@@ -16,10 +16,7 @@
 
 ```bash
 brew install fhidalgoGC/tap/fremi
-git clone https://github.com/fhidalgoGC/homebrew-tap.git ~/.fremi/framework
 ```
-
-The second line is a one-time setup that fetches the framework content (skills, hooks, rules). Homebrew's install sandbox blocks writes to `$HOME`, so this step runs outside the formula. It goes away in v0.1.1 (auto-clone on first CLI invocation).
 
 ### macOS / Linux — curl
 
@@ -39,7 +36,7 @@ iwr -useb https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install
 
 ```bash
 fremi version
-# fremi-framework v0.1.0
+# fremi-framework v0.1.1
 ```
 
 With `brew install` the binary is on your PATH immediately. With `curl | bash` you may need to open a new shell (or `source ~/.zshrc`) if `~/.local/bin` was not previously in PATH.
