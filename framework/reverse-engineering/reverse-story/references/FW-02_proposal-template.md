@@ -1,0 +1,1 @@
+../../../skills/story/skills/proposal/references/FW-02_proposal-template.md

@@ -1,0 +1,37 @@
+{
+  "_comment": "Template de una entry de MCP server para .claude/settings.json bajo `mcpServers`. Sustituir <name>, <command>, args, env según el MCP concreto.",
+  "mcpServers": {
+    "<name>": {
+      "command": "<command>",
+      "args": ["<arg1>", "<arg2>"],
+      "env": {
+        "VAR_NAME": "value"
+      }
+    }
+  },
+  "_alternatives": {
+    "_comment": "Formatos alternativos según el tipo de MCP",
+    "http_mcp": {
+      "<name>": {
+        "type": "http",
+        "url": "https://example.com/mcp",
+        "headers": {
+          "Authorization": "Bearer <token>"
+        }
+      }
+    },
+    "sse_mcp": {
+      "<name>": {
+        "type": "sse",
+        "url": "https://example.com/sse"
+      }
+    },
+    "stdio_mcp": {
+      "<name>": {
+        "type": "stdio",
+        "command": "<command>",
+        "args": ["<arg1>"]
+      }
+    }
+  }
+}

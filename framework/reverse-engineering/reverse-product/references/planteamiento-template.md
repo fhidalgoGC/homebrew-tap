@@ -1,0 +1,1 @@
+../../../skills/product/skills/planteamiento/references/planteamiento-template.md

@@ -1,0 +1,1 @@
+../../../skills/enabler/skills/closure/references/EN-04_closure-template.md

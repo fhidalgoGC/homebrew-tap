@@ -1,0 +1,1 @@
+../../../skills/story/skills/plan/references/FW-08_plan-template.md

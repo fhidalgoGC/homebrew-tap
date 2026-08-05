@@ -1,0 +1,1 @@
+../skills/plan/references/EN-03_plan-template.md

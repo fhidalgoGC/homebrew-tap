@@ -1,0 +1,599 @@
+schema: framework-config
+schema_version: 11
+since: 2026-07-13
+
+# ---------------------------------------------------------------------------
+# CONFIG MASTER del framework makingFileReport.
+#
+# Este archivo es la FUENTE DE VERDAD OPERATIVA GLOBAL. Contiene:
+#   - Config del proyecto (name, description).
+#   - Stack técnico global.
+#   - Testing capabilities.
+#   - Versioning (Regla 17): reglas de bump, frontmatter, changelog, triggers.
+#   - Phase rules transversales (aplican a todas las capas).
+#   - Preferencias operativas.
+#   - Referencia a archivos per-capa (`layers` — un archivo por capa).
+#
+# NO contiene la config específica de cada capa (docs, flow, conditional_rules).
+# Eso vive en `config.<capa>.yaml` — un archivo por capa.
+#
+# ── SCHEMA v11 CHANGES ─────────────────────────────────────────────────────
+# v11 (2026-08-05):
+#   - NUEVA CAPA: layers.reverse (config.reverse.yaml).
+#     Formaliza reverse-engineering como VÍA de primera clase para alinear
+#     código pre-existente al framework. Regla 25-32 en rules/reverse.md.
+#     Skills: 6 (reverse-product, feature, story, enabler, bug, extra).
+#     Pipelines: 4 (reverse-product, feature, story, enabler).
+#     Default mode: transparent (frontmatter con reverse_engineered:*).
+# ── SCHEMA v10 CHANGES ─────────────────────────────────────────────────────
+# v10 (2026-07-16):
+#   - MOVE: settings/config.<capa>.yaml → docs/frmwk/skills/<capa>/config.user.yaml
+#     Los archivos user-editable ahora viven junto al skill orquestador.
+#     Razón: config user-editable + config.core (topología) son dos caras de
+#     la misma capa; tenerlos juntos evita cruzar carpetas al editar.
+#   - `layers.<capa>` ahora tiene DOS refs: `config_user` + `config_core`.
+#   - `agent` en config.core.yaml pasa a estructura {options, default, reasoning}
+#     con 3 tipos: main | subagent | agent.
+#   - Nuevo bloque `step_agents` en cada config.user.yaml para elegir tipo
+#     por step (debe estar en options del core; si no → error).
+# ── SCHEMA v9 CHANGES ──────────────────────────────────────────────────────
+# v9 (2026-07-16):
+#   - Los `config.core.yaml` per-capa ahora declaran `agent: main | subagent`
+#     por step. Prepara el terreno para el orquestador de subagentes:
+#       - `main`     → agente principal (thread del usuario). Para decisiones
+#                      de negocio, bifurcaciones Regla 3b, escritura sobre
+#                      docs living single-writer, co-creación.
+#       - `subagent` → context aislado. Para investigación, generación
+#                      determinista (BDD, TDD, verify), apply de tasks aisladas.
+#     Regla: subagentes NUNCA interactúan con el usuario directamente. Si
+#     execution_mode: interactive, el main pausa al retornar el subagente
+#     para que el usuario valide.
+# ── SCHEMA v8 CHANGES ──────────────────────────────────────────────────────
+# v8 (2026-07-16):
+#   - Split de `parallelism`:
+#     * TOGGLE + hard_rules + topology_refs → siguen en este master
+#       (user-configurable). Solo el flag `enabled` es cambiable por el user.
+#     * TOPOLOGÍA (step_matrix + internal_items + cross_instance) →
+#       movida a `docs/frmwk/skills/<capa>/config.core.yaml` — fuente
+#       de verdad ESTRUCTURAL, no user-editable.
+#   - Los settings/config.<capa>.yaml YA NO tienen bloque `flow.parallelism`.
+#   - Nueva regla: config.core.yaml vive junto al skill orquestador porque
+#     la topología es un hecho del skill, no una preferencia.
+# ── SCHEMA v7 CHANGES ──────────────────────────────────────────────────────
+# v7 (2026-07-16):
+#   - Agrega `parallelism` transversal (schema declarativo).
+#     Cada config.<capa>.yaml declara su `flow.parallelism` con 3 niveles:
+#     step_level, internal_items, cross_instance.
+#     Consumido por pipelines como guía informativa; en el futuro por el
+#     orquestador de subagentes para fan-out.
+#     Declara reglas duras que serializan aunque parallelism esté ON.
+# ── SCHEMA v6 CHANGES ──────────────────────────────────────────────────────
+# v6 (2026-07-16):
+#   - Agrega `execution_mode` (interactive | auto) transversal.
+#     Default global + override per-layer + override per-invocation.
+#     Consumido por skills y pipelines para decidir si pausan.
+#     La semántica del modo depende del NIVEL (skill vs pipeline):
+#       - skill.interactive  → pausa DENTRO del skill (por sección)
+#       - skill.auto         → escribe el doc entero de un tirón
+#       - pipeline.interactive → pausa ENTRE steps (skills internos siguen en auto)
+#       - pipeline.auto      → corre toda la cadena sin pausa
+#     Ver `execution_mode.semantics_by_level` — fuente de verdad.
+#     Los sub-skills DENTRO de un pipeline SIEMPRE corren en `auto`
+#     (`pipeline_internal_skill_mode: auto` es regla dura).
+# v5 (2026-07-13):
+#   - Refactor: extrae workflows.* + conditional_rules a archivos per-capa:
+#     config.product.yaml, config.feature.yaml, config.story.yaml,
+#     config.enabler.yaml, config.bug.yaml, config.extra.yaml.
+#   - Agrega `layers` con paths y `active` flag por capa.
+#   - Cada archivo per-capa incluye ahora `flow.sequence` (secuencia de skills)
+#     y `flow.parallel_allowed` (skills transversales a la capa).
+# v4 (2026-07-13):
+#   - Introduce `versioning:` (semver + linaje ancestral + changelog).
+# v3 (2026-07-13):
+#   - Refactor genérico de workflows (por name, sin filenames hardcoded).
+# v2 (2026-07-13):
+#   - FW-00_explore y FW-02_proposal como condicionales de story.
+# ---------------------------------------------------------------------------
+
+project:
+  name: makingFileReport
+  description: >
+    Lambda HTTP que genera reportes (PDF/CSV) a partir de HTML/queries GraphQL.
+    Runtime AWS Lambda + Node.js + TypeScript + Serverless Framework.
+
+# ---------------------------------------------------------------------------
+# Stack técnico del proyecto
+# ---------------------------------------------------------------------------
+stack:
+  language: typescript
+  runtime: nodejs24.x
+  package_manager: npm
+  bundler: esbuild
+  iac: serverless-framework@3
+  cloud: aws
+  region_default: us-west-2
+
+# ---------------------------------------------------------------------------
+# Capacidades de testing (consumido por /fremi-story-verify, /fremi-story-tdd,
+# /fremi-story-checkwork y skills relacionados)
+# ---------------------------------------------------------------------------
+testing:
+  strict_tdd: true
+  test_runner: "npm run test"
+  test_watch: "npm run test:watch"
+  unit:
+    enabled: true
+    framework: vitest
+    command: "npm run test:unit"
+    location_pattern: "src/functions/<lambda>/test/unit-test/**/*.test.ts"
+  integration:
+    enabled: false
+    framework: null
+    command: null
+  e2e:
+    enabled: true
+    framework: "aws-lambda invoke-local"
+    command: "npm run e2e:aws"
+    location_pattern: "src/functions/<lambda>/test/e2e/<scenario>/index.e2e.mjs"
+  coverage:
+    enabled: false
+    command: null
+    threshold: null
+  type_checker: "npm run typecheck"
+  linter: eslint
+  formatter: prettier
+  notes: >
+    Regla 7 (TDD rojo primero) es obligatoria cuando strict_tdd: true.
+    Regla 8 (bug fix con test rojo previo) aplica independientemente del flag.
+
+# ===========================================================================
+# LAYERS — referencia a los archivos config.<capa>.yaml
+#
+# Cada capa tiene su archivo dedicado con: docs/sections, conditional_rules,
+# flow.sequence (skills en orden), flow.parallel_allowed (transversales).
+# El archivo per-capa es la fuente de verdad OPERATIVA de esa capa.
+# ===========================================================================
+layers:
+  product:
+    config_user: docs/frmwk/skills/product/config.user.yaml    # user-editable
+    config_core: docs/frmwk/skills/product/config.core.yaml    # framework-owned
+    active: true
+    orchestrator_skill: /fremi-product
+
+  feature:
+    config_user: docs/frmwk/skills/feature/config.user.yaml
+    config_core: docs/frmwk/skills/feature/config.core.yaml
+    active: true
+    orchestrator_skill: /fremi-feature
+
+  story:
+    config_user: docs/frmwk/skills/story/config.user.yaml
+    config_core: docs/frmwk/skills/story/config.core.yaml
+    active: true
+    orchestrator_skill: /fremi-story
+
+  enabler:
+    config_user: docs/frmwk/skills/enabler/config.user.yaml
+    config_core: docs/frmwk/skills/enabler/config.core.yaml
+    active: true
+    orchestrator_skill: /fremi-enabler
+
+  bug:
+    active: true   # el concepto "bug" está activo (si es false, ambos scopes off)
+    orchestrator_skill: null   # bug tiene 2 skills según scope (/fremi-story-bug, /fremi-feature-bug)
+    scopes:
+      story:
+        config: docs/frmwk/settings/config.bug.story.yaml
+        active: true
+        skill: /fremi-story-bug
+      feature:
+        config: docs/frmwk/settings/config.bug.feature.yaml
+        active: true
+        skill: /fremi-feature-bug
+
+  extra:
+    config: docs/frmwk/settings/config.extra.yaml
+    active: true
+    orchestrator_skill: null   # extra no tiene skill dedicado (edición a mano)
+
+  reverse:
+    config: docs/frmwk/settings/config.reverse.yaml
+    active: true
+    orchestrator_skill: null   # reverse no tiene orquestador único — 6 skills + 4 pipelines
+    rules: docs/frmwk/rules/reverse.md   # Reglas 25-32 específicas de reverse
+    flow: docs/frmwk/flows/flow.reverse.md
+    skills_dir: docs/frmwk/reverse-engineering/
+    pipelines:
+      - docs/frmwk/pipelines/pipeline.reverse.product.md
+      - docs/frmwk/pipelines/pipeline.reverse.feature.md
+      - docs/frmwk/pipelines/pipeline.reverse.story.md
+      - docs/frmwk/pipelines/pipeline.reverse.enabler.md
+    # Bug y extra reverse son 1 archivo — sin pipeline propio.
+
+# ===========================================================================
+# VERSIONING — Regla 17 (living versioning + linaje ancestral)
+# Transversal a todas las capas.
+# ===========================================================================
+versioning:
+  enabled: true
+  format: semver
+  initial_version: 0.1.0
+
+  # Los archivos que son living vs snapshot ya están declarados en el
+  # config.<capa>.yaml de cada capa (campo `doc_type`).
+  # Esta sección declara sólo las REGLAS transversales.
+
+  bump_rules:
+    MAJOR:
+      description: >
+        Cambio breaking en el contrato/scope. Rompe compatibilidad con
+        artifacts que dependían de la versión anterior.
+      examples:
+        - "product/definition.md: se saca una capacidad in-scope que ya tenía features apoyadas."
+        - "feature/spec.md: una story MODIFICA un requirement existente (breaking)."
+        - "feature/definition.md: se re-scope completamente la feature."
+
+    MINOR:
+      description: >
+        Agregado que no rompe lo existente. Nuevo contenido válido bajo el
+        contrato actual.
+      examples:
+        - "product/plan.md: se agrega una feature nueva al roadmap."
+        - "feature/spec.md: una story AGREGA nuevos requirements."
+        - "product/decisions.md: nuevo ADR aceptado."
+
+    PATCH:
+      description: >
+        Aclaración, corrección menor, typo, mejora de redacción — sin
+        cambio semántico. También aplica a completar TBDs con contenido
+        que YA estaba decidido.
+      examples:
+        - "feature/definition.md: mejora en la redacción de un CA."
+        - "product/plan.md: corrección de fecha."
+
+  frontmatter:
+    required_fields:
+      - version
+      - created
+      - last_updated
+      - doc_type
+    conditional_fields:
+      ancestor:
+        applies_to: "docs con padre (feature, story, enabler, bug, extra)"
+        subfields:
+          - id
+          - version_at_creation
+          - version_at_closure
+    example_living: |
+      ---
+      version: 1.3.0
+      created: 2026-06-15
+      last_updated: 2026-07-13
+      doc_type: living
+      ancestor:
+        id: product
+        version_at_creation: "0.5.0"
+      ---
+    example_snapshot: |
+      ---
+      version: 1.0.0
+      created: 2026-06-19
+      last_updated: 2026-06-19
+      doc_type: snapshot
+      ancestor:
+        id: FT-01
+        version_at_creation: "2.1.0"
+        version_at_closure: "2.2.0"
+      ---
+
+  changelog:
+    location: "al pie del doc living, sección `## Changelog`"
+    entry_format: >
+      `- **v<version>** — <YYYY-MM-DD> — <descripción>. [origen: <ancestor artifact>]`
+
+  parent_bump_triggers:
+    story_closes:
+      updates:
+        - artifact: feature/spec.md
+          rule: >
+            MINOR si sólo agrega requirements; MAJOR si modifica requirements
+            existentes; PATCH si sólo son aclaraciones.
+        - artifact: feature/decisions.md
+          rule: MINOR por cada ADR nuevo aceptado durante la story.
+        - artifact: feature/definition.md
+          rule: >
+            PATCH si la story confirmó supuestos; MINOR/MAJOR sólo si
+            descubrió que el definition estaba mal.
+    feature_closes:
+      updates:
+        - artifact: product/plan.md
+          rule: "MINOR — marca la feature como completada."
+        - artifact: product/definition.md
+          rule: "PATCH si aclara / MINOR si agrega capacidad / MAJOR si redefine."
+    enabler_closes:
+      updates:
+        - artifact: "(según scope declarado — product, feature o story padre)"
+          rule: "MINOR — registra la capacidad habilitada."
+    bug_closes:
+      updates:
+        - artifact: feature/spec.md
+          rule: >
+            PATCH si el fix respetó el contrato; MINOR si extendió el contrato;
+            MAJOR si el contrato cambió.
+    adr_accepted:
+      updates:
+        - artifact: "(según scope del ADR — product/decisions.md o FT-XX/decisions.md o HU-YY/decisions.md)"
+          rule: "MINOR (nuevo ADR aceptado). Reemplazo de ADR = MAJOR del living decisions."
+
+# ===========================================================================
+# PHASE RULES — reglas transversales por fase de trabajo.
+#
+# Las fases son TRANSVERSALES a las capas: un doc de cualquier capa puede
+# referirse a estas reglas vía `phase: <X>` en su declaración en config.<capa>.yaml.
+# ===========================================================================
+phase_rules:
+
+  explore:
+    - "Leer código, no inventar."
+    - "Documentar hallazgos con archivo:línea concreta cuando aplique."
+    - "No proponer solución — sólo mapear terreno y listar alternativas viables."
+    - "Cerrar el doc con `Impacto en la proposal` (qué decisiones habilita/bloquea)."
+
+  definition:
+    - "Formato obligatorio de story: `As a <rol> / I want <acción> / So that <beneficio>`."
+    - "Criterios de aceptación con IDs CA-XXX numerados."
+    - "Sin decisiones técnicas — sólo negocio-usuario."
+
+  proposal:
+    - "Estructura fija: Intent, Scope (resumen), Approach, Decisions, Known Limitations, Impact, Acceptance Criteria (referencia CAs de definition), Rollout, Risk."
+    - "Approach expone 2+ opciones si hay bifurcación (Regla 3b)."
+    - "Cada Decision se registra ADEMÁS como ADR-XXX en el scope apropiado."
+    - "Impact lista archivos afectados con delta estimado (LOC)."
+
+  scope:
+    - "Listas explícitas In-scope / Out-of-scope / Dependencias."
+    - "Cada Out-of-scope acota una expectativa razonable del usuario."
+
+  bdd:
+    - "Given/When/Then obligatorio. IDs SC-XXX numerados."
+    - "Cubrir happy path + al menos un caso de borde/error relevante."
+    - "Sin firmas, tipos ni tecnología — sólo comportamiento observable."
+
+  sdd:
+    - "Contratos que se sostienen SIN haber decidido tecnología."
+    - "Tabla de códigos/errores expuestos por la interfaz."
+    - "NFRs medibles (latencia, throughput) cuando apliquen."
+    - "Sin librerías, wrappers ni capas internas — eso es design."
+
+  design:
+    - "Elección de tecnologías + rationale contra el contrato SDD."
+    - "Bifurcaciones con 2+ caminos viables → Regla 3b + ADR."
+    - "Diagramas de secuencia / modelo de datos cuando aporten."
+    - "Estructura de archivos/carpetas a crear."
+
+  tdd:
+    - "Cada test tiene ID TC-XXX y referencia a SC-XXX (BDD) o cláusula SDD."
+    - "Regla 7 (rojo → verde → refactor) activada si config.testing.strict_tdd = true."
+    - "Plan cubre unit + integration + e2e según config.testing.*.enabled."
+
+  tasks:
+    - "IDs T-XXX secuenciales locales al artifact."
+    - "Cada task: objetivo, mapeo a spec/bdd/tdd, criterios verificables."
+    - "Estado explícito `[ ]` pendiente / `[/]` en curso / `[x]` hecho."
+
+  apply:
+    - "Al arrancar una task: mover a `## 🚧 En curso` en el checkwork."
+    - "Al cerrar una task: mover a `## ✅ Listo` con fecha; actualizar % progreso."
+    - "Actualizar archivos implementados + CAs cubiertos en checkwork."
+
+  verify:
+    - "Correr `config.testing.test_runner` — todos los tests deben pasar."
+    - "Correr `config.testing.type_checker` — sin errores en el scope del cambio."
+    - "Si config.testing.coverage.enabled → correr coverage_command y verificar threshold."
+    - "Emitir Verdict: PASS / PASS WITH WARNINGS / FAIL."
+    - "Issues residuales clasificados: CRITICAL / WARNING / SUGGESTION."
+    - "El verdict debe ser PASS o PASS WITH WARNINGS (con warnings aceptadas) para poder firmar closure."
+
+  closure:
+    - "Precondición: checkwork del artifact al 100%."
+    - "Precondición: última corrida de verify = PASS o PASS WITH WARNINGS."
+    - "Matriz de trazabilidad CA → SC → SDD → test → archivo."
+    - "DoD completo firmado (ver Regla 11)."
+    - "Sign-off con fecha."
+    - "Bumpear padre según parent_bump_triggers (Regla 17)."
+
+  archive:
+    - "Warn antes de deltas destructivas."
+    - "Mantener rastro histórico — no borrar archivos cerrados."
+
+# ===========================================================================
+# EXECUTION MODE — cómo corren skills y pipelines
+#
+# Define el modo default de ejecución transversal a todas las capas.
+# Cada `config.<capa>.yaml` puede overridear este valor con su propio campo
+# `execution_mode` (mismo schema).
+#
+# Además, el usuario puede pasar `--mode interactive|auto` al invocar
+# cualquier skill o pipeline para overridear puntualmente.
+#
+# Precedencia (mayor prioridad primero):
+#   1. Flag `--mode` en la invocación.
+#   2. `execution_mode` del `config.<capa>.yaml` de la capa activa.
+#   3. `execution_mode.default` de este archivo (master).
+# ===========================================================================
+execution_mode:
+  default: interactive
+
+  # Nota: la semántica precisa de cada modo depende del NIVEL de invocación
+  # (skill suelto vs pipeline). Ver `semantics_by_level` más abajo — es la
+  # fuente de verdad. Este bloque `modes.*` es sólo resumen de alto nivel.
+  modes:
+    interactive:
+      short: "La IA pausa para validar contigo — granularidad según el nivel."
+      when_to_use:
+        - "Trabajo exploratorio donde el usuario quiere revisar cada paso."
+        - "Onboarding / práctica del flujo."
+        - "Story/feature/producto crítico donde la calidad de cada decisión pesa."
+        - "El usuario prefiere co-crear el contenido en lugar de revisar diff al final."
+      stop_events_shared_with_auto:
+        - "Bifurcación técnica con 2+ caminos viables (Regla 3b)."
+        - "Sync-back a capa superior necesario (Regla 12)."
+        - "Precondición dura ausente."
+        - "Información inicial insuficiente."
+        - "Fallo de tooling / config corrupta."
+
+    auto:
+      short: "La IA completa el trabajo sola; pausa sólo ante stop events reales."
+      when_to_use:
+        - "El usuario dio contexto suficiente y quiere output rápido."
+        - "Refresh de docs que ya existían y sólo hace falta reponerlos."
+        - "Trabajo bajo presión / foco en velocidad."
+        - "El usuario prefiere revisar diff completo al final antes de aceptar."
+      what_pauses_the_ai:
+        - "Bifurcación técnica con 2+ caminos viables (Regla 3b)."
+        - "Conditional rule ambigua (Regla 16 — explore_when / proposal_when no inferibles)."
+        - "Sync-back a capa superior necesario (Regla 12)."
+        - "Precondición dura ausente."
+        - "Información inicial insuficiente para completar un doc obligatorio."
+        - "Fallo de tooling / config corrupta."
+
+  # Semántica del modo aplicada según el nivel de invocación.
+  # IMPORTANTE: el modo NO tiene la misma semántica cuando se aplica a UN
+  # skill suelto que cuando se aplica a un pipeline (que compone varios skills).
+  semantics_by_level:
+    skill:
+      interactive: >
+        Al invocar UN sub-skill (`/fremi-story-proposal`, `/fremi-product-ideas`, etc.),
+        la IA pausa DENTRO del skill: valida cada decisión/sección relevante del doc
+        antes de escribirla. Propone contenido, espera OK o feedback, aplica, sigue
+        a la siguiente sección.
+      auto: >
+        Al invocar UN sub-skill, la IA completa el doc entero de un tirón
+        tomando decisiones razonables por su cuenta. Pausa sólo ante stop
+        events (bifurcación Regla 3b, info insuficiente, precondición ausente).
+
+    pipeline:
+      interactive: >
+        Al invocar un pipeline (`/fremi-pipeline-story`, `/fremi-pipeline-*`),
+        cada sub-skill interno CORRE EN `auto` — la IA no pausa dentro de cada
+        sub-skill. La pausa ocurre ENTRE STEPS: después de cada sub-skill
+        completado, la IA reporta lo producido y pregunta "¿seguimos al siguiente?"
+        antes de arrancar el próximo. Es el pipeline con checkpoints por doc,
+        no por sección.
+      auto: >
+        Al invocar un pipeline, cada sub-skill corre EN `auto` Y no hay pausa
+        entre steps. La IA arranca en el step 0 y no se detiene hasta terminar
+        toda la cadena, salvo stop events reales.
+
+  # Regla dura: dentro de un pipeline, los sub-skills SIEMPRE corren en `auto`.
+  # El modo `interactive` de un pipeline modifica sólo la política de pausa
+  # ENTRE steps, nunca la política interna de cada sub-skill.
+  pipeline_internal_skill_mode: auto
+
+  # Notas por si en el futuro se quiere granularidad más fina
+  granularity:
+    per_layer_override: true
+    per_invocation_override: true
+    per_phase_override: false   # no soportado hoy; abrir si aparece necesidad real
+
+  # Cómo respetan los skills y pipelines este flag
+  applies_to:
+    skills: true       # cada /fremi-*-* respeta el modo activo (semántica DENTRO del skill)
+    pipelines: true    # los pipelines respetan el modo activo (semántica ENTRE steps)
+  pipeline_default_hint: >
+    Los pipelines existen precisamente para modo `auto` — si el usuario
+    invoca `/fremi-pipeline-*` sin especificar modo, se asume `auto` aunque
+    el default global sea `interactive`. Para forzar interactivo en un
+    pipeline: `/fremi-pipeline-story ... --mode interactive` — los skills
+    internos siguen corriendo en `auto` (nunca cambia), sólo se agregan
+    checkpoints entre steps.
+
+# ===========================================================================
+# PARALLELISM — TOGGLE global (user-configurable)
+#
+# Este archivo (settings) sólo declara si el paralelismo está ACTIVO en el
+# proyecto. La TOPOLOGÍA (qué steps pueden concurrir, qué items internos
+# son paralelizables, matrices de compatibilidad) NO vive acá — es estructura
+# del framework y vive en `docs/frmwk/skills/<capa>/config.core.yaml`.
+#
+# Regla dura: los archivos `config.core.yaml` son fuente de verdad ESTRUCTURAL
+# — el usuario NO los modifica. Sólo el mantenedor del framework los edita
+# cuando cambia la topología de las capas.
+# ===========================================================================
+parallelism:
+  # Toggle único user-configurable.
+  # false → todo secuencial, sin fan-out con subagentes.
+  # true  → el orquestador (futuro) puede paralelizar según lo declarado en
+  #         cada config.core.yaml de la capa correspondiente.
+  enabled: false
+
+  # Referencias a la topología por capa. Los archivos son estructura del
+  # framework — no se editan desde acá.
+  # DEPRECATED: `topology_refs` se mantiene por compat. Usar `layers.<capa>.config_core`.
+  topology_refs:
+    product:  docs/frmwk/skills/product/config.core.yaml
+    feature:  docs/frmwk/skills/feature/config.core.yaml
+    story:    docs/frmwk/skills/story/config.core.yaml
+    enabler:  docs/frmwk/skills/enabler/config.core.yaml
+
+  # Reglas duras que gobiernan CUALQUIER paralelización, aunque
+  # `parallelism.enabled: true`. Estas son transversales al framework —
+  # las capas no pueden sobre-escribirlas.
+  hard_rules:
+    - "DAG de dependencias es INVIOLABLE. Cada step declara `requires_complete` en su config.core.yaml; hasta que todo eso esté done, el step no arranca. Paralelismo aplica ENTRE ramas independientes del DAG, nunca saltando dependencias."
+    - "Si un step requiere insumos de una fase anterior (ej: TDD requiere SDD, verify requiere plan completo), esos insumos deben existir Y estar en estado terminado antes de arrancar — no basta con que estén 'empezados'."
+    - "Bifurcaciones Regla 3b SIEMPRE serializan (pausan y consultan)."
+    - "Bumps de versión (Regla 17) sobre un mismo padre se serializan."
+    - "Numeración global (ADR-XXX, EN-XX) se serializa al asignar ID."
+    - "Sync-back (Regla 12) hacia capa superior se serializa."
+    - "Regla 7 (test rojo primero) NO se paraleliza — cada task es rojo → verde → refactor."
+    - "Actualización de docs living (FW-09_checkwork, plan.md, etc.) es single-writer."
+
+  # Consumidores actuales (informativo)
+  consumers:
+    current:
+      - "Pipelines — leen la topología como guía informativa."
+    future:
+      - "Orquestador de subagentes — ejecutará fan-out según topology."
+      - "Hooks de validación — pueden detectar violación de merge_hazards."
+
+# ---------------------------------------------------------------------------
+# Preferencias operativas del proyecto
+# ---------------------------------------------------------------------------
+preferences:
+  language_conversation: es
+  language_artifacts: en
+  commit_convention: "conventional-commits (feat/fix/chore/docs/refactor/test)"
+  branch_from: main
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  methodology_nomenclature: docs/frmwk/settings/methodology.json
+  rules_hard: docs/frmwk/rules/workflow.md
+  flow_narrative: docs/frmwk/flows/workflow.md
+  agent_entry_point: CLAUDE.md
+  layer_configs:
+    # User-editable configs viven ahora junto al skill orquestador
+    # (docs/frmwk/skills/<capa>/config.user.yaml).
+    # Los config.core.yaml (topología, DAG, agent options) también viven
+    # ahí — user NO edita.
+    product:
+      user: docs/frmwk/skills/product/config.user.yaml
+      core: docs/frmwk/skills/product/config.core.yaml
+    feature:
+      user: docs/frmwk/skills/feature/config.user.yaml
+      core: docs/frmwk/skills/feature/config.core.yaml
+    story:
+      user: docs/frmwk/skills/story/config.user.yaml
+      core: docs/frmwk/skills/story/config.core.yaml
+    enabler:
+      user: docs/frmwk/skills/enabler/config.user.yaml
+      core: docs/frmwk/skills/enabler/config.core.yaml
+    bug:
+      # Bugs no tienen config.core.yaml todavía (por evaluar si aplica).
+      story: docs/frmwk/settings/config.bug.story.yaml
+      feature: docs/frmwk/settings/config.bug.feature.yaml
+    extra: docs/frmwk/settings/config.extra.yaml
+    reverse: docs/frmwk/settings/config.reverse.yaml

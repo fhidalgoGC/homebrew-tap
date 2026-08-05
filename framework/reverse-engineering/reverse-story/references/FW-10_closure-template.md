@@ -1,0 +1,1 @@
+../../../skills/story/skills/closure/references/FW-10_closure-template.md

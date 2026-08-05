@@ -1,0 +1,29 @@
+{
+  "name": "fremi-framework",
+  "version": "0.1.0",
+  "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/fhidalgoGC/gc-framework.git"
+  },
+  "author": "fhidalgoGC",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "fremi": "./bin/fremi"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build:darwin-arm64": "bun build ./src/index.ts --compile --target=bun-darwin-arm64 --outfile bin/fremi-darwin-arm64",
+    "build:darwin-x64": "bun build ./src/index.ts --compile --target=bun-darwin-x64 --outfile bin/fremi-darwin-x64",
+    "build:linux-x64": "bun build ./src/index.ts --compile --target=bun-linux-x64 --outfile bin/fremi-linux-x64",
+    "build:linux-arm64": "bun build ./src/index.ts --compile --target=bun-linux-arm64 --outfile bin/fremi-linux-arm64",
+    "build:windows-x64": "bun build ./src/index.ts --compile --target=bun-windows-x64 --outfile bin/fremi-windows-x64.exe",
+    "build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,1 @@
+../skills/bdd/references/FW-04_bdd-userstories-template.md

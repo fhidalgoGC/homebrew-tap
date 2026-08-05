@@ -1,0 +1,1 @@
+../../../skills/enabler/skills/design/references/EN-02_design-template.md

@@ -1,0 +1,1 @@
+../../../skills/product/skills/strategies/references/strategies-template.md

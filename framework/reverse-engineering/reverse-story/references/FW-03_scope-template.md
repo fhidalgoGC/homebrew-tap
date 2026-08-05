@@ -1,0 +1,1 @@
+../../../skills/story/skills/scope/references/FW-03_scope-template.md

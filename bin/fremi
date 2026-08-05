@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ============================================================================
+# fremi — Dev entry point (bash wrapper)
+#
+# This wrapper is used when running fremi from a repo clone (no compiled binary
+# available yet). Requires bun installed.
+#
+# In production (post v0.1.0 release), install.sh downloads a pre-compiled
+# binary and this wrapper is not used.
+# ============================================================================
+
+set -euo pipefail
+
+# Resolve the actual directory of this script (following symlinks)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
+
+# Check that bun is available
+if ! command -v bun >/dev/null 2>&1; then
+  echo "Error: bun is required for dev mode. Install from https://bun.sh"
+  echo "In production, install.sh downloads a pre-compiled binary instead."
+  exit 1
+fi
+
+# Run the TypeScript entry with bun, passing all args
+exec bun run "${REPO_ROOT}/src/index.ts" "$@"

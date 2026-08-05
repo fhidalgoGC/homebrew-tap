@@ -1,0 +1,1 @@
+../../../skills/story/skills/definition/references/FW-01_definition-template.md

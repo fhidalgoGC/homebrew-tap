@@ -1,0 +1,1 @@
+../../../skills/feature/skills/adr/references/adr-entry-template.md

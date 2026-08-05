@@ -1,0 +1,1 @@
+../../../skills/feature/references/definition-template.md

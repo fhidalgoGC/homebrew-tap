@@ -1,0 +1,1 @@
+../skills/design/references/EN-02_design-template.md

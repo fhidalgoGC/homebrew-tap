@@ -1,0 +1,1 @@
+../../../skills/story/skills/design/references/FW-06_design-template.md

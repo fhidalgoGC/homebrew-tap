@@ -1,0 +1,1 @@
+../../../skills/story/skills/bug/references/BG-template.md

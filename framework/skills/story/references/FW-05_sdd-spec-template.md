@@ -1,0 +1,1 @@
+../skills/sdd/references/FW-05_sdd-spec-template.md

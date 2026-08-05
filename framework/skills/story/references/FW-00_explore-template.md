@@ -1,0 +1,1 @@
+../skills/explore/references/FW-00_explore-template.md
