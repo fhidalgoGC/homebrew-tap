@@ -22,7 +22,7 @@ Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BD
 **Framework instalado**:
 - Ubicación: \`~/.fremi/framework/\`.
 - CLI: \`fremi version\`, \`fremi install [path]\`.
-- Repo: https://github.com/fhidalgoGC/gc-framework
+- Repo: https://github.com/fhidalgoGC/homebrew-tap
 
 ---
 

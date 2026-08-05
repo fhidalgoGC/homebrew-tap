@@ -4,7 +4,7 @@
 
 `fremi` is a small CLI that installs the framework into any project so an AI agent (Claude Code today; Cursor / Windsurf / other agents later) can follow a disciplined workflow: **PRODUCT → FEATURE → USER STORY**, with reverse-engineering support for pre-existing code.
 
-- **Repo**: [`fhidalgoGC/gc-framework`](https://github.com/fhidalgoGC/gc-framework)
+- **Repo**: [`fhidalgoGC/homebrew-tap`](https://github.com/fhidalgoGC/homebrew-tap)
 - **License**: MIT
 - **Supported agents**: Claude Code (v0.1.x). Cursor / Windsurf planned.
 
@@ -15,13 +15,13 @@
 ### macOS / Linux
 
 ```bash
-curl -sL https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.ps1 | iex
 ```
 
 **Dependencies**: the installer auto-detects missing `git` and offers to install it (via `brew` on macOS, `apt`/`dnf`/`pacman`/`apk` on Linux, or `winget` on Windows). To skip prompts in CI or automation, set `FREMI_ASSUME_YES=1` (bash) or `$env:FREMI_ASSUME_YES = "1"` (PowerShell).
@@ -108,8 +108,8 @@ rm -rf ~/.fremi ~/.local/bin/fremi
 ## Development
 
 ```bash
-git clone git@github.com:fhidalgoGC/gc-framework.git
-cd gc-framework
+git clone git@github.com:fhidalgoGC/homebrew-tap.git
+cd homebrew-tap
 bun install
 bun run dev version                    # test CLI without building
 bun run build:darwin-arm64             # compile for local machine

@@ -26,7 +26,7 @@ export async function runInstall(rawPath?: string): Promise<void> {
   if (!existsSync(frameworkContent)) {
     throw new Error(
       `Framework content not found at ${frameworkContent}. ` +
-        `Try reinstalling: curl -sL https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.sh | bash`,
+        `Try reinstalling: curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.sh | bash`,
     );
   }
 

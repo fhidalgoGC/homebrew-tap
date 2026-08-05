@@ -4,7 +4,7 @@
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/fhidalgoGC/gc-framework.git"
+    "url": "git+ssh://git@github.com/fhidalgoGC/homebrew-tap.git"
   },
   "author": "fhidalgoGC",
   "license": "MIT",

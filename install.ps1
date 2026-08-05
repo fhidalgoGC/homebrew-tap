@@ -2,11 +2,11 @@
 # fremi-framework — Bootstrap installer for Windows
 #
 # Usage:
-#   iwr -useb https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.ps1 | iex
+#   iwr -useb https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.ps1 | iex
 #
 # What it does:
 #   1. Detects missing dependencies (git) and offers to install them (winget).
-#   2. Clones (or updates) fhidalgoGC/gc-framework to $env:USERPROFILE\.fremi\framework
+#   2. Clones (or updates) fhidalgoGC/homebrew-tap to $env:USERPROFILE\.fremi\framework
 #   3. Downloads the fremi-windows-x64.exe binary from GitHub Releases
 #   4. Places it in $env:LOCALAPPDATA\Programs\fremi\fremi.exe
 #   5. Adds the install dir to the User PATH environment variable
@@ -17,7 +17,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$Repo         = "fhidalgoGC/gc-framework"
+$Repo         = "fhidalgoGC/homebrew-tap"
 $FremiHome    = Join-Path $env:USERPROFILE ".fremi"
 $FrameworkDir = Join-Path $FremiHome "framework"
 $BinDir       = Join-Path $env:LOCALAPPDATA "Programs\fremi"

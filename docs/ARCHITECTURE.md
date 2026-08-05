@@ -15,7 +15,7 @@ Both are versioned together (`VERSION` file at repo root). One tagged git releas
 User runs: curl -sL .../install.sh | bash
    ↓
 install.sh:
-   1. Clones (or updates) fhidalgoGC/gc-framework → ~/.fremi/framework/
+   1. Clones (or updates) fhidalgoGC/homebrew-tap → ~/.fremi/framework/
    2. Reads VERSION
    3. Downloads bin/fremi-<platform>-<arch> from GitHub Releases → ~/.local/bin/fremi
    4. Verifies PATH

@@ -3,11 +3,11 @@
 # fremi-framework — Bootstrap installer for macOS / Linux
 #
 # Usage:
-#   curl -sL https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.sh | bash
 #
 # What it does:
 #   1. Detects missing dependencies (git, curl) and offers to install them.
-#   2. Clones (or updates) fhidalgoGC/gc-framework to ~/.fremi/framework
+#   2. Clones (or updates) fhidalgoGC/homebrew-tap to ~/.fremi/framework
 #   3. Detects OS + architecture
 #   4. Downloads the correct compiled binary from GitHub Releases
 #   5. Places it in ~/.local/bin/fremi
@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-REPO="fhidalgoGC/gc-framework"
+REPO="fhidalgoGC/homebrew-tap"
 FREMI_HOME="${HOME}/.fremi"
 FRAMEWORK_DIR="${FREMI_HOME}/framework"
 BIN_DIR="${HOME}/.local/bin"
