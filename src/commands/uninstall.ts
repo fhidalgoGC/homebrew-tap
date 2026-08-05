@@ -4,6 +4,7 @@ import { getFrameworkContentRoot } from "../core/paths";
 import { uninstallSkills } from "../core/uninstall-skills";
 import { uninstallHooks } from "../core/uninstall-hooks";
 import { uninstallClaudeMd } from "../core/uninstall-claude-md";
+import { uninstallFremiConfig } from "../core/uninstall-fremi-config";
 
 export async function runUninstall(rawPath?: string): Promise<void> {
   const targetPath = resolve(rawPath ?? process.cwd());
@@ -26,16 +27,17 @@ export async function runUninstall(rawPath?: string): Promise<void> {
     skills: await uninstallSkills(targetPath, frameworkContent),
     hooks: await uninstallHooks(targetPath, frameworkContent),
     claudeMd: await uninstallClaudeMd(targetPath),
+    fremiConfig: await uninstallFremiConfig(targetPath),
   };
 
   console.log("==> Uninstall summary:");
   console.log(`    Skills:       ${report.skills.removed} removed, ${report.skills.kept} kept (non-fremi)`);
   console.log(`    Hooks:        ${report.hooks.removed} removed from .claude/settings.json`);
   console.log(`    CLAUDE.md:    ${report.claudeMd.action}`);
+  console.log(`    .fremi/:      ${report.fremiConfig.action}`);
   console.log("");
-  console.log("Preserved (user data — remove manually if desired):");
+  console.log("Preserved (your content — remove manually if desired):");
   console.log(`    docs/works/`);
-  console.log(`    .fremi/config.yaml`);
   console.log("");
   console.log("✓ fremi uninstall complete.");
 }

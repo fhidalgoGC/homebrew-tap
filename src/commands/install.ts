@@ -55,5 +55,10 @@ export async function runInstall(rawPath?: string): Promise<void> {
   console.log(`    docs/works/:  ${report.docsWorks.action}`);
   console.log(`    .fremi/:      ${report.config.action}`);
   console.log("");
-  console.log("✓ fremi install complete. Restart Claude Code to load the skills.");
+  console.log(`✓ fremi-framework installed in ${targetPath}`);
+  console.log("");
+  console.log("Next steps:");
+  console.log("  → Restart Claude Code (or reload the workspace) to load the skills");
+  console.log("  → Update framework later:   fremi update");
+  console.log("  → Remove from this project: fremi uninstall");
 }
