@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { getFrameworkRoot, getFrameworkContentRoot } from "../core/paths";
+import { ensureFrameworkContent } from "../core/ensure-framework";
 import { installSkills } from "../core/install-skills";
 import { installHooks } from "../core/install-hooks";
 import { installClaudeMd } from "../core/install-claude-md";
@@ -19,14 +20,15 @@ export async function runInstall(rawPath?: string): Promise<void> {
     throw new Error(`Target path is not a directory: ${targetPath}`);
   }
 
-  // 3. Framework paths (resolved from where fremi is installed)
+  // 3. Framework paths — auto-clone framework content on first run.
   const frameworkRoot = getFrameworkRoot();
+  ensureFrameworkContent(frameworkRoot);
   const frameworkContent = getFrameworkContentRoot();
 
   if (!existsSync(frameworkContent)) {
     throw new Error(
-      `Framework content not found at ${frameworkContent}. ` +
-        `Try reinstalling: curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.sh | bash`,
+      `Framework content directory missing after clone: ${frameworkContent}. ` +
+        "This is unexpected — please open an issue.",
     );
   }
 
