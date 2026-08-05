@@ -2,15 +2,17 @@
 /**
  * fremi — CLI entry point
  *
- * Commands (MVP v0.1):
+ * Commands (v0.1):
  *   fremi version           → prints framework version
  *   fremi install [path]    → installs framework enganches into a project
- *                             (uses CWD if [path] is omitted)
+ *   fremi uninstall [path]  → removes framework enganches
+ *   fremi update            → pulls the latest framework content
  */
 
 import { runVersion } from "./commands/version";
 import { runInstall } from "./commands/install";
 import { runUninstall } from "./commands/uninstall";
+import { runUpdate } from "./commands/update";
 
 async function main(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -28,6 +30,10 @@ async function main(): Promise<void> {
 
     case "uninstall":
       await runUninstall(rest[0]);
+      break;
+
+    case "update":
+      await runUpdate();
       break;
 
     case undefined:
@@ -57,6 +63,7 @@ Commands:
                         (defaults to \$PWD if path is omitted)
   uninstall [path]      Remove framework enganches from project
                         (preserves docs/works/ and .fremi/config.yaml)
+  update                Pull the latest framework content from GitHub
   help                  Show this help
 
 Examples:
@@ -64,6 +71,7 @@ Examples:
   fremi install
   fremi install ~/code/my-project
   fremi uninstall
+  fremi update
 `);
 }
 

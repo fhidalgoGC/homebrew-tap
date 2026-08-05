@@ -5,10 +5,18 @@ import { join } from "node:path";
 const FRAMEWORK_REPO = "https://github.com/fhidalgoGC/homebrew-tap.git";
 
 /**
- * Ensures the framework content (skills, hooks, rules, flows, templates) is
- * present at `frameworkRoot`. If it's missing, clones the repo synchronously.
- * This is the "first-run" bootstrap that lets `brew install fremi` be a
- * single command — the binary self-provisions its content on demand.
+ * Paths inside the source repo that the CLI actually needs at runtime.
+ * Everything else (src/, Formula/, Dockerfile*, package.json, install.*,
+ * bun.lock, tsconfig, docs, bin) is developer-only and gets skipped by
+ * the sparse-checkout below.
+ */
+const SPARSE_PATHS = ["framework", "VERSION", "LICENSE", "README.md"];
+
+/**
+ * Ensures the framework content is present at `frameworkRoot`. If missing,
+ * clones only the paths listed in SPARSE_PATHS from the repo using git's
+ * sparse-checkout — so the user's ~/.fremi/framework never ends up holding
+ * the CLI source code, Docker files, Homebrew formula, etc.
  */
 export function ensureFrameworkContent(frameworkRoot: string): void {
   if (existsSync(join(frameworkRoot, "VERSION"))) {
@@ -30,9 +38,17 @@ export function ensureFrameworkContent(frameworkRoot: string): void {
   console.log("");
 
   try {
-    execSync(`git clone --quiet "${FRAMEWORK_REPO}" "${frameworkRoot}"`, {
-      stdio: "inherit",
-    });
+    execSync(
+      `git clone --depth 1 --filter=blob:none --sparse --quiet "${FRAMEWORK_REPO}" "${frameworkRoot}"`,
+      { stdio: "inherit" },
+    );
+    // --no-cone lets us mix directory prefixes (`framework/`) with
+    // top-level files (VERSION, LICENSE, README.md). Cone mode would
+    // reject the files.
+    execSync(
+      `git -C "${frameworkRoot}" sparse-checkout set --no-cone ${SPARSE_PATHS.join(" ")}`,
+      { stdio: "inherit" },
+    );
   } catch (err) {
     throw new Error(
       `Failed to clone framework: ${(err as Error).message}. ` +
