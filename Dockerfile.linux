@@ -1,0 +1,39 @@
+# Development container for fremi-framework — Linux target
+#
+# Usage from any host (Mac, Linux, Windows via Docker Desktop):
+#   docker build -f Dockerfile.linux -t fremi-dev-linux .
+#   docker run --rm -it -v "$PWD":/workspace fremi-dev-linux
+#
+# Or with docker compose:
+#   docker compose -f docker-compose.dev.yml up dev-linux
+
+FROM debian:bookworm-slim
+
+# Core deps: git (framework clone), curl (bun installer + release downloads),
+# ca-certificates (HTTPS), unzip (bun installer), bash, build-essential (native modules)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git \
+        curl \
+        ca-certificates \
+        unzip \
+        bash \
+        build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install bun (cross-arch: script detects x64/arm64 automatically)
+ENV BUN_INSTALL=/usr/local/bun
+ENV PATH=$BUN_INSTALL/bin:$PATH
+RUN curl -fsSL https://bun.sh/install | bash
+
+# Non-root user for safer file ownership on host-mounted volumes
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g ${GID} dev && \
+    useradd -m -u ${UID} -g ${GID} -s /bin/bash dev && \
+    chown -R dev:dev /usr/local/bun
+
+USER dev
+WORKDIR /workspace
+
+CMD ["bash"]

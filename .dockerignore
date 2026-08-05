@@ -1,0 +1,13 @@
+.git
+node_modules
+bin/fremi-*
+dist
+.atl
+.vscode
+.idea
+*.log
+.env
+.env.local
+.*.bun-build
+.DS_Store
+Thumbs.db

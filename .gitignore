@@ -22,3 +22,6 @@ Thumbs.db
 
 # Agent tooling cache (Gentle AI skill registry, etc.)
 .atl/
+
+# Claude Code local project state
+.claude/

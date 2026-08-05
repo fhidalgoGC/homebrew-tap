@@ -1,0 +1,35 @@
+# Development container for fremi-framework — Windows target
+#
+# NOTE: Windows containers ONLY run on Windows hosts with Docker Desktop
+# switched to "Windows containers" mode (right-click Docker Desktop tray icon
+# → "Switch to Windows containers"). From Mac or Linux hosts, use
+# Dockerfile.linux instead.
+#
+# Usage (Windows host, PowerShell):
+#   docker build -f Dockerfile.windows -t fremi-dev-windows .
+#   docker run --rm -it -v ${PWD}:C:\workspace fremi-dev-windows
+#
+# Base: Windows Server Core LTSC 2022 — small enough for CLI tooling,
+# large enough to support chocolatey + git + curl.
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# Install chocolatey (package manager for Windows containers)
+RUN Set-ExecutionPolicy Bypass -Scope Process -Force; \
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
+    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Core deps
+RUN choco install -y --no-progress git curl unzip
+
+# Install bun (Windows-native support via bun.sh/install.ps1)
+RUN irm bun.sh/install.ps1 | iex
+
+# Persist bun PATH for future RUN and container CMD
+RUN [System.Environment]::SetEnvironmentVariable('Path', $env:Path + ';' + $env:USERPROFILE + '\.bun\bin', [System.EnvironmentVariableTarget]::Machine)
+
+WORKDIR C:\workspace
+
+CMD ["powershell"]

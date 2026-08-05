@@ -1,0 +1,44 @@
+# Dev environment for fremi-framework
+#
+# Two profiles — pick the one that matches your Docker Desktop mode:
+#
+#   Linux containers (default on Mac / Linux / Windows):
+#     docker compose -f docker-compose.dev.yml up dev-linux
+#
+#   Windows containers (Windows host only, Docker Desktop in Windows mode):
+#     docker compose -f docker-compose.dev.yml up dev-windows
+#
+# The workspace is mounted read-write; edits from the host reflect
+# immediately inside the container. A named volume caches node_modules.
+
+services:
+  dev-linux:
+    build:
+      context: .
+      dockerfile: Dockerfile.linux
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    image: fremi-dev-linux
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - fremi-node-modules-linux:/workspace/node_modules
+    stdin_open: true
+    tty: true
+    command: bash
+
+  dev-windows:
+    build:
+      context: .
+      dockerfile: Dockerfile.windows
+    image: fremi-dev-windows
+    working_dir: C:\workspace
+    volumes:
+      - .:C:\workspace
+    stdin_open: true
+    tty: true
+    command: powershell
+
+volumes:
+  fremi-node-modules-linux:

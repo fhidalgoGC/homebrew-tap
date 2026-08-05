@@ -37,7 +37,7 @@ jobs:
 
     runs-on: ${{ matrix.target.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -54,7 +54,7 @@ jobs:
             --outfile "bin/fremi-${{ matrix.target.platform }}${{ matrix.target.ext }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fremi-${{ matrix.target.platform }}
           path: bin/fremi-${{ matrix.target.platform }}${{ matrix.target.ext }}
@@ -64,9 +64,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: dist/
 
