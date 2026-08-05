@@ -10,6 +10,7 @@
 
 import { runVersion } from "./commands/version";
 import { runInstall } from "./commands/install";
+import { runUninstall } from "./commands/uninstall";
 
 async function main(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -23,6 +24,10 @@ async function main(): Promise<void> {
 
     case "install":
       await runInstall(rest[0]);
+      break;
+
+    case "uninstall":
+      await runUninstall(rest[0]);
       break;
 
     case undefined:
@@ -50,12 +55,15 @@ Commands:
   version               Show installed framework version
   install [path]        Install framework enganches into project
                         (defaults to \$PWD if path is omitted)
+  uninstall [path]      Remove framework enganches from project
+                        (preserves docs/works/ and .fremi/config.yaml)
   help                  Show this help
 
 Examples:
   fremi version
   fremi install
   fremi install ~/code/my-project
+  fremi uninstall
 `);
 }
 

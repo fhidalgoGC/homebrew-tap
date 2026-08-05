@@ -24,6 +24,8 @@ curl -sL https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.
 iwr -useb https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.ps1 | iex
 ```
 
+**Dependencies**: the installer auto-detects missing `git` and offers to install it (via `brew` on macOS, `apt`/`dnf`/`pacman`/`apk` on Linux, or `winget` on Windows). To skip prompts in CI or automation, set `FREMI_ASSUME_YES=1` (bash) or `$env:FREMI_ASSUME_YES = "1"` (PowerShell).
+
 After install, restart your shell (or `source ~/.bashrc` / `source ~/.zshrc`).
 
 ```bash
@@ -87,6 +89,7 @@ Each project consumes the framework via lightweight enganches (symlinks, hooks, 
 |---|---|
 | `fremi version` | Prints the installed framework version. |
 | `fremi install [path]` | Installs framework enganches into project. `[path]` defaults to `$PWD`. |
+| `fremi uninstall [path]` | Removes framework enganches (skills, hooks, CLAUDE.md block). Preserves `docs/works/` and `.fremi/config.yaml` (user data). |
 
 More commands (`fremi update`, `fremi status`, `fremi doctor`) coming as needed.
 

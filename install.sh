@@ -6,16 +6,15 @@
 #   curl -sL https://raw.githubusercontent.com/fhidalgoGC/gc-framework/main/install.sh | bash
 #
 # What it does:
-#   1. Clones (or updates) fhidalgoGC/gc-framework to ~/.fremi/framework
-#   2. Detects OS + architecture
-#   3. Downloads the correct compiled binary from GitHub Releases
-#   4. Places it in ~/.local/bin/fremi
-#   5. Verifies PATH and guides the user if needed
+#   1. Detects missing dependencies (git, curl) and offers to install them.
+#   2. Clones (or updates) fhidalgoGC/gc-framework to ~/.fremi/framework
+#   3. Detects OS + architecture
+#   4. Downloads the correct compiled binary from GitHub Releases
+#   5. Places it in ~/.local/bin/fremi
+#   6. Verifies PATH and guides the user if needed
 #
-# Requirements:
-#   - bash 4+ (macOS ships bash 3 — script is bash-3 compatible)
-#   - git
-#   - curl
+# Environment overrides:
+#   FREMI_ASSUME_YES=1   Skip all confirmations and auto-install deps.
 # ============================================================================
 
 set -euo pipefail
@@ -35,6 +34,26 @@ fi
 info()  { printf "${BOLD}${GREEN}==>${RESET} %s\n" "$*"; }
 warn()  { printf "${BOLD}${YELLOW}==>${RESET} %s\n" "$*"; }
 error() { printf "${BOLD}${RED}==>${RESET} %s\n" "$*" >&2; }
+
+# --- Prompt helper — reads from /dev/tty so it works under `curl | bash` ----
+confirm() {
+  local prompt="$1"
+  if [ "${FREMI_ASSUME_YES:-0}" = "1" ]; then
+    info "$prompt (auto-yes via FREMI_ASSUME_YES)"
+    return 0
+  fi
+  if [ ! -r /dev/tty ]; then
+    warn "No TTY available — cannot prompt. Re-run with FREMI_ASSUME_YES=1 to auto-accept."
+    return 1
+  fi
+  local answer
+  printf "${BOLD}?${RESET} %s [y/N] " "$prompt" > /dev/tty
+  read -r answer < /dev/tty
+  case "$answer" in
+    y|Y|yes|YES|si|SI|Si) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 # --- Detect OS + arch -------------------------------------------------------
 detect_platform() {
@@ -57,16 +76,61 @@ detect_platform() {
   echo "${os}-${arch}"
 }
 
-# --- Check dependencies -----------------------------------------------------
-require() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
+OS_KIND="$(uname -s)"
+
+# --- Dependency install helpers ---------------------------------------------
+install_dep_macos() {
+  local pkg="$1"
+  if command -v brew >/dev/null 2>&1; then
+    info "Installing ${pkg} via Homebrew..."
+    brew install "$pkg"
+  else
+    error "Homebrew not found. Install ${pkg} manually or install Homebrew first:"
+    error '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
     exit 1
   fi
 }
 
-require git
-require curl
+install_dep_linux() {
+  local pkg="$1"
+  if command -v apt-get >/dev/null 2>&1; then
+    info "Installing ${pkg} via apt-get..."
+    sudo apt-get update -qq && sudo apt-get install -y "$pkg"
+  elif command -v dnf >/dev/null 2>&1; then
+    info "Installing ${pkg} via dnf..."
+    sudo dnf install -y "$pkg"
+  elif command -v pacman >/dev/null 2>&1; then
+    info "Installing ${pkg} via pacman..."
+    sudo pacman -S --noconfirm "$pkg"
+  elif command -v apk >/dev/null 2>&1; then
+    info "Installing ${pkg} via apk..."
+    sudo apk add "$pkg"
+  else
+    error "No supported package manager found (apt, dnf, pacman, apk). Install ${pkg} manually."
+    exit 1
+  fi
+}
+
+ensure_dep() {
+  local pkg="$1"
+  if command -v "$pkg" >/dev/null 2>&1; then
+    return 0
+  fi
+  warn "Required dependency missing: ${pkg}"
+  if ! confirm "Install ${pkg} now?"; then
+    error "Cannot proceed without ${pkg}. Aborting."
+    exit 1
+  fi
+  case "$OS_KIND" in
+    Darwin) install_dep_macos "$pkg" ;;
+    Linux)  install_dep_linux "$pkg" ;;
+    *) error "Auto-install not supported on ${OS_KIND}. Install ${pkg} manually."; exit 1 ;;
+  esac
+}
+
+# --- Ensure required deps ---------------------------------------------------
+ensure_dep git
+ensure_dep curl
 
 # --- Clone or update framework repo -----------------------------------------
 info "Installing fremi-framework to ${FREMI_HOME}"
@@ -96,16 +160,28 @@ info "Fetching binary: ${BINARY_URL}"
 mkdir -p "${BIN_DIR}"
 
 # Try to download the pre-compiled binary. If not available (early releases),
-# fall back to a bash shim that runs the framework in dev mode via bun (if bun
-# is present). This lets development proceed before the first tagged release.
+# fall back to a bash shim that runs the framework in dev mode via bun.
 if curl -sSfL "${BINARY_URL}" -o "${BIN_DIR}/fremi" 2>/dev/null; then
   chmod +x "${BIN_DIR}/fremi"
   info "Binary installed at ${BIN_DIR}/fremi"
 else
   warn "No pre-compiled binary for v${VERSION} — installing dev shim (requires bun)."
   if ! command -v bun >/dev/null 2>&1; then
-    error "Bun is required for dev-mode install. Install bun (https://bun.sh) or wait for a tagged release."
-    exit 1
+    warn "Bun is required for dev-mode install."
+    if confirm "Install bun now via https://bun.sh/install?"; then
+      info "Installing bun..."
+      curl -fsSL https://bun.sh/install | bash
+      # Bun installs to ~/.bun/bin — add to PATH for this session
+      export BUN_INSTALL="${HOME}/.bun"
+      export PATH="${BUN_INSTALL}/bin:${PATH}"
+      if ! command -v bun >/dev/null 2>&1; then
+        error "Bun install did not complete successfully. Please install manually from https://bun.sh"
+        exit 1
+      fi
+    else
+      error "Cannot proceed without bun. Install manually from https://bun.sh or wait for a tagged release."
+      exit 1
+    fi
   fi
   cat > "${BIN_DIR}/fremi" <<EOF
 #!/usr/bin/env bash
@@ -130,4 +206,5 @@ echo ""
 echo "Try:"
 echo "  ${BOLD}fremi version${RESET}"
 echo "  ${BOLD}fremi install /path/to/project${RESET}"
+echo "  ${BOLD}fremi uninstall /path/to/project${RESET}"
 echo ""
