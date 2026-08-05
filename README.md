@@ -12,7 +12,16 @@
 
 ## Install
 
-### macOS / Linux
+### macOS — Homebrew (recommended)
+
+```bash
+brew install fhidalgoGC/tap/fremi
+git clone https://github.com/fhidalgoGC/homebrew-tap.git ~/.fremi/framework
+```
+
+The second line is a one-time setup that fetches the framework content (skills, hooks, rules). Homebrew's install sandbox blocks writes to `$HOME`, so this step runs outside the formula. It goes away in v0.1.1 (auto-clone on first CLI invocation).
+
+### macOS / Linux — curl
 
 ```bash
 curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.sh | bash
@@ -24,14 +33,16 @@ curl -sL https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.
 iwr -useb https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install.ps1 | iex
 ```
 
-**Dependencies**: the installer auto-detects missing `git` and offers to install it (via `brew` on macOS, `apt`/`dnf`/`pacman`/`apk` on Linux, or `winget` on Windows). To skip prompts in CI or automation, set `FREMI_ASSUME_YES=1` (bash) or `$env:FREMI_ASSUME_YES = "1"` (PowerShell).
+**Dependencies**: the `curl`/`iwr` installers auto-detect missing `git` and offer to install it (via `brew` on macOS, `apt`/`dnf`/`pacman`/`apk` on Linux, or `winget` on Windows). To skip prompts in CI or automation, set `FREMI_ASSUME_YES=1` (bash) or `$env:FREMI_ASSUME_YES = "1"` (PowerShell).
 
-After install, restart your shell (or `source ~/.bashrc` / `source ~/.zshrc`).
+### Verify
 
 ```bash
 fremi version
-# 0.1.0
+# fremi-framework v0.1.0
 ```
+
+With `brew install` the binary is on your PATH immediately. With `curl | bash` you may need to open a new shell (or `source ~/.zshrc`) if `~/.local/bin` was not previously in PATH.
 
 ---
 
@@ -97,11 +108,26 @@ More commands (`fremi update`, `fremi status`, `fremi doctor`) coming as needed.
 
 ## Uninstall
 
+From a project (remove enganches only, keep `docs/works/` and `.fremi/config.yaml`):
+
 ```bash
-rm -rf ~/.fremi ~/.local/bin/fremi
+fremi uninstall
 ```
 
-(Windows: delete `%USERPROFILE%\.fremi\` and `%LOCALAPPDATA%\Programs\fremi\fremi.exe`.)
+Remove fremi from the system:
+
+```bash
+# Homebrew install:
+brew uninstall fremi
+brew untap fhidalgoGC/tap
+rm -rf ~/.fremi
+
+# curl install (macOS / Linux):
+rm -rf ~/.fremi ~/.local/bin/fremi
+
+# Windows:
+# delete %USERPROFILE%\.fremi\ and %LOCALAPPDATA%\Programs\fremi\fremi.exe
+```
 
 ---
 
