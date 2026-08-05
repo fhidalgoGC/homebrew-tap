@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.1.1"
+  version "0.1.3"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.1/fremi-darwin-arm64"
-      sha256 "16273ee522c3f47584bf86827e29b5306c37ec988a4c58e136262241a47d84ff"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-darwin-arm64"
+      sha256 "d6db937b7bea74be948f5736d940ba62a970932bafad218bef5454428e51ef34"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.1/fremi-darwin-x64"
-      sha256 "6bc852bf6f82fa1533a1fe0b15609219c8a7536682716d064964770f34b55af9"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-darwin-x64"
+      sha256 "261b2f06fad2f0a2e440c29576d0cb1edb140876f978c2aeadc2ed0eac5583f4"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.1/fremi-linux-arm64"
-      sha256 "3195bc0be0f8820a7812c537efebdbc1d601aea3ec7e9083b651370b4fb12f10"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-linux-arm64"
+      sha256 "dd8bcb8876c2f18546c0798e8fbdcc16d16ffead78b393307e905c4c9e319512"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.1/fremi-linux-x64"
-      sha256 "0501846a8aacc89d2aec35138e23a816d8826cb5e8cacbbee3e2a9419c57aa46"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-linux-x64"
+      sha256 "c422ffe668504ab1e0a06b3e67a1bdde940dfd4786892ff144c9bba5c45fdf7e"
     end
   end
 
@@ -41,9 +41,7 @@ class Fremi < Formula
         fremi install /path/to/project
 
       Framework content is fetched automatically to ~/.fremi/framework on
-      first `fremi install`. Update it later with:
-
-        git -C ~/.fremi/framework pull
+      first `fremi install`. Update it later with `fremi update`.
     EOS
   end
 
