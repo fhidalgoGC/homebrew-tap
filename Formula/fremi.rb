@@ -34,24 +34,21 @@ class Fremi < Formula
     bin.install downloaded => "fremi"
   end
 
-  def post_install
-    # Ensure the framework content (skills, hooks, rules, flows) is present
-    # at ~/.fremi/framework. The binary looks there at runtime.
-    framework_dir = File.expand_path("~/.fremi/framework")
-    unless File.exist?(File.join(framework_dir, "VERSION"))
-      system "git", "clone", "--quiet",
-             "https://github.com/fhidalgoGC/homebrew-tap.git",
-             framework_dir
-    end
-  end
-
   def caveats
     <<~EOS
-      fremi-framework binary installed.
-      Framework content lives at:   ~/.fremi/framework
-      Update framework content:     git -C ~/.fremi/framework pull
-      Try:                          fremi version
-                                    fremi install /path/to/project
+      fremi binary installed. One-time setup — clone the framework content:
+
+        git clone https://github.com/fhidalgoGC/homebrew-tap.git ~/.fremi/framework
+
+      Then:
+        fremi version
+        fremi install /path/to/project
+
+      Update the framework later with:
+        git -C ~/.fremi/framework pull
+
+      (Homebrew's install sandbox prevents writing to $HOME, so the clone
+       has to run outside the formula. This is a one-line manual step.)
     EOS
   end
 
