@@ -1,51 +1,54 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.2.5"
+  version "0.3.1"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-darwin-arm64"
-      sha256 "872cc6b8155f61fb4b66228457e8649fd25226d95f8e14060cfa2af0731e2b0a"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.1/fremi-darwin-arm64"
+      sha256 "650c796fa9ac8d4e10f4eb41412fcaaa0a44b10aa67b5fec680245b84336ee74"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-darwin-x64"
-      sha256 "8b4363d5a93ec3f13aaccac9f1d1a8004be17003ca57ddc33e7c92eeafb52db6"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.1/fremi-darwin-x64"
+      sha256 "eaf414559a50375ab4115a3b492afdd649eabf54023536b812997989f6d59ec9"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-linux-arm64"
-      sha256 "b26809c05541acf7ee4bde096e0ee6af73d2242816520a2dbb0a20a4b0ff33c1"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.1/fremi-linux-arm64"
+      sha256 "c178fffb30f18e2f1d720391cffd657c2918248e07997e629623829e768974d4"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-linux-x64"
-      sha256 "c2df5ddf31c70fc12d6ec613a2930f00579f29e835487cec682b577c0a76c869"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.1/fremi-linux-x64"
+      sha256 "61d8cb2dcbf9595570f84d68b7ca0a3f8add2e164ddd04243c6bdcefcfbb4ea1"
     end
   end
 
   def install
-    # The download is a single pre-compiled binary; rename it to `fremi`.
     downloaded = Dir["*"].first
     bin.install downloaded => "fremi"
   end
 
   def caveats
     <<~EOS
-      fremi installed. Try:
+      fremi installed. Two-layer setup:
 
-        fremi install /path/to/project
+        fremi agent install        (once per machine — installs skills, rules,
+                                    and a SessionStart verify hook to ~/.claude/)
+        fremi install <path>       (per project — writes docs/works/, .fremi/
+                                    config.yaml, CLAUDE.md block)
 
-      Interactive mode (default in a terminal): pick agents by toggling
-      each with ENTER; select 'Done' to finalize. Pass --non-interactive
-      or -y to skip the prompt.
+      `fremi install` auto-runs `fremi agent install` if the machine hasn't
+      been set up yet, so you can also run just:
 
-      Framework content is fetched automatically to ~/.fremi/framework on
-      first `fremi install`. Update it later with `fremi update`.
+        fremi install
+
+      Framework content is fetched automatically to ~/.fremi on first use.
+      Update later with: fremi update
     EOS
   end
 
