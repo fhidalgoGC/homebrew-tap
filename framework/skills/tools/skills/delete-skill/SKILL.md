@@ -1,11 +1,11 @@
 ---
 name: fremi-delete-skill
-description: Elimina un skill de proyecto — borra `docs/project/skills/<name>/` y su symlink en `.claude/skills/<name>`. Por default sólo elimina project skills. Con `--force` puede eliminar skills del framework (peligroso). Pide confirmación antes de borrar.
+description: Elimina un skill de proyecto — borra `docs/project/skills/<name>/` y desenlaza TODOS los symlinks correspondientes (`.claude/skills/`, `.cursor/skills/`, `.windsurf/skills/`, ...). Por default sólo elimina project skills. Con `--force` puede eliminar skills del framework (peligroso). Pide confirmación antes de borrar.
 ---
 
 # /fremi-delete-skill — Eliminar skill
 
-Elimina un skill del proyecto (por default) o del framework (con `--force`). Borra el folder + el symlink en `.claude/skills/`.
+Elimina un skill del proyecto (por default) o del framework (con `--force`). Borra el folder fuente en `docs/project/skills/` y desenlaza el symlink de **cada agente instalado** en el proyecto.
 
 ## Sintaxis
 
@@ -53,8 +53,9 @@ Esperar `sí` explícito.
 
 ### Paso 3 — Eliminar
 
-1. Borrar symlink: `rm .claude/skills/<name>`.
-2. Borrar folder: `rm -rf docs/project/skills/<name>/` (o `~/.fremi/framework/skills/<name>/` con `--force`).
+1. Detectar agentes instalados en el proyecto (ver `/fremi-add-skill` Paso 2 para la tabla de detección).
+2. Para **cada** agente detectado (`A`): si `<agent_dir>/skills/<name>` existe como symlink → `rm <agent_dir>/skills/<name>`.
+3. Borrar folder fuente: `rm -rf docs/project/skills/<name>/` (o `~/.fremi/framework/skills/<name>/` con `--force`).
 
 ### Paso 4 — Reportar
 
@@ -62,7 +63,11 @@ Esperar `sí` explícito.
 ✅ Skill eliminado: <name>
 🗑️ Borrado:
    - docs/project/skills/<name>/ (o ~/.fremi/framework/skills/<name>/)
-   - .claude/skills/<name>
+
+🔌 Symlinks removidos:
+   ✓ .claude/skills/<name>
+   ✓ .cursor/skills/<name>
+   • .windsurf/skills/<name>  (no existía)
 
 ⚠️ Referencias que quedaron rotas:
    - <archivo1>: menciona /<name>
