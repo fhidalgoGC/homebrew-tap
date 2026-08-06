@@ -1,6 +1,6 @@
 {
   "name": "fremi-framework",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",
@@ -15,16 +15,13 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
-
     "clean:bun-cache": "bash scripts/clean-cache.sh",
-
     "build:darwin-arm64": "bash scripts/build.sh darwin-arm64",
     "build:darwin-x64": "bash scripts/build.sh darwin-x64",
     "build:linux-x64": "bash scripts/build.sh linux-x64",
     "build:linux-arm64": "bash scripts/build.sh linux-arm64",
     "build:windows-x64": "bash scripts/build.sh windows-x64",
     "build:all": "bash scripts/build-all.sh",
-
     "fremi:version": "bash scripts/fremi-run.sh version",
     "fremi:help": "bash scripts/fremi-run.sh help",
     "fremi:install": "bash scripts/fremi-install.sh",
@@ -32,18 +29,19 @@
     "fremi:uninstall": "bash scripts/fremi-run.sh uninstall ./sandbox",
     "fremi:update": "bash scripts/fremi-run.sh update",
     "fremi:reset": "bash scripts/sandbox.sh reset",
-
     "sandbox:reset": "bash scripts/sandbox.sh reset",
     "sandbox:install": "bash scripts/sandbox.sh install",
     "sandbox:uninstall": "bash scripts/sandbox.sh uninstall",
     "sandbox:tree": "bash scripts/sandbox.sh tree",
     "sandbox:cycle": "bash scripts/sandbox.sh cycle",
-
     "release:publish": "bash scripts/release.sh publish",
     "release:sha256": "bash scripts/release.sh sha256"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0"
   }
 }

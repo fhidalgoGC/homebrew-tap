@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.2.2"
+  version "0.2.3"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.2/fremi-darwin-arm64"
-      sha256 "52ea9011c119c0314aadbdda24750d1342e478cea9479d99ef5d374c265f7c91"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.3/fremi-darwin-arm64"
+      sha256 "1db584472fe71cc1725ed5034804cf977b0082f6dcac76144e6f2715bc6bcdbe"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.2/fremi-darwin-x64"
-      sha256 "c1e381527ebff074ae4f04a42c2850a63f9de1115f9e8afbc153f12c6b0b9263"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.3/fremi-darwin-x64"
+      sha256 "81707c0a764031a5a2a6190fcc9315c5d38022f77abd5aef51e9918231ca78cb"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.2/fremi-linux-arm64"
-      sha256 "31d29cde9b92e73466d3de268b4b0e7b5bc39049a2ebce431fbbd334fb582cf5"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.3/fremi-linux-arm64"
+      sha256 "278a9ef16f9dcd62d35148c6fa7119d478a4d944a44609e520136ff6870d99e7"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.2/fremi-linux-x64"
-      sha256 "656091668d4f30ac0bf3961f136a8fecc6980e6436cb19d620433cde7cad6020"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.3/fremi-linux-x64"
+      sha256 "82bc4fc15072e45b2afec6f301781bc0a3bae935cfeb050441f8cb5c13f54af9"
     end
   end
 
@@ -39,6 +39,9 @@ class Fremi < Formula
       fremi installed. Try:
 
         fremi install /path/to/project
+
+      Interactive mode (default in a terminal): asks which agent(s) to
+      install for. Pass --non-interactive or -y to skip the prompt.
 
       Framework content is fetched automatically to ~/.fremi/framework on
       first `fremi install`. Update it later with `fremi update`.

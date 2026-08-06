@@ -9,8 +9,14 @@ import { installClaudeMd } from "../core/install-claude-md";
 import { installUserSettings } from "../core/install-user-settings";
 import { initDocsWorks } from "../core/init-docs-works";
 import { initFremiConfig } from "../core/init-config";
+import { gatherInstallAnswers, validateAgentsAreSupported } from "../prompts/install";
 
-export async function runInstall(rawPath?: string): Promise<void> {
+export interface InstallFlags {
+  agent?: string;         // comma-separated list, e.g. "claude,cursor"
+  nonInteractive?: boolean; // skip prompts, use defaults or --agent value
+}
+
+export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Promise<void> {
   // 1. Resolve target project path — use CWD if not provided
   const targetPath = resolve(rawPath ?? process.cwd());
 
@@ -22,7 +28,13 @@ export async function runInstall(rawPath?: string): Promise<void> {
     throw new Error(`Target path is not a directory: ${targetPath}`);
   }
 
-  // 3. Framework paths — auto-clone framework content on first run.
+  // 3. Gather interactive answers (agents, plus future per-command options).
+  //    See src/prompts/install.ts for the precedence rules.
+  const answers = await gatherInstallAnswers(flags);
+  validateAgentsAreSupported(answers.agents);
+  console.log(`==> Target agents: ${answers.agents.join(", ")}`);
+
+  // 4. Framework paths — auto-clone framework content on first run.
   const frameworkRoot = getFrameworkRoot();
   ensureFrameworkContent(frameworkRoot);
   const frameworkContent = getFrameworkContentRoot();
@@ -39,7 +51,9 @@ export async function runInstall(rawPath?: string): Promise<void> {
   console.log(`    framework: ${frameworkContent}`);
   console.log("");
 
-  // 4. Execute install steps (idempotent — safe to re-run)
+  // 5. Execute install steps (idempotent — safe to re-run).
+  //    All current install modules target Claude Code (.claude/*, CLAUDE.md).
+  //    When other agents are added they will get parallel install modules.
   const report = {
     skills: await installSkills(targetPath, frameworkContent),
     hooks: await installHooks(targetPath, frameworkContent),
@@ -50,7 +64,7 @@ export async function runInstall(rawPath?: string): Promise<void> {
     config: await initFremiConfig(targetPath, frameworkRoot),
   };
 
-  // 5. Report
+  // 6. Report
   console.log("");
   console.log("==> Install summary:");
   console.log(`    Skills:       ${report.skills.installed} installed, ${report.skills.skipped} unchanged, ${report.skills.recreated} recreated`);
@@ -68,3 +82,4 @@ export async function runInstall(rawPath?: string): Promise<void> {
   console.log("  → Update framework later:   fremi update");
   console.log("  → Remove from this project: fremi uninstall");
 }
+
