@@ -1,0 +1,110 @@
+schema: framework-layer-core
+schema_version: 4
+layer: feature
+since: 2026-07-16
+# v4 (2026-07-16): `agent` pasa a ser estructura con `options` + `default` + `reasoning`.
+# v3 (2026-07-16): agrega `agent` (main | subagent) + `agent_reason` por step.
+# v2 (2026-07-16): agrega `requires_complete` + `consumes` a step_matrix.
+
+# ===========================================================================
+# CONFIG.CORE — capa FEATURE
+#
+# Fuente de verdad ESTRUCTURAL — el usuario NO edita.
+# - Toggle on/off → settings/config.yaml → parallelism.enabled.
+# - Config operativa → ~/.fremi/framework/skills/feature/config.user.yaml.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEP MATRIX — feature tiene UN step obligatorio (create definition).
+# Ejes: requires_complete, consumes, can_run_with, agent{options/default/reasoning}.
+# Tipos de agent: main | subagent | agent (ver header de story/config.core.yaml).
+# ---------------------------------------------------------------------------
+step_matrix:
+  definition:
+    skill: /fremi-feature
+    requires_complete:
+      - "product/definition.md (con contenido real)"
+      - "product/plan.md (existe, aunque tenga 0 features listadas)"
+    consumes:
+      - "product/definition.md — capacidades in-scope + glosario"
+      - "product/plan.md — versión actual para ancestor.version_at_creation (Regla 17)"
+      - "product/strategies.md — stack global aplicable (opcional pero recomendado)"
+    can_run_with: [/fremi-feature-adr]
+    agent:
+      options: [main, subagent, agent]
+      default: main
+      reasoning:
+        main: >
+          Formalización con el usuario: capacidades, in-scope, restricciones,
+          criterios de éxito. Escritura sobre product/plan.md (single-writer).
+          Bifurcaciones al elegir approach de la feature.
+        subagent: >
+          Secciones internas del definition.md (capabilities, user_stories_seed,
+          constraints, success_criteria) pueden generarse por subagentes en
+          paralelo (ver internal_items.definition). El main consolida y valida.
+        agent: >
+          Si hay agente especializado en feature framing / PRD generation.
+    reason: >
+      Regla 1 — no se crea feature sin capa producto lista. Sin product/plan.md
+      no se puede capturar ancestor.version_at_creation (Regla 17).
+
+  # Transversales durante la vida de la feature (después del step 1)
+  lifecycle:
+    requires_complete: [definition]
+    can_run_with:
+      - /fremi-feature-adr          # ADRs locales que van apareciendo
+      - /fremi-feature-bug          # bugs transversales a la feature
+      - /fremi-story                # crear stories dentro
+      - /fremi-pipeline-story       # ídem, versión pipeline
+      - /fremi-enabler --feature    # enabler local a feature
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Coordinación de sub-ciclos (stories, bugs, enablers). El main
+          orquesta y delega a subagentes cuando los sub-ciclos lo permiten
+          (ej: cada story dentro de la feature puede correr apply en subs).
+    reason: >
+      Una feature está viva mientras existan sus stories.
+
+# ---------------------------------------------------------------------------
+# INTERNAL ITEMS — secciones del definition.md
+# ---------------------------------------------------------------------------
+internal_items:
+  definition:
+    allow_parallel: true
+    max_concurrent: 3
+    parallelizable_sections:
+      - capabilities        # capacidades in-scope
+      - user_stories_seed   # listado inicial de stories planeadas
+      - constraints         # restricciones locales
+      - success_criteria    # criterios de éxito medibles
+    serialize_sections:
+      - metadata            # frontmatter (versión, ancestor) — single write
+      - glossary            # glosario final — merge al cierre
+    reason: >
+      Secciones descriptivas son independientes. Un subagente puede generar
+      capabilities + user_stories_seed + constraints en paralelo si conoce
+      la descripción de la feature.
+    merge_hazards:
+      - "Términos del glosario mencionados en múltiples secciones — consolidar al final."
+      - "Sync-back con product/definition.md (Regla 12) → serialize."
+
+# ---------------------------------------------------------------------------
+# CROSS INSTANCE — entre features del MISMO producto.
+# ---------------------------------------------------------------------------
+cross_instance:
+  same_product:
+    allow_parallel_creation: true
+    allow_parallel_lifecycle: true
+    conditions:
+      - "Features NO comparten user stories (cada HU pertenece a UNA feature)."
+      - "Features tocan áreas del codebase distintas."
+      - "Bumps del product/plan.md se serializan (Regla 17)."
+    merge_hazards:
+      - "Creación simultánea de dos features → race en el próximo FT-XX. Serialize la asignación de ID."
+      - "Cierre simultáneo → race en bump de product/plan.md. Serialize."
+    reason: >
+      Común querer avanzar varias features en paralelo. Subagentes pueden
+      orquestar esto respetando las condiciones + serialize points.

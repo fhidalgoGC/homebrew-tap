@@ -1,0 +1,474 @@
+schema: framework-layer-core
+schema_version: 4
+layer: story
+since: 2026-07-16
+# v4 (2026-07-16): `agent` pasa a ser estructura con `options` + `default` + `reasoning`.
+#                  El core declara qué tipos son ESTRUCTURALMENTE viables por step;
+#                  la elección concreta la hace `config.user.yaml → step_agents`.
+# v3 (2026-07-16): agrega `agent` (main | subagent) + `agent_reason` por step.
+# v2 (2026-07-16): agrega `requires_complete` + `consumes` a step_matrix.
+
+# ===========================================================================
+# CONFIG.CORE — capa STORY
+#
+# Fuente de verdad ESTRUCTURAL — el usuario NO edita este archivo.
+# Sólo el mantenedor del framework lo cambia cuando la topología muta.
+#
+# - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.yaml → parallelism.enabled`.
+# - Config operativa (docs, flow.sequence, execution_mode, elección de agent
+#   por step) → `~/.fremi/framework/skills/story/config.user.yaml`.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEP MATRIX — para cada step declaramos varios ejes:
+#
+#   1. `requires_complete`: DAG de dependencias (INVIOLABLE).
+#   2. `consumes`: artefactos/datos que lee del predecesor.
+#   3. `can_run_with`: skills que pueden concurrir mientras corre este step.
+#   4. `agent`: tipos de agente estructuralmente viables para ejecutar el step.
+#      Sub-campos:
+#         options: [<lista de tipos viables>]
+#           - main     → el agente principal (thread del usuario). Necesario
+#                        ante decisiones de negocio, bifurcaciones Regla 3b,
+#                        escritura sobre docs living single-writer, o
+#                        co-creación con el usuario.
+#           - subagent → subagente aislado spawneado vía Task tool
+#                        (context propio, retorna al main). Ideal para
+#                        trabajo auto-contenido: research, generación
+#                        determinista, ejecución mecánica.
+#           - agent    → agente ESPECIALIZADO (subagent_type específico como
+#                        Explore, Plan, sdd-apply, o un agent-type custom del
+#                        proyecto). Se diferencia de `subagent` en que tiene
+#                        system prompt de dominio + tools acotados.
+#         default: <tipo que el framework recomienda si el user no override>
+#         reasoning: mapa <tipo> → razón/cuándo usarlo
+#
+#      Sólo los tipos listados en `options` son elegibles. El usuario elige uno
+#      en `config.user.yaml → step_agents[<step>]`; si no lo elige, se usa
+#      `default`. Elegir un tipo que NO está en `options` es error.
+#
+#   5. `single_writer` (bool, opcional): si true, la ESCRITURA sobre el doc
+#      producido es serializada aunque el step corra con subagentes.
+#
+# Regla dura: subagentes y agentes NUNCA interactúan con el usuario. Si
+# `execution_mode: interactive`, el main pausa al retornar el subagente/agente
+# para que el usuario valide antes de continuar.
+# ---------------------------------------------------------------------------
+step_matrix:
+  FW-00_explore:
+    skill: /fremi-story-explore
+    requires_complete: [feature/definition.md]
+    consumes:
+      - "feature/definition.md — contexto y capabilities de la feature"
+      - "product/definition.md — restricciones y glosario globales"
+    can_run_with: []
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Investigación auto-contenida: leer código, mapear terreno, listar
+          alternativas técnicas. No requiere decisiones de negocio ni
+          escritura sobre docs compartidos. Aísla y preserva context del main.
+        main: >
+          Si el user quiere hacer el explore CO-creando con la IA (revisar
+          hallazgos sobre la marcha, decidir qué alternativas profundizar).
+        agent: >
+          Si hay un agente especializado en exploración del stack del proyecto
+          (ej: agente Explore de Claude Code o uno custom). Aporta system prompt
+          dominio-específico + tools acotados a search/read.
+    reason: >
+      Primer step de la story. Requiere que la feature padre exista con
+      definition real (Regla 1).
+
+  FW-01_definition:
+    skill: /fremi-story-definition
+    requires_complete: [feature/definition.md, "FW-00_explore (si aplicó)"]
+    consumes:
+      - "FW-00_explore.md — hallazgos que reencuadran el problema"
+      - "feature/definition.md — capacidades y user_stories_seed"
+    can_run_with: []
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Co-creación de negocio con el usuario: "As a / I want / So that"
+          + CA-XXX. Requiere validación humana de cada criterio. No
+          delegable a subagente sin perder la conversación de framing.
+    reason: >
+      Bloquea hasta que la feature exista y — si el explore aplicó — hasta
+      que esté firmado. Sin insumos no se puede escribir el As a / I want
+      / So that con CAs.
+
+  FW-02_proposal:
+    skill: /fremi-story-proposal
+    requires_complete: [FW-01_definition]
+    consumes:
+      - "FW-01_definition.md — CAs para armar intent + approach"
+    can_run_with: [/fremi-story-adr]
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          El proposal contiene Decisions con bifurcaciones Regla 3b — pausan
+          y consultan al usuario. Un subagente aislado no puede resolver
+          esas pausas.
+    reason: >
+      El proposal contiene bloque Decisions — cada bifurcación (Regla 3b)
+      dispara un ADR. El ADR puede escribirse en paralelo con el resto del
+      proposal, pero ambos requieren la definition completa.
+
+  FW-03_scope:
+    skill: /fremi-story-scope
+    requires_complete: [FW-01_definition]
+    consumes:
+      - "FW-01_definition.md — CAs para acotar in/out-of-scope"
+      - "FW-02_proposal.md (si aplicó) — impact + rollout limitan el scope"
+    can_run_with: []
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Decisión de negocio sobre qué queda dentro/fuera. El usuario valida
+          los límites para evitar scope creep. No delegable.
+    reason: >
+      Scope acota la story a partir de los CAs. Sin definition no se puede
+      acotar; sin proposal (si aplica) queda ambigua la frontera.
+
+  FW-04_bdd:
+    skill: /fremi-story-bdd
+    requires_complete: [FW-03_scope]
+    consumes:
+      - "FW-01_definition.md — CAs que se traducen a escenarios SC-XXX"
+      - "FW-03_scope.md — in-scope define qué escenarios cubrir"
+    can_run_with: []
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Traducción determinista de CAs a SC-XXX Given/When/Then. Genera
+          múltiples SC-XXX en paralelo (ver internal_items). Main revisa
+          al final.
+        main: >
+          Si execution_mode=interactive y el usuario quiere validar cada
+          SC-XXX individualmente durante la redacción.
+        agent: >
+          Si hay agente especializado en BDD (Cucumber/Gherkin) con reglas
+          del proyecto codificadas.
+    reason: >
+      Sin scope explícito los escenarios se expanden sin control (Regla 6.1).
+      SC-XXX paralelizable internamente.
+
+  FW-05_sdd:
+    skill: /fremi-story-sdd
+    requires_complete: [FW-04_bdd]
+    consumes:
+      - "FW-04_bdd-userstories.md — SCs para derivar contratos externos"
+      - "FW-03_scope.md — dependencias que fijan integraciones"
+    can_run_with: [/fremi-story-adr]
+    agent:
+      options: [main, subagent, agent]
+      default: main
+      reasoning:
+        main: >
+          SDD es donde nacen las decisiones de contrato externo — Regla 3b
+          típicamente aparece (protocolo, esquema, códigos HTTP). Main
+          por default para poder pausar.
+        subagent: >
+          Sólo si el usuario garantiza que NO hay bifurcaciones (contratos
+          triviales derivados 1:1 de BDD). Cada contrato puede ir en su
+          subagente (ver internal_items).
+        agent: >
+          Si hay agente especializado en API design / contract-first
+          (OpenAPI, GraphQL SDL) con reglas del proyecto.
+    reason: >
+      Sin BDD no hay contrato externo (Regla 6.2). Bifurcaciones concurren
+      con ADRs.
+
+  FW-06_design:
+    skill: /fremi-story-design
+    requires_complete: [FW-05_sdd]
+    consumes:
+      - "FW-05_sdd-spec.md — contratos que el design debe satisfacer"
+      - "product/strategies.md — stack global aplicable"
+      - "product/decisions.md — ADRs de producto que restringen tech"
+    can_run_with: [/fremi-story-adr]
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Design es la capa con MÁS bifurcaciones técnicas (Regla 3b).
+          Elección de librería/wrapper/capa cascadea al resto. Componentes
+          individuales pueden paralelizarse en subagentes DESPUÉS de que
+          las decisiones tech estén tomadas (ver internal_items) — pero el
+          orquestador de esos subs sigue siendo el main.
+    reason: >
+      Design satisface el contrato SDD, no lo redefine (Regla 6.4).
+
+  FW-07_tdd:
+    skill: /fremi-story-tdd
+    requires_complete: [FW-05_sdd, FW-06_design]
+    consumes:
+      - "FW-04_bdd.md — SC-XXX para mapear TC-XXX"
+      - "FW-05_sdd.md — cláusulas y errores para mapear TC-XXX"
+      - "FW-06_design.md — decisiones técnicas para elegir unit/integration/e2e"
+    can_run_with: []
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Mapeo determinista SC/SDD → TC-XXX. Genera TCs en paralelo
+          (ver internal_items). Main revisa cobertura.
+        main: >
+          Si el usuario quiere validar cada TC uno por uno.
+        agent: >
+          Si hay agente especializado en test planning con testing.stack
+          del proyecto (Vitest, Jest, e2e-aws-lambda…).
+    reason: >
+      Sin SDD y Design cerrados no se puede plantear cobertura.
+
+  FW-08_plan:
+    skill: /fremi-story-plan
+    requires_complete: [FW-07_tdd]
+    consumes:
+      - "FW-06_design.md — estructura de archivos para descomponer tasks"
+      - "FW-07_tdd-plan.md — TCs a cubrir por task"
+    can_run_with: [/fremi-story-task]
+    agent:
+      options: [main, subagent]
+      default: main
+      reasoning:
+        main: >
+          Descomposición requiere juicio: orden, granularidad, criterios
+          verificables (Regla 7b). Además el usuario suele intervenir en la
+          priorización.
+        subagent: >
+          Si el usuario acepta que el sub proponga una descomposición
+          inicial y el main revise/priorice al final.
+    reason: >
+      Sin design (qué archivos) ni TDD (qué tests) no hay unidad de trabajo.
+
+  # Fase de implementación (post-plan)
+  apply:
+    phase: apply
+    requires_complete: [FW-08_plan]
+    consumes:
+      - "FW-08_plan.md — cola de tasks a ejecutar (respetando depends_on)"
+      - "FW-07_tdd-plan.md — TCs a implementar (Regla 7 rojo primero)"
+      - "FW-06_design.md — estructura de archivos donde escribir código"
+    can_run_with:
+      - /fremi-story-task
+      - /fremi-story-checkwork
+      - /fremi-story-adr
+      - /fremi-story-bug
+      - /fremi-enabler
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Cada task es unidad aislada: leer design, escribir test rojo,
+          implementar, verde. Un subagente por task encaja perfecto.
+          El main coordina + serializa FW-09_checkwork.
+        main: >
+          Si el usuario prefiere ejecutar cada task él mismo (con la IA
+          asistiendo en la conversación principal, sin fan-out).
+        agent: >
+          Si hay agente especializado en apply/coding (como `sdd-apply` de
+          Claude Code) con tools acotados a Edit/Write/Bash.
+    orchestration:
+      main_responsibilities:
+        - "Elegir próxima task (respetando depends_on)."
+        - "Lanzar subagente/agente con contexto de la task (design, TDs, archivos)."
+        - "Recibir reporte del subagente."
+        - "Serializar update de FW-09_checkwork (single-writer)."
+        - "Pausar ante bifurcaciones Regla 3b (el sub NO decide)."
+    reason: >
+      Sin plan no hay lista de tasks para ejecutar.
+
+  FW-09_checkwork:
+    skill: /fremi-story-checkwork
+    requires_complete: [FW-08_plan]
+    consumes:
+      - "FW-08_plan.md — tasks para reflejar estado en vivo"
+    can_run_with: []
+    single_writer: true
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Doc LIVING single-writer (Regla 13). Aunque las tasks corran en
+          subagentes en paralelo, la escritura del checkwork la serializa
+          el main para evitar race conditions.
+    reason: >
+      Doc LIVING con actualización single-writer.
+
+  verify:
+    skill: /fremi-story-verify
+    requires_complete: ["FW-09_checkwork al 100%", "todas las tasks del FW-08 en [x]"]
+    consumes:
+      - "FW-09_checkwork.md — evidencia de tasks cerradas y CAs cubiertos"
+      - "config.testing.test_runner / type_checker / coverage — comandos a correr"
+    can_run_with: []
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Ejecución mecánica: correr test_runner, type_checker, coverage.
+          Sin decisiones — output es verdict. Subagente aislado corre y
+          reporta.
+        main: >
+          Si el usuario quiere ver el runner en vivo en su thread.
+        agent: >
+          Si hay agente especializado en test verification (como `sdd-verify`
+          de Claude Code) con tools acotados a Bash.
+    reason: >
+      Verify corre suite completa contra el estado final. Compite por
+      tooling → no admite concurrencia.
+
+  closure-check:
+    skill: /fremi-story-closure-check
+    requires_complete: [verify]
+    consumes:
+      - "verify verdict (PASS o PASS WITH WARNINGS)"
+      - "FW-01..FW-08 completos para armar matriz de trazabilidad"
+    can_run_with: []
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Auditoría automatizada: cruzar CA → SC → SDD → test → código,
+          verificar bumps de versión, sync-back, DoD. Sin decisiones — output
+          es lista de gaps clasificados.
+        main: >
+          Si el usuario quiere ver la auditoría paso a paso.
+        agent: >
+          Si hay agente especializado en compliance / trazabilidad.
+    reason: >
+      Auditoría antes de firmar. Requiere verify pasado.
+
+  FW-10_closure:
+    skill: /fremi-story-closure
+    requires_complete: [verify, closure-check]
+    consumes:
+      - "closure-check sin issues CRITICAL"
+      - "feature/definition.md — versión actual del padre para bumpear"
+      - "FW-01..FW-08 completos — matriz de trazabilidad final"
+    can_run_with: []
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Firma final + bump del feature padre (Regla 17). Escritura sobre
+          docs compartidos con la feature (single-writer). Serialize con
+          otras stories cerrando en paralelo — sólo main puede coordinar.
+    reason: >
+      Precondiciones duras: verify PASS + closure-check sin CRITICAL
+      (Regla 11).
+
+# ---------------------------------------------------------------------------
+# INTERNAL ITEMS — dentro de un step que produce N items del mismo tipo,
+# si esos items pueden generarse en paralelo por subagentes.
+# El agent-type usado internamente hereda del step (o del override del user).
+# ---------------------------------------------------------------------------
+internal_items:
+  FW-04_bdd:
+    unit: SC-XXX
+    allow_parallel: true
+    max_concurrent: 5
+    merge_strategy: append-numbered
+    reason: >
+      Cada escenario Given/When/Then es independiente del resto. Un
+      subagente puede generar SC-001..SC-005 en paralelo si conoce los CAs
+      de FW-01_definition.
+
+  FW-05_sdd:
+    unit: contract
+    allow_parallel: true
+    max_concurrent: 3
+    merge_strategy: append-per-section
+    reason: >
+      Cada contrato externo (endpoint, evento, comando) puede escribirse
+      independiente. Tabla de errores + NFRs se consolidan al final.
+    merge_hazards:
+      - "Contratos que comparten schema/tipo — resolver en una sola pasada."
+
+  FW-06_design:
+    unit: component
+    allow_parallel: true
+    max_concurrent: 3
+    merge_strategy: append-per-section
+    reason: >
+      Cada componente/wrapper/adapter puede diseñarse aislado. Diagrama de
+      secuencia + estructura de archivos se consolidan al final.
+    merge_hazards:
+      - "Elecciones de tecnología deben resolverse ANTES de descomponer en components (Regla 3b)."
+
+  FW-07_tdd:
+    unit: TC-XXX
+    allow_parallel: true
+    max_concurrent: 5
+    merge_strategy: append-numbered
+    reason: >
+      Cada TC-XXX mapea a un SC-XXX o cláusula SDD independiente.
+      El plan de coverage se consolida al final.
+
+  FW-08_plan:
+    unit: task-XXX
+    allow_parallel: false
+    allow_parallel_when: >
+      Las tasks explicitan `depends_on` y el grafo no tiene ciclos.
+      Entonces las tasks sin dependencias entre sí pueden ejecutarse en
+      paralelo durante APPLY (no durante creación del plan).
+    reason: >
+      La CREACIÓN del plan es secuencial (el orden importa).
+      La EJECUCIÓN (apply) puede paralelizar tasks independientes.
+
+  apply:
+    unit: task-XXX
+    allow_parallel: true
+    max_concurrent: 3
+    conditions:
+      - "Cada task declara `depends_on: []` o lista explícita."
+      - "Tasks paralelas NO tocan los mismos archivos."
+      - "Cada task tiene su test rojo + verde antes de mergear (Regla 7)."
+    reason: >
+      Tasks independientes (diferentes módulos/archivos) pueden ejecutarse
+      por subagentes en paralelo.
+    merge_hazards:
+      - "Multiple writers a FW-09_checkwork.md → serialize."
+      - "Coverage/testing global corre después del merge, no en paralelo."
+
+# ---------------------------------------------------------------------------
+# CROSS INSTANCE — entre múltiples stories.
+# ---------------------------------------------------------------------------
+cross_instance:
+  same_feature:
+    allow_parallel_planning: true       # FW-00..FW-08 de dos stories a la vez
+    allow_parallel_implementation: true # apply de dos stories en paralelo
+    conditions:
+      - "Stories NO comparten CAs ni escenarios BDD."
+      - "Stories tocan archivos diferentes."
+      - "Actualizaciones al feature/decisions.md se serializan al cierre (Regla 17)."
+    merge_hazards:
+      - "Cierre en paralelo → conflicto de bump del feature padre. Serialize al closure."
+      - "ADRs de story promovidos a feature/producto → conflict resolver."
+    reason: >
+      Común querer avanzar 2-3 stories de una feature en paralelo. Los
+      subagentes pueden orquestar esto si respetan las condiciones.
+
+  cross_feature:
+    allow_parallel: true
+    reason: >
+      Stories de distintas features típicamente tocan áreas distintas del
+      codebase. Sin dependencia técnica compartida → paralelas.

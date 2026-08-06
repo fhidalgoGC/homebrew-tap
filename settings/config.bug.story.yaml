@@ -1,0 +1,140 @@
+schema: framework-layer-config
+schema_version: 1
+layer: bug
+scope: story
+since: 2026-07-13
+
+# ---------------------------------------------------------------------------
+# Configuración operativa de BUG con scope STORY.
+# Un bug de este tipo vive DENTRO de una story concreta.
+# Archivo único BG-XX_<slug>.md.
+#
+# Cuándo se usa: bug atribuible a UNA story específica (default y más común).
+# Para bugs transversales a varias stories → ver `config.bug.feature.yaml`.
+# ---------------------------------------------------------------------------
+
+active: true
+single_file: true
+
+# ---------------------------------------------------------------------------
+# Ubicación y skill
+# ---------------------------------------------------------------------------
+location: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/{filename}
+skill: /fremi-story-bug
+invocation: "/fremi-story-bug FT-XX/HU-YY <slug>"
+numbering: local_to_story   # cada story arranca desde BG-01 en su carpeta bugs/
+
+when_to_use:
+  - "El bug encaja claramente en UNA story existente."
+  - "El comportamiento incorrecto contradice specs de esa story (BDD/SDD)."
+  - "El fix va a modificar código atribuible al scope de esa story."
+
+when_not_to_use:
+  - "Bug transversal a varias stories → usar `/fremi-feature-bug` (`config.bug.feature.yaml`)."
+  - "Comportamiento no especificado en ninguna spec → primero crear/extender la story (Regla 8), después el bug."
+
+# ---------------------------------------------------------------------------
+# Secciones del archivo (comunes con bug de feature)
+# ---------------------------------------------------------------------------
+sections:
+  - name: symptom
+    required: always
+    description: Síntoma observado en producción
+
+  - name: impact-severity
+    required: always
+    description: Impacto y severidad (Crítico / Alto / Medio / Bajo)
+
+  - name: reproduction-red-test
+    required: always
+    description: Reproducción + test rojo (Regla 8 — test rojo PRIMERO antes del fix)
+
+  - name: root-cause
+    required: always
+    description: Causa raíz identificada
+
+  - name: fix-applied
+    required: always
+    description: Fix aplicado (código + archivos afectados)
+
+  - name: linkages
+    required: conditional
+    condition_ref: bug_linkages_when
+    description: Vinculaciones con otros artefactos (ADRs, otras stories, releases)
+
+  - name: closure
+    required: always
+    description: DoD del bug + sign-off
+
+# ---------------------------------------------------------------------------
+# Reglas condicionales
+# ---------------------------------------------------------------------------
+conditional_rules:
+  bug_linkages_when:
+    description: >
+      La sección `linkages` es obligatoria cuando el bug se conecta a otros
+      artefactos vigentes.
+    obligatory_if_any:
+      - "El bug fue causado por una decisión que sigue en un ADR vigente."
+      - "El bug se detectó en un release específico (nombrarlo)."
+      - "El fix requirió modificar una story anterior (referenciarla)."
+
+# ---------------------------------------------------------------------------
+# FLOW — sólo pasos que son skills invocables.
+# El trabajo interno del bug (caracterizar, fix, firmar) se hace DENTRO del
+# skill /fremi-story-bug guiado por su SKILL.md. Ver `procedure_after_creation`.
+# ---------------------------------------------------------------------------
+flow:
+  sequence:
+    - step: 1
+      skill: /fremi-story-bug
+      action: registrar bug de story (crear BG-XX_<slug>.md)
+      preconditions:
+        - "Story existe con FW-01_definition.md y FW-05_sdd-spec.md"
+        - "El comportamiento incorrecto contradice la spec de la story (Regla 8 — si no, extender spec primero)"
+      produces: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/BG-XX_<slug>.md
+      versioning: snapshot con ancestor.id = HU-YY, version_at_creation = story@version
+
+  parallel_allowed:
+    - skill: /fremi-story-tdd
+      when: "agregar el test rojo de reproducción al FW-07_tdd-plan de la story (Regla 8)"
+
+    - skill: /fremi-story-adr
+      when: "el fix requirió una decisión técnica local a la story"
+
+    - skill: /fremi-feature-adr
+      when: "el fix reveló una decisión técnica que aplica a toda la feature"
+
+# ---------------------------------------------------------------------------
+# PROCEDURE AFTER CREATION — acciones NO-skill dentro del ciclo del bug.
+# ---------------------------------------------------------------------------
+procedure_after_creation:
+  - action: Caracterizar reproducción precisa
+    fills_section: reproduction-red-test (parte de repro)
+
+  - action: Agregar test rojo al FW-07_tdd-plan.md de la story (Regla 8)
+    fills_section: reproduction-red-test (parte de test)
+    constraint: "El test DEBE fallar antes de implementar el fix"
+    skill_available: /fremi-story-tdd
+
+  - action: Implementar el fix
+    constraint: "El test rojo pasa a verde"
+
+  - action: Llenar root-cause y fix-applied
+    fills_section: [root-cause, fix-applied]
+
+  - action: Firmar sección `## Cierre` del bug
+    fills_section: closure
+    side_effects:
+      - "Bumpea la story padre según parent_bump_triggers.bug_closes (Regla 17)"
+      - "Rellena ancestor.version_at_closure en el frontmatter del bug"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  master_config: ~/.fremi/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/settings/methodology.json
+  rules: ~/.fremi/framework/rules/workflow.md
+  regla_8: "~/.fremi/framework/rules/workflow.md § Regla 8 (test rojo primero)"
+  sibling_scope: ~/.fremi/framework/settings/config.bug.feature.yaml

@@ -29,7 +29,7 @@ User runs: cd my-project && fremi install
 fremi (binary):
    1. Resolves target path (arg or CWD)
    2. Locates the framework content via getFrameworkContentRoot()
-      → default: ~/.fremi/framework/framework/
+      → default: ~/.fremi/framework/
    3. For each subsystem, calls a core module:
       · install-skills.ts   → symlinks .claude/skills/fremi-*
       · install-hooks.ts    → merges hook entries into .claude/settings.json

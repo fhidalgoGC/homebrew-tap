@@ -1,0 +1,206 @@
+schema: framework-layer-user-config
+schema_version: 5
+layer: product
+since: 2026-07-13
+
+# ---------------------------------------------------------------------------
+# Configuración USER-EDITABLE de la capa PRODUCTO.
+# Vive junto al skill orquestador (~/.fremi/framework/skills/product/) porque el
+# usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
+#
+# Declara: qué docs viven en product/, qué skills los pueblan, en qué orden
+# se invocan (flow), qué está activo y qué reglas condicionales aplican.
+#
+# El nombre semántico `name` cruza con `methodology.json → identifiers.*`
+# para resolver filenames concretos (no hardcoded acá).
+# ---------------------------------------------------------------------------
+
+active: true
+
+# ---------------------------------------------------------------------------
+# Execution mode — override opcional del default global (config.yaml)
+#
+# - `default`: modo por default para skills de esta capa cuando el usuario
+#   no pasa `--mode` en la invocación.
+# - `pipeline_default`: modo por default cuando se invoca /fremi-pipeline-product.
+#
+# Comentar/omitir todo este bloque para heredar del master.
+# ---------------------------------------------------------------------------
+execution_mode:
+  # Modo default para skills sueltos de esta capa (`/fremi-product-*`).
+  # interactive → pausa DENTRO del skill validando cada sección con el usuario.
+  # auto        → escribe el doc entero de un tirón.
+  default: interactive
+
+  # Modo default para el pipeline (`/fremi-pipeline-product`).
+  # interactive → pausa ENTRE STEPS (los skills internos SIEMPRE corren en auto).
+  # auto        → corre toda la cadena sin pausa (pausa sólo por stop events).
+  pipeline_default: auto
+
+  notes: >
+    Producto tiene 7 docs (3 discovery + 4 formalización). Es la capa donde
+    MÁS conviene interactivo por default a nivel skill suelto, porque las
+    decisiones acá cascadean a todas las features.
+
+    - Skill suelto en `interactive`: la IA propone cada init-XXX, cada idea,
+      cada capacidad in-scope, cada estrategia técnica y valida antes de
+      escribirlas.
+    - Skill suelto en `auto`: llena el doc entero solo; pausa sólo ante
+      Regla 3b (elección de stack / approach con trade-offs no-triviales)
+      o info inicial insuficiente para formular al menos una iniciativa.
+    - Pipeline en `auto`: los 7 docs se completan sin pausa entre steps y
+      sin pausa dentro de cada step. Sólo se detiene por stop events reales.
+    - Pipeline en `interactive`: los skills internos siguen escribiendo cada
+      doc completo (auto), pero la IA se detiene ENTRE cada doc terminado
+      (iniciativas → OK? → ideas → OK? → …) y pregunta si continúa. Los
+      skills internos NUNCA reactivan el modo interactivo.
+
+# ---------------------------------------------------------------------------
+# Step agents — elección del tipo de agente por step.
+# Opciones válidas por step viven en config.core.yaml → step_matrix.<step>.agent.options.
+# Si no se especifica un step acá, se usa el `default` del core.
+# ---------------------------------------------------------------------------
+step_agents:
+  # iniciativas: main       # core options: [main]                  (no overridable)
+  # ideas: subagent         # core options: [main, subagent, agent]
+  # planteamiento: main     # core options: [main]                  (no overridable)
+  # definition: main        # core options: [main]                  (no overridable)
+  # strategies: main        # core options: [main, subagent, agent]
+  # decisions: main         # core options: [main]                  (no overridable)
+  # plan: main              # core options: [main]                  (no overridable)
+
+# ---------------------------------------------------------------------------
+# Docs de la capa (7 docs, todos living)
+# ---------------------------------------------------------------------------
+docs:
+  - name: iniciativas
+    file: iniciativas.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-iniciativas
+    phase: definition
+    stage: discovery
+
+  - name: ideas
+    file: ideas.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-ideas
+    phase: definition
+    stage: discovery
+
+  - name: planteamiento
+    file: planteamiento.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-planteamiento
+    phase: definition
+    stage: discovery
+
+  - name: definition
+    file: definition.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-definition
+    phase: definition
+    stage: formalizacion
+
+  - name: strategies
+    file: strategies.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-strategies
+    phase: design
+    stage: formalizacion
+
+  - name: decisions
+    file: decisions.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-adr
+    phase: design
+    stage: formalizacion
+    lifecycle: growing   # ADRs se acumulan
+
+  - name: plan
+    file: plan.md
+    required: always
+    doc_type: living
+    skill: /fremi-product-plan
+    phase: tasks
+    stage: formalizacion
+    lifecycle: growing   # roadmap crece
+
+# ---------------------------------------------------------------------------
+# Reglas condicionales locales (product no tiene por ahora)
+# ---------------------------------------------------------------------------
+conditional_rules: {}
+
+# ---------------------------------------------------------------------------
+# FLOW — secuencia canónica de skills a invocar para completar el producto.
+# Los skills en `sequence` corren en orden con precondiciones estrictas.
+# Los skills en `parallel_allowed` corren en cualquier momento.
+# ---------------------------------------------------------------------------
+flow:
+  # Secuencia estricta — descubrimiento → formalización
+  sequence:
+    - step: 1
+      skill: /fremi-product-iniciativas
+      preconditions: []
+      produces: product/iniciativas.md
+      stage: discovery
+
+    - step: 2
+      skill: /fremi-product-ideas
+      preconditions: ["iniciativas.md con al menos 1 init-XXX Aceptada"]
+      produces: product/ideas.md
+      stage: discovery
+
+    - step: 3
+      skill: /fremi-product-planteamiento
+      preconditions:
+        - "ideas.md con al menos 3 ideas exploradas"
+      produces: product/planteamiento.md
+      stage: discovery
+
+    - step: 4
+      skill: /fremi-product-definition
+      preconditions:
+        - "planteamiento.md con approach elegido"
+      produces: product/definition.md
+      stage: formalizacion
+
+    - step: 5
+      skill: /fremi-product-strategies
+      preconditions:
+        - "definition.md con capacidades in-scope declaradas"
+      produces: product/strategies.md
+      stage: formalizacion
+
+    - step: 6
+      skill: /fremi-product-plan
+      preconditions:
+        - "definition.md completo"
+        - "strategies.md con estrategia Elegida"
+      produces: product/plan.md
+      stage: formalizacion
+
+  # NOTA: la TOPOLOGÍA de paralelismo (qué steps pueden concurrir, qué items
+  # internos son paralelizables) vive en `~/.fremi/framework/skills/product/config.core.yaml`
+  # — es estructura del framework, no configuración de usuario. Este archivo
+  # (settings) sólo tiene el flag on/off (ver config.yaml master → parallelism.enabled).
+
+  # Transversales — corren en cualquier momento (típicamente durante 4-6)
+  parallel_allowed:
+    - skill: /fremi-product-adr
+      when: "aparece decisión técnica global (Regla 3b)"
+      produces: entries en product/decisions.md
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  master_config: ~/.fremi/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/settings/methodology.json
+  rules: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-product
