@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.1.3"
+  version "0.1.4"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-darwin-arm64"
-      sha256 "d6db937b7bea74be948f5736d940ba62a970932bafad218bef5454428e51ef34"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.4/fremi-darwin-arm64"
+      sha256 "e23bb2e116dc834d80f7e1373c8034e5448bb4d7c1691479c02302079f369715"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-darwin-x64"
-      sha256 "261b2f06fad2f0a2e440c29576d0cb1edb140876f978c2aeadc2ed0eac5583f4"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.4/fremi-darwin-x64"
+      sha256 "0e3e45d6f9cafa62cf6c7722c73380bff43531491df1d17792037ba635ffab85"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-linux-arm64"
-      sha256 "dd8bcb8876c2f18546c0798e8fbdcc16d16ffead78b393307e905c4c9e319512"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.4/fremi-linux-arm64"
+      sha256 "f68245448d418a0e334fed6b5264b28ec860dddc909b4ca4ff5db3dbffd53383"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.3/fremi-linux-x64"
-      sha256 "c422ffe668504ab1e0a06b3e67a1bdde940dfd4786892ff144c9bba5c45fdf7e"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.1.4/fremi-linux-x64"
+      sha256 "2e3dc8852d5eb3576f0ca265f9507af2013e5658d6bb980b79dfd9a78f45843f"
     end
   end
 
