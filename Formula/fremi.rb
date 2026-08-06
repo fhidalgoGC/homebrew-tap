@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.3"
+  version "0.4.4"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-darwin-arm64"
-      sha256 "f56875507ddfa4cf40d47ce45a50f841b07d85b5a857cc9f48b339f4019b6835"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-darwin-arm64"
+      sha256 "26519e7f5e713f40ffb2714407d5fdbb541ef6dc3a93f3a3dbbac95738fcfc7b"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-darwin-x64"
-      sha256 "11b069e46c291303358a9ab523826eb87fb87b58f389db40495f7f80c4586210"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-darwin-x64"
+      sha256 "016b5a0a8dd0569c7df8a5421ca03f55ea98e08e9c31b0728540ae7af722189d"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-linux-arm64"
-      sha256 "96792309f52b218da2e0110fa81bc7ade2ddd260241c981864a96ee959b026bd"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-linux-arm64"
+      sha256 "ab542cb11457b9b5ef6cfef743fcc727be5b3196f702f3221d5de645bd0d7039"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-linux-x64"
-      sha256 "e1022bf4ea3cd86b222b9e56516840029ff721c37f5f9ff0fd4bbd340d28cbe1"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-linux-x64"
+      sha256 "30c2da655fe880cbdd7eb5c7187fb849831b9b4ed106090b70d3ec97c7135668"
     end
   end
 
@@ -39,8 +39,9 @@ class Fremi < Formula
 
         fremi setting [path]      Menu of sections. Pick methodology
                                   and edit paths, slug rules, or
-                                  identifiers (prefix + id_format per
-                                  type: feature, story, enabler, ...).
+                                  identifiers. Each field shows the
+                                  framework default so you can accept
+                                  it with Enter or override it.
 
       Changes are written back to the .fremi/settings/*.user.yaml file,
       preserving comments and formatting.
