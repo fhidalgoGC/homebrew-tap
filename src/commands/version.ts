@@ -8,7 +8,7 @@ import { getFrameworkRoot } from "../core/paths";
  *
  * Bump this and the top-level VERSION file in lockstep on release.
  */
-const EMBEDDED_VERSION = "0.3.5";
+const EMBEDDED_VERSION = "0.4.0";
 
 export async function runVersion(): Promise<void> {
   const root = getFrameworkRoot();

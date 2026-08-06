@@ -23,6 +23,7 @@ import { runVerify } from "./commands/verify";
 import { runAgentInstall } from "./commands/agent-install";
 import { runAgentUninstall } from "./commands/agent-uninstall";
 import { runSetting } from "./commands/setting";
+import { runMcp } from "./commands/mcp";
 
 async function main(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -55,6 +56,10 @@ async function main(): Promise<void> {
     case "setting":
     case "settings":
       await runSetting(rest[0]);
+      break;
+
+    case "mcp":
+      await runMcp();
       break;
 
     case "agent": {

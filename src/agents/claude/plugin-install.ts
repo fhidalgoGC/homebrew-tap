@@ -11,6 +11,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import { installFremiMarketplace, type MarketplaceInstallReport } from "./marketplace";
+import { registerFremiMcp, type McpRegisterReport } from "./mcp-register";
 
 // Materialises fremi as a native Claude Code plugin (same layout Engram
 // uses). Everything lands under:
@@ -35,6 +36,7 @@ export interface PluginInstallReport {
   registeredInRegistry: boolean;
   enabledInSettings: boolean;
   marketplace: MarketplaceInstallReport;
+  mcp: McpRegisterReport;
   errors: string[];
 }
 
@@ -59,6 +61,14 @@ export async function installClaudePlugin(
       updatedExisting: false,
       registeredInKnown: false,
       addedToSettings: false,
+      errors: [],
+    },
+    mcp: {
+      fremiJsonPath: "",
+      fremiJsonWritten: false,
+      permissionsAdded: 0,
+      pluginMcpJsonUpdated: false,
+      binaryPath: "",
       errors: [],
     },
     errors: [],
@@ -94,6 +104,12 @@ export async function installClaudePlugin(
   // as a first-class plugin source (same treatment Engram gets).
   report.marketplace = installFremiMarketplace(homePath);
   report.errors.push(...report.marketplace.errors);
+
+  // MCP side: write ~/.claude/mcp/fremi.json, extend permissions.allow,
+  // and populate the plugin's .mcp.json so `fremi mcp` boots when
+  // Claude Code loads the plugin.
+  report.mcp = registerFremiMcp(homePath, pluginRoot);
+  report.errors.push(...report.mcp.errors);
 
   return report;
 }

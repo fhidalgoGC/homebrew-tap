@@ -36,6 +36,8 @@ export async function runAgentUninstall(flags: AgentUninstallFlags = {}): Promis
       console.log(`    marketplace:    ${report.marketplaceRemoved ? "removed" : "not present"}`);
       console.log(`                    known_marketplaces.json: ${report.marketplaceRegistryUpdated ? "entry removed" : "unchanged"}`);
       console.log(`                    settings.extraKnownMarketplaces: ${report.marketplaceSettingsUpdated ? "entry removed" : "unchanged"}`);
+      console.log(`    mcp server:     ${report.mcpJsonRemoved ? "~/.claude/mcp/fremi.json removed" : "not present"}`);
+      console.log(`                    permissions.allow: -${report.mcpPermissionsRemoved}`);
       if (report.errors.length > 0) {
         console.log(`    errors:`);
         for (const e of report.errors) console.log(`      - ${e}`);

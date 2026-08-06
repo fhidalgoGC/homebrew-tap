@@ -6,6 +6,7 @@ import {
   rmSync,
 } from "node:fs";
 import { uninstallFremiMarketplace } from "./marketplace";
+import { unregisterFremiMcp } from "./mcp-register";
 
 const PLUGIN_NAME = "fremi";
 
@@ -16,6 +17,8 @@ export interface PluginUninstallReport {
   marketplaceRemoved: boolean;
   marketplaceRegistryUpdated: boolean;
   marketplaceSettingsUpdated: boolean;
+  mcpJsonRemoved: boolean;
+  mcpPermissionsRemoved: number;
   errors: string[];
 }
 
@@ -32,6 +35,8 @@ export async function uninstallClaudePlugin(homePath: string): Promise<PluginUni
     marketplaceRemoved: false,
     marketplaceRegistryUpdated: false,
     marketplaceSettingsUpdated: false,
+    mcpJsonRemoved: false,
+    mcpPermissionsRemoved: 0,
     errors: [],
   };
 
@@ -90,6 +95,12 @@ export async function uninstallClaudePlugin(homePath: string): Promise<PluginUni
   report.marketplaceRegistryUpdated = marketplaceReport.removedFromKnown;
   report.marketplaceSettingsUpdated = marketplaceReport.removedFromSettings;
   report.errors.push(...marketplaceReport.errors);
+
+  // 5. MCP side: remove ~/.claude/mcp/fremi.json and settings.permissions.
+  const mcpReport = unregisterFremiMcp(homePath);
+  report.mcpJsonRemoved = mcpReport.fremiJsonRemoved;
+  report.mcpPermissionsRemoved = mcpReport.permissionsRemoved;
+  report.errors.push(...mcpReport.errors);
 
   return report;
 }
