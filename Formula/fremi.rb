@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.0"
+  version "0.4.1"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.0/fremi-darwin-arm64"
-      sha256 "10736632d83ad0f4d77fc0d69ea1aa5ff6f729bc3a1d66b542a4e34fda1caf45"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.1/fremi-darwin-arm64"
+      sha256 "542f79a0bb1adfb7c143d344b68a339c5f742cc9aa6ee479b359a0f6329588a8"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.0/fremi-darwin-x64"
-      sha256 "279aa50f2d16fbc2a9603c185b4d2c891628dfada3cc2df0b2749513295168d0"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.1/fremi-darwin-x64"
+      sha256 "411cc3e93a9bc01e04893e828573a7af1ef6ecd1e9e5942dec4bb5b11c270a3d"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.0/fremi-linux-arm64"
-      sha256 "b619505617b9c1d20026b6eec78e3339b5cb60b63ecd661064901ddfbb6be1b7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.1/fremi-linux-arm64"
+      sha256 "a2cff504fc9cf92d735734996407318aff3283c303ca492877ed52edaa85611b"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.0/fremi-linux-x64"
-      sha256 "ac275a5d9a872b137ee8d355e8612b64b8caa749348dda66a98f1d97d71cf8a2"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.1/fremi-linux-x64"
+      sha256 "805c78c076be1d206f4313dce6ab8805de45d1d65f087623f0148bec0b5ce0b2"
     end
   end
 
@@ -37,18 +37,14 @@ class Fremi < Formula
     <<~EOS
       fremi installed. Two-layer setup:
 
-        fremi agent install        Once per machine. Materialises fremi as
-                                   a Claude Code plugin under
-                                   ~/.claude/plugins/cache/fremi/, clones
-                                   the marketplace, and registers the MCP
-                                   server (~/.claude/mcp/fremi.json).
-        fremi install <path>       Per project. Writes docs/works/, .fremi/
-                                   config.yaml with enabled: true, plus
-                                   .fremi/settings/ overrides.
-        fremi setting [path]       Interactive TUI to toggle active per
-                                   section under .fremi/settings/.
-        fremi mcp                  Runs the MCP server (invoked by Claude
-                                   Code, not manually).
+        fremi agent install                Once per machine. Asks whether
+                                           to include the MCP server. Use
+                                           --with-mcp / --no-mcp to skip
+                                           the prompt.
+        fremi install <path>               Per project.
+        fremi setting [path]               Interactive TUI (toggle active).
+        fremi mcp                          Runs the MCP server (invoked by
+                                           Claude Code).
 
       MCP tools exposed:
         - mcp__fremi__project_status
@@ -56,8 +52,7 @@ class Fremi < Formula
         - mcp__fremi__list_stories
         - mcp__fremi__list_enablers
 
-      Fremi skills only auto-activate when .fremi/config.yaml has
-      enabled: true. Update the framework later with: fremi update
+      Update the framework later with: fremi update
     EOS
   end
 

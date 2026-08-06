@@ -12,6 +12,7 @@ import { runAgentInstall } from "./agent-install";
 export interface InstallFlags {
   agent?: string;             // comma-separated list of agents, e.g. "claude,cursor"
   nonInteractive?: boolean;   // skip prompts, use defaults or --agent value
+  withMcp?: boolean;          // true = --with-mcp, false = --no-mcp, undefined = ask/default
 }
 
 /**

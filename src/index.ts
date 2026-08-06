@@ -114,6 +114,14 @@ function parseInstallArgs(args: string[]): { path?: string; flags: InstallFlags 
       flags.nonInteractive = true;
       continue;
     }
+    if (arg === "--with-mcp") {
+      flags.withMcp = true;
+      continue;
+    }
+    if (arg === "--no-mcp") {
+      flags.withMcp = false;
+      continue;
+    }
     if (!arg.startsWith("-") && !path) {
       path = arg;
       continue;

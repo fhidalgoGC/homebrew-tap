@@ -165,12 +165,17 @@ function mergePermissions(homePath: string): number {
   return added;
 }
 
-function updatePluginMcpJson(pluginRoot: string, binaryPath: string): void {
+function updatePluginMcpJson(pluginRoot: string, _absoluteBinaryPath: string): void {
   const path = resolve(pluginRoot, ".mcp.json");
+  // Plugin-embedded .mcp.json matches Engram's pattern: the command is
+  // the bare binary name, resolved via PATH at runtime. Keeps the plugin
+  // portable across brew / curl / dev installs where the absolute path
+  // differs. The loose ~/.claude/mcp/fremi.json still uses the resolved
+  // absolute path for stable direct invocation.
   const content = {
     mcpServers: {
       [MCP_NAME]: {
-        command: binaryPath,
+        command: MCP_NAME,
         args: MCP_ARGS,
       },
     },

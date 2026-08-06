@@ -1,4 +1,4 @@
-import { shouldPrompt, askSelect, note, intro } from "./_helpers";
+import { shouldPrompt, askSelect, askConfirm, note, intro } from "./_helpers";
 import type { InstallFlags } from "../commands/install";
 
 /**
@@ -20,6 +20,7 @@ const DONE_TOKEN = "__done__";
 
 export interface InstallAnswers {
   agents: string[];
+  withMcp: boolean;
 }
 
 /**
@@ -41,7 +42,26 @@ export async function gatherInstallAnswers(
     agents = ["claude"];
   }
 
-  return { agents };
+  // MCP is a separate opt-in step. Explicit --with-mcp / --no-mcp
+  // flags win; otherwise ask interactively; otherwise default to true
+  // (MCP is small, read-only, easy to remove later).
+  let withMcp: boolean;
+  if (flags.withMcp === true) {
+    withMcp = true;
+  } else if (flags.withMcp === false) {
+    withMcp = false;
+  } else if (shouldPrompt(flags) && agents.includes("claude")) {
+    withMcp = await askConfirm({
+      message:
+        "Install the fremi MCP server too? (Registers ~/.claude/mcp/fremi.json + " +
+        "adds mcp__fremi__* to permissions.allow so Claude can query project state.)",
+      defaultValue: true,
+    });
+  } else {
+    withMcp = true;
+  }
+
+  return { agents, withMcp };
 }
 
 /**

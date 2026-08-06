@@ -44,6 +44,7 @@ export async function installClaudePlugin(
   homePath: string,
   frameworkContent: string,
   version: string,
+  opts: { withMcp: boolean } = { withMcp: true },
 ): Promise<PluginInstallReport> {
   const report: PluginInstallReport = {
     pluginRoot: "",
@@ -105,11 +106,14 @@ export async function installClaudePlugin(
   report.marketplace = installFremiMarketplace(homePath);
   report.errors.push(...report.marketplace.errors);
 
-  // MCP side: write ~/.claude/mcp/fremi.json, extend permissions.allow,
-  // and populate the plugin's .mcp.json so `fremi mcp` boots when
-  // Claude Code loads the plugin.
-  report.mcp = registerFremiMcp(homePath, pluginRoot);
-  report.errors.push(...report.mcp.errors);
+  // MCP side (optional): register when opts.withMcp is true. Writes
+  // ~/.claude/mcp/fremi.json, extends permissions.allow, and populates
+  // the plugin's .mcp.json so `fremi mcp` boots when Claude Code loads
+  // the plugin.
+  if (opts.withMcp) {
+    report.mcp = registerFremiMcp(homePath, pluginRoot);
+    report.errors.push(...report.mcp.errors);
+  }
 
   return report;
 }
