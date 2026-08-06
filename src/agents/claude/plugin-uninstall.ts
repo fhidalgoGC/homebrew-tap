@@ -5,6 +5,7 @@ import {
   writeFileSync,
   rmSync,
 } from "node:fs";
+import { uninstallFremiMarketplace } from "./marketplace";
 
 const PLUGIN_NAME = "fremi";
 
@@ -12,6 +13,9 @@ export interface PluginUninstallReport {
   pluginRootRemoved: boolean;
   registryUpdated: boolean;
   settingsUpdated: boolean;
+  marketplaceRemoved: boolean;
+  marketplaceRegistryUpdated: boolean;
+  marketplaceSettingsUpdated: boolean;
   errors: string[];
 }
 
@@ -25,6 +29,9 @@ export async function uninstallClaudePlugin(homePath: string): Promise<PluginUni
     pluginRootRemoved: false,
     registryUpdated: false,
     settingsUpdated: false,
+    marketplaceRemoved: false,
+    marketplaceRegistryUpdated: false,
+    marketplaceSettingsUpdated: false,
     errors: [],
   };
 
@@ -75,6 +82,14 @@ export async function uninstallClaudePlugin(homePath: string): Promise<PluginUni
       report.errors.push(`Failed to update ${settingsPath}: ${(err as Error).message}`);
     }
   }
+
+  // 4. Marketplace side: remove ~/.claude/plugins/marketplaces/fremi/,
+  //    known_marketplaces.json entry, and settings.extraKnownMarketplaces.
+  const marketplaceReport = uninstallFremiMarketplace(homePath);
+  report.marketplaceRemoved = marketplaceReport.removedDir;
+  report.marketplaceRegistryUpdated = marketplaceReport.removedFromKnown;
+  report.marketplaceSettingsUpdated = marketplaceReport.removedFromSettings;
+  report.errors.push(...marketplaceReport.errors);
 
   return report;
 }

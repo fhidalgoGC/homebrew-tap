@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.3.2"
+  version "0.3.3"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.2/fremi-darwin-arm64"
-      sha256 "6c0c2b74cccd69675386b78655bc39a8a27a85ae3d91d849f68c604ca26436be"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.3/fremi-darwin-arm64"
+      sha256 "6d59fca52a1a1151cb98bfd7c35f88e4a91aeecfdffac9d3636048483a8594be"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.2/fremi-darwin-x64"
-      sha256 "dbfe14f09ad983aaaee2aa7a02df80599ce7a2bd0e992923211f44f6c5008493"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.3/fremi-darwin-x64"
+      sha256 "9bc6905fc5d9db2816b3cfe6388f81660c2ff011d2cc6dfb90483d233185db9c"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.2/fremi-linux-arm64"
-      sha256 "eeffe0e00dcc58508c9a7015bf30d8c6027dead30a19e9fb63891022cc656039"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.3/fremi-linux-arm64"
+      sha256 "b65f69f5ffee6041c37a5023c7b1a8ed0a066ea6f0d1f0fbc6ff6f864d85322d"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.2/fremi-linux-x64"
-      sha256 "a54d1c9a22dc84a90672b6698e081a719c8bb3337eb6209b08fbfbb1d3e8f0f7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.3/fremi-linux-x64"
+      sha256 "9dec02f43a42e0d7f6fadf5b78fa7758d11d9e4bb141e252498d6e7b67f9a1db"
     end
   end
 
@@ -39,8 +39,10 @@ class Fremi < Formula
 
         fremi agent install        Once per machine. Materialises fremi as
                                    a Claude Code plugin under
-                                   ~/.claude/plugins/cache/fremi/ and enables
-                                   it in ~/.claude/settings.json.
+                                   ~/.claude/plugins/cache/fremi/, clones
+                                   the marketplace at
+                                   ~/.claude/plugins/marketplaces/fremi/,
+                                   and enables it in settings.json.
         fremi install <path>       Per project. Writes docs/works/, .fremi/
                                    config.yaml, CLAUDE.md block.
 

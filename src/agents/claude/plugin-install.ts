@@ -10,6 +10,7 @@ import {
   symlinkSync,
   unlinkSync,
 } from "node:fs";
+import { installFremiMarketplace, type MarketplaceInstallReport } from "./marketplace";
 
 // Materialises fremi as a native Claude Code plugin (same layout Engram
 // uses). Everything lands under:
@@ -33,6 +34,7 @@ export interface PluginInstallReport {
   pluginJsonWritten: boolean;
   registeredInRegistry: boolean;
   enabledInSettings: boolean;
+  marketplace: MarketplaceInstallReport;
   errors: string[];
 }
 
@@ -51,6 +53,14 @@ export async function installClaudePlugin(
     pluginJsonWritten: false,
     registeredInRegistry: false,
     enabledInSettings: false,
+    marketplace: {
+      marketplaceDir: "",
+      cloned: false,
+      updatedExisting: false,
+      registeredInKnown: false,
+      addedToSettings: false,
+      errors: [],
+    },
     errors: [],
   };
 
@@ -78,6 +88,12 @@ export async function installClaudePlugin(
 
   enableInUserSettings(homePath);
   report.enabledInSettings = true;
+
+  // Marketplace side: clone repo + register in known_marketplaces.json
+  // + add to extraKnownMarketplaces so Claude Code recognises fremi
+  // as a first-class plugin source (same treatment Engram gets).
+  report.marketplace = installFremiMarketplace(homePath);
+  report.errors.push(...report.marketplace.errors);
 
   return report;
 }

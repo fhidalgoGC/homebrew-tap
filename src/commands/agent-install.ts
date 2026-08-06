@@ -5,7 +5,7 @@ import { installClaudePlugin } from "../agents/claude/plugin-install";
 import { writeUserMarker, readUserMarker } from "../core/user-marker";
 import type { InstallFlags } from "./install";
 
-const FREMI_VERSION = "0.3.2";
+const FREMI_VERSION = "0.3.3";
 
 // `fremi agent install` - materialises fremi as a plugin at USER level for
 // every selected agent. For Claude Code that means writing to
@@ -41,6 +41,11 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
     console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written (SessionStart -> fremi verify)" : "skipped"}`);
     console.log(`    registry:     ${report.registeredInRegistry ? "added to installed_plugins.json" : "unchanged"}`);
     console.log(`    settings:     ${report.enabledInSettings ? "enabledPlugins updated" : "unchanged"}`);
+    const mkt = report.marketplace;
+    const mktAction = mkt.cloned ? "cloned" : mkt.updatedExisting ? "updated" : "unchanged";
+    console.log(`    marketplace:  ${mktAction} at ${mkt.marketplaceDir}`);
+    console.log(`                  known_marketplaces.json: ${mkt.registeredInKnown ? "registered" : "unchanged"}`);
+    console.log(`                  settings.extraKnownMarketplaces: ${mkt.addedToSettings ? "updated" : "unchanged"}`);
     if (report.errors.length > 0) {
       console.log(`    errors:`);
       for (const e of report.errors) console.log(`      - ${e}`);

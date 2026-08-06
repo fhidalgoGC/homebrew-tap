@@ -33,6 +33,9 @@ export async function runAgentUninstall(flags: AgentUninstallFlags = {}): Promis
       console.log(`    plugin cache:   ${report.pluginRootRemoved ? "removed" : "not present"}`);
       console.log(`    registry:       ${report.registryUpdated ? "entry removed" : "unchanged"}`);
       console.log(`    settings:       ${report.settingsUpdated ? "enabledPlugins cleaned" : "unchanged"}`);
+      console.log(`    marketplace:    ${report.marketplaceRemoved ? "removed" : "not present"}`);
+      console.log(`                    known_marketplaces.json: ${report.marketplaceRegistryUpdated ? "entry removed" : "unchanged"}`);
+      console.log(`                    settings.extraKnownMarketplaces: ${report.marketplaceSettingsUpdated ? "entry removed" : "unchanged"}`);
       if (report.errors.length > 0) {
         console.log(`    errors:`);
         for (const e of report.errors) console.log(`      - ${e}`);
