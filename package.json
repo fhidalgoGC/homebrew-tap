@@ -1,6 +1,6 @@
 {
   "name": "fremi-framework",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "fremi:install:init": "bash scripts/fremi-install.sh --init",
     "fremi:uninstall": "bash scripts/fremi-run.sh uninstall ./sandbox",
     "fremi:update": "bash scripts/fremi-run.sh update",
+    "fremi:setting": "bash scripts/fremi-run.sh setting ./sandbox",
     "fremi:reset": "bash scripts/sandbox.sh reset",
     "sandbox:reset": "bash scripts/sandbox.sh reset",
     "sandbox:install": "bash scripts/sandbox.sh install",

@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.3.4"
+  version "0.3.5"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.4/fremi-darwin-arm64"
-      sha256 "6a930886f84be41a13193838f1073411e563733325c40d70e6c1a386f56c7ec6"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.5/fremi-darwin-arm64"
+      sha256 "5d4c5180a7b3e345a6c61e1df9342d1e2336cb29d0e5ad52284a7cfbf3aa1ece"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.4/fremi-darwin-x64"
-      sha256 "bdb78e6ec0a2f844efd2095709ba6f36c1fbc1797cba18aa3a470b06ff324d66"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.5/fremi-darwin-x64"
+      sha256 "cd7cd8fb5a051021ec36083fb5c22a45b70343e8fcc738e83c56f3eb07c43ce1"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.4/fremi-linux-arm64"
-      sha256 "1731f196250cb6c65d274f3ef5c47d1c5c90dad09e012b9fe94f814f5c4364f7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.5/fremi-linux-arm64"
+      sha256 "7b9fc50d3879111326907693002c00fccb5b9977e16d3a04f083d66505a3be1d"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.4/fremi-linux-x64"
-      sha256 "618994896aad5b22246b833498a3da50e53e30db9ba5d0886f44850bfec6ff9a"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.3.5/fremi-linux-x64"
+      sha256 "dba1419570284d8996a395425a2800cd7adb336cfcca88a44c3c662f9965f77b"
     end
   end
 
@@ -39,23 +39,18 @@ class Fremi < Formula
 
         fremi agent install        Once per machine. Materialises fremi as
                                    a Claude Code plugin under
-                                   ~/.claude/plugins/cache/fremi/, clones
-                                   the marketplace at
-                                   ~/.claude/plugins/marketplaces/fremi/,
-                                   and enables it in settings.json.
+                                   ~/.claude/plugins/cache/fremi/.
         fremi install <path>       Per project. Writes docs/works/, .fremi/
-                                   config.yaml (with `enabled: true`),
-                                   CLAUDE.md block.
+                                   config.yaml with `enabled: true`, plus
+                                   .fremi/settings/ with per-layer overrides.
+        fremi setting [path]       Interactive TUI to toggle `active`
+                                   per section under .fremi/settings/.
 
-      Fremi skills only auto-activate in a project when BOTH:
-        - .fremi/config.yaml exists at the project root
-        - the file contains `enabled: true` at the top level
-      Otherwise Claude Code will see the skills but not invoke them,
-      thanks to a SessionStart hook (`fremi verify`) that injects an
-      INACTIVE notice into the model's context.
+      Fremi skills only auto-activate when .fremi/config.yaml has
+      enabled: true. Otherwise the SessionStart hook injects an
+      INACTIVE notice.
 
-      Framework content is fetched automatically to ~/.fremi on first use.
-      Update later with: fremi update
+      Update the framework later with: fremi update
     EOS
   end
 
