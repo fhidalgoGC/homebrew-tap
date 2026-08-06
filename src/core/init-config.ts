@@ -33,9 +33,19 @@ export async function initFremiConfig(
 # Only put here what YOU want to override at the project level.
 
 schema: fremi-project-config
-schema_version: 1
+schema_version: 2
 generated_by: fremi-framework@${version}
 generated_at: ${today}
+
+# ------------------------------------------------------------------------
+# Master switch — fremi skills only run when BOTH:
+#   - this file exists at the project root, AND
+#   - enabled: true
+# Set enabled: false to keep the config but temporarily disable the
+# framework in this project (skills will be ignored by the SessionStart
+# hook and by Claude).
+# ------------------------------------------------------------------------
+enabled: true
 
 project:
   name: ${projectName}

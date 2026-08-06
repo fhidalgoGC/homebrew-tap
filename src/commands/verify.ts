@@ -3,23 +3,20 @@ import { join, resolve } from "node:path";
 import { readUserMarker } from "../core/user-marker";
 
 /**
- * `fremi verify` — health check invoked by the user-level SessionStart hook.
+ * `fremi verify` — health + status check invoked by the user-level
+ * SessionStart hook on every Claude Code session.
  *
- * Purpose: when Claude Code opens a workspace, this runs silently. It has
- * TWO checks:
- *   1. User-level install present (marker + framework content).
- *   2. THIS project has `.fremi/config.yaml` at its root.
+ * Rules:
+ *   1. If ~/.claude/.fremi-installed is missing → warn (user-level
+ *      install not run yet).
+ *   2. If the current project has .fremi/config.yaml AND `enabled: true`
+ *      inside → silent. Fremi is active here.
+ *   3. Otherwise → inject an INACTIVE notice so Claude does NOT
+ *      auto-invoke fremi-* skills in projects that never opted in.
  *
- * Anything missing gets printed to stdout. SessionStart hooks feed stdout
- * into the model's context, so Claude sees exactly what needs to happen
- * and can suggest `fremi install` (or `fremi agent install`) to the user.
- *
- * Silent when both levels are healthy — no context noise for well-set-up
- * projects. Never blocks: filesystem checks only, no network.
- *
- * The hook passes SessionStart JSON on stdin (session_id, cwd, ...). We
- * read cwd from there to know which project to inspect. If no stdin
- * (called from a plain terminal), we fall back to `process.cwd()`.
+ * The stdout of this command feeds Claude Code's SessionStart context.
+ * Silence on the happy path keeps the model's context clean; a short
+ * bulletized message otherwise steers Claude away from fremi tooling.
  */
 export async function runVerify(): Promise<void> {
   const projectCwd = await resolveProjectCwd();
@@ -34,17 +31,27 @@ export async function runVerify(): Promise<void> {
     );
   }
 
-  const projectMarker = join(projectCwd, ".fremi", "config.yaml");
-  if (!existsSync(projectMarker)) {
+  const configPath = join(projectCwd, ".fremi", "config.yaml");
+  const projectStatus = evaluateProjectStatus(configPath);
+
+  if (projectStatus === "inactive-no-config") {
     messages.push(
-      "[fremi] this project has no .fremi/config.yaml.\n" +
-        "        The fremi framework is available but not installed here.\n" +
-        "        Ask the user before running: fremi install",
+      "[fremi] fremi is INACTIVE in this project.\n" +
+        "        .fremi/config.yaml is missing at the project root.\n" +
+        "        Do NOT invoke fremi-* skills unless the user explicitly requests\n" +
+        "        them or asks to run `fremi install`.",
+    );
+  } else if (projectStatus === "inactive-disabled") {
+    messages.push(
+      "[fremi] fremi is INACTIVE in this project.\n" +
+        "        .fremi/config.yaml exists but `enabled: true` is not set.\n" +
+        "        Do NOT invoke fremi-* skills. Ask the user to flip `enabled` to\n" +
+        "        true (or remove the config) if they want fremi active here.",
     );
   }
+  // projectStatus === "active" → no message (fremi runs normally)
 
   if (messages.length === 0) {
-    // Silent success — nothing to inject.
     return;
   }
 
@@ -54,14 +61,37 @@ export async function runVerify(): Promise<void> {
   }
 }
 
-/**
- * Reads stdin best-effort for the SessionStart JSON payload
- * (`{ "session_id": "...", "cwd": "..." }`) and returns the cwd. Falls
- * back to `process.cwd()` if stdin is absent or malformed — so `fremi
- * verify` works as a standalone CLI command too.
- */
+type ProjectStatus = "active" | "inactive-no-config" | "inactive-disabled";
+
+function evaluateProjectStatus(configPath: string): ProjectStatus {
+  if (!existsSync(configPath)) return "inactive-no-config";
+
+  let content: string;
+  try {
+    content = readFileSync(configPath, "utf8");
+  } catch {
+    return "inactive-disabled";
+  }
+
+  // Look for `enabled: true` at the top level. Match any line that is
+  // effectively `enabled: true`, tolerant of surrounding whitespace and
+  // an optional trailing comment. Reject explicit `enabled: false`.
+  //
+  // Deliberate: parse with regex so we avoid pulling a full YAML lib
+  // for what is a very simple top-level scalar check. If the user
+  // nests `enabled: true` under a different key, that does NOT count.
+  const lines = content.split("\n");
+  for (const raw of lines) {
+    const line = raw.replace(/#.*$/, "").trimEnd();
+    // Must be a top-level key (no leading spaces).
+    if (/^enabled:\s*true\s*$/.test(line)) return "active";
+    if (/^enabled:\s*false\s*$/.test(line)) return "inactive-disabled";
+  }
+  // Key not present at top level.
+  return "inactive-disabled";
+}
+
 async function resolveProjectCwd(): Promise<string> {
-  // If stdin is not a piped input, don't block waiting for it.
   if (process.stdin.isTTY) {
     return process.cwd();
   }
