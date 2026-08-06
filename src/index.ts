@@ -2,13 +2,16 @@
 /**
  * fremi — CLI entry point
  *
- * Commands (v0.2):
- *   fremi version              → prints framework version
- *   fremi install [path]       → interactive install into a project
- *      --agent LIST            → comma-separated agents (e.g. claude,cursor)
+ * Commands (v0.3):
+ *   fremi agent install        → install fremi at USER level (~/.claude/)
+ *   fremi agent uninstall      → remove user-level install
+ *   fremi install [path]       → install PROJECT-level artifacts
+ *      --agent LIST            → comma-separated agents (default prompt)
  *      --non-interactive | -y  → skip prompts, use defaults
- *   fremi uninstall [path]     → removes framework enganches
- *   fremi update               → pulls the latest framework content
+ *   fremi uninstall [path]     → remove project-level artifacts
+ *   fremi update               → git pull inside ~/.fremi
+ *   fremi verify               → health check (used by SessionStart hook)
+ *   fremi version              → prints CLI + framework version
  */
 
 import { runVersion } from "./commands/version";
@@ -16,6 +19,9 @@ import { runInstall } from "./commands/install";
 import type { InstallFlags } from "./commands/install";
 import { runUninstall } from "./commands/uninstall";
 import { runUpdate } from "./commands/update";
+import { runVerify } from "./commands/verify";
+import { runAgentInstall } from "./commands/agent-install";
+import { runAgentUninstall } from "./commands/agent-uninstall";
 
 async function main(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -25,6 +31,10 @@ async function main(): Promise<void> {
     case "-v":
     case "--version":
       await runVersion();
+      break;
+
+    case "verify":
+      await runVerify();
       break;
 
     case "install": {
@@ -40,6 +50,23 @@ async function main(): Promise<void> {
     case "update":
       await runUpdate();
       break;
+
+    case "agent": {
+      const sub = rest[0];
+      const subArgs = rest.slice(1);
+      if (sub === "install") {
+        const { flags } = parseInstallArgs(subArgs);
+        await runAgentInstall(flags);
+      } else if (sub === "uninstall") {
+        const { flags } = parseInstallArgs(subArgs);
+        await runAgentUninstall(flags);
+      } else {
+        console.error(`Unknown 'agent' subcommand: ${sub ?? "(none)"}\n`);
+        printHelp();
+        process.exit(1);
+      }
+      break;
+    }
 
     case undefined:
     case "help":
@@ -94,25 +121,36 @@ Usage:
   fremi <command> [args]
 
 Commands:
-  version                Show installed framework version
-  install [path]         Install framework enganches into project
-                         (defaults to \$PWD if path is omitted)
-    --agent LIST           Comma-separated agents (claude,cursor,windsurf).
+  agent install          Install fremi at USER level (~/.claude/) — skills,
+                         rules, and one bootstrap hook. Run once per machine.
+    --agent LIST           Comma-separated agents (claude only for now).
                            If omitted and TTY is present, an interactive
                            multiselect prompt is shown.
-    --non-interactive, -y  Skip prompts. Uses --agent value if given,
-                           otherwise defaults to 'claude'.
-  uninstall [path]       Remove framework enganches from project
-                         (preserves docs/works/ and .fremi/config.yaml)
-  update                 Pull the latest framework content from GitHub
-  help                   Show this help
+    --non-interactive, -y  Skip prompts, default to 'claude'.
+
+  agent uninstall        Remove the user-level install.
+
+  install [path]         Install fremi at PROJECT level.
+                         Auto-runs 'agent install' first if not done yet.
+                         Writes: CLAUDE.md block, .fremi/config.yaml,
+                                 .fremi/settings/, docs/works/.
+    --agent LIST, -y       (Same flags as 'agent install'.)
+
+  uninstall [path]       Remove project-level artifacts (CLAUDE.md block,
+                         .fremi/config.yaml). Preserves docs/works/ and
+                         .fremi/settings/.
+
+  update                 Pull the latest framework content from GitHub.
+  verify                 Health check (silent when everything is OK).
+  version                Show installed framework version.
+  help                   Show this help.
 
 Examples:
-  fremi install                                → interactive, targets \$PWD
-  fremi install ~/code/my-project              → interactive, custom path
-  fremi install --agent claude -y              → non-interactive, claude only
-  fremi install --agent claude,cursor          → interactive for other opts
-  fremi uninstall
+  fremi agent install                          → interactive user-level setup
+  fremi install                                → project-level (auto-agent-install if needed)
+  fremi install ~/code/my-project --agent claude -y
+  fremi uninstall                              → project-level cleanup
+  fremi agent uninstall                        → full user-level cleanup
   fremi update
 `);
 }

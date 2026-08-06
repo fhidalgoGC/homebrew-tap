@@ -1,12 +1,18 @@
 import { resolve } from "node:path";
 import { existsSync, statSync } from "node:fs";
-import { getFrameworkContentRoot } from "../core/paths";
-import { uninstallSkills } from "../core/uninstall-skills";
-import { uninstallHooks } from "../core/uninstall-hooks";
-import { uninstallRules } from "../core/uninstall-rules";
 import { uninstallClaudeMd } from "../core/uninstall-claude-md";
 import { uninstallFremiConfig } from "../core/uninstall-fremi-config";
 
+/**
+ * `fremi uninstall [path]` — removes PROJECT-level enganches. Since v0.3.0
+ * skills / rules / hooks live at user level, so this command only reverses
+ * the project-scoped artifacts: the CLAUDE.md block and .fremi/config.yaml.
+ *
+ * Preserves docs/works/ (real user content — user stories, PRDs, features)
+ * and .fremi/settings/ (per-project overrides the user may have edited).
+ *
+ * To remove the user-level install too, use `fremi agent uninstall`.
+ */
 export async function runUninstall(rawPath?: string): Promise<void> {
   const targetPath = resolve(rawPath ?? process.cwd());
 
@@ -17,30 +23,25 @@ export async function runUninstall(rawPath?: string): Promise<void> {
     throw new Error(`Target path is not a directory: ${targetPath}`);
   }
 
-  const frameworkContent = getFrameworkContentRoot();
-
-  console.log(`==> Uninstalling fremi-framework enganches`);
+  console.log(`==> Uninstalling fremi from project`);
   console.log(`    target:    ${targetPath}`);
-  console.log(`    framework: ${frameworkContent}`);
   console.log("");
 
   const report = {
-    skills: await uninstallSkills(targetPath, frameworkContent),
-    hooks: await uninstallHooks(targetPath, frameworkContent),
-    rules: await uninstallRules(targetPath, frameworkContent),
     claudeMd: await uninstallClaudeMd(targetPath),
     fremiConfig: await uninstallFremiConfig(targetPath),
   };
 
   console.log("==> Uninstall summary:");
-  console.log(`    Skills:       ${report.skills.removed} removed, ${report.skills.kept} kept (non-fremi)`);
-  console.log(`    Hooks:        ${report.hooks.removed} removed from .claude/settings.json`);
-  console.log(`    Rules:        ${report.rules.removed} removed, ${report.rules.kept} kept (non-fremi)`);
   console.log(`    CLAUDE.md:    ${report.claudeMd.action}`);
   console.log(`    .fremi/:      ${report.fremiConfig.action}`);
   console.log("");
   console.log("Preserved (your content — remove manually if desired):");
   console.log(`    docs/works/`);
+  console.log(`    .fremi/settings/`);
   console.log("");
   console.log("✓ fremi uninstall complete.");
+  console.log("");
+  console.log("To also remove the user-level install (skills, rules, bootstrap hook):");
+  console.log("  fremi agent uninstall");
 }
