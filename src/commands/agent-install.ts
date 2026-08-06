@@ -1,19 +1,17 @@
 import { getFrameworkRoot, getFrameworkContentRoot } from "../core/paths";
 import { ensureFrameworkContent } from "../core/ensure-framework";
 import { gatherInstallAnswers, validateAgentsAreSupported } from "../prompts/install";
-import { installClaudeUserLevel } from "../agents/claude/user-install";
+import { installClaudePlugin } from "../agents/claude/plugin-install";
 import { writeUserMarker, readUserMarker } from "../core/user-marker";
 import type { InstallFlags } from "./install";
 
-/**
- * `fremi agent install` — installs fremi at USER level for the selected
- * agents. Skills, rules, and one bootstrap hook land in ~/.claude/ (for
- * Claude Code); other agents will get parallel install modules in future
- * releases.
- *
- * Idempotent: if the marker already reports the same agents, we skip.
- * Version comparison will land in v0.3.x.
- */
+const FREMI_VERSION = "0.3.2";
+
+// `fremi agent install` - materialises fremi as a plugin at USER level for
+// every selected agent. For Claude Code that means writing to
+// ~/.claude/plugins/cache/fremi/fremi/<version>/ and registering the plugin
+// so Claude picks it up on next session start.
+
 export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
   const answers = await gatherInstallAnswers(flags);
   validateAgentsAreSupported(answers.agents);
@@ -24,40 +22,42 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
 
   const home = process.env.HOME || process.env.USERPROFILE || "";
   if (!home) {
-    throw new Error("Cannot resolve HOME/USERPROFILE — user-level install requires a home directory.");
+    throw new Error("Cannot resolve HOME/USERPROFILE - user-level install requires a home directory.");
   }
 
-  console.log(`==> User-level install for agent(s): ${answers.agents.join(", ")}`);
+  console.log(`==> User-level plugin install for agent(s): ${answers.agents.join(", ")}`);
   console.log(`    home:      ${home}`);
   console.log(`    framework: ${frameworkContent}`);
   console.log("");
 
   for (const agent of answers.agents) {
-    if (agent !== "claude") continue; // gated by validateAgentsAreSupported
-    const report = await installClaudeUserLevel(home, frameworkContent);
-    console.log(`==> Claude Code user-level install`);
-    console.log(`    Skills:         ${report.skills.installed} installed, ${report.skills.skipped} unchanged, ${report.skills.recreated} recreated`);
-    console.log(`    Rules:          ${report.rules.installed} installed, ${report.rules.skipped} unchanged, ${report.rules.recreated} recreated`);
-    console.log(`    Bootstrap hook: ${report.bootstrapHook.action}`);
+    if (agent !== "claude") continue;
+    const report = await installClaudePlugin(home, frameworkContent, FREMI_VERSION);
+    console.log(`==> Claude Code plugin`);
+    console.log(`    plugin root:  ${report.pluginRoot}`);
+    console.log(`    skills:       ${report.skillsInstalled} installed, ${report.skillsSkipped} unchanged, ${report.skillsRecreated} recreated`);
+    console.log(`    plugin.json:  ${report.pluginJsonWritten ? "written" : "skipped"}`);
+    console.log(`    .mcp.json:    ${report.mcpJsonWritten ? "written" : "skipped"}`);
+    console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written (SessionStart -> fremi verify)" : "skipped"}`);
+    console.log(`    registry:     ${report.registeredInRegistry ? "added to installed_plugins.json" : "unchanged"}`);
+    console.log(`    settings:     ${report.enabledInSettings ? "enabledPlugins updated" : "unchanged"}`);
+    if (report.errors.length > 0) {
+      console.log(`    errors:`);
+      for (const e of report.errors) console.log(`      - ${e}`);
+    }
     console.log("");
   }
 
-  // Persist marker so `fremi install` knows this ran.
   const previous = readUserMarker();
   writeUserMarker({
-    fremi_version: readEmbeddedVersion(),
+    fremi_version: FREMI_VERSION,
     installed_at: new Date().toISOString(),
     agents: dedupe([...(previous?.agents ?? []), ...answers.agents]),
   });
 
-  console.log("✓ fremi installed at user level.");
+  console.log("✓ fremi installed as user-level plugin.");
   console.log("");
-  console.log("Next: `fremi install <path>` to enable fremi in a specific project.");
-}
-
-function readEmbeddedVersion(): string {
-  // Match the constant in src/commands/version.ts so both stay in lockstep.
-  return "0.3.1";
+  console.log("Restart Claude Code (or open a new session) to load the plugin.");
 }
 
 function dedupe<T>(arr: T[]): T[] {
