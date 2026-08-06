@@ -68,4 +68,4 @@ Puebla la **estructura inicial** del `FW-08_plan.md`: resumen, secciones (Backlo
 - Template: [`references/FW-08_plan-template.md`](references/FW-08_plan-template.md).
 - Skill `/fremi-story-task` — agrega entries.
 - `config.yaml → phase_rules.tasks`.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 7b (tareas con criterios verificables).
+- `~/.fremi/framework/rules/workflow.md` → Regla 7b (tareas con criterios verificables).

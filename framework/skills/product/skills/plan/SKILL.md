@@ -90,4 +90,4 @@ Doc **living**:
 ## Referencias
 - Template: [`references/plan-template.md`](references/plan-template.md).
 - Skill `/fremi-feature` — agrega feature al plan automáticamente.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 12 (sync-back).
+- `~/.fremi/framework/rules/workflow.md` → Regla 12 (sync-back).

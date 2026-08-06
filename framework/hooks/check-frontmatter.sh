@@ -63,7 +63,7 @@ done
 
 if [[ ${#missing[@]} -gt 0 ]]; then
   echo "⚠️  [check-frontmatter] $FILE_PATH — faltan campos en frontmatter: ${missing[*]}"
-  echo "   Ver Regla 17 en ~/.fremi/framework/framework/rules/workflow.md."
+  echo "   Ver Regla 17 en ~/.fremi/framework/rules/workflow.md."
 fi
 
 # --- Verificar ancestor.* si el doc no es raíz de producto ------------------

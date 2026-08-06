@@ -39,7 +39,7 @@ FILE_PATH=$(echo "$PAYLOAD" | jq -r '.tool_input.file_path // empty' 2>/dev/null
 [[ "$(basename "$FILE_PATH")" == "index.ts" ]] && exit 0
 
 # --- Verificar strict_tdd está activo ----------------------------------------
-CONFIG_FILE="~/.fremi/framework/framework/settings/config.yaml"
+CONFIG_FILE="~/.fremi/framework/settings/config.yaml"
 [[ ! -f "$CONFIG_FILE" ]] && exit 0
 
 STRICT_TDD=$(grep -E "^[[:space:]]+strict_tdd:" "$CONFIG_FILE" | head -1 | awk '{print $2}' || true)

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://makingfilereport/~/.fremi/framework/framework/settings/methodology.schema.json",
+  "$id": "https://makingfilereport/~/.fremi/framework/settings/methodology.schema.json",
   "title": "Methodology config",
-  "description": "Schema de validación de ~/.fremi/framework/framework/settings/methodology.json. Define la estructura esperada de la configuración de nomenclatura del proyecto.",
+  "description": "Schema de validación de ~/.fremi/framework/settings/methodology.json. Define la estructura esperada de la configuración de nomenclatura del proyecto.",
   "type": "object",
   "required": ["version", "identifiers", "paths", "slug", "layers"],
   "properties": {

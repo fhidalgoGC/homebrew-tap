@@ -1,6 +1,6 @@
 # Flujo — Capa EXTRA
 
-> **Config operativa:** [`~/.fremi/framework/framework/settings/config.extra.yaml`](../settings/config.extra.yaml)
+> **Config operativa:** [`~/.fremi/framework/settings/config.extra.yaml`](../settings/config.extra.yaml)
 > **Skill:** ninguno — edición manual del archivo.
 > **Rol:** trabajo fuera del flujo lineal (tooling, scripts, IaC, refactor de utilidades, mejoras a la metodología). NO usar como excusa para saltar el flujo cuando el trabajo SÍ es spec-driven (Regla 14).
 
@@ -111,7 +111,7 @@ Si un trabajo que arrancó como `extra/` resulta tener **comportamiento user-fac
 | Endpoint nuevo / capacidad user-facing | `/fremi-feature` o `/fremi-story` |
 | Trabajo técnico habilitador (fundación, plataforma) | `/fremi-enabler` |
 | Defecto en código de producción | `/fremi-story-bug` o `/fremi-feature-bug` |
-| Documentación general del framework | Editar `~/.fremi/framework/framework/` directo |
+| Documentación general del framework | Editar `~/.fremi/framework/` directo |
 | Notas personales / scratch pad | Fuera del proyecto (repo personal) — `EX-NN` es para docs comprensibles por otros |
 
 ---

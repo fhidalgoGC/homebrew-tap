@@ -1,6 +1,6 @@
 ---
 name: fremi-add-skill
-description: Crea un skill ESPECÍFICO del proyecto bajo `docs/project/skills/<name>/` y lo expone al agente via symlink en `.claude/skills/<name>`. No toca `~/.fremi/framework/framework/` (metodología). Reemplaza al viejo `/fremi-tools skill`.
+description: Crea un skill ESPECÍFICO del proyecto bajo `docs/project/skills/<name>/` y lo expone al agente via symlink en `.claude/skills/<name>`. No toca `~/.fremi/framework/` (metodología). Reemplaza al viejo `/fremi-tools skill`.
 ---
 
 # /fremi-add-skill — Crear skill de proyecto
@@ -21,7 +21,7 @@ Crea un skill nuevo específico del proyecto (`docs/project/skills/<name>/SKILL.
 - Aparece una automatización/convención específica del stack del proyecto (no del framework general).
 
 **No invocarlo si**:
-- El skill sería reusable en cualquier proyecto → editar `~/.fremi/framework/framework/skills/` a mano.
+- El skill sería reusable en cualquier proyecto → editar `~/.fremi/framework/skills/` a mano.
 - Es una decisión técnica → usar `/fremi-product-adr`/`/fremi-feature-adr`/`/fremi-story-adr`.
 
 ## Procedimiento
@@ -29,7 +29,7 @@ Crea un skill nuevo específico del proyecto (`docs/project/skills/<name>/SKILL.
 ### Paso 0 — Validar entrada
 1. Normalizar `<name>` a kebab-case.
 2. Validar regex `^[a-z][a-z0-9-]*$` y largo ≤ 60.
-3. Verificar que NO existen: `docs/project/skills/<name>/`, `.claude/skills/<name>`, ni `~/.fremi/framework/framework/skills/<name>/` (colisión con framework).
+3. Verificar que NO existen: `docs/project/skills/<name>/`, `.claude/skills/<name>`, ni `~/.fremi/framework/skills/<name>/` (colisión con framework).
 4. Si colisiona → abortar y sugerir nombre alternativo.
 
 ### Paso 1 — Crear el asset
@@ -57,7 +57,7 @@ Próximo paso: editá docs/project/skills/<name>/SKILL.md y completá los placeh
 
 - `<name>` inválido → abortar mostrando la regla.
 - Colisión con skill de proyecto o de framework → abortar con sugerencia (`-v2`, `-extra`).
-- NO tocar `~/.fremi/framework/framework/` ni `docs/works/`.
+- NO tocar `~/.fremi/framework/` ni `docs/works/`.
 
 ## Referencias
 

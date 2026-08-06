@@ -1,6 +1,6 @@
 ---
 name: fremi-story-verify
-description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/framework/settings/config.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); esta skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
+description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/settings/config.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); esta skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
 ---
 
 # /fremi-story-verify — Corrida final de verificación (fase verify)
@@ -38,7 +38,7 @@ Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (co
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/framework/settings/config.yaml`.
+1. Leer `~/.fremi/framework/settings/config.yaml`.
 2. Extraer:
    - `testing.strict_tdd`, `testing.test_runner`, `testing.type_checker`.
    - `testing.unit.enabled + command + framework`.
@@ -46,7 +46,7 @@ Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (co
    - `testing.e2e.enabled + command`.
    - `testing.coverage.enabled + command + threshold`.
    - `phase_rules.verify` — reglas obligatorias de la fase.
-3. Leer `~/.fremi/framework/framework/settings/methodology.json`:
+3. Leer `~/.fremi/framework/settings/methodology.json`:
    - `identifiers.workflow_doc.items[name=checkwork]` — filename del checkwork.
    - `identifiers.workflow_doc.items[name=closure]` — filename del closure.
 
@@ -133,7 +133,7 @@ El reporte va a la sección **"Última corrida de `verify`"** dentro de `FW-09_c
 - **v<nueva>** — YYYY-MM-DD — Reporte de verify: <VERDICT>. [origen: /fremi-story-verify]
 ```
 
-**Cargar el template canónico** de `~/.fremi/framework/framework/skills/verify/references/verify-report-block-template.md` y rellenarlo con:
+**Cargar el template canónico** de `~/.fremi/framework/skills/verify/references/verify-report-block-template.md` y rellenarlo con:
 - Timestamp real de la corrida.
 - Comandos ejecutados y resultados (exit codes reales, no adornados).
 - Verdict calculado (PASS / PASS WITH WARNINGS / FAIL).
@@ -175,6 +175,6 @@ Si `FW-09_checkwork.md` no existe (caso raro) → crearlo con el bloque como sec
 ## Referencias
 
 - Template local del bloque de reporte: [`references/verify-report-block-template.md`](references/verify-report-block-template.md)
-- `~/.fremi/framework/framework/settings/config.yaml` → `testing.*`, `phase_rules.verify`, `phase_rules.closure` (precondición).
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 7 (TDD durante desarrollo), Regla 11 (closure precondiciona verify).
+- `~/.fremi/framework/settings/config.yaml` → `testing.*`, `phase_rules.verify`, `phase_rules.closure` (precondición).
+- `~/.fremi/framework/rules/workflow.md` → Regla 7 (TDD durante desarrollo), Regla 11 (closure precondiciona verify).
 - Skill `/fremi-story-closure-check` — corre después de `/fremi-story-verify` PASS.

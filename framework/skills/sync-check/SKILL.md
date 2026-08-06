@@ -25,18 +25,18 @@ Audita **dos dimensiones** de consistencia del framework:
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/framework/settings/methodology.json`:
+1. Leer `~/.fremi/framework/settings/methodology.json`:
    - `paths.*` (product_dir, features_dir, user_stories_subdir).
    - `identifiers.workflow_doc.items[]` — los **11 docs de story** (FW-00..FW-10) con sus `filename` (no hardcodear).
    - `identifiers.feature.folder_regex`, `identifiers.story.folder_regex`, `identifiers.enabler.folder_regex`, `identifiers.bug.filename_regex`, `identifiers.extra.filename_regex`.
    - `identifiers.adr` (con `locations.{product, feature, story}` — 3 scopes de ADR).
    - `principles.sync_back.rule_ref` (Regla 12), `principles.checkwork_live_status.rule_ref` (Regla 13).
 
-2. Leer `~/.fremi/framework/framework/settings/config.yaml` (master):
+2. Leer `~/.fremi/framework/settings/config.yaml` (master):
    - `layers.*` — descubrir qué capas están `active`.
    - `versioning.*` — reglas de bump, frontmatter obligatorio, parent_bump_triggers.
 
-3. Leer cada `~/.fremi/framework/framework/settings/config.<capa>.yaml` referenciado:
+3. Leer cada `~/.fremi/framework/settings/config.<capa>.yaml` referenciado:
    - `config.product.yaml`, `config.feature.yaml`, `config.story.yaml`, `config.enabler.yaml`, `config.bug.story.yaml`, `config.bug.feature.yaml`, `config.extra.yaml`.
    - Extraer `docs[]` / `sections[]`, `conditional_rules`, `flow` — para saber qué se espera en cada capa.
 
@@ -242,8 +242,8 @@ Para uso de mayor profundidad: complementar con revisión humana periódica.
 
 ## Referencias
 
-- Regla 12 (sync-back) en `~/.fremi/framework/framework/rules/workflow.md`.
-- Regla 17 (versionado + linaje) en `~/.fremi/framework/framework/rules/workflow.md`.
-- `~/.fremi/framework/framework/settings/config.yaml` — master (versioning + phase_rules).
-- `~/.fremi/framework/framework/settings/config.<capa>.yaml` — 7 archivos per-capa.
-- `~/.fremi/framework/framework/settings/methodology.json` — nomenclatura y ubicaciones.
+- Regla 12 (sync-back) en `~/.fremi/framework/rules/workflow.md`.
+- Regla 17 (versionado + linaje) en `~/.fremi/framework/rules/workflow.md`.
+- `~/.fremi/framework/settings/config.yaml` — master (versioning + phase_rules).
+- `~/.fremi/framework/settings/config.<capa>.yaml` — 7 archivos per-capa.
+- `~/.fremi/framework/settings/methodology.json` — nomenclatura y ubicaciones.

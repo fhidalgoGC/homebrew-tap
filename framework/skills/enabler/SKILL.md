@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler
-description: Crea un nuevo enabler (trabajo técnico habilitador, sin comportamiento user-facing) con sus 4 docs en cadena liviana (definition → design → plan → closure). Soporta 3 ubicaciones — global, dentro de feature o dentro de story — según el alcance declarado al crearlo. Lee la nomenclatura desde ~/.fremi/framework/framework/settings/methodology.json. Usar cuando el usuario identifica un trabajo de plataforma/infra/fundación que habilita capacidad futura.
+description: Crea un nuevo enabler (trabajo técnico habilitador, sin comportamiento user-facing) con sus 4 docs en cadena liviana (definition → design → plan → closure). Soporta 3 ubicaciones — global, dentro de feature o dentro de story — según el alcance declarado al crearlo. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json. Usar cuando el usuario identifica un trabajo de plataforma/infra/fundación que habilita capacidad futura.
 ---
 
 # /fremi-enabler — Crear un nuevo enabler
 
-Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: definition → design → plan → closure), todos prefijados según `~/.fremi/framework/framework/settings/methodology.json`.
+Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: definition → design → plan → closure), todos prefijados según `~/.fremi/framework/settings/methodology.json`.
 
 > **Importante:** este skill NO tiene prefijos hardcoded. Lee `identifiers.enabler`, `identifiers.enabler_doc` y `identifiers.enabler_doc.items[]` del JSON.
 >
@@ -43,7 +43,7 @@ Si falta el nombre descriptivo → preguntárselo al usuario.
 | Endpoint nuevo / capacidad user-facing | `/fremi-feature` o `/fremi-story` |
 | Tooling / scripts / refactor sin habilitar nada nuevo | `EX-NN_<slug>.md` en `docs/works/extra/` |
 | Defecto en código de producción | `/fremi-story-bug` o `/fremi-feature-bug` dentro de la story afectada |
-| Cambio en docs / metodología | `~/.fremi/framework/framework/` directo (o `EX-NN` si se documenta como work item) |
+| Cambio en docs / metodología | `~/.fremi/framework/` directo (o `EX-NN` si se documenta como work item) |
 
 Si el "enabler" propuesto entrega valor user-facing → en realidad es feature/story. Si no habilita ninguna capacidad futura → en realidad es `extra/`.
 
@@ -51,7 +51,7 @@ Si el "enabler" propuesto entrega valor user-facing → en realidad es feature/s
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.json`.
 2. Extraer:
    - `en_cfg = identifiers.enabler` → `prefix`, `id_format`, `folder_format`, `placements`.
    - `en_doc_cfg = identifiers.enabler_doc` → `prefix`, `id_format`, `filename_format`, `items[]`.

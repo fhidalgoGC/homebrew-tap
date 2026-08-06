@@ -1,6 +1,6 @@
 # Flujo — Capa ENABLER
 
-> **Config operativa:** [`~/.fremi/framework/framework/skills/enabler/config.user.yaml`](../settings/config.enabler.yaml)
+> **Config operativa:** [`~/.fremi/framework/skills/enabler/config.user.yaml`](../settings/config.enabler.yaml)
 > **Orquestador:** [`/fremi-enabler`](../skills/enabler/SKILL.md)
 > **Rol:** trabajo técnico habilitador. NO tiene comportamiento user-facing por sí solo — habilita que features/stories puedan existir o cumplir sus contratos.
 
@@ -129,7 +129,7 @@
 | Endpoint nuevo / capacidad user-facing | `/fremi-feature` o `/fremi-story` |
 | Tooling / scripts / refactor sin habilitar nada nuevo | `EX-NN` en `docs/works/extra/` |
 | Defecto en código de producción | `/fremi-story-bug` o `/fremi-feature-bug` |
-| Cambio en docs / metodología | `~/.fremi/framework/framework/` directo (o `EX-NN` si se registra como work item) |
+| Cambio en docs / metodología | `~/.fremi/framework/` directo (o `EX-NN` si se registra como work item) |
 
 ---
 
@@ -174,4 +174,4 @@ Padre (nueva versión)
 
 - Config operativa: [`config.enabler.yaml`](../settings/config.enabler.yaml)
 - Reglas duras: [`workflow.md`](../rules/workflow.md)
-- Templates canónicos: `~/.fremi/framework/framework/skills/enabler/skills/<sub>/references/`
+- Templates canónicos: `~/.fremi/framework/skills/enabler/skills/<sub>/references/`

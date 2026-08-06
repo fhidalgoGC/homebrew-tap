@@ -81,4 +81,4 @@ Doc **living**:
 
 ## Referencias
 - Template: [`references/definition-template.md`](references/definition-template.md).
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 4, Regla 12 (sync-back).
+- `~/.fremi/framework/rules/workflow.md` → Regla 4, Regla 12 (sync-back).

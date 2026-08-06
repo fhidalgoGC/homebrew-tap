@@ -60,10 +60,10 @@ Próximo paso: editá docs/project/rules/<name>.md y completá los placeholders.
 
 - Colisión de nombre → abortar.
 - `CLAUDE.md` no legible → abortar con error claro.
-- NO tocar `~/.fremi/framework/framework/rules/`.
+- NO tocar `~/.fremi/framework/rules/`.
 
 ## Referencias
 
 - Template: [`references/rule-template.md`](references/rule-template.md).
-- Rules del framework para inspiración: [`~/.fremi/framework/framework/rules/workflow.md`](../../../../rules/workflow.md).
+- Rules del framework para inspiración: [`~/.fremi/framework/rules/workflow.md`](../../../../rules/workflow.md).
 - Ver también: [`/fremi-delete-rule`](../delete-rule/SKILL.md).

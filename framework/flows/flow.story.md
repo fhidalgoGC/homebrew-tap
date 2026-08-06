@@ -1,6 +1,6 @@
 # Flujo — Capa STORY
 
-> **Config operativa:** [`~/.fremi/framework/framework/skills/story/config.user.yaml`](../settings/config.story.yaml)
+> **Config operativa:** [`~/.fremi/framework/skills/story/config.user.yaml`](../settings/config.story.yaml)
 > **Orquestador:** [`/fremi-story`](../skills/story/SKILL.md)
 > **Rol:** unidad mínima de valor. Cada story pertenece a una feature. Cadena de 11 docs FW-00..FW-10.
 
@@ -218,7 +218,7 @@ Cada artefacto sólo consume decisiones de los anteriores. Nunca depende de uno 
 
 - Config operativa: [`config.story.yaml`](../settings/config.story.yaml)
 - Reglas duras: [`workflow.md`](../rules/workflow.md)
-- Templates canónicos: `~/.fremi/framework/framework/skills/story/skills/<sub>/references/`
+- Templates canónicos: `~/.fremi/framework/skills/story/skills/<sub>/references/`
 - Flow feature (padre): [`flow.feature.md`](./flow.feature.md)
 - Flow bug de story: [`flow.bug.story.md`](./flow.bug.story.md)
 - Flow enabler: [`flow.enabler.md`](./flow.enabler.md)

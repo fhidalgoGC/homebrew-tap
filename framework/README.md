@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/` — Configuración multi-agente del proyecto
+# `~/.fremi/framework/` — Configuración multi-agente del proyecto
 
 > **Esta carpeta es la fuente de verdad de la configuración de los agentes (IA) que trabajan en el proyecto.** Las carpetas específicas de cada agente (`.claude/`, `.cursor/`, etc.) NO contienen archivos reales sino **symlinks** apuntando acá. Eso garantiza que todos los agentes vean la misma fuente.
 >
@@ -39,11 +39,11 @@ Si dudás, leé el README específico de cada subcarpeta — cada uno tiene una 
 Cada agente (Claude Code, Cursor, etc.) tiene su propia carpeta de configuración en la raíz del proyecto:
 
 ```
-.claude/rules    → ~/.fremi/framework/framework/rules         (symlink)
-.claude/skills   → ~/.fremi/framework/framework/skills        (symlink)
-.claude/hooks    → ~/.fremi/framework/framework/hooks         (symlink)
-.claude/settings → ~/.fremi/framework/framework/settings      (symlink)
-.cursor/...      → ~/.fremi/framework/framework/...           (symlink)
+.claude/rules    → ~/.fremi/framework/rules         (symlink)
+.claude/skills   → ~/.fremi/framework/skills        (symlink)
+.claude/hooks    → ~/.fremi/framework/hooks         (symlink)
+.claude/settings → ~/.fremi/framework/settings      (symlink)
+.cursor/...      → ~/.fremi/framework/...           (symlink)
 ```
 
 **Regla:** nunca editar archivos a través de los symlinks pensando que son específicos del agente. Son compartidos por todos. Si una configuración es específica del agente (ej: settings de UI), va dentro de `.claude/settings.local.json` (no versionado), no acá.
@@ -78,9 +78,9 @@ Si agregás archivos a una subcarpeta, sumarlos en la tabla de Contenido del REA
 
 ---
 
-## Anti-patrones de `~/.fremi/framework/framework/`
+## Anti-patrones de `~/.fremi/framework/`
 
 - ❌ Mezclar config con documentación humana sin separarlas (la docs humana va en `README.md`, la config en archivos estructurados).
 - ❌ Crear subcarpetas nuevas sin documentar acá ni en CLAUDE.md.
-- ❌ Editar archivos a través de symlinks (`.claude/rules/...`) — siempre editar la fuente en `~/.fremi/framework/framework/`.
-- ❌ Duplicar configuración entre `.claude/` y `~/.fremi/framework/framework/` (uno debe ser symlink del otro, nunca copia).
+- ❌ Editar archivos a través de symlinks (`.claude/rules/...`) — siempre editar la fuente en `~/.fremi/framework/`.
+- ❌ Duplicar configuración entre `.claude/` y `~/.fremi/framework/` (uno debe ser symlink del otro, nunca copia).

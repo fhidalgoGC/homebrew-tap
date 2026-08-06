@@ -1,11 +1,11 @@
 ---
 name: fremi-story
-description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/framework/settings/methodology.json y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/framework/settings/config.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
+description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
 ---
 
 # /fremi-story — Crear nueva user story
 
-Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/framework/settings/methodology.json`** (nomenclatura) y **`~/.fremi/framework/framework/settings/config.yaml`** (obligatoriedad operativa).
+Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.json`** (nomenclatura) y **`~/.fremi/framework/settings/config.yaml`** (obligatoriedad operativa).
 
 La cadena canónica tiene **11 docs** (`FW-00..FW-10`), pero dos son de **obligatoriedad condicional** — `FW-00_explore` y `FW-02_proposal` sólo se crean cuando aplican los criterios declarados en `config.story.yaml → conditional_rules` (ver Regla 16).
 
@@ -31,8 +31,8 @@ Si falta alguno → preguntárselo al usuario.
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
-2. Leer `~/.fremi/framework/framework/settings/config.yaml`.
+1. Leer `~/.fremi/framework/settings/methodology.json`.
+2. Leer `~/.fremi/framework/settings/config.yaml`.
 3. Extraer de `methodology.json`:
    - `feat_cfg = identifiers.feature` (para resolver la feature padre).
    - `story_cfg = identifiers.story` → `prefix`, `id_format`, `folder_format`, `folder_regex`.
@@ -113,7 +113,7 @@ Si el usuario decidió omitir `FW-00_explore` y/o `FW-02_proposal`, esas líneas
 
 > **Convención FW-XX_:** el prefijo refleja el orden de ejecución del workflow. La cadena es una progresión de abstracción que siempre baja (abstracto → concreto). **La spec dirige el diseño** (SDD antes que Design). Cada item del JSON trae su `role` y `principio` que se respetan al armar el template.
 
-Cada doc se crea con el template canónico correspondiente de `references/` (relativo a la carpeta del skill: `~/.fremi/framework/framework/skills/story/references/`). Para cada item de `wf_cfg.items[]`, el skill:
+Cada doc se crea con el template canónico correspondiente de `references/` (relativo a la carpeta del skill: `~/.fremi/framework/skills/story/references/`). Para cada item de `wf_cfg.items[]`, el skill:
 
 1. Carga `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/FW-01_definition-template.md`).
 2. Reemplaza los placeholders del template:
@@ -136,7 +136,7 @@ Durante la redacción de cualquier artefacto de la story (especialmente `FW-05_s
 4. Invocar `/fremi-story-adr` para registrar la decisión.
 5. Continuar la redacción referenciando el `adr-XXX` desde el artefacto donde nació.
 
-Esto es **obligatorio** — ver Regla 3b en `~/.fremi/framework/framework/rules/workflow.md`.
+Esto es **obligatorio** — ver Regla 3b en `~/.fremi/framework/rules/workflow.md`.
 
 ### Principio rector y reglas de frontera (críticas)
 

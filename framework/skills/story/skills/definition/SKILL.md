@@ -27,8 +27,8 @@ Puebla el `FW-01_definition.md` de una story con el formato canónico:
 
 ### Paso 0 — Cargar configuración
 
-1. Leer `~/.fremi/framework/framework/settings/methodology.json` (extraer `identifiers.criterion`, `identifiers.workflow_doc.items[name=definition]`).
-2. Leer `~/.fremi/framework/framework/settings/config.yaml` (`phase_rules.definition`).
+1. Leer `~/.fremi/framework/settings/methodology.json` (extraer `identifiers.criterion`, `identifiers.workflow_doc.items[name=definition]`).
+2. Leer `~/.fremi/framework/settings/config.yaml` (`phase_rules.definition`).
 
 ### Paso 1 — Validar padre y precondiciones
 
@@ -75,5 +75,5 @@ Reglas duras:
 ## Referencias
 
 - Template canónico: [`references/FW-01_definition-template.md`](references/FW-01_definition-template.md).
-- `~/.fremi/framework/framework/settings/config.yaml → phase_rules.definition`.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 5 (formato definition), Regla 6 (frontera BDD/SDD/Design).
+- `~/.fremi/framework/settings/config.yaml → phase_rules.definition`.
+- `~/.fremi/framework/rules/workflow.md` → Regla 5 (formato definition), Regla 6 (frontera BDD/SDD/Design).

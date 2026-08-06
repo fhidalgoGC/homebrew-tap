@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/hooks/` — Hooks del framework
+# `~/.fremi/framework/hooks/` — Hooks del framework
 
 > **Esta carpeta es configuración del entorno del agente.** Los hooks son scripts bash que el harness del agente ejecuta **automáticamente** en respuesta a eventos.
 >
@@ -57,13 +57,13 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-frontmatter.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-version-bump.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-changelog-entry.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-parent-bump-on-closure.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-ancestor-coherence.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-strict-tdd.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/sync-checkwork.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-frontmatter.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-version-bump.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-changelog-entry.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-parent-bump-on-closure.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-ancestor-coherence.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-strict-tdd.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/sync-checkwork.sh" }
         ]
       }
     ],
@@ -71,15 +71,15 @@
       {
         "matcher": "Write",
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-flow-preconditions.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-flow-preconditions.sh" }
         ]
       }
     ],
     "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-workflow-stage.sh" } ] }
+      { "hooks": [ { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/check-workflow-stage.sh" } ] }
     ],
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/audit-on-stop.sh" } ] }
+      { "hooks": [ { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/hooks/audit-on-stop.sh" } ] }
     ]
   }
 }

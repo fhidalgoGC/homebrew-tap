@@ -65,7 +65,7 @@ else
 ⚠️ Esta story NO tiene FW-09_checkwork.md. Según Regla 13 debería existir.
 Crear:
   $CHECKWORK
-con el template de ~/.fremi/framework/framework/flows/workflow.md § "Estado en vivo — FW-09_checkwork.md".
+con el template de ~/.fremi/framework/flows/workflow.md § "Estado en vivo — FW-09_checkwork.md".
 
 EOF
 fi

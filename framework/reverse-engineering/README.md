@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/reverse-engineering/` — Vía formal de alineación de código pre-existente
+# `~/.fremi/framework/reverse-engineering/` — Vía formal de alineación de código pre-existente
 
 > **Actualizado 2026-08-05:** reverse-engineering es una **vía de primera clase** del framework (Regla 25), no procedimiento excepcional. Se ejerce cuando existe código en producción sin sus docs del flow. Tiene reglas propias (`rules/reverse.md`, Reglas 25-32), su flow (`flows/flow.reverse.md`), config (`settings/config.reverse.yaml`), 6 skills y 4 pipelines.
 >

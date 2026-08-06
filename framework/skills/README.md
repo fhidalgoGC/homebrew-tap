@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/skills/` — Skills invocables del proyecto
+# `~/.fremi/framework/skills/` — Skills invocables del proyecto
 
 > **Esta carpeta es configuración para los agentes (IA).** Cada subcarpeta contiene un skill ejecutable que el usuario invoca con `/fremi-<nombre>`. La IA carga el `SKILL.md` correspondiente y sigue su procedimiento.
 >
@@ -48,11 +48,11 @@ El skill `/fremi-install-framework` es el responsable de asegurar que todo lo qu
 
 ### Reverse-engineering
 
-Ubicados en `~/.fremi/framework/framework/reverse-engineering/`: `fremi-reverse-story`, `fremi-reverse-feature`, `fremi-reverse-bug`, `fremi-reverse-enabler`, `fremi-reverse-product`, `fremi-reverse-extra`. Reconstruyen documentación a partir de código existente sin usar el flow lineal.
+Ubicados en `~/.fremi/framework/reverse-engineering/`: `fremi-reverse-story`, `fremi-reverse-feature`, `fremi-reverse-bug`, `fremi-reverse-enabler`, `fremi-reverse-product`, `fremi-reverse-extra`. Reconstruyen documentación a partir de código existente sin usar el flow lineal.
 
 ### Instalación
 
-Ubicado en `~/.fremi/framework/framework/installs/`: `fremi-install-framework` — instalador idempotente que asegura la convención `fremi-` al montar los symlinks en `.claude/skills/`.
+Ubicado en `~/.fremi/framework/installs/`: `fremi-install-framework` — instalador idempotente que asegura la convención `fremi-` al montar los symlinks en `.claude/skills/`.
 
 ---
 
@@ -61,7 +61,7 @@ Ubicado en `~/.fremi/framework/framework/installs/`: `fremi-install-framework` �
 Cada subcarpeta tiene **un único archivo `SKILL.md`** con frontmatter YAML:
 
 ```
-~/.fremi/framework/framework/skills/<nombre>/
+~/.fremi/framework/skills/<nombre>/
 └── SKILL.md
 ```
 
@@ -82,20 +82,20 @@ Después del frontmatter va el procedimiento del skill (Markdown).
 
 ## Convención: Paso 0 — Cargar configuración
 
-**Todos los skills que tocan nomenclatura** deben empezar con un `Paso 0 — Cargar configuración (OBLIGATORIO)` que lee `~/.fremi/framework/framework/settings/methodology.json` y deriva prefijos/formatos de ahí.
+**Todos los skills que tocan nomenclatura** deben empezar con un `Paso 0 — Cargar configuración (OBLIGATORIO)` que lee `~/.fremi/framework/settings/methodology.json` y deriva prefijos/formatos de ahí.
 
 Esto evita que los skills tengan hardcoded `FT-01` o `HU-01` — si el usuario cambia la convención en el JSON, los skills se adaptan.
 
 Si el JSON no parsea → **abortar y avisar**. No usar fallbacks hardcoded.
 
-Ver `~/.fremi/framework/framework/settings/README.md` para la configuración.
+Ver `~/.fremi/framework/settings/README.md` para la configuración.
 
 ---
 
 ## Cómo agregar un skill nuevo
 
 1. Elegir un nombre corto en kebab-case (ej: `bug-triage`). El `name:` del frontmatter será `fremi-bug-triage`.
-2. Crear la carpeta `~/.fremi/framework/framework/skills/<nombre>/`.
+2. Crear la carpeta `~/.fremi/framework/skills/<nombre>/`.
 3. Crear `SKILL.md` con:
    - Frontmatter con `name: fremi-<nombre>` y `description` clara (la IA usa la `description` para decidir cuándo invocarlo).
    - Sección **Sintaxis** con la forma de uso (`/fremi-<nombre> ...`).
@@ -103,14 +103,14 @@ Ver `~/.fremi/framework/framework/settings/README.md` para la configuración.
    - Sección **Procedimiento** paso a paso. Si toca nomenclatura, incluir el **Paso 0 — Cargar configuración**.
    - Sección **Validaciones** con casos de error.
 4. Listar el skill en este README (tabla de Contenido).
-5. Si el skill respeta o introduce alguna regla, referenciar la regla aplicable en `~/.fremi/framework/framework/rules/workflow.md`.
+5. Si el skill respeta o introduce alguna regla, referenciar la regla aplicable en `~/.fremi/framework/rules/workflow.md`.
 6. El symlink en `.claude/skills/` se llama `fremi-<nombre>` (lo maneja `/fremi-install-framework`).
 
 ### Cuándo NO crear un skill
 
 - La tarea se hace bien con un prompt manual breve — no amerita formalizar.
-- El comportamiento debería ser **automático** (no invocable por usuario) — eso es un hook (ver `~/.fremi/framework/framework/hooks/`).
-- Es configuración estática — eso va a `~/.fremi/framework/framework/settings/`.
+- El comportamiento debería ser **automático** (no invocable por usuario) — eso es un hook (ver `~/.fremi/framework/hooks/`).
+- Es configuración estática — eso va a `~/.fremi/framework/settings/`.
 
 ---
 
@@ -118,7 +118,7 @@ Ver `~/.fremi/framework/framework/settings/README.md` para la configuración.
 
 - **Cambio de procedimiento** → editar el `SKILL.md`. Si el cambio afecta IDs o nomenclatura, asegurarse de que sigue leyendo `methodology.json` y no hardcodea.
 - **Cambio de comando o sintaxis** → coordinar con el usuario (ya tiene memoria del comando viejo). Idealmente mantener compatibilidad o avisar del cambio.
-- **Cambio de behavior crítico** (ej: pasa de avisar a bloquear) → mencionar en commit y, si toca, actualizar `~/.fremi/framework/framework/flows/workflow.md`.
+- **Cambio de behavior crítico** (ej: pasa de avisar a bloquear) → mencionar en commit y, si toca, actualizar `~/.fremi/framework/flows/workflow.md`.
 
 ---
 

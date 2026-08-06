@@ -66,4 +66,4 @@ Puebla el `FW-04_bdd-userstories.md` con escenarios Gherkin (`Scenario:`) numera
 
 - Template: [`references/FW-04_bdd-userstories-template.md`](references/FW-04_bdd-userstories-template.md).
 - `config.yaml → phase_rules.bdd`.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 6.2 (BDD antes que SDD).
+- `~/.fremi/framework/rules/workflow.md` → Regla 6.2 (BDD antes que SDD).

@@ -2,38 +2,43 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Resolves the framework root — the directory containing the CLI + framework/.
+ * The FREMI HOME — the directory where the framework repo is cloned.
+ * On disk this is `~/.fremi/` by default. Inside it sits the sparse clone
+ * of homebrew-tap, containing the top-level `framework/` subdirectory
+ * (plus VERSION, LICENSE, README.md, .git/).
  *
- * When compiled with `bun --compile`, `import.meta.url` points at the binary
- * embedded location. We walk up until we find the marker file (VERSION or
- * package.json). Falls back to `~/.fremi/framework` if walking fails.
+ *   ~/.fremi/                       ← this dir (clone target, "framework root")
+ *   ├── .git/
+ *   ├── framework/                  ← the actual content root
+ *   │   ├── skills/
+ *   │   ├── rules/
+ *   │   ├── hooks/
+ *   │   └── ...
+ *   ├── VERSION
+ *   ├── LICENSE
+ *   └── README.md
  */
 export function getFrameworkRoot(): string {
-  // When running from source (`bun run dev`), import.meta.url points at src/core/paths.ts
-  // When compiled, it points at the binary — but Bun's compile embeds the source,
-  // so relative paths within `../../` still work if the layout is intact.
-  //
-  // Simpler + robust strategy: use FREMI_HOME env var if set, else ~/.fremi/framework.
   const envOverride = process.env.FREMI_HOME;
   if (envOverride) return resolve(envOverride);
 
-  // Dev fallback: walk up from this file to find VERSION marker.
   try {
     const here = dirname(fileURLToPath(import.meta.url));
-    // src/core/paths.ts → walk up 2 levels to repo root
+    // src/core/paths.ts → walk up 2 levels to repo root (dev mode).
     const candidate = resolve(here, "..", "..");
     if (isFrameworkRoot(candidate)) return candidate;
   } catch {
-    // Compiled binary — no meaningful __dirname
+    // Compiled binary — no meaningful __dirname.
   }
 
-  // Production default: ~/.fremi/framework (installed by install.sh)
   const home = process.env.HOME || process.env.USERPROFILE || "";
-  return resolve(home, ".fremi", "framework");
+  return resolve(home, ".fremi");
 }
 
 /**
- * The `framework/` subdirectory that holds skills/hooks/rules/etc.
+ * The `framework/` subdirectory inside the clone. This is where skills,
+ * rules, hooks, flows, pipelines, settings, etc. live. Everything the CLI
+ * consumes at runtime is under this path.
  */
 export function getFrameworkContentRoot(): string {
   return resolve(getFrameworkRoot(), "framework");
@@ -42,7 +47,12 @@ export function getFrameworkContentRoot(): string {
 function isFrameworkRoot(dir: string): boolean {
   try {
     const fs = require("node:fs") as typeof import("node:fs");
-    return fs.existsSync(resolve(dir, "VERSION")) && fs.existsSync(resolve(dir, "framework"));
+    // A valid clone root has VERSION at its top level AND a framework/
+    // subdir with skills/ inside it (the framework content).
+    return (
+      fs.existsSync(resolve(dir, "VERSION")) &&
+      fs.existsSync(resolve(dir, "framework", "skills"))
+    );
   } catch {
     return false;
   }

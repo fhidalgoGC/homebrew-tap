@@ -37,7 +37,7 @@ ancestor:
 
 > Crear cada tarea con `/task <FT-XX>_<HU-YY>` (el skill agrega la entrada acá usando `references/task-entry-template.md`).
 
-> Estructura esperada por tarea (resumen — el template canónico vive en `~/.fremi/framework/framework/skills/task/references/task-entry-template.md`):
+> Estructura esperada por tarea (resumen — el template canónico vive en `~/.fremi/framework/skills/task/references/task-entry-template.md`):
 
 ### task-001 — <título corto y accionable>
 

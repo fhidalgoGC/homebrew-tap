@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/pipelines/` — Pipelines de auto-ejecución
+# `~/.fremi/framework/pipelines/` — Pipelines de auto-ejecución
 
 > **Un pipeline es una invocación única que corre el flujo COMPLETO de una capa (o subconjunto declarado) sin pausar entre pasos, salvo cuando aparece una duda que la IA no puede resolver por su cuenta.**
 >
@@ -8,7 +8,7 @@
 
 ## Modo de ejecución (`interactive` vs `auto`)
 
-Todos los skills y pipelines del framework respetan un `execution_mode` declarado en `config.yaml` (default global) y overridable por capa en `config.<capa>.yaml`. Ver [`~/.fremi/framework/framework/settings/config.yaml → execution_mode`](../settings/config.yaml) para el schema completo.
+Todos los skills y pipelines del framework respetan un `execution_mode` declarado en `config.yaml` (default global) y overridable por capa en `config.<capa>.yaml`. Ver [`~/.fremi/framework/settings/config.yaml → execution_mode`](../settings/config.yaml) para el schema completo.
 
 **La semántica del modo depende del nivel de invocación**. Un skill suelto no se comporta igual que un pipeline aunque el modo se llame igual.
 
@@ -99,9 +99,9 @@ Pipeline ≠ velocidad a cualquier costo — respeta **todas** las reglas del fr
 Antes de correr **cualquier** pipeline (o skill), el framework debe estar instalado en el proyecto:
 
 - `.claude/skills/fremi-install-framework` es symlink válido.
-- `CLAUDE.md` en la raíz referencia `~/.fremi/framework/framework/rules/workflow.md`.
+- `CLAUDE.md` en la raíz referencia `~/.fremi/framework/rules/workflow.md`.
 
-Si no lo está → el pipeline aborta con `"Corré /fremi-install-framework antes de invocar el pipeline"`. **La IA no auto-instala** — la instalación crea symlinks reales en `.claude/` y necesita aprobación explícita del usuario. Ver Regla 24 en [`~/.fremi/framework/framework/rules/workflow.md`](../rules/workflow.md).
+Si no lo está → el pipeline aborta con `"Corré /fremi-install-framework antes de invocar el pipeline"`. **La IA no auto-instala** — la instalación crea symlinks reales en `.claude/` y necesita aprobación explícita del usuario. Ver Regla 24 en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
 
 Excepciones (skills bootstrap): `/fremi-install-framework` y `/fremi-import-template` son los únicos que pueden correr con framework no-instalado.
 
@@ -144,7 +144,7 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 ## Convención de nomenclatura
 
-- Los pipelines viven en `~/.fremi/framework/framework/pipelines/pipeline.<capa>.md`.
+- Los pipelines viven en `~/.fremi/framework/pipelines/pipeline.<capa>.md`.
 - Se invocan como `/fremi-pipeline-<capa>` (ej: `/fremi-pipeline-story`).
 - El prefijo `fremi-` respeta Regla 21.
 
@@ -179,7 +179,7 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 ## Cómo agregar un pipeline
 
-1. Crear `~/.fremi/framework/framework/pipelines/pipeline.<capa>.md` siguiendo el template de los existentes.
+1. Crear `~/.fremi/framework/pipelines/pipeline.<capa>.md` siguiendo el template de los existentes.
 2. Frontmatter con `name: fremi-pipeline-<capa>` + `description`.
 3. Referenciar el `config.<capa>.yaml → flow.sequence` como fuente de verdad de la secuencia — **no duplicar la secuencia en el pipeline**, sólo referenciarla y agregar la política de auto-ejecución.
 4. Declarar los **stop events específicos** de esa capa (además de los genéricos de este README).
@@ -191,8 +191,8 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 | Carpeta | Rol |
 |---|---|
-| `~/.fremi/framework/framework/skills/` | Sub-skills invocables individualmente (modo manual). |
-| `~/.fremi/framework/framework/pipelines/` | Pipelines que orquestan sub-skills en modo automático (esta). |
-| `~/.fremi/framework/framework/flows/` | Documentación **descriptiva** del flujo canónico (para humanos). |
-| `~/.fremi/framework/framework/settings/` | Configuración operativa (fuente de verdad de la secuencia). |
-| `~/.fremi/framework/framework/rules/` | Reglas duras que ambos modos (manual y pipeline) deben respetar. |
+| `~/.fremi/framework/skills/` | Sub-skills invocables individualmente (modo manual). |
+| `~/.fremi/framework/pipelines/` | Pipelines que orquestan sub-skills en modo automático (esta). |
+| `~/.fremi/framework/flows/` | Documentación **descriptiva** del flujo canónico (para humanos). |
+| `~/.fremi/framework/settings/` | Configuración operativa (fuente de verdad de la secuencia). |
+| `~/.fremi/framework/rules/` | Reglas duras que ambos modos (manual y pipeline) deben respetar. |

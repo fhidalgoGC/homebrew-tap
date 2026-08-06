@@ -1,9 +1,9 @@
 # Flujo — Vía REVERSE (alineación de código pre-existente al framework)
 
-> **Config operativa:** [`~/.fremi/framework/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
-> **Reglas específicas:** [`~/.fremi/framework/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25–32.
-> **Skills:** `~/.fremi/framework/framework/reverse-engineering/` (6 skills).
-> **Pipelines:** `~/.fremi/framework/framework/pipelines/pipeline.reverse.*.md` (4 pipelines).
+> **Config operativa:** [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
+> **Reglas específicas:** [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25–32.
+> **Skills:** `~/.fremi/framework/reverse-engineering/` (6 skills).
+> **Pipelines:** `~/.fremi/framework/pipelines/pipeline.reverse.*.md` (4 pipelines).
 > **Rol:** vía canónica para alinear código pre-existente al framework — reconstruir los docs del flow forward a partir de artifacts sobrevivientes.
 
 ---
@@ -128,7 +128,7 @@ Escanear los artifacts sobrevivientes del trabajo. La skill decide qué fuentes 
 | `/fremi-reverse-bug` | Commit del fix (identificado por keyword "fix:", "bug:", etc.), diff | Tests agregados junto al fix, issue tracker |
 | `/fremi-reverse-enabler` | IaC files (serverless.yml, CDK, terraform), scripts de tooling, package.json deps | Config files, CI/CD workflows |
 | `/fremi-reverse-product` | `docs/works/features/`, `package.json`, `README.md`, `CLAUDE.md` | Todo el árbol de features + git log de root |
-| `/fremi-reverse-extra` | Scripts en `scripts/`, cambios de `~/.fremi/framework/framework/`, mejoras a tooling | Commits de refactor, config changes |
+| `/fremi-reverse-extra` | Scripts en `scripts/`, cambios de `~/.fremi/framework/`, mejoras a tooling | Commits de refactor, config changes |
 
 ### Fase 2 — Inferencia
 
@@ -225,7 +225,7 @@ Ejemplo: reverse-engineering de una story cerrada → bumpear `feature/spec.md`,
 | **Regla 12** (sync-back) | Si durante reverse aparece que algo pertenece a capa superior, se sube (igual que forward). |
 | **Regla 17** (versionado + linaje) | Aplica con timestamps inferidos — ver Fase 4. |
 | **Regla 24** (framework instalado) | Precondición dura de todas las skills reverse. |
-| **Regla 25–32** (reglas específicas de reverse) | Ver [`~/.fremi/framework/framework/rules/reverse.md`](../rules/reverse.md). |
+| **Regla 25–32** (reglas específicas de reverse) | Ver [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md). |
 
 ---
 
@@ -243,9 +243,9 @@ Ejemplo: reverse-engineering de una story cerrada → bumpear `feature/spec.md`,
 
 ## Referencias
 
-- Reglas del flow forward: [`~/.fremi/framework/framework/rules/workflow.md`](../rules/workflow.md).
-- Reglas específicas de reverse: [`~/.fremi/framework/framework/rules/reverse.md`](../rules/reverse.md).
-- Config operativo: [`~/.fremi/framework/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml).
-- Skills: [`~/.fremi/framework/framework/reverse-engineering/`](../reverse-engineering/).
-- Pipelines: [`~/.fremi/framework/framework/pipelines/`](../pipelines/) — buscar `pipeline.reverse.*.md`.
-- Flow forward por capa: `~/.fremi/framework/framework/flows/flow.product.md`, `flow.feature.md`, `flow.story.md`, etc.
+- Reglas del flow forward: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
+- Reglas específicas de reverse: [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md).
+- Config operativo: [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml).
+- Skills: [`~/.fremi/framework/reverse-engineering/`](../reverse-engineering/).
+- Pipelines: [`~/.fremi/framework/pipelines/`](../pipelines/) — buscar `pipeline.reverse.*.md`.
+- Flow forward por capa: `~/.fremi/framework/flows/flow.product.md`, `flow.feature.md`, `flow.story.md`, etc.

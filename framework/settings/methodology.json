@@ -29,10 +29,10 @@
     "enablers_subdir": "enablers",
     "bugs_subdir": "bugs",
     "extras_dir": "docs/works/extra",
-    "frmwk_dir": "~/.fremi/framework/framework",
+    "frmwk_dir": "~/.fremi/framework",
     "project_dir": "docs/project",
-    "flows_doc": "~/.fremi/framework/framework/flows/workflow.md",
-    "rules_doc": "~/.fremi/framework/framework/rules/workflow.md"
+    "flows_doc": "~/.fremi/framework/flows/workflow.md",
+    "rules_doc": "~/.fremi/framework/rules/workflow.md"
   },
 
   "slug": {
@@ -85,7 +85,7 @@
     },
 
     "workflow_doc": {
-      "_description": "Documento del workflow dentro de una story. 11 docs en orden fijo de ejecución (FW-00..FW-10). FW-00_explore y FW-02_proposal son de OBLIGATORIEDAD CONDICIONAL — la regla operativa vive en `~/.fremi/framework/framework/settings/config.yaml` bajo `workflow.story.conditional_rules`.",
+      "_description": "Documento del workflow dentro de una story. 11 docs en orden fijo de ejecución (FW-00..FW-10). FW-00_explore y FW-02_proposal son de OBLIGATORIEDAD CONDICIONAL — la regla operativa vive en `~/.fremi/framework/settings/config.yaml` bajo `workflow.story.conditional_rules`.",
       "prefix": "FW",
       "scope": "story",
       "scope_description": "Los 11 archivos están dentro de cada story (los condicionales pueden omitirse cuando no aplican).",
@@ -414,7 +414,7 @@
         "FW-10_closure.md"
       ],
       "conditional_files": ["FW-00_explore.md", "FW-02_proposal.md"],
-      "conditional_ref": "~/.fremi/framework/framework/settings/config.yaml → workflow.story.conditional_rules"
+      "conditional_ref": "~/.fremi/framework/settings/config.yaml → workflow.story.conditional_rules"
     },
 
     "extra": {
@@ -464,31 +464,31 @@
   "principles": {
     "spec_drives_design": {
       "_description": "La SDD va antes que Design. Cada artefacto sólo consume decisiones de los anteriores.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 6"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 6"
     },
     "fork_triggers_adr": {
       "_description": "Cuando aparece una bifurcación técnica con 2+ caminos viables, la IA pausa, propone opciones al usuario y crea un ADR con la decisión.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 3b"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 3b"
     },
     "sync_back": {
       "_description": "Si trabajando en story/feature se descubre algo que pertenece a una capa superior, actualizar la superior PRIMERO.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 12"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 12"
     },
     "closure_required": {
       "_description": "Una story no es DONE sin FW-10_closure.md validado.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 11"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 11"
     },
     "checkwork_live_status": {
       "_description": "FW-09_checkwork.md es el estado en vivo de la implementación de la story. Se actualiza después de cerrar cada task o vía hook. Es el doc que se consulta para saber 'qué falta'.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 13"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 13"
     },
     "extras_documentation": {
       "_description": "Trabajo fuera del flujo capa-feature-story-task se documenta en `docs/works/extra/EX-NN_<slug>.md`. Un archivo por concepto cohesivo: tooling, scripts, fixes de build/IaC, mejoras a la metodología, refactor de utilidades. Sirve para que el trabajo 'invisible' (no atribuible a una story) quede trazado.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 14"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 14"
     },
     "enablers_and_bugs_are_optional": {
       "_description": "Enablers (EN-XX) y bugs (BG-XX) NO son obligatorios al crear una feature. Se agregan bajo demanda cuando el trabajo lo amerita: un enabler cuando se identifica capacidad técnica habilitadora; un bug cuando se detecta defecto en código de producción. Enablers pueden vivir global, dentro de feature o dentro de story (el alcance lo declara el usuario al crearlo). Bugs viven SIEMPRE dentro de la story que originó el defecto.",
-      "rule_ref": "~/.fremi/framework/framework/rules/workflow.md § Regla 15"
+      "rule_ref": "~/.fremi/framework/rules/workflow.md § Regla 15"
     }
   }
 }

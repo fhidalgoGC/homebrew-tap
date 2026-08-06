@@ -1,6 +1,6 @@
 # Flujo — Capa PRODUCTO
 
-> **Config operativa:** [`~/.fremi/framework/framework/skills/product/config.user.yaml`](../settings/config.product.yaml)
+> **Config operativa:** [`~/.fremi/framework/skills/product/config.user.yaml`](../settings/config.product.yaml)
 > **Orquestador:** [`/fremi-product`](../skills/product/SKILL.md)
 > **Rol:** discovery + formalización del producto (una vez al arrancar; luego se mantiene living).
 

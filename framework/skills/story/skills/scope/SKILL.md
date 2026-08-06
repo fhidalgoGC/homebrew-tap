@@ -64,4 +64,4 @@ Puebla el `FW-03_scope.md` con listas explícitas:
 
 - Template: [`references/FW-03_scope-template.md`](references/FW-03_scope-template.md).
 - `config.yaml → phase_rules.scope`.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 6.1 (Scope antes que BDD).
+- `~/.fremi/framework/rules/workflow.md` → Regla 6.1 (Scope antes que BDD).

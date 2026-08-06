@@ -72,4 +72,4 @@ Doc **living**:
 
 ## Referencias
 - Template: [`references/ideas-template.md`](references/ideas-template.md).
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 4.
+- `~/.fremi/framework/rules/workflow.md` → Regla 4.

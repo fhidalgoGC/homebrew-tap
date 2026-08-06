@@ -14,9 +14,9 @@ since: 2026-07-16
 # Fuente de verdad ESTRUCTURAL — el usuario NO edita este archivo.
 # Sólo el mantenedor del framework lo cambia cuando la topología muta.
 #
-# - Toggle on/off del paralelismo → `~/.fremi/framework/framework/settings/config.yaml → parallelism.enabled`.
+# - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.yaml → parallelism.enabled`.
 # - Config operativa (docs, flow.sequence, execution_mode, elección de agent
-#   por step) → `~/.fremi/framework/framework/skills/story/config.user.yaml`.
+#   por step) → `~/.fremi/framework/skills/story/config.user.yaml`.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------

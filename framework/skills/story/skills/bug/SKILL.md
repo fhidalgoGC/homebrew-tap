@@ -1,6 +1,6 @@
 ---
 name: fremi-story-bug
-description: Registra un defecto detectado en código de producción como BG-XX_<slug>.md dentro de la story que originó el bug. Un archivo único por bug, con síntoma, repro, test rojo (Regla 8), causa raíz, fix y cierre. Lee la nomenclatura desde ~/.fremi/framework/framework/settings/methodology.json. Usar cuando el usuario reporta un comportamiento incorrecto detectado en producción o en una suite que protege producción.
+description: Registra un defecto detectado en código de producción como BG-XX_<slug>.md dentro de la story que originó el bug. Un archivo único por bug, con síntoma, repro, test rojo (Regla 8), causa raíz, fix y cierre. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json. Usar cuando el usuario reporta un comportamiento incorrecto detectado en producción o en una suite que protege producción.
 ---
 
 # /fremi-story-bug — Registrar un nuevo bug
@@ -45,7 +45,7 @@ Si falta alguno → preguntárselo al usuario.
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.json`.
 2. Extraer:
    - `bug_cfg = identifiers.bug` → `prefix`, `id_format`, `filename_format`, `filename_regex`.
    - `feat_cfg = identifiers.feature`, `story_cfg = identifiers.story`.

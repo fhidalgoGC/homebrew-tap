@@ -11,7 +11,7 @@ schema_version: 1
 #   - Register project-specific external agents (future).
 #
 # Anything you do NOT override inherits from
-# ~/.fremi/framework/framework/settings/agents.core.yaml.
+# ~/.fremi/framework/settings/agents.core.yaml.
 #
 # The framework's copy of this file lives under the framework repo and is a
 # TEMPLATE. When you run `fremi install`, this file is copied to

@@ -23,7 +23,7 @@ Elimina un hook + su registro en `.claude/settings.json`. Por default sólo proj
 ### Paso 0 — Validar entrada
 1. Localizar el hook:
    - `docs/project/hooks/<name>.sh` (default).
-   - `~/.fremi/framework/framework/hooks/<name>.sh` (sólo con `--force`).
+   - `~/.fremi/framework/hooks/<name>.sh` (sólo con `--force`).
 2. Si no existe → abortar.
 
 ### Paso 1 — Detectar registros en settings.json
@@ -60,10 +60,10 @@ Reportar dónde está registrado (eventos + matchers).
 ## Validaciones
 
 - Hook no existe → abortar.
-- Sin `--force` y hook está en `~/.fremi/framework/framework/hooks/` → abortar.
+- Sin `--force` y hook está en `~/.fremi/framework/hooks/` → abortar.
 - Settings.json malformado → abortar antes de modificar.
 
 ## Referencias
 
 - Ver también: [`/fremi-add-hook`](../add-hook/SKILL.md).
-- Hooks del framework: [`~/.fremi/framework/framework/hooks/`](../../../../hooks/).
+- Hooks del framework: [`~/.fremi/framework/hooks/`](../../../../hooks/).

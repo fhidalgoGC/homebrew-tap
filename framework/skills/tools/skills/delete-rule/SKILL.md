@@ -23,7 +23,7 @@ Elimina una rule + su referencia en `CLAUDE.md`. Por default sólo project rules
 ### Paso 0 — Validar entrada
 1. Localizar rule:
    - `docs/project/rules/<name>.md` (default).
-   - `~/.fremi/framework/framework/rules/<name>.md` (sólo con `--force`).
+   - `~/.fremi/framework/rules/<name>.md` (sólo con `--force`).
 2. Si no existe → abortar.
 
 ### Paso 1 — Detectar referencias
@@ -67,10 +67,10 @@ Buscar en:
 ## Validaciones
 
 - Rule no existe → abortar.
-- Sin `--force` y rule está en `~/.fremi/framework/framework/rules/` → abortar.
+- Sin `--force` y rule está en `~/.fremi/framework/rules/` → abortar.
 - CLAUDE.md no legible → abortar.
 
 ## Referencias
 
 - Ver también: [`/fremi-add-rule`](../add-rule/SKILL.md).
-- Rules del framework: [`~/.fremi/framework/framework/rules/workflow.md`](../../../../rules/workflow.md).
+- Rules del framework: [`~/.fremi/framework/rules/workflow.md`](../../../../rules/workflow.md).

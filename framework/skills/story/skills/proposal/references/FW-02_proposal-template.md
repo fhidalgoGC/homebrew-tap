@@ -1,6 +1,6 @@
 # Template — `FW-02_proposal.md` de una story
 
-> **Doc CONDICIONAL.** Obligatorio cuando aplica al menos uno de los criterios declarados en `~/.fremi/framework/framework/settings/config.yaml → conditional_rules.proposal_when`. Omitir si no aplica.
+> **Doc CONDICIONAL.** Obligatorio cuando aplica al menos uno de los criterios declarados en `~/.fremi/framework/settings/config.yaml → conditional_rules.proposal_when`. Omitir si no aplica.
 >
 > **Propósito**: puente entre `FW-01_definition.md` (por qué existe la story) y `FW-03_scope.md` (alcance detallado). Declara el **intent técnico**, el **approach elegido** (con opciones si hubo bifurcación), las **decisions numeradas** (cada una anclada a un ADR), el **impact** (archivos afectados con delta LOC) y el **risk** de la story.
 >

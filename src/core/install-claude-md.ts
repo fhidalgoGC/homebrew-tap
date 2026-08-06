@@ -28,7 +28,7 @@ Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BD
 
 | Ubicación | Archivos permitidos | Editable |
 |---|---|---|
-| \`~/.fremi/framework/framework/**/\` | \`.core.yaml\` (estructura + defaults) | ❌ NO — se sobreescribe con \`fremi update\` |
+| \`~/.fremi/framework/**/\` | \`.core.yaml\` (estructura + defaults) | ❌ NO — se sobreescribe con \`fremi update\` |
 | \`.fremi/settings/**/\` | \`.user.yaml\` (overrides del proyecto) | ✅ SÍ — el user edita acá |
 
 **Los \`.core.yaml\` NUNCA se copian al proyecto**. Viven exclusivamente en el framework global. Los \`.user.yaml\` NUNCA viven en el framework como fuente activa — se copian al proyecto en \`fremi install\` y ahí se editan.
@@ -36,18 +36,18 @@ Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BD
 **Al resolver un valor de config, un skill debe:**
 
 1. **Leer primero \`.fremi/settings/**.user.yaml\`** (proyecto) — si el key existe con valor, gana.
-2. **Fallback a \`~/.fremi/framework/framework/**.core.yaml\`** (framework) — si el key no está en user, usar el default del core.
+2. **Fallback a \`~/.fremi/framework/**.core.yaml\`** (framework) — si el key no está en user, usar el default del core.
 3. **Si el user pone un valor fuera del \`options\` declarado en core** → ERROR (validación estructural).
 
 **Ejemplo concreto:**
-- Core (framework):  \`~/.fremi/framework/framework/settings/agents.core.yaml\` → \`fremi-apply: { model: sonnet }\`
+- Core (framework):  \`~/.fremi/framework/settings/agents.core.yaml\` → \`fremi-apply: { model: sonnet }\`
 - User (proyecto):   \`.fremi/settings/agents.user.yaml\` → \`subagent_overrides.fremi-apply.model: opus\`
 - Efectivo:           **\`opus\`** (user gana)
 
-Aplica igual a per-layer: \`.fremi/settings/story/config.user.yaml\` extiende \`~/.fremi/framework/framework/skills/story/config.core.yaml\`.
+Aplica igual a per-layer: \`.fremi/settings/story/config.user.yaml\` extiende \`~/.fremi/framework/skills/story/config.core.yaml\`.
 
 **Registry canónico de agents** (no editable, del framework):
-- \`~/.fremi/framework/framework/settings/agents.core.yaml\` — options válidas de subagent + mapping a Claude Code native agent + defaults de model/effort.
+- \`~/.fremi/framework/settings/agents.core.yaml\` — options válidas de subagent + mapping a Claude Code native agent + defaults de model/effort.
 
 **Framework instalado**:
 - Ubicación: \`~/.fremi/framework/\`.

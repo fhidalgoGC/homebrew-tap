@@ -1,6 +1,6 @@
 # Reglas del flujo de trabajo — makingFileReport
 
-> **Documento de referencia:** `~/.fremi/framework/framework/flows/workflow.md`
+> **Documento de referencia:** `~/.fremi/framework/flows/workflow.md`
 >
 > Estas reglas son **obligatorias** para todo trabajo en este proyecto. Si una regla bloquea una acción, hay que volver a la etapa correspondiente del flujo, no saltarla.
 
@@ -41,9 +41,9 @@ docs/works/
 
 ### Convención de nomenclatura
 
-> **Fuente de verdad de la NOMENCLATURA:** `~/.fremi/framework/framework/settings/methodology.json`. Las descripciones de abajo son resumen — la configuración formal (regex, formats, scopes) vive en ese JSON. Para cambiar prefijos o padding (ej: `FT-01` → `F-001`), editar el JSON y hacer sweep.
+> **Fuente de verdad de la NOMENCLATURA:** `~/.fremi/framework/settings/methodology.json`. Las descripciones de abajo son resumen — la configuración formal (regex, formats, scopes) vive en ese JSON. Para cambiar prefijos o padding (ej: `FT-01` → `F-001`), editar el JSON y hacer sweep.
 >
-> **Fuente de verdad OPERATIVA:** `~/.fremi/framework/framework/settings/config.yaml`. Manda para scripts/tooling y define la **obligatoriedad condicional** de `FW-00_explore.md` y `FW-02_proposal.md` (ver `config.story.yaml → conditional_rules`), además del stack técnico, testing capabilities y reglas por fase.
+> **Fuente de verdad OPERATIVA:** `~/.fremi/framework/settings/config.yaml`. Manda para scripts/tooling y define la **obligatoriedad condicional** de `FW-00_explore.md` y `FW-02_proposal.md` (ver `config.story.yaml → conditional_rules`), además del stack técnico, testing capabilities y reglas por fase.
 
 - **Features:** `FT-XX_<slug>` (`FT-01`, `FT-02`, ...). ID secuencial de 2 dígitos a nivel proyecto. Slug kebab-case descriptivo.
 - **Stories:** `HU-XX_<slug>` (`HU-01`, `HU-02`, ...). ID secuencial de 2 dígitos **dentro de cada feature** (cada feature arranca desde `HU-01`).
@@ -84,7 +84,7 @@ feature/definition → (feature/decisions opcional)
 ```
 [FW-00_explore] → FW-01_definition → [FW-02_proposal] → FW-03_scope → FW-04_bdd-userstories → FW-05_sdd-spec → FW-06_design → FW-07_tdd-plan → FW-08_plan → FW-09_checkwork → FW-10_closure
 ```
-Docs entre corchetes `[...]` son **condicionales**: obligatorios cuando aplican los criterios declarados en `~/.fremi/framework/framework/skills/story/config.user.yaml → conditional_rules`, opcionales en el resto. Ver Regla 16 abajo.
+Docs entre corchetes `[...]` son **condicionales**: obligatorios cuando aplican los criterios declarados en `~/.fremi/framework/skills/story/config.user.yaml → conditional_rules`, opcionales en el resto. Ver Regla 16 abajo.
 
 Antes de proponer trabajar en la etapa N, verificar que N-1 existe y tiene contenido.
 
@@ -104,7 +104,7 @@ Antes de tocar código de producción, debe existir, para la story correspondien
 **Excepciones permitidas:**
 - Configuración de tooling (linters, formatters, tsconfig).
 - Scaffolding inicial (`package.json`, estructura de carpetas).
-- Los archivos de `docs/` y `~/.fremi/framework/framework/`.
+- Los archivos de `docs/` y `~/.fremi/framework/`.
 
 ---
 
@@ -327,7 +327,7 @@ Los tests planeados en `FW-07_tdd-plan.md` se marcan como `[x]` cuando se implem
 
 Una tarea **no se marca `[x]`** sin que todos sus criterios pasen. Si un criterio falla, la tarea sigue `[/]`.
 
-Ver template en `~/.fremi/framework/framework/flows/workflow.md` sección "Plan de ejecución".
+Ver template en `~/.fremi/framework/flows/workflow.md` sección "Plan de ejecución".
 
 ---
 
@@ -462,7 +462,7 @@ Si hay duda, **default a promover hacia arriba**. Es más fácil bajar después 
 ### Quién lo actualiza
 
 - **Por default:** el agente (Claude / humano) que cierra la task lo actualiza en el mismo paso que marca `[x]` en `FW-08_plan.md`.
-- **Opcional:** un hook en `~/.fremi/framework/framework/hooks/sync-checkwork.sh` puede observar cambios en `FW-08_plan.md` y sincronizar checkwork automáticamente. Está disponible como stub; el usuario decide si lo activa en `.claude/settings.json`. **El hook no exime del paso manual** — si el hook falla, la regla sigue aplicando.
+- **Opcional:** un hook en `~/.fremi/framework/hooks/sync-checkwork.sh` puede observar cambios en `FW-08_plan.md` y sincronizar checkwork automáticamente. Está disponible como stub; el usuario decide si lo activa en `.claude/settings.json`. **El hook no exime del paso manual** — si el hook falla, la regla sigue aplicando.
 
 ### Cuándo NO se actualiza
 
@@ -496,7 +496,7 @@ No todo el trabajo cae en feature / story / task. Tooling, scripts, fixes de IaC
 Va a `docs/works/extra/EX-NN_<slug>.md` cualquier trabajo que:
 
 - **No** genera código user-facing nuevo (no es endpoint, no es bug fix con test, no es comportamiento observable).
-- Pero **sí** modifica el repo de forma duradera: cambia tooling, mejora un script, ajusta IaC sin cambiar contratos externos, introduce o modifica metodología (skills, hooks, docs de `~/.fremi/framework/framework/`), refactoriza utilidades sin cambiar API pública, o limpia código zombi.
+- Pero **sí** modifica el repo de forma duradera: cambia tooling, mejora un script, ajusta IaC sin cambiar contratos externos, introduce o modifica metodología (skills, hooks, docs de `~/.fremi/framework/`), refactoriza utilidades sin cambiar API pública, o limpia código zombi.
 
 ### Regla "un archivo por concepto cohesivo"
 
@@ -518,7 +518,7 @@ Cada `EX-NN_<slug>.md` debe contener (las primeras 4 son obligatorias, las últi
 
 Plus frontmatter informativo: `Tipo`, `Fecha`, `Estado`, `Disparador`.
 
-Ver template en `~/.fremi/framework/framework/flows/workflow.md` § "Trabajo fuera del flujo".
+Ver template en `~/.fremi/framework/flows/workflow.md` § "Trabajo fuera del flujo".
 
 ### Numeración
 
@@ -630,7 +630,7 @@ Los otros 9 (`FW-01`, `FW-03..FW-10`) son **obligatorios siempre**.
 
 ### Fuente de verdad: `config.yaml`
 
-`~/.fremi/framework/framework/settings/config.yaml` bajo la clave `config.story.yaml → conditional_rules` declara **cuándo son obligatorios y cuándo se pueden omitir**. Es la única fuente autorizada para decidir esto; los skills que generan/validan stories leen ese archivo.
+`~/.fremi/framework/settings/config.yaml` bajo la clave `config.story.yaml → conditional_rules` declara **cuándo son obligatorios y cuándo se pueden omitir**. Es la única fuente autorizada para decidir esto; los skills que generan/validan stories leen ese archivo.
 
 **Criterios actuales (resumen — el detalle vive en `config.yaml`):**
 
@@ -678,7 +678,7 @@ Todos los artifacts del framework llevan una **versión semver** (`MAJOR.MINOR.P
 
 ### Fuente de verdad operativa
 
-`~/.fremi/framework/framework/settings/config.yaml → versioning.*` gobierna:
+`~/.fremi/framework/settings/config.yaml → versioning.*` gobierna:
 - **`doc_types.living` / `doc_types.snapshot`** — qué archivos son living y cuáles son snapshot.
 - **`bump_rules`** — cuándo se bumpea MAJOR / MINOR / PATCH.
 - **`frontmatter`** — campos obligatorios en el YAML del inicio de cada doc.
@@ -806,7 +806,7 @@ Confundir "step del flow" con "cualquier cosa que el usuario hace" desdibuja la 
 ### Cómo aplicar
 
 Cuando se diseña o edita un `config.<capa>.yaml`:
-- Cada entry de `flow.sequence` debe tener campo `skill:` con un skill que exista en `~/.fremi/framework/framework/skills/`.
+- Cada entry de `flow.sequence` debe tener campo `skill:` con un skill que exista en `~/.fremi/framework/skills/`.
 - Si aparece un paso sin skill → crear el sub-skill correspondiente O mover el paso a `procedure_manual`/`procedure_after_creation`.
 
 ---
@@ -890,14 +890,14 @@ Al detectar necesidad de crear un ADR / bug / enabler:
 
 Los skills del framework se organizan **físicamente por capa** (`<capa>/skills/<sub>/`) y se exponen en `.claude/skills/` con **doble prefijo**:
 
-1. **`fremi-`** — prefijo global del framework (obligatorio para todo skill de `~/.fremi/framework/framework/`).
+1. **`fremi-`** — prefijo global del framework (obligatorio para todo skill de `~/.fremi/framework/`).
 2. **`<capa>-`** — prefijo estructural que refleja jerarquía cuando corresponde.
 
 Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`, `fremi-enabler-plan`).
 
 ### Regla dura — Prefijo `fremi-`
 
-- **Todo skill de `~/.fremi/framework/framework/`** (orquestador, sub-skill, reverse, install, tools) debe:
+- **Todo skill de `~/.fremi/framework/`** (orquestador, sub-skill, reverse, install, tools) debe:
   - Tener `name: fremi-<...>` en el frontmatter de su `SKILL.md`.
   - Publicarse en `.claude/skills/` como symlink `fremi-<...>`.
   - Invocarse por el usuario como `/fremi-<...>`.
@@ -906,21 +906,21 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 
 ### Regla dura — Jerarquía física por capa
 
-- **Sub-skills de una capa** → viven en `~/.fremi/framework/framework/skills/<capa>/skills/<sub>/`.
-- **Orquestadores de capa** → `~/.fremi/framework/framework/skills/<capa>/SKILL.md` con `name: fremi-<capa>` (ej: `fremi-story`, `fremi-product`).
-- **Skills globales / transversales** → viven directo en `~/.fremi/framework/framework/skills/<name>/` (ej: `fremi-sync-check`, `fremi-tools`, `fremi-import-template`, `fremi-link-template-assets`).
-- **Reverse-engineering** → viven en `~/.fremi/framework/framework/reverse-engineering/<name>/` con `name: fremi-reverse-<...>` (ej: `fremi-reverse-story`).
-- **Installer** → vive en `~/.fremi/framework/framework/installs/install-framework/` con `name: fremi-install-framework`.
+- **Sub-skills de una capa** → viven en `~/.fremi/framework/skills/<capa>/skills/<sub>/`.
+- **Orquestadores de capa** → `~/.fremi/framework/skills/<capa>/SKILL.md` con `name: fremi-<capa>` (ej: `fremi-story`, `fremi-product`).
+- **Skills globales / transversales** → viven directo en `~/.fremi/framework/skills/<name>/` (ej: `fremi-sync-check`, `fremi-tools`, `fremi-import-template`, `fremi-link-template-assets`).
+- **Reverse-engineering** → viven en `~/.fremi/framework/reverse-engineering/<name>/` con `name: fremi-reverse-<...>` (ej: `fremi-reverse-story`).
+- **Installer** → vive en `~/.fremi/framework/installs/install-framework/` con `name: fremi-install-framework`.
 
 ### Justificación
 
 - **Prefijo `fremi-` global**: aísla los skills reusables del framework de los skills específicos del proyecto y garantiza que el usuario reconoce visualmente qué skill viene de la metodología. También simplifica el sweep del installer.
-- **Jerarquía física por capa**: un ingeniero que abre `~/.fremi/framework/framework/skills/story/` ve inmediatamente todos los skills que operan sobre stories, sin tener que buscar en 20+ carpetas planas.
+- **Jerarquía física por capa**: un ingeniero que abre `~/.fremi/framework/skills/story/` ve inmediatamente todos los skills que operan sobre stories, sin tener que buscar en 20+ carpetas planas.
 
 ### Ejemplos
 
 ```
-~/.fremi/framework/framework/skills/
+~/.fremi/framework/skills/
 ├── product/                        (name: fremi-product)
 │   └── skills/
 │       ├── iniciativas/            (name: fremi-product-iniciativas)
@@ -954,7 +954,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 ├── import-template/                (name: fremi-import-template)
 └── link-template-assets/           (name: fremi-link-template-assets)
 
-~/.fremi/framework/framework/reverse-engineering/
+~/.fremi/framework/reverse-engineering/
 ├── reverse-story/                  (name: fremi-reverse-story)
 ├── reverse-feature/                (name: fremi-reverse-feature)
 ├── reverse-bug/                    (name: fremi-reverse-bug)
@@ -962,7 +962,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 ├── reverse-product/                (name: fremi-reverse-product)
 └── reverse-extra/                  (name: fremi-reverse-extra)
 
-~/.fremi/framework/framework/installs/
+~/.fremi/framework/installs/
 └── install-framework/              (name: fremi-install-framework)
 ```
 
@@ -970,8 +970,8 @@ En `.claude/skills/` los symlinks conservan el prefijo: `fremi-story-explore`, `
 
 ### Cómo aplicar
 
-- **Skill nuevo de capa**: ubicarlo en `~/.fremi/framework/framework/skills/<capa>/skills/<sub>/` y usar `name: fremi-<capa>-<sub>`.
-- **Skill nuevo transversal**: ubicarlo en `~/.fremi/framework/framework/skills/<name>/` con `name: fremi-<name>`.
+- **Skill nuevo de capa**: ubicarlo en `~/.fremi/framework/skills/<capa>/skills/<sub>/` y usar `name: fremi-<capa>-<sub>`.
+- **Skill nuevo transversal**: ubicarlo en `~/.fremi/framework/skills/<name>/` con `name: fremi-<name>`.
 - **Skill nuevo de proyecto** (via `/fremi-add-skill`): vive en `docs/project/skills/<name>/`, **sin prefijo** `fremi-`.
 - **Verificación en instalación**: `/fremi-install-framework` es idempotente y corrige los symlinks para que respeten la convención `fremi-`.
 
@@ -985,7 +985,7 @@ En `.claude/skills/` los symlinks conservan el prefijo: `fremi-story-explore`, `
 
 ## Regla 22 — Config operativa per-capa
 
-La configuración operativa está **dividida por capa** en archivos independientes bajo `~/.fremi/framework/framework/settings/`. El `config.yaml` master contiene **sólo globals** + referencias a los archivos per-capa.
+La configuración operativa está **dividida por capa** en archivos independientes bajo `~/.fremi/framework/settings/`. El `config.yaml` master contiene **sólo globals** + referencias a los archivos per-capa.
 
 ### Regla dura
 
@@ -1010,7 +1010,7 @@ La configuración operativa está **dividida por capa** en archivos independient
 
 ## Regla 23 — Hooks como red de seguridad de Regla 17
 
-Los hooks en `~/.fremi/framework/framework/hooks/` **validan automáticamente** que las reglas del framework se cumplen. Actúan como red de seguridad — detectan violaciones en tiempo real. **Por default AVISAN, no bloquean** (exit 0).
+Los hooks en `~/.fremi/framework/hooks/` **validan automáticamente** que las reglas del framework se cumplen. Actúan como red de seguridad — detectan violaciones en tiempo real. **Por default AVISAN, no bloquean** (exit 0).
 
 ### Regla dura
 
@@ -1036,7 +1036,7 @@ Los hooks en `~/.fremi/framework/framework/hooks/` **validan automáticamente** 
 
 ### Cómo aplicar
 
-- Registrar los hooks relevantes en `.claude/settings.json` (ver `~/.fremi/framework/framework/hooks/README.md`).
+- Registrar los hooks relevantes en `.claude/settings.json` (ver `~/.fremi/framework/hooks/README.md`).
 - Los hooks se disparan según su evento (PostToolUse, PreToolUse, UserPromptSubmit, Stop).
 - Para hacer un hook **bloqueante**: descomentar la línea `# exit 2` en el hook — sólo cuando el proyecto está listo para rigor estricto.
 - Complementar con `/fremi-sync-check` para auditoría bajo demanda (Regla 12 + Regla 17).
@@ -1055,20 +1055,20 @@ Antes de invocar **cualquier** skill del framework (`/fremi-*`), pipeline (`/fre
 
 ### Justificación
 
-El framework vive en `~/.fremi/framework/framework/` como fuente de verdad, pero los skills se descubren desde `.claude/skills/` (donde el harness los busca). Sin la instalación, `.claude/skills/` no tiene symlinks al framework y las invocaciones fallan silenciosamente o resuelven a versiones stale. Correr un skill "a mano" leyendo el `SKILL.md` desde `~/.fremi/framework/framework/` sin haber instalado deja los hooks desregistrados, los rules sin referenciar en `CLAUDE.md` y la nomenclatura sin garantía de convención `fremi-` (Regla 21) — es peor que no correrlo.
+El framework vive en `~/.fremi/framework/` como fuente de verdad, pero los skills se descubren desde `.claude/skills/` (donde el harness los busca). Sin la instalación, `.claude/skills/` no tiene symlinks al framework y las invocaciones fallan silenciosamente o resuelven a versiones stale. Correr un skill "a mano" leyendo el `SKILL.md` desde `~/.fremi/framework/` sin haber instalado deja los hooks desregistrados, los rules sin referenciar en `CLAUDE.md` y la nomenclatura sin garantía de convención `fremi-` (Regla 21) — es peor que no correrlo.
 
 ### Definición operativa de "instalado"
 
 El framework está instalado cuando **ambas** condiciones se cumplen:
 
-1. **Symlinks `fremi-*` presentes en `.claude/skills/`.** Al menos los orquestadores + `fremi-install-framework` deben existir como symlinks apuntando a `~/.fremi/framework/framework/skills/<capa>/` y `~/.fremi/framework/framework/installs/install-framework/` respectivamente.
-2. **`CLAUDE.md` en la raíz** existe y referencia `~/.fremi/framework/framework/rules/workflow.md` y `~/.fremi/framework/framework/flows/workflow.md`.
+1. **Symlinks `fremi-*` presentes en `.claude/skills/`.** Al menos los orquestadores + `fremi-install-framework` deben existir como symlinks apuntando a `~/.fremi/framework/skills/<capa>/` y `~/.fremi/framework/installs/install-framework/` respectivamente.
+2. **`CLAUDE.md` en la raíz** existe y referencia `~/.fremi/framework/rules/workflow.md` y `~/.fremi/framework/flows/workflow.md`.
 
 Check operativo mínimo (barato, sin invocar tooling externo):
 
 ```
 [ -L .claude/skills/fremi-install-framework ] && [ -f CLAUDE.md ] && \
-  grep -q "~/.fremi/framework/framework/rules/workflow.md" CLAUDE.md
+  grep -q "~/.fremi/framework/rules/workflow.md" CLAUDE.md
 ```
 
 Si el check falla → framework NO instalado.
@@ -1094,7 +1094,7 @@ Al recibir una invocación de skill/pipeline/hook, **antes** de ejecutar el proc
 
 ### Anti-patrones
 
-- ❌ La IA lee `SKILL.md` desde `~/.fremi/framework/framework/skills/…` y ejecuta el procedimiento "manualmente" sin correr install → viola Regla 24.
+- ❌ La IA lee `SKILL.md` desde `~/.fremi/framework/skills/…` y ejecuta el procedimiento "manualmente" sin correr install → viola Regla 24.
 - ❌ Un hook se dispara y ejecuta lógica del framework sin haber verificado que el framework está instalado.
 - ❌ Auto-instalar sin permiso del usuario cuando el check falla — la instalación crea symlinks en `.claude/` que son cambios reales del entorno; requiere aprobación explícita.
 - ❌ Instalar "sólo la parte que necesito" ignorando el resto (los hooks, las rules) — la instalación es atómica por diseño.
@@ -1102,7 +1102,7 @@ Al recibir una invocación de skill/pipeline/hook, **antes** de ejecutar el proc
 ### Cuándo NO aplica
 
 - Trabajo puramente sobre `docs/works/` **sin invocar un skill** (ej: el usuario edita un `FW-05_sdd-spec.md` a mano en su editor). Regla 24 gobierna invocaciones de skills, no edición manual.
-- Lectura de docs (`~/.fremi/framework/framework/**`, `docs/works/**`) — el guard aplica sólo a ejecución de procedimientos.
+- Lectura de docs (`~/.fremi/framework/**`, `docs/works/**`) — el guard aplica sólo a ejecución de procedimientos.
 
 ---
 
@@ -1110,7 +1110,7 @@ Al recibir una invocación de skill/pipeline/hook, **antes** de ejecutar el proc
 
 Las Reglas 25-32 gobiernan **reverse-engineering** — la vía formal para alinear código pre-existente al framework. Viven en un archivo dedicado:
 
-> **`~/.fremi/framework/framework/rules/reverse.md`** — Reglas 25-32:
+> **`~/.fremi/framework/rules/reverse.md`** — Reglas 25-32:
 >
 > - **R25** — Reverse-engineering es vía formal de alineación (no procedimiento excepcional).
 > - **R26** — Default `--transparent` (frontmatter con `reverse_engineered:*`).
@@ -1123,10 +1123,10 @@ Las Reglas 25-32 gobiernan **reverse-engineering** — la vía formal para aline
 
 Este archivo (`rules/workflow.md`) se lee **junto con** `rules/reverse.md` cuando se ejerce reverse. Ambos son obligatorios.
 
-Skills relacionados: `/fremi-reverse-*` (6 skills en `~/.fremi/framework/framework/reverse-engineering/`).
-Pipelines: `/fremi-pipeline-reverse-*` (4 pipelines en `~/.fremi/framework/framework/pipelines/`).
-Flow: `~/.fremi/framework/framework/flows/flow.reverse.md`.
-Config: `~/.fremi/framework/framework/settings/config.reverse.yaml`.
+Skills relacionados: `/fremi-reverse-*` (6 skills en `~/.fremi/framework/reverse-engineering/`).
+Pipelines: `/fremi-pipeline-reverse-*` (4 pipelines en `~/.fremi/framework/pipelines/`).
+Flow: `~/.fremi/framework/flows/flow.reverse.md`.
+Config: `~/.fremi/framework/settings/config.reverse.yaml`.
 
 ---
 

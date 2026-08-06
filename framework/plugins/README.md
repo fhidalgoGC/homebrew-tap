@@ -1,4 +1,4 @@
-# `~/.fremi/framework/framework/plugins/` — Configuración de plugins por agente
+# `~/.fremi/framework/plugins/` — Configuración de plugins por agente
 
 > **Esta carpeta es configuración del entorno del agente.** Contiene archivos de configuración de plugins externos (MCP servers, integraciones, etc.) que cada agente (Claude Code, Cursor, etc.) consume.
 >
@@ -26,12 +26,12 @@ Centralizar esa configuración acá tiene dos ventajas:
 
 ## Cómo agregar configuración de un plugin
 
-1. Crear un archivo descriptivo: `~/.fremi/framework/framework/plugins/<plugin-nombre>.json` (o el formato que pida el plugin).
+1. Crear un archivo descriptivo: `~/.fremi/framework/plugins/<plugin-nombre>.json` (o el formato que pida el plugin).
 2. **Documentarlo en este README** con:
    - Nombre y propósito.
    - Quién lo consume (qué agente lo lee).
    - Si necesita credenciales (en `.env` no versionado).
-3. Wirearlo en el archivo de configuración del agente (`.claude/settings.json` o similar), apuntando a `~/.fremi/framework/framework/plugins/<plugin-nombre>.json`.
+3. Wirearlo en el archivo de configuración del agente (`.claude/settings.json` o similar), apuntando a `~/.fremi/framework/plugins/<plugin-nombre>.json`.
 
 ### Plantilla mínima de entry en este README
 

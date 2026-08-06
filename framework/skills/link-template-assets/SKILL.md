@@ -14,7 +14,7 @@ Adopta **skills, rules y/o hooks** del template importado (`/template/`) como as
 ```
 
 - `tipo` (opcional): uno de `skills | rules | hooks`. Si se omite → procesa los 3.
-- `--remove` (opcional): **invierte la operación**. Desenlaza los assets que apuntan a `/template/` (no toca los de `~/.fremi/framework/framework/` ni los creados con `/fremi-add-skill` / `/fremi-add-hook` / `/fremi-add-rule` / `/fremi-add-mcp`).
+- `--remove` (opcional): **invierte la operación**. Desenlaza los assets que apuntan a `/template/` (no toca los de `~/.fremi/framework/` ni los creados con `/fremi-add-skill` / `/fremi-add-hook` / `/fremi-add-rule` / `/fremi-add-mcp`).
 
 **Combinaciones válidas:**
 
@@ -89,7 +89,7 @@ Para cada `<type>` en la lista:
 
 Para cada item detectado en Paso 1:
 
-1. **Colisión con metodología (`~/.fremi/framework/framework/<type>/<same-name>`):** si existe → **abortar todo el skill** (no procesa nada). Mostrar al usuario:
+1. **Colisión con metodología (`~/.fremi/framework/<type>/<same-name>`):** si existe → **abortar todo el skill** (no procesa nada). Mostrar al usuario:
    - Cuál es el item conflictivo.
    - Sugerencia: renombrar el item en `/template/docs/<type>/` antes de re-invocar.
    - Razón de abortar: dos sources distintos con mismo nombre confunde a Claude Code y al lector.
@@ -119,7 +119,7 @@ Para cada item validado:
    - Si es symlink (estado heredado) → convertir a folder-of-symlinks (mismo procedimiento que `/fremi-add-skill` / `/fremi-add-hook` / `/fremi-add-rule` / `/fremi-add-mcp`):
      - `rm .claude/skills`
      - `mkdir .claude/skills`
-     - Para cada subdir en `~/.fremi/framework/framework/skills/`: `ln -s ../../~/.fremi/framework/framework/skills/<frmwk-skill> .claude/skills/<frmwk-skill>`.
+     - Para cada subdir en `~/.fremi/framework/skills/`: `ln -s ../../~/.fremi/framework/skills/<frmwk-skill> .claude/skills/<frmwk-skill>`.
    - Si ya es carpeta: continuar.
 2. Para cada skill nuevo: `ln -s ../../docs/project/skills/<name> .claude/skills/<name>`.
 3. Verificar que `.claude/skills/<name>/SKILL.md` se lee correctamente (cadena resuelve hasta `/template/`).
@@ -153,7 +153,7 @@ Para cada item validado:
 
 ## Modo `--remove` — Desenlazar assets del template
 
-Cuando se invoca con `--remove`, el skill **invierte** el procedimiento de enlace. Es destructivo pero **acotado**: sólo toca symlinks que apunten al `/template/`. Nunca borra archivos reales, ni symlinks que apunten a otros destinos (`~/.fremi/framework/framework/`, `docs/project/` con archivos reales creados por `/fremi-add-skill` / `/fremi-add-hook` / `/fremi-add-rule` / `/fremi-add-mcp`, etc.).
+Cuando se invoca con `--remove`, el skill **invierte** el procedimiento de enlace. Es destructivo pero **acotado**: sólo toca symlinks que apunten al `/template/`. Nunca borra archivos reales, ni symlinks que apunten a otros destinos (`~/.fremi/framework/`, `docs/project/` con archivos reales creados por `/fremi-add-skill` / `/fremi-add-hook` / `/fremi-add-rule` / `/fremi-add-mcp`, etc.).
 
 ### Paso R0 — Validar precondiciones (modo remove)
 
@@ -341,7 +341,7 @@ Imprimir:
    ] } ] } }
 
 🔄 Estado de .claude/skills/: (si hubo conversión, mencionar)
-   - Antes: symlink a ~/.fremi/framework/framework/skills.
+   - Antes: symlink a ~/.fremi/framework/skills.
    - Después: carpeta con N symlinks individuales (M de frmwk + <N> del template).
 
 ⏭️ Tipos saltados:
@@ -361,10 +361,10 @@ Próximos pasos:
 - **`/template/` no existe** → abortar; sugerir `/fremi-import-template <ruta>` primero.
 - **`/template/docs/` no existe** → abortar; el template no sigue la convención esperada.
 - **`tipo` inválido** → abortar; mostrar valores válidos.
-- **Colisión con `~/.fremi/framework/framework/<type>/<name>`** → abortar **todo el skill** (atómico); sugerir renombrar en el template.
+- **Colisión con `~/.fremi/framework/<type>/<name>`** → abortar **todo el skill** (atómico); sugerir renombrar en el template.
 - **Colisión con un link previo en `docs/project/<type>/<name>` apuntando a otro target** → abortar; pedir resolución manual.
 - **`CLAUDE.md` no es legible** (cuando `type=rules`) → abortar con error claro.
-- **No crear nada que toque `~/.fremi/framework/framework/`, `docs/works/`, `/template/`** — esos quedan inmutables.
+- **No crear nada que toque `~/.fremi/framework/`, `docs/works/`, `/template/`** — esos quedan inmutables.
 - **Symlinks atómicos:** crear todos los symlinks de una vez al final del Paso 3-4. Si algún paso falla a mitad, rollback de los symlinks ya creados en esta invocación.
 
 ## Reglas

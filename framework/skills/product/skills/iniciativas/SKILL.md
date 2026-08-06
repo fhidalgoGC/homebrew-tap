@@ -79,4 +79,4 @@ Doc **living**:
 
 ## Referencias
 - Template: [`references/iniciativas-template.md`](references/iniciativas-template.md).
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 4 (discovery antes de formalización).
+- `~/.fremi/framework/rules/workflow.md` → Regla 4 (discovery antes de formalización).

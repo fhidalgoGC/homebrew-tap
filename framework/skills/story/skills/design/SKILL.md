@@ -83,4 +83,4 @@ Reglas duras:
 
 - Template: [`references/FW-06_design-template.md`](references/FW-06_design-template.md).
 - `config.yaml → phase_rules.design`.
-- `~/.fremi/framework/framework/rules/workflow.md` → Regla 6.4 (Design satisface SDD, no la redefine), Regla 3b (ADR por bifurcación).
+- `~/.fremi/framework/rules/workflow.md` → Regla 6.4 (Design satisface SDD, no la redefine), Regla 3b (ADR por bifurcación).

@@ -1,11 +1,11 @@
 ---
 name: fremi-install-framework
-description: Instala el framework completo en `.claude/` — crea/recrea symlinks para todos los skills (orquestadores + sub-skills por capa + globales + reverse-engineering + tools), aplicando la convención de prefijo `fremi-` (Regla 21). Reporta el estado de hooks en `.claude/settings.json` (incluye `check-reverse-alignment.sh` — Regla 32) y valida CLAUDE.md (incluye referencia a `rules/reverse.md` — Reglas 25-32). Idempotente: si un symlink ya existe apuntando al target correcto lo respeta; si el nombre no cumple con la convención `fremi-` o el target es incorrecto, lo recrea. Modos `--dry-run` (sólo mostrar), `--only skills|hooks|rules|project` (parcial). Ejecutar cuando se clona el proyecto, se importa el framework a un proyecto nuevo, o cuando se cambia la estructura de `~/.fremi/framework/framework/skills/` y hay que resincronizar `.claude/`.
+description: Instala el framework completo en `.claude/` — crea/recrea symlinks para todos los skills (orquestadores + sub-skills por capa + globales + reverse-engineering + tools), aplicando la convención de prefijo `fremi-` (Regla 21). Reporta el estado de hooks en `.claude/settings.json` (incluye `check-reverse-alignment.sh` — Regla 32) y valida CLAUDE.md (incluye referencia a `rules/reverse.md` — Reglas 25-32). Idempotente: si un symlink ya existe apuntando al target correcto lo respeta; si el nombre no cumple con la convención `fremi-` o el target es incorrecto, lo recrea. Modos `--dry-run` (sólo mostrar), `--only skills|hooks|rules|project` (parcial). Ejecutar cuando se clona el proyecto, se importa el framework a un proyecto nuevo, o cuando se cambia la estructura de `~/.fremi/framework/skills/` y hay que resincronizar `.claude/`.
 ---
 
 # /fremi-install-framework — Instalador del framework
 
-> **Bootstrap del framework — exento de Regla 24.** Este skill es el ÚNICO que puede correr con el framework NO instalado. Cualquier otro `/fremi-*` aborta si el framework no está instalado; sin este skill no habría cómo arrancar. Ver Regla 24 en [`~/.fremi/framework/framework/rules/workflow.md`](../../rules/workflow.md).
+> **Bootstrap del framework — exento de Regla 24.** Este skill es el ÚNICO que puede correr con el framework NO instalado. Cualquier otro `/fremi-*` aborta si el framework no está instalado; sin este skill no habría cómo arrancar. Ver Regla 24 en [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md).
 
 Instala **todo el framework** en `.claude/` de forma idempotente y **garantiza la convención `fremi-`** (Regla 21):
 
@@ -17,7 +17,7 @@ Instala **todo el framework** en `.claude/` de forma idempotente y **garantiza l
 
 **Convención global `fremi-` (Regla 21)** — este skill es el **único responsable** de garantizar que:
 
-1. Todo skill de `~/.fremi/framework/framework/` se publique en `.claude/skills/` con nombre `fremi-<...>`, aunque el `name:` del `SKILL.md` tuviera drift.
+1. Todo skill de `~/.fremi/framework/` se publique en `.claude/skills/` con nombre `fremi-<...>`, aunque el `name:` del `SKILL.md` tuviera drift.
 2. Los skills bajo `docs/project/skills/` se publiquen con su nombre original **sin** prefijo `fremi-`.
 3. Los symlinks viejos sin prefijo (`story`, `product-adr`, `scaffold`, etc.) se limpien y se recreen como `fremi-<...>`.
 
@@ -44,9 +44,9 @@ Instala **todo el framework** en `.claude/` de forma idempotente y **garantiza l
 
 ## Cuándo invocarlo
 
-- **Al clonar el proyecto** — sincronizar `.claude/skills/` con `~/.fremi/framework/framework/skills/`.
+- **Al clonar el proyecto** — sincronizar `.claude/skills/` con `~/.fremi/framework/skills/`.
 - **Al importar el framework** a un proyecto nuevo (después de `/fremi-import-template`).
-- **Cuando cambia la estructura** de `~/.fremi/framework/framework/skills/` (nuevos sub-skills, refactor de carpetas).
+- **Cuando cambia la estructura** de `~/.fremi/framework/skills/` (nuevos sub-skills, refactor de carpetas).
 - **Cuando aparecen symlinks broken** — el skill los detecta y recrea.
 - **Después de agregar hooks nuevos** para reportar cómo registrarlos.
 
@@ -56,7 +56,7 @@ Instala **todo el framework** en `.claude/` de forma idempotente y **garantiza l
 
 ### Paso 0 — Validar entorno
 
-1. Verificar que existe `~/.fremi/framework/framework/skills/` — si no, abortar (no es un proyecto con framework instalado).
+1. Verificar que existe `~/.fremi/framework/skills/` — si no, abortar (no es un proyecto con framework instalado).
 2. Verificar que existe `.claude/` — si no, crear con `mkdir -p .claude/skills`.
 3. Verificar que existe `CLAUDE.md` en la raíz — si no, avisar (necesario para cargar rules).
 
@@ -64,24 +64,24 @@ Instala **todo el framework** en `.claude/` de forma idempotente y **garantiza l
 
 Escanear todas las carpetas del framework:
 
-- `~/.fremi/framework/framework/skills/` — orquestadores + sub-skills por capa + globales + tools.
-- `~/.fremi/framework/framework/reverse-engineering/` — reverse-*.
-- `~/.fremi/framework/framework/installs/` — este skill.
+- `~/.fremi/framework/skills/` — orquestadores + sub-skills por capa + globales + tools.
+- `~/.fremi/framework/reverse-engineering/` — reverse-*.
+- `~/.fremi/framework/installs/` — este skill.
 
 Estructura esperada:
 
 ```
-~/.fremi/framework/framework/skills/
+~/.fremi/framework/skills/
 ├── <capa>/SKILL.md                 → invocable como /fremi-<capa>
 │   └── skills/<sub>/SKILL.md       → invocable como /fremi-<capa>-<sub>
 ├── tools/SKILL.md                  → invocable como /fremi-tools
 │   └── skills/<action>/SKILL.md    → invocable como /fremi-<action>
 └── <global>/SKILL.md               → invocable como /fremi-<global>
 
-~/.fremi/framework/framework/reverse-engineering/
+~/.fremi/framework/reverse-engineering/
 └── <reverse-name>/SKILL.md         → invocable como /fremi-<reverse-name>
 
-~/.fremi/framework/framework/installs/
+~/.fremi/framework/installs/
 └── install-framework/SKILL.md      → invocable como /fremi-install-framework
 ```
 
@@ -109,11 +109,11 @@ Para cada skill descubierto:
    - Si el `name:` NO empieza con `fremi-` → normalizarlo a `fremi-<name>` para el symlink (y reportar "warning: name field drift — usando `fremi-<name>` en el symlink").
    - Si empieza con `fremi-` → usarlo tal cual.
 3. Determinar el path del target según la ubicación en el árbol:
-   - Orquestador de capa: `~/.fremi/framework/framework/skills/<capa>/`
-   - Sub-skill: `~/.fremi/framework/framework/skills/<capa>/skills/<sub>/`
-   - Skill global: `~/.fremi/framework/framework/skills/<name>/`
-   - Reverse: `~/.fremi/framework/framework/reverse-engineering/<name>/`
-   - Install: `~/.fremi/framework/framework/installs/<name>/`
+   - Orquestador de capa: `~/.fremi/framework/skills/<capa>/`
+   - Sub-skill: `~/.fremi/framework/skills/<capa>/skills/<sub>/`
+   - Skill global: `~/.fremi/framework/skills/<name>/`
+   - Reverse: `~/.fremi/framework/reverse-engineering/<name>/`
+   - Install: `~/.fremi/framework/installs/<name>/`
 4. Path del symlink: `.claude/skills/fremi-<nombre>` → `../../<target>`.
 5. **Limpieza de nombres legacy** (sin prefijo): antes de crear, si existe `.claude/skills/<legacy-name>` (ej: `story`, `product-adr`, `scaffold`) y su target apunta a este skill, **borrarlo** (reportar "cleaned legacy").
 6. Aplicar idempotencia:
@@ -139,7 +139,7 @@ Enumerar `docs/project/skills/` (si existe). Para cada skill:
 
 Los rules del framework se cargan vía **referencia desde `CLAUDE.md`**, no via symlink en `.claude/`.
 
-1. Verificar que `CLAUDE.md` referencia `~/.fremi/framework/framework/rules/workflow.md` (típicamente en la introducción).
+1. Verificar que `CLAUDE.md` referencia `~/.fremi/framework/rules/workflow.md` (típicamente en la introducción).
 2. Verificar que existe la sección `## Project rules` en `CLAUDE.md` para rules del project (si `docs/project/rules/` existe).
 3. Si `docs/project/rules/*.mdc` existe pero no está referenciada en `## Project rules` → sugerir agregarla (con `--force` la agrega automáticamente).
 
@@ -147,7 +147,7 @@ Los rules del framework se cargan vía **referencia desde `CLAUDE.md`**, no via 
 
 Los hooks se registran en `.claude/settings.json` bajo `"hooks"`. El skill:
 
-1. Enumerar hooks de `~/.fremi/framework/framework/hooks/*.sh`.
+1. Enumerar hooks de `~/.fremi/framework/hooks/*.sh`.
 2. Cargar `references/settings-hooks-template.json` — bloque JSON con los mappings recomendados.
 3. **Si `.claude/settings.json` NO existe** → crearlo con el bloque del template.
 4. **Si `.claude/settings.json` existe con hooks registrados** → reportar cuáles están (mostrar bloque actual). NO sobrescribir sin `--force`.
@@ -181,7 +181,7 @@ Formato:
 
 ▶ Hooks:
   ✓ .claude/settings.json existe
-  ✓ Hooks registrados: N / 10 (~/.fremi/framework/framework/hooks/)
+  ✓ Hooks registrados: N / 10 (~/.fremi/framework/hooks/)
   ⚠ Sin registrar: <lista>
      Registrarlos manualmente copiando de references/settings-hooks-template.json.
 
@@ -195,7 +195,7 @@ Formato:
 
 ## Validaciones
 
-- Aborta si `~/.fremi/framework/framework/skills/` no existe (no hay framework para instalar).
+- Aborta si `~/.fremi/framework/skills/` no existe (no hay framework para instalar).
 - Aborta si un symlink no puede crearse (permisos, filesystem).
 - Reporta symlinks broken pero no los recrea si el target no existe.
 - Con `--dry-run` NO modifica nada — sólo reporta.
@@ -206,7 +206,7 @@ Formato:
 ## Anti-patrones
 
 - ❌ Ejecutar el skill "por las dudas" cada vez — es idempotente pero no gratis. Usarlo cuando cambia la estructura.
-- ❌ Editar `.claude/skills/` a mano — este skill lo mantiene sincronizado con `~/.fremi/framework/framework/skills/`.
+- ❌ Editar `.claude/skills/` a mano — este skill lo mantiene sincronizado con `~/.fremi/framework/skills/`.
 - ❌ Registrar hooks sin verificar sus dependencias (`jq`, `git`) — verificar en el sistema antes.
 - ❌ Usar `--force` sin haber revisado el reporte de `--dry-run` primero.
 
@@ -215,7 +215,7 @@ Formato:
 ## Referencias
 
 - Template del bloque de hooks: [`references/settings-hooks-template.json`](references/settings-hooks-template.json).
-- Skills del framework: `~/.fremi/framework/framework/skills/` (jerárquico por capa — Regla 21).
-- Hooks del framework: `~/.fremi/framework/framework/hooks/` (Regla 23).
-- Rules del framework: `~/.fremi/framework/framework/rules/workflow.md` (cargado vía CLAUDE.md).
+- Skills del framework: `~/.fremi/framework/skills/` (jerárquico por capa — Regla 21).
+- Hooks del framework: `~/.fremi/framework/hooks/` (Regla 23).
+- Rules del framework: `~/.fremi/framework/rules/workflow.md` (cargado vía CLAUDE.md).
 - CLAUDE.md (entrada del agente) — [`../../../../CLAUDE.md`](../../../../CLAUDE.md).

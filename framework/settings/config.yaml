@@ -27,7 +27,7 @@ since: 2026-07-13
 #     Default mode: transparent (frontmatter con reverse_engineered:*).
 # ── SCHEMA v10 CHANGES ─────────────────────────────────────────────────────
 # v10 (2026-07-16):
-#   - MOVE: settings/config.<capa>.yaml → ~/.fremi/framework/framework/skills/<capa>/config.user.yaml
+#   - MOVE: settings/config.<capa>.yaml → ~/.fremi/framework/skills/<capa>/config.user.yaml
 #     Los archivos user-editable ahora viven junto al skill orquestador.
 #     Razón: config user-editable + config.core (topología) son dos caras de
 #     la misma capa; tenerlos juntos evita cruzar carpetas al editar.
@@ -54,7 +54,7 @@ since: 2026-07-13
 #     * TOGGLE + hard_rules + topology_refs → siguen en este master
 #       (user-configurable). Solo el flag `enabled` es cambiable por el user.
 #     * TOPOLOGÍA (step_matrix + internal_items + cross_instance) →
-#       movida a `~/.fremi/framework/framework/skills/<capa>/config.core.yaml` — fuente
+#       movida a `~/.fremi/framework/skills/<capa>/config.core.yaml` — fuente
 #       de verdad ESTRUCTURAL, no user-editable.
 #   - Los settings/config.<capa>.yaml YA NO tienen bloque `flow.parallelism`.
 #   - Nueva regla: config.core.yaml vive junto al skill orquestador porque
@@ -155,26 +155,26 @@ testing:
 # ===========================================================================
 layers:
   product:
-    config_user: ~/.fremi/framework/framework/skills/product/config.user.yaml    # user-editable
-    config_core: ~/.fremi/framework/framework/skills/product/config.core.yaml    # framework-owned
+    config_user: ~/.fremi/framework/skills/product/config.user.yaml    # user-editable
+    config_core: ~/.fremi/framework/skills/product/config.core.yaml    # framework-owned
     active: true
     orchestrator_skill: /fremi-product
 
   feature:
-    config_user: ~/.fremi/framework/framework/skills/feature/config.user.yaml
-    config_core: ~/.fremi/framework/framework/skills/feature/config.core.yaml
+    config_user: ~/.fremi/framework/skills/feature/config.user.yaml
+    config_core: ~/.fremi/framework/skills/feature/config.core.yaml
     active: true
     orchestrator_skill: /fremi-feature
 
   story:
-    config_user: ~/.fremi/framework/framework/skills/story/config.user.yaml
-    config_core: ~/.fremi/framework/framework/skills/story/config.core.yaml
+    config_user: ~/.fremi/framework/skills/story/config.user.yaml
+    config_core: ~/.fremi/framework/skills/story/config.core.yaml
     active: true
     orchestrator_skill: /fremi-story
 
   enabler:
-    config_user: ~/.fremi/framework/framework/skills/enabler/config.user.yaml
-    config_core: ~/.fremi/framework/framework/skills/enabler/config.core.yaml
+    config_user: ~/.fremi/framework/skills/enabler/config.user.yaml
+    config_core: ~/.fremi/framework/skills/enabler/config.core.yaml
     active: true
     orchestrator_skill: /fremi-enabler
 
@@ -183,31 +183,31 @@ layers:
     orchestrator_skill: null   # bug tiene 2 skills según scope (/fremi-story-bug, /fremi-feature-bug)
     scopes:
       story:
-        config: ~/.fremi/framework/framework/settings/config.bug.story.yaml
+        config: ~/.fremi/framework/settings/config.bug.story.yaml
         active: true
         skill: /fremi-story-bug
       feature:
-        config: ~/.fremi/framework/framework/settings/config.bug.feature.yaml
+        config: ~/.fremi/framework/settings/config.bug.feature.yaml
         active: true
         skill: /fremi-feature-bug
 
   extra:
-    config: ~/.fremi/framework/framework/settings/config.extra.yaml
+    config: ~/.fremi/framework/settings/config.extra.yaml
     active: true
     orchestrator_skill: null   # extra no tiene skill dedicado (edición a mano)
 
   reverse:
-    config: ~/.fremi/framework/framework/settings/config.reverse.yaml
+    config: ~/.fremi/framework/settings/config.reverse.yaml
     active: true
     orchestrator_skill: null   # reverse no tiene orquestador único — 6 skills + 4 pipelines
-    rules: ~/.fremi/framework/framework/rules/reverse.md   # Reglas 25-32 específicas de reverse
-    flow: ~/.fremi/framework/framework/flows/flow.reverse.md
-    skills_dir: ~/.fremi/framework/framework/reverse-engineering/
+    rules: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32 específicas de reverse
+    flow: ~/.fremi/framework/flows/flow.reverse.md
+    skills_dir: ~/.fremi/framework/reverse-engineering/
     pipelines:
-      - ~/.fremi/framework/framework/pipelines/pipeline.reverse.product.md
-      - ~/.fremi/framework/framework/pipelines/pipeline.reverse.feature.md
-      - ~/.fremi/framework/framework/pipelines/pipeline.reverse.story.md
-      - ~/.fremi/framework/framework/pipelines/pipeline.reverse.enabler.md
+      - ~/.fremi/framework/pipelines/pipeline.reverse.product.md
+      - ~/.fremi/framework/pipelines/pipeline.reverse.feature.md
+      - ~/.fremi/framework/pipelines/pipeline.reverse.story.md
+      - ~/.fremi/framework/pipelines/pipeline.reverse.enabler.md
     # Bug y extra reverse son 1 archivo — sin pipeline propio.
 
 # ===========================================================================
@@ -514,7 +514,7 @@ execution_mode:
 # Este archivo (settings) sólo declara si el paralelismo está ACTIVO en el
 # proyecto. La TOPOLOGÍA (qué steps pueden concurrir, qué items internos
 # son paralelizables, matrices de compatibilidad) NO vive acá — es estructura
-# del framework y vive en `~/.fremi/framework/framework/skills/<capa>/config.core.yaml`.
+# del framework y vive en `~/.fremi/framework/skills/<capa>/config.core.yaml`.
 #
 # Regla dura: los archivos `config.core.yaml` son fuente de verdad ESTRUCTURAL
 # — el usuario NO los modifica. Sólo el mantenedor del framework los edita
@@ -531,10 +531,10 @@ parallelism:
   # framework — no se editan desde acá.
   # DEPRECATED: `topology_refs` se mantiene por compat. Usar `layers.<capa>.config_core`.
   topology_refs:
-    product:  ~/.fremi/framework/framework/skills/product/config.core.yaml
-    feature:  ~/.fremi/framework/framework/skills/feature/config.core.yaml
-    story:    ~/.fremi/framework/framework/skills/story/config.core.yaml
-    enabler:  ~/.fremi/framework/framework/skills/enabler/config.core.yaml
+    product:  ~/.fremi/framework/skills/product/config.core.yaml
+    feature:  ~/.fremi/framework/skills/feature/config.core.yaml
+    story:    ~/.fremi/framework/skills/story/config.core.yaml
+    enabler:  ~/.fremi/framework/skills/enabler/config.core.yaml
 
   # Reglas duras que gobiernan CUALQUIER paralelización, aunque
   # `parallelism.enabled: true`. Estas son transversales al framework —
@@ -570,30 +570,30 @@ preferences:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  methodology_nomenclature: ~/.fremi/framework/framework/settings/methodology.json
-  rules_hard: ~/.fremi/framework/framework/rules/workflow.md
-  flow_narrative: ~/.fremi/framework/framework/flows/workflow.md
+  methodology_nomenclature: ~/.fremi/framework/settings/methodology.json
+  rules_hard: ~/.fremi/framework/rules/workflow.md
+  flow_narrative: ~/.fremi/framework/flows/workflow.md
   agent_entry_point: CLAUDE.md
   layer_configs:
     # User-editable configs viven ahora junto al skill orquestador
-    # (~/.fremi/framework/framework/skills/<capa>/config.user.yaml).
+    # (~/.fremi/framework/skills/<capa>/config.user.yaml).
     # Los config.core.yaml (topología, DAG, agent options) también viven
     # ahí — user NO edita.
     product:
-      user: ~/.fremi/framework/framework/skills/product/config.user.yaml
-      core: ~/.fremi/framework/framework/skills/product/config.core.yaml
+      user: ~/.fremi/framework/skills/product/config.user.yaml
+      core: ~/.fremi/framework/skills/product/config.core.yaml
     feature:
-      user: ~/.fremi/framework/framework/skills/feature/config.user.yaml
-      core: ~/.fremi/framework/framework/skills/feature/config.core.yaml
+      user: ~/.fremi/framework/skills/feature/config.user.yaml
+      core: ~/.fremi/framework/skills/feature/config.core.yaml
     story:
-      user: ~/.fremi/framework/framework/skills/story/config.user.yaml
-      core: ~/.fremi/framework/framework/skills/story/config.core.yaml
+      user: ~/.fremi/framework/skills/story/config.user.yaml
+      core: ~/.fremi/framework/skills/story/config.core.yaml
     enabler:
-      user: ~/.fremi/framework/framework/skills/enabler/config.user.yaml
-      core: ~/.fremi/framework/framework/skills/enabler/config.core.yaml
+      user: ~/.fremi/framework/skills/enabler/config.user.yaml
+      core: ~/.fremi/framework/skills/enabler/config.core.yaml
     bug:
       # Bugs no tienen config.core.yaml todavía (por evaluar si aplica).
-      story: ~/.fremi/framework/framework/settings/config.bug.story.yaml
-      feature: ~/.fremi/framework/framework/settings/config.bug.feature.yaml
-    extra: ~/.fremi/framework/framework/settings/config.extra.yaml
-    reverse: ~/.fremi/framework/framework/settings/config.reverse.yaml
+      story: ~/.fremi/framework/settings/config.bug.story.yaml
+      feature: ~/.fremi/framework/settings/config.bug.feature.yaml
+    extra: ~/.fremi/framework/settings/config.extra.yaml
+    reverse: ~/.fremi/framework/settings/config.reverse.yaml
