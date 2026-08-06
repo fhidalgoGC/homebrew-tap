@@ -14,28 +14,33 @@
   },
   "scripts": {
     "dev": "bun run src/index.ts",
-    "clean:bun-cache": "find . -maxdepth 1 -name '.*.bun-build' -type f -delete 2>/dev/null; true",
-    "build:darwin-arm64": "bun run clean:bun-cache && bun build ./src/index.ts --compile --target=bun-darwin-arm64 --outfile bin/fremi-darwin-arm64 && bun run clean:bun-cache",
-    "build:darwin-x64": "bun run clean:bun-cache && bun build ./src/index.ts --compile --target=bun-darwin-x64 --outfile bin/fremi-darwin-x64 && bun run clean:bun-cache",
-    "build:linux-x64": "bun run clean:bun-cache && bun build ./src/index.ts --compile --target=bun-linux-x64 --outfile bin/fremi-linux-x64 && bun run clean:bun-cache",
-    "build:linux-arm64": "bun run clean:bun-cache && bun build ./src/index.ts --compile --target=bun-linux-arm64 --outfile bin/fremi-linux-arm64 && bun run clean:bun-cache",
-    "build:windows-x64": "bun run clean:bun-cache && bun build ./src/index.ts --compile --target=bun-windows-x64 --outfile bin/fremi-windows-x64.exe && bun run clean:bun-cache",
-    "build:all": "bun run clean:bun-cache && bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64 && bun run clean:bun-cache",
     "typecheck": "tsc --noEmit",
-    "sandbox:reset": "rm -rf sandbox && mkdir sandbox && echo 'Fresh sandbox at ./sandbox — run `bun run sandbox:install` to install fremi there'",
-    "sandbox:install": "bun run build:darwin-arm64 && ./bin/fremi-darwin-arm64 install ./sandbox",
-    "sandbox:uninstall": "./bin/fremi-darwin-arm64 uninstall ./sandbox",
-    "sandbox:tree": "find sandbox -type f -o -type l 2>/dev/null | sort | head -50",
-    "sandbox:cycle": "bun run sandbox:reset && bun run sandbox:install && bun run sandbox:tree",
-    "fremi:version": "bun run src/index.ts version",
-    "fremi:help": "bun run src/index.ts help",
+
+    "clean:bun-cache": "bash scripts/clean-cache.sh",
+
+    "build:darwin-arm64": "bash scripts/build.sh darwin-arm64",
+    "build:darwin-x64": "bash scripts/build.sh darwin-x64",
+    "build:linux-x64": "bash scripts/build.sh linux-x64",
+    "build:linux-arm64": "bash scripts/build.sh linux-arm64",
+    "build:windows-x64": "bash scripts/build.sh windows-x64",
+    "build:all": "bash scripts/build-all.sh",
+
+    "fremi:version": "bash scripts/fremi-run.sh version",
+    "fremi:help": "bash scripts/fremi-run.sh help",
     "fremi:install": "bash scripts/fremi-install.sh",
     "fremi:install:init": "bash scripts/fremi-install.sh --init",
-    "fremi:uninstall": "bun run src/index.ts uninstall ./sandbox",
-    "fremi:update": "bun run src/index.ts update",
-    "fremi:reset": "rm -rf sandbox && mkdir sandbox && echo 'sandbox reset — try: bun run fremi:install'",
-    "release:publish": "bun run build:all && gh release create v$(cat VERSION) bin/fremi-* --repo fhidalgoGC/homebrew-tap --title \"v$(cat VERSION)\" --generate-notes",
-    "release:sha256": "shasum -a 256 bin/fremi-*"
+    "fremi:uninstall": "bash scripts/fremi-run.sh uninstall ./sandbox",
+    "fremi:update": "bash scripts/fremi-run.sh update",
+    "fremi:reset": "bash scripts/sandbox.sh reset",
+
+    "sandbox:reset": "bash scripts/sandbox.sh reset",
+    "sandbox:install": "bash scripts/sandbox.sh install",
+    "sandbox:uninstall": "bash scripts/sandbox.sh uninstall",
+    "sandbox:tree": "bash scripts/sandbox.sh tree",
+    "sandbox:cycle": "bash scripts/sandbox.sh cycle",
+
+    "release:publish": "bash scripts/release.sh publish",
+    "release:sha256": "bash scripts/release.sh sha256"
   },
   "devDependencies": {
     "@types/bun": "latest",
