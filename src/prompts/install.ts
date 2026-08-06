@@ -45,45 +45,51 @@ export async function gatherInstallAnswers(
 }
 
 /**
- * Loop-style multiselect: press ENTER on an agent to toggle it, then
- * navigate down to "✓ Done" to finalize. Compared to @clack/prompts'
- * standard multiselect (SPACE = toggle, ENTER = submit), this is more
- * discoverable — one key, one action, obvious "finish" affordance.
+ * Loop-style multiselect: press ENTER on an agent to toggle its check mark,
+ * navigate down to "✓ Done" to finalize. Between iterations we clear the
+ * screen so the user only sees ONE menu, always reflecting the current
+ * selection — no scrolling backlog of previous states.
  *
- * Draws a fresh menu each iteration by re-invoking select(). The screen
- * scrolls, but the flow reads naturally top to bottom.
+ * Preferred over @clack/prompts' native multiselect (SPACE = toggle,
+ * ENTER = submit) because ENTER-toggle is more discoverable in a first-time
+ * CLI experience.
  */
 async function pickAgentsLoop(defaults: string[]): Promise<string[]> {
   const selected = new Set<string>(defaults);
-  let firstIteration = true;
 
   while (true) {
-    if (firstIteration) {
-      intro("fremi install — pick your targets");
-      firstIteration = false;
-    }
+    // Redraw the whole prompt in place instead of stacking iterations. Users
+    // see a single, live-updating menu.
+    console.clear();
+    intro("fremi install — pick your targets");
+    note(
+      "ENTER toggles the check mark on each agent.\n" +
+        "Move down to '✓ Done' and press ENTER to finish.",
+      "how it works",
+    );
 
     const options = [
       ...AGENT_CATALOG.map((a) => ({
         value: a.value,
-        label: `${selected.has(a.value) ? "◼" : "◻"}  ${a.label}`,
+        label: `${selected.has(a.value) ? "[x]" : "[ ]"}  ${a.label}`,
         hint: a.hint,
       })),
       {
         value: DONE_TOKEN,
-        label: `✓  Done — proceed with ${selected.size} agent${selected.size === 1 ? "" : "s"}`,
+        label: `✓  Done — proceed with ${selected.size} agent${selected.size === 1 ? "" : "s"} selected`,
         hint: selected.size === 0 ? "select at least one first" : "confirm and continue",
       },
     ];
 
     const choice = await askSelect({
-      message: "Toggle an agent (ENTER) or pick Done to finish:",
+      message: "Toggle agents (ENTER) · pick 'Done' to finish:",
       options,
     });
 
     if (choice === DONE_TOKEN) {
       if (selected.size === 0) {
-        note("Select at least one agent before continuing.", "⚠ empty selection");
+        // Loop again; the "select at least one first" hint already tells
+        // the user why. No extra note needed.
         continue;
       }
       return Array.from(selected);

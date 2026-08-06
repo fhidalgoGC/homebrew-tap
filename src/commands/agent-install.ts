@@ -57,7 +57,7 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
 
 function readEmbeddedVersion(): string {
   // Match the constant in src/commands/version.ts so both stay in lockstep.
-  return "0.3.0";
+  return "0.3.1";
 }
 
 function dedupe<T>(arr: T[]): T[] {
