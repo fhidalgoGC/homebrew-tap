@@ -330,6 +330,6 @@ flow:
 # ---------------------------------------------------------------------------
 references:
   master_config: ~/.fremi/framework/settings/config.yaml
-  methodology: ~/.fremi/framework/settings/methodology.json
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules: ~/.fremi/framework/rules/workflow.md
   orchestrator_skill: /fremi-story

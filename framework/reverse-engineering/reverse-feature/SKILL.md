@@ -27,7 +27,7 @@ Reconstruye los docs de una feature a partir de:
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`, `config.feature.yaml`, `config.yaml` master.
+- `methodology.core.yaml`, `config.feature.yaml`, `config.yaml` master.
 
 ### Paso 1 — Identificar la feature
 - Verificar existencia del folder `docs/works/features/{FT-XX}_<slug>/`.

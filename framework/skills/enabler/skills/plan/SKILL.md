@@ -23,7 +23,7 @@ Puebla el `EN-03_plan.md` con las **tareas atómicas** `T-XXX` que materializan 
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.task`.
+- `methodology.core.yaml` → `identifiers.task`.
 - `config.yaml` → `phase_rules.tasks`.
 
 ### Paso 1 — Validar padre

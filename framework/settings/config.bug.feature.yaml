@@ -143,7 +143,7 @@ procedure_after_creation:
 # ---------------------------------------------------------------------------
 references:
   master_config: ~/.fremi/framework/settings/config.yaml
-  methodology: ~/.fremi/framework/settings/methodology.json
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules: ~/.fremi/framework/rules/workflow.md
   regla_8: "~/.fremi/framework/rules/workflow.md § Regla 8 (test rojo primero)"
   sibling_scope: ~/.fremi/framework/settings/config.bug.story.yaml

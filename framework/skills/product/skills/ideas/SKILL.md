@@ -29,7 +29,7 @@ Extiende `docs/works/product/ideas.md` con **ideas exploradas** — enfoques pos
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.definition` (aplica también para ideas discovery).
 
 ### Paso 1 — Precondiciones (Regla 1)

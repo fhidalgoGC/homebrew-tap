@@ -46,7 +46,7 @@ Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (co
    - `testing.e2e.enabled + command`.
    - `testing.coverage.enabled + command + threshold`.
    - `phase_rules.verify` — reglas obligatorias de la fase.
-3. Leer `~/.fremi/framework/settings/methodology.json`:
+3. Leer `~/.fremi/framework/settings/methodology.core.yaml`:
    - `identifiers.workflow_doc.items[name=checkwork]` — filename del checkwork.
    - `identifiers.workflow_doc.items[name=closure]` — filename del closure.
 

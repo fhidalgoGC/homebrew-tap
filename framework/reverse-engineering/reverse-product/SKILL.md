@@ -28,7 +28,7 @@ Reconstruye los 7 docs de la capa producto a partir de features/stories existent
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`, `config.product.yaml`.
+- `methodology.core.yaml`, `config.product.yaml`.
 
 ### Paso 1 — Inventario de features y stories
 

@@ -41,7 +41,7 @@ docs/works/
 
 ### Convención de nomenclatura
 
-> **Fuente de verdad de la NOMENCLATURA:** `~/.fremi/framework/settings/methodology.json`. Las descripciones de abajo son resumen — la configuración formal (regex, formats, scopes) vive en ese JSON. Para cambiar prefijos o padding (ej: `FT-01` → `F-001`), editar el JSON y hacer sweep.
+> **Fuente de verdad de la NOMENCLATURA:** `~/.fremi/framework/settings/methodology.core.yaml`. Las descripciones de abajo son resumen — la configuración formal (regex, formats, scopes) vive en ese JSON. Para cambiar prefijos o padding (ej: `FT-01` → `F-001`), editar el JSON y hacer sweep.
 >
 > **Fuente de verdad OPERATIVA:** `~/.fremi/framework/settings/config.yaml`. Manda para scripts/tooling y define la **obligatoriedad condicional** de `FW-00_explore.md` y `FW-02_proposal.md` (ver `config.story.yaml → conditional_rules`), además del stack técnico, testing capabilities y reglas por fase.
 

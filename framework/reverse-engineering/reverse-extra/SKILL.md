@@ -24,7 +24,7 @@ Reconstruye un `EX-NN_<slug>.md` a partir de cambios de tooling / scripts / IaC 
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`, `config.extra.yaml`.
+- `methodology.core.yaml`, `config.extra.yaml`.
 
 ### Paso 1 — Identificar el trabajo
 

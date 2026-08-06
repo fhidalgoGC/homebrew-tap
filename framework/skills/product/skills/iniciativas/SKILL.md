@@ -34,7 +34,7 @@ Crea o extiende `docs/works/product/iniciativas.md` con **iniciativas** (`init-X
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.iniciativa` (init-XXX + regex + padding).
+- `methodology.core.yaml` → `identifiers.iniciativa` (init-XXX + regex + padding).
 - `config.yaml` → `phase_rules.definition` (aplica también para iniciativas dado su rol de "por qué").
 
 ### Paso 1 — Precondiciones

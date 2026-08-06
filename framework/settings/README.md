@@ -11,24 +11,24 @@
 | Archivo | Tipo | Propósito |
 |---|---|---|
 | `config.yaml` | Config maestra | **Fuente de verdad operativa**: stack técnico, testing capabilities (strict_tdd, test_runner, type_checker), reglas por fase (proposal/spec/design/tasks/apply/verify/…), obligatoriedad condicional de `FW-00_explore` y `FW-02_proposal`, preferencias del proyecto. **El archivo que marca todo** — scripts, hooks y tooling consultan primero acá. |
-| `methodology.json` | Config nomenclatura | Fuente de verdad de la **nomenclatura**: prefijos, formatos de ID, scopes, regex, rutas base, principios. Para IAs que necesitan entender el naming. Coexiste con `config.yaml`. |
-| `methodology.schema.json` | Schema | JSON Schema (draft 2020-12) que valida `methodology.json`. Lo usa el IDE para autocompletar y reportar errores. |
+| `methodology.core.yaml` | Config nomenclatura | Fuente de verdad de la **nomenclatura**: prefijos, formatos de ID, scopes, regex, rutas base, principios. Para IAs que necesitan entender el naming. Coexiste con `config.yaml`. |
+| `methodology.schema.yaml` | Schema | JSON Schema (draft 2020-12) que valida `methodology.core.yaml`. Lo usa el IDE para autocompletar y reportar errores. |
 | `README.md` | Doc humana | Este archivo. |
 
-### Relación entre `config.yaml` y `methodology.json`
+### Relación entre `config.yaml` y `methodology.core.yaml`
 
 Son **complementarios, no redundantes**:
 
 - **`config.yaml`** manda para **operar** el framework: qué test runner correr, si strict-TDD está activo, si `FW-00_explore` es obligatorio en esta story concreta, cuál es la regla que se aplica en la fase `proposal`.
-- **`methodology.json`** manda para **nombrar** artefactos: cuál es el regex de un ID de feature, con qué padding se numera un ADR, cuál es el filename esperado del doc `FW-05_sdd-spec.md`.
+- **`methodology.core.yaml`** manda para **nombrar** artefactos: cuál es el regex de un ID de feature, con qué padding se numera un ADR, cuál es el filename esperado del doc `FW-05_sdd-spec.md`.
 
-En caso de superposición (ej: obligatoriedad de `FW-00`/`FW-02` mencionada en ambos), **`config.yaml` es autoritativo**. `methodology.json` solo mantiene la referencia cruzada (`condition_ref`) para que los skills sepan dónde buscar la decisión.
+En caso de superposición (ej: obligatoriedad de `FW-00`/`FW-02` mencionada en ambos), **`config.yaml` es autoritativo**. `methodology.core.yaml` solo mantiene la referencia cruzada (`condition_ref`) para que los skills sepan dónde buscar la decisión.
 
 ---
 
 ## ¿Quién lee estos archivos?
 
-Los **skills** del proyecto (`~/.fremi/framework/skills/*/SKILL.md`) cargan `methodology.json` como **Paso 0 obligatorio** antes de hacer cualquier otra cosa. Si el JSON falta o no parsea, los skills **abortan** — no usan fallbacks hardcoded.
+Los **skills** del proyecto (`~/.fremi/framework/skills/*/SKILL.md`) cargan `methodology.core.yaml` como **Paso 0 obligatorio** antes de hacer cualquier otra cosa. Si el JSON falta o no parsea, los skills **abortan** — no usan fallbacks hardcoded.
 
 Skills que dependen del JSON:
 - `/fremi-feature` — usa `identifiers.feature`, `slug`, `paths`.
@@ -43,7 +43,7 @@ Los **hooks** (en `~/.fremi/framework/hooks/`) hoy no leen el JSON directamente 
 
 ---
 
-## `methodology.json` — La fuente de verdad
+## `methodology.core.yaml` — La fuente de verdad
 
 ### Estructura
 
@@ -94,7 +94,7 @@ Cada `id_format`, `folder_format`, `filename_format` usa placeholders estilo pri
 
 ## Cómo cambiar la convención
 
-Editar `methodology.json` cambia la convención **para todos los items nuevos**. Los items ya creados con la nomenclatura vieja quedan como están hasta que se haga un sweep manual.
+Editar `methodology.core.yaml` cambia la convención **para todos los items nuevos**. Los items ya creados con la nomenclatura vieja quedan como están hasta que se haga un sweep manual.
 
 ### Casos típicos
 
@@ -126,17 +126,17 @@ Editar `paths.*` (rutas base) o `identifiers.<id>.location` (ubicación específ
 
 ### Después de cambiar
 
-1. Validá que el JSON sigue siendo válido (el IDE te lo dice con el `methodology.schema.json`).
+1. Validá que el JSON sigue siendo válido (el IDE te lo dice con el `methodology.schema.yaml`).
 2. Si cambiaste algo que afecta archivos ya creados, hacé un sweep:
    - Renombrar carpetas/archivos.
    - Actualizar referencias internas (grep + perl/sed).
-3. Si modificaste estructura del schema (agregaste un nuevo tipo de identificador, etc.), actualizá también `methodology.schema.json`.
+3. Si modificaste estructura del schema (agregaste un nuevo tipo de identificador, etc.), actualizá también `methodology.schema.yaml`.
 
 ---
 
-## `methodology.schema.json` — Validación
+## `methodology.schema.yaml` — Validación
 
-JSON Schema versión 2020-12 que valida la estructura de `methodology.json`. El IDE lo usa automáticamente vía el `$schema` declarado en `methodology.json`.
+JSON Schema versión 2020-12 que valida la estructura de `methodology.core.yaml`. El IDE lo usa automáticamente vía el `$schema` declarado en `methodology.core.yaml`.
 
 Define:
 - Campos requeridos top-level (`version`, `identifiers`, `paths`, `slug`, `layers`).

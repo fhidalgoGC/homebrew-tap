@@ -17,7 +17,7 @@ Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/ski
 /fremi-pipeline-story <FEATURE_ID> <nombre-descriptivo-de-la-story> [--mode interactive|auto]
 ```
 
-- `<FEATURE_ID>`: ej `FT-03` o `FT-03_reportes-mensuales`. Formato definido en `methodology.json → identifiers.feature.id_format`.
+- `<FEATURE_ID>`: ej `FT-03` o `FT-03_reportes-mensuales`. Formato definido en `methodology.core.yaml → identifiers.feature.id_format`.
 - `<nombre-descriptivo>`: título en lenguaje natural. Se convierte a slug según `slug.transforms`.
 - `--mode` *(opcional)*: overridea el `execution_mode.pipeline_default` de `config.story.yaml`.
 
@@ -47,7 +47,7 @@ Consultar `config.story.yaml → execution_mode` para los defaults. Sugerencia: 
 ## Precondiciones duras (abortan el pipeline)
 
 - **Regla 24 — Framework instalado**: `.claude/skills/fremi-install-framework` es symlink válido y `CLAUDE.md` referencia `~/.fremi/framework/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré `/fremi-install-framework` antes de invocar el pipeline". **No auto-instalar.**
-- `~/.fremi/framework/settings/methodology.json` + `config.story.yaml` existen y parsean.
+- `~/.fremi/framework/settings/methodology.core.yaml` + `config.story.yaml` existen y parsean.
 - `config.story.yaml → active: true`.
 - Feature `{FEATURE_ID}` existe en `docs/works/features/` y su `definition.md` tiene contenido real (no template vacío).
 - Feature `definition.md` tiene frontmatter con `version` (Regla 17). Si no → avisar y proponer migrarla antes.

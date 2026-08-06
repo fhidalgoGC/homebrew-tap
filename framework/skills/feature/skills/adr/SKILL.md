@@ -43,7 +43,7 @@ Si el usuario invoca `/fremi-feature-adr` directamente para registrar una decisi
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer:
    - `adr_cfg = identifiers.adr` → `prefix`, `id_format`, `location_default`, `location_feature`, `regex`.
    - `feat_cfg = identifiers.feature` (para resolver el path cuando scope es una feature).
@@ -122,7 +122,7 @@ Decir al usuario:
 - **No reciclar** IDs. Un ADR reemplazado se marca `Estado: Reemplazada por <adr-id>` y se crea uno nuevo.
 - **Default = product.** Sólo se va a feature si la decisión es estrictamente interna a esa feature.
 - **Fecha:** se usa la fecha actual (`date +%Y-%m-%d`).
-- Si `methodology.json` no es legible → **abortar**. No usar fallbacks hardcoded.
+- Si `methodology.core.yaml` no es legible → **abortar**. No usar fallbacks hardcoded.
 
 ## Validaciones
 

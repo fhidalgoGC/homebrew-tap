@@ -1,11 +1,11 @@
 ---
 name: fremi-story
-description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
+description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
 ---
 
 # /fremi-story — Crear nueva user story
 
-Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.json`** (nomenclatura) y **`~/.fremi/framework/settings/config.yaml`** (obligatoriedad operativa).
+Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.core.yaml`** (nomenclatura) y **`~/.fremi/framework/settings/config.yaml`** (obligatoriedad operativa).
 
 La cadena canónica tiene **11 docs** (`FW-00..FW-10`), pero dos son de **obligatoriedad condicional** — `FW-00_explore` y `FW-02_proposal` sólo se crean cuando aplican los criterios declarados en `config.story.yaml → conditional_rules` (ver Regla 16).
 
@@ -31,9 +31,9 @@ Si falta alguno → preguntárselo al usuario.
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/settings/config.yaml`.
-3. Extraer de `methodology.json`:
+3. Extraer de `methodology.core.yaml`:
    - `feat_cfg = identifiers.feature` (para resolver la feature padre).
    - `story_cfg = identifiers.story` → `prefix`, `id_format`, `folder_format`, `folder_regex`.
    - `wf_cfg = identifiers.workflow_doc` → `prefix`, `id_format`, `filename_format`, `use_compound_filename`, `compound_filename_format`, `items[]` (los 11 docs FW-00..FW-10 con su `required` flag).
@@ -124,7 +124,7 @@ Cada doc se crea con el template canónico correspondiente de `references/` (rel
 
 Ver tabla en sección "## Templates" abajo. **No inventar estructura** — todos los `FW-XX_*.md` deben respetar el template correspondiente.
 
-> **Templates faltantes:** al 2026-07-13 los templates para `FW-00_explore-template.md`, `FW-02_proposal-template.md` y `FW-09_checkwork-template.md` **NO existen todavía** en `references/`. Al primer uso, si el archivo falta, el skill genera el doc con una estructura mínima derivada del `role` + `principio` del item en `methodology.json` y avisa al usuario para crear el template canónico en `references/` en un `EX-NN` posterior.
+> **Templates faltantes:** al 2026-07-13 los templates para `FW-00_explore-template.md`, `FW-02_proposal-template.md` y `FW-09_checkwork-template.md` **NO existen todavía** en `references/`. Al primer uso, si el archivo falta, el skill genera el doc con una estructura mínima derivada del `role` + `principio` del item en `methodology.core.yaml` y avisa al usuario para crear el template canónico en `references/` en un `EX-NN` posterior.
 
 ### Bifurcaciones técnicas durante la story → pausar y preguntar (Regla 3b)
 
@@ -218,4 +218,4 @@ Los templates canónicos viven en `references/` (relativo a la carpeta del skill
 - No crear si el slug de story colisiona dentro de la misma feature.
 - Si feature no tiene `definition.md` con contenido → forzar a completarlo primero.
 - **Todos los docs dentro de la story DEBEN seguir el formato definido en `wf_cfg`.** No inventar nombres.
-- Si `methodology.json` no es legible → **abortar**. No usar fallbacks hardcoded.
+- Si `methodology.core.yaml` no es legible → **abortar**. No usar fallbacks hardcoded.

@@ -32,7 +32,7 @@ Crea o actualiza `docs/works/product/planteamiento.md` con:
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.definition`.
 
 ### Paso 1 — Precondiciones (Regla 1)

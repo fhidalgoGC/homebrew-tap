@@ -19,7 +19,7 @@
 | Invocación | `/<nombre>` | `/<nombre>` (idéntica) |
 | Estructura | `SKILL.md` con frontmatter + procedimiento Markdown | Un archivo plano con instrucciones cortas |
 | Complejidad | Procedimiento de varios pasos, validaciones, branching | Atajo simple, una o pocas acciones directas |
-| Estado interno | Puede leer/escribir archivos, parsear configuración (`methodology.json`), invocar herramientas | Típicamente sin lógica condicional compleja |
+| Estado interno | Puede leer/escribir archivos, parsear configuración (`methodology.core.yaml`), invocar herramientas | Típicamente sin lógica condicional compleja |
 | Ejemplo típico | `/fremi-feature` (crea folder + valida precondiciones + actualiza plan) | `/list-stories` (sólo lista carpetas de stories) |
 
 **Regla práctica:** si el procedimiento cabe en 3 líneas, considerar comando. Si tiene branching o consulta configuración → skill.

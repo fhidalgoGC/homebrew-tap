@@ -23,7 +23,7 @@ Puebla el `FW-07_tdd-plan.md` con la lista planeada de tests `TC-XXX`, cada uno 
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.test_case` (TC-XXX), `identifiers.workflow_doc.items[name=tdd-plan]`.
+- `methodology.core.yaml` → `identifiers.test_case` (TC-XXX), `identifiers.workflow_doc.items[name=tdd-plan]`.
 - `config.yaml` → `phase_rules.tdd`, `testing.strict_tdd`, `testing.unit.enabled`, `testing.e2e.enabled`, `testing.coverage.threshold`.
 
 ### Paso 1 — Validar padre y precondiciones

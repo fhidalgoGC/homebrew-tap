@@ -113,6 +113,6 @@ anti_patterns:
 # ---------------------------------------------------------------------------
 references:
   master_config: ~/.fremi/framework/settings/config.yaml
-  methodology: ~/.fremi/framework/settings/methodology.json
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules: ~/.fremi/framework/rules/workflow.md
   regla_14: "~/.fremi/framework/rules/workflow.md § Regla 14 (trabajo fuera del flujo)"

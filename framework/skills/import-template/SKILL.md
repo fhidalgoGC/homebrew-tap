@@ -41,7 +41,7 @@ El doc `implementation-guide.md` es la pieza central que hace al skill útil: si
 
 > Esta regla aplica retroactivamente: si una invocación previa generó docs con comparaciones, en la próxima ejecución del skill con `--clean-docs` (o regeneración manual) se reemplazan por las versiones puramente descriptivas.
 
-> **Importante:** este skill **no registra el template en `methodology.json`** ni promueve decisiones a ADRs. Eso se hace con otro skill aparte. Este sólo trae el código + escribe los MDs de investigación.
+> **Importante:** este skill **no registra el template en `methodology.core.yaml`** ni promueve decisiones a ADRs. Eso se hace con otro skill aparte. Este sólo trae el código + escribe los MDs de investigación.
 
 ## Sintaxis
 
@@ -322,7 +322,7 @@ Próximos pasos sugeridos:
 3. Cruzar con /docs/template/notes.md — divergencias detectadas con ADRs vigentes.
 4. Sanear /template/.env y env files (sacar credenciales sensibles si no aplican).
 4. Si el stack del template aplica al proyecto → registrar ADRs (Regla 3b) o referenciar los ADRs existentes.
-5. Si querés registrar este template en methodology.json → ejecutar el skill correspondiente (otro skill, aparte).
+5. Si querés registrar este template en methodology.core.yaml → ejecutar el skill correspondiente (otro skill, aparte).
 ```
 
 ## Validaciones
@@ -335,7 +335,7 @@ Próximos pasos sugeridos:
 - **No se encontró `.gitignore` en el origen** → continuar con sólo la lista hardcoded, avisar al usuario.
 - **`.env` con valores no vacíos** → **copiar** (regla 4a — política del skill) pero **avisar explícitamente** en el reporte que se copió y recomendar revisión manual.
 - **Archivos > 5 MB, archivos binarios grandes** → pedir confirmación antes de copiar.
-- **El skill no debe MODIFICAR archivos del proyecto fuera de `/template/` y `docs/template/`.** No tocar `methodology.json`, no crear ADRs, no tocar `docs/works/`.
+- **El skill no debe MODIFICAR archivos del proyecto fuera de `/template/` y `docs/template/`.** No tocar `methodology.core.yaml`, no crear ADRs, no tocar `docs/works/`.
 
 ---
 
@@ -364,7 +364,7 @@ TODO: el usuario decide. Sugerencias automáticas en base al análisis:
 - [x] Análisis automático en `docs/template/`
 - [ ] TODOs resueltos
 - [ ] Decisiones del template alineadas con ADRs del proyecto
-- [ ] Registrado en `methodology.json` (otro skill)
+- [ ] Registrado en `methodology.core.yaml` (otro skill)
 ```
 
 ## Template — `stack.md`
@@ -577,7 +577,7 @@ template/
 - (ej: "Hay un archivo `secrets.json` que se copió — revisar si tiene contenido sensible")
 
 ## Posibles divergencias con la metodología del proyecto
-(Cruzar con `~/.fremi/framework/rules/workflow.md`, `docs/works/product/decisions.md`, `~/.fremi/framework/settings/methodology.json`.)
+(Cruzar con `~/.fremi/framework/rules/workflow.md`, `docs/works/product/decisions.md`, `~/.fremi/framework/settings/methodology.core.yaml`.)
 - (ej: "El template asume CommonJS pero ADR-001 acepta Node 20 — puede usar ESM. No es divergencia técnica pero el código del template está en CommonJS.")
 
 ## TODOs explícitos del template original

@@ -29,10 +29,10 @@
 |---|---|
 | `~/.fremi/framework/rules/workflow.md` (este) | **Reglas obligatorias.** "Antes de N, debe existir N-1." Son normativas. |
 | `~/.fremi/framework/flows/workflow.md` | **Descripción del flujo.** Explicativo, didáctico. Muestra cómo se hace, cuándo, con qué resultado. |
-| `~/.fremi/framework/settings/methodology.json` | **Configuración de nomenclatura.** Datos estructurados (prefijos, formatos). No tiene reglas — tiene parámetros. |
+| `~/.fremi/framework/settings/methodology.core.yaml` | **Configuración de nomenclatura.** Datos estructurados (prefijos, formatos). No tiene reglas — tiene parámetros. |
 | `CLAUDE.md` (raíz) | **Punto de entrada para los agentes.** Sintetiza qué leer y qué comportamiento aplicar. |
 
-Una regla nueva va a `rules/workflow.md`. Una explicación didáctica de cómo se aplica esa regla va a `flows/workflow.md`. Un parámetro configurable (ej: padding de dígitos) va a `settings/methodology.json`.
+Una regla nueva va a `rules/workflow.md`. Una explicación didáctica de cómo se aplica esa regla va a `flows/workflow.md`. Un parámetro configurable (ej: padding de dígitos) va a `settings/methodology.core.yaml`.
 
 ---
 

@@ -24,7 +24,7 @@ El skill `/fremi-install-framework` es el responsable de asegurar que todo lo qu
 |---|---|---|
 | `product/` | `/fremi-product [sub]` | Orquestador de la capa producto — encolan las 7 sub-skills (`fremi-product-iniciativas` → `fremi-product-plan`). |
 | `feature/` | `/fremi-feature <nombre>` | Crea una nueva feature (`FT-XX_<slug>/`) con `definition.md`. Valida precondiciones de capa producto. |
-| `story/` | `/fremi-story <FT-XX> <nombre>` | Crea una nueva user story (`HU-XX_<slug>/`) con la cadena FW-01..FW-10 en el orden definido por `methodology.json`. |
+| `story/` | `/fremi-story <FT-XX> <nombre>` | Crea una nueva user story (`HU-XX_<slug>/`) con la cadena FW-01..FW-10 en el orden definido por `methodology.core.yaml`. |
 | `enabler/` | `/fremi-enabler <nombre> [--scope]` | Crea un enabler técnico (global / por feature / por story) con la cadena `EN-01..EN-04`. |
 | `tools/` | `/fremi-tools <acción> <tipo> <name>` | Meta-orquestador de scaffolding de assets bajo `docs/project/`. Sub-skills: `fremi-add-{skill,hook,rule,mcp}`, `fremi-delete-{skill,hook,rule,mcp}`. |
 
@@ -82,7 +82,7 @@ Después del frontmatter va el procedimiento del skill (Markdown).
 
 ## Convención: Paso 0 — Cargar configuración
 
-**Todos los skills que tocan nomenclatura** deben empezar con un `Paso 0 — Cargar configuración (OBLIGATORIO)` que lee `~/.fremi/framework/settings/methodology.json` y deriva prefijos/formatos de ahí.
+**Todos los skills que tocan nomenclatura** deben empezar con un `Paso 0 — Cargar configuración (OBLIGATORIO)` que lee `~/.fremi/framework/settings/methodology.core.yaml` y deriva prefijos/formatos de ahí.
 
 Esto evita que los skills tengan hardcoded `FT-01` o `HU-01` — si el usuario cambia la convención en el JSON, los skills se adaptan.
 
@@ -116,7 +116,7 @@ Ver `~/.fremi/framework/settings/README.md` para la configuración.
 
 ## Cómo modificar un skill existente
 
-- **Cambio de procedimiento** → editar el `SKILL.md`. Si el cambio afecta IDs o nomenclatura, asegurarse de que sigue leyendo `methodology.json` y no hardcodea.
+- **Cambio de procedimiento** → editar el `SKILL.md`. Si el cambio afecta IDs o nomenclatura, asegurarse de que sigue leyendo `methodology.core.yaml` y no hardcodea.
 - **Cambio de comando o sintaxis** → coordinar con el usuario (ya tiene memoria del comando viejo). Idealmente mantener compatibilidad o avisar del cambio.
 - **Cambio de behavior crítico** (ej: pasa de avisar a bloquear) → mencionar en commit y, si toca, actualizar `~/.fremi/framework/flows/workflow.md`.
 
@@ -125,7 +125,7 @@ Ver `~/.fremi/framework/settings/README.md` para la configuración.
 ## Anti-patrones de esta carpeta
 
 - ❌ Crear skills triviales que sólo hacen una llamada (mejor enseñar al usuario el comando directo).
-- ❌ Hardcodear prefijos/formatos de nomenclatura (debe venir de `settings/methodology.json`).
+- ❌ Hardcodear prefijos/formatos de nomenclatura (debe venir de `settings/methodology.core.yaml`).
 - ❌ Crear skill que duplica función de otro skill (ej: dos formas de crear feature). Si hace falta variar, parametrizar.
 - ❌ Skill sin **Validaciones** documentadas (la IA no sabría qué error reportar).
 - ❌ Skill que se ejecuta automáticamente (eso es un hook, no un skill).

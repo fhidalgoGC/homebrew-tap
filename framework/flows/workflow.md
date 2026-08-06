@@ -100,7 +100,7 @@ docs/works/
 
 ## Convención de nomenclatura
 
-**Fuente de verdad**: [`~/.fremi/framework/settings/methodology.json`](../settings/methodology.json). Las descripciones son resumen.
+**Fuente de verdad**: [`~/.fremi/framework/settings/methodology.core.yaml`](../settings/methodology.core.yaml). Las descripciones son resumen.
 
 - **Features**: `FT-XX_<slug>` — ID secuencial global, 2 dígitos.
 - **Stories**: `HU-XX_<slug>` — ID secuencial local a la feature, 2 dígitos.
@@ -227,6 +227,6 @@ Detalle completo en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.m
 
 - **Reglas duras**: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
 - **Configs operativas**: [`~/.fremi/framework/settings/config.yaml`](../settings/config.yaml) + 7 `config.<capa>.yaml`.
-- **Nomenclatura**: [`~/.fremi/framework/settings/methodology.json`](../settings/methodology.json).
+- **Nomenclatura**: [`~/.fremi/framework/settings/methodology.core.yaml`](../settings/methodology.core.yaml).
 - **Skills invocables**: `~/.fremi/framework/skills/` (con jerarquía por capa).
 - **CLAUDE.md** (entrada del agente): [`../../../CLAUDE.md`](../../../CLAUDE.md).

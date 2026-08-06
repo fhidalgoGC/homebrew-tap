@@ -33,7 +33,7 @@ Flujo típico: `/fremi-story-verify` PASS → `/fremi-story-closure-check` repor
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.workflow_doc.items[name=closure]`, `identifiers.criterion`, `identifiers.scenario`, `identifiers.test_case`.
+- `methodology.core.yaml` → `identifiers.workflow_doc.items[name=closure]`, `identifiers.criterion`, `identifiers.scenario`, `identifiers.test_case`.
 - `config.yaml` → `phase_rules.closure`, `parent_bump_triggers.story_closes`.
 
 ### Paso 1 — Validar precondiciones DURAS

@@ -50,7 +50,7 @@ Si falta alguno → preguntárselo al usuario.
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer:
    - `bug_cfg = identifiers.bug` → `prefix`, `id_format`, `filename_format`, `filename_regex`.
    - `feat_cfg = identifiers.feature`, `story_cfg = identifiers.story`.

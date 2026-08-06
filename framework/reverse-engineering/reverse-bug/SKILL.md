@@ -29,7 +29,7 @@ Reconstruye un `BG-XX_<slug>.md` a partir de un fix ya aplicado. Detecta el scop
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.bug`.
+- `methodology.core.yaml` → `identifiers.bug`.
 - `config.bug.story.yaml` o `config.bug.feature.yaml` según scope.
 
 ### Paso 1 — Identificar el fix

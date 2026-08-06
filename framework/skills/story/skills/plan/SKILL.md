@@ -28,7 +28,7 @@ Puebla la **estructura inicial** del `FW-08_plan.md`: resumen, secciones (Backlo
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.task` (task-XXX), `identifiers.workflow_doc.items[name=plan]`.
+- `methodology.core.yaml` → `identifiers.task` (task-XXX), `identifiers.workflow_doc.items[name=plan]`.
 - `config.yaml` → `phase_rules.tasks`.
 
 ### Paso 1 — Validar padre y precondiciones

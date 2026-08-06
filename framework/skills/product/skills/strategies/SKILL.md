@@ -31,7 +31,7 @@ Crea o actualiza `docs/works/product/strategies.md` — evalúa **2-3 estrategia
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.design` (aplica también para strategies).
 
 ### Paso 1 — Precondiciones

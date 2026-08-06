@@ -23,7 +23,7 @@ Puebla el `FW-04_bdd-userstories.md` con escenarios Gherkin (`Scenario:`) numera
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.scenario` (SC-XXX), `identifiers.workflow_doc.items[name=bdd-userstories]`.
+- `methodology.core.yaml` → `identifiers.scenario` (SC-XXX), `identifiers.workflow_doc.items[name=bdd-userstories]`.
 - `config.yaml` → `phase_rules.bdd`.
 
 ### Paso 1 — Validar padre y precondiciones

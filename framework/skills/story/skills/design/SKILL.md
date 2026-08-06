@@ -33,7 +33,7 @@ Puebla el `FW-06_design.md` con el "cómo estructural" que satisface los contrat
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.workflow_doc.items[name=design]`, `identifiers.adr`.
+- `methodology.core.yaml` → `identifiers.workflow_doc.items[name=design]`, `identifiers.adr`.
 - `config.yaml` → `phase_rules.design`.
 
 ### Paso 1 — Validar padre y precondiciones

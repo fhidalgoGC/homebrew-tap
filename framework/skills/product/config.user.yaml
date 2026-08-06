@@ -11,7 +11,7 @@ since: 2026-07-13
 # Declara: qué docs viven en product/, qué skills los pueblan, en qué orden
 # se invocan (flow), qué está activo y qué reglas condicionales aplican.
 #
-# El nombre semántico `name` cruza con `methodology.json → identifiers.*`
+# El nombre semántico `name` cruza con `methodology.core.yaml → identifiers.*`
 # para resolver filenames concretos (no hardcoded acá).
 # ---------------------------------------------------------------------------
 
@@ -201,6 +201,6 @@ flow:
 # ---------------------------------------------------------------------------
 references:
   master_config: ~/.fremi/framework/settings/config.yaml
-  methodology: ~/.fremi/framework/settings/methodology.json
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules: ~/.fremi/framework/rules/workflow.md
   orchestrator_skill: /fremi-product

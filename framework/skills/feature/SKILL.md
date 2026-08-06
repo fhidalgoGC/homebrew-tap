@@ -1,11 +1,11 @@
 ---
 name: fremi-feature
-description: Crea una nueva feature en docs/works/features/ con su definition.md inicial. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario quiere crear o registrar una feature nueva del producto. Valida que la capa producto esté lista antes de avanzar.
+description: Crea una nueva feature en docs/works/features/ con su definition.md inicial. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml (NO usa prefijos hardcoded). Usar cuando el usuario quiere crear o registrar una feature nueva del producto. Valida que la capa producto esté lista antes de avanzar.
 ---
 
 # /fremi-feature — Crear nueva feature
 
-Crea el folder y el `definition.md` de una nueva feature, respetando la nomenclatura definida en **`~/.fremi/framework/settings/methodology.json`** y validando precondiciones.
+Crea el folder y el `definition.md` de una nueva feature, respetando la nomenclatura definida en **`~/.fremi/framework/settings/methodology.core.yaml`** y validando precondiciones.
 
 > **Importante:** este skill NO tiene prefijos ni formatos hardcoded. Antes de hacer cualquier cosa, lee el JSON de configuración y deriva los patrones de `identifiers.feature`, `slug` y `paths`. Si la convención cambia (ej: `FT-01` → `F-001`), el skill se adapta automáticamente.
 
@@ -27,7 +27,7 @@ Crea el folder y el `definition.md` de una nueva feature, respetando la nomencla
 
 ### Paso 0 — Cargar configuración de nomenclatura (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer la configuración relevante:
    - `feat_cfg = identifiers.feature` → `prefix`, `scope`, `id_format`, `folder_format`, `folder_regex`, `examples`.
    - `slug_cfg = slug` → `regex`, `case`, `max_length`, `transforms`.
@@ -35,7 +35,7 @@ Crea el folder y el `definition.md` de una nueva feature, respetando la nomencla
    - `paths.product_dir` → dónde vive `definition.md` de producto.
    - `paths.fields_for_methodology_doc` (si existe) — referencias a docs internos.
 
-Si el JSON no existe o está corrupto → abortar y avisar al usuario que falta `~/.fremi/framework/settings/methodology.json`.
+Si el JSON no existe o está corrupto → abortar y avisar al usuario que falta `~/.fremi/framework/settings/methodology.core.yaml`.
 
 ### Paso 1 — Validar precondiciones (Regla 1)
 
@@ -134,4 +134,4 @@ Para cambiar la estructura del `definition.md` de las features, **editar el temp
 
 - Si el `<nombre>` recibido es ambiguo o muy corto (< 3 palabras), pedir al usuario que lo clarifique.
 - Si el usuario pide un slug que ya existe, sugerir agregar contexto (`-v2`, `-extension`, etc.) o pedir nombre alternativo.
-- Si `methodology.json` no es legible o está malformado → **abortar y avisar**. No usar fallbacks hardcoded.
+- Si `methodology.core.yaml` no es legible o está malformado → **abortar y avisar**. No usar fallbacks hardcoded.

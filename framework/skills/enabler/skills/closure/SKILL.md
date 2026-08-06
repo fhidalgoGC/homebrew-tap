@@ -23,7 +23,7 @@ Completa el `EN-04_closure.md` del enabler y **bumpea el padre** según scope (R
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.closure`, `parent_bump_triggers.enabler_closes`.
 - `config.enabler.yaml` → `scopes.<placement>` para saber cuál es el padre.
 

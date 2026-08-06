@@ -1,6 +1,6 @@
 ---
 name: fremi-story-explore
-description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — típicamente `FW-00_explore.md`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.json` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
+description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — típicamente `FW-00_explore.md`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.core.yaml` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
 ---
 
 # /fremi-story-explore — Investigación previa (fase explore de una story)
@@ -42,13 +42,13 @@ Si el usuario invoca `/fremi-story-explore` sin args pero está claro el context
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/settings/config.yaml`.
 3. Extraer de `config.yaml`:
    - `config.story.yaml → docs[]` — buscar entry con `name: "explore"` para obtener `required` y `condition_ref`.
    - `conditional_rules[condition_ref]` — criterios de obligatoriedad.
    - `phase_rules.explore` — reglas específicas de la fase.
-4. Extraer de `methodology.json`:
+4. Extraer de `methodology.core.yaml`:
    - `identifiers.workflow_doc.items[]` — buscar item con `name: "explore"` para obtener el `filename` real (ej: `FW-00_explore.md`).
    - `paths.features_dir`, `paths.user_stories_subdir`.
 
@@ -96,7 +96,7 @@ El skill DEBE ejecutar exploración real (grep, read de archivos, listar depende
 
 ### Paso 6 — Actualizar checkwork si existe
 
-Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.json `name: "checkwork"`), agregar en la sección "Estado general" que el explore fue creado con la fecha.
+Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.yaml `name: "checkwork"`), agregar en la sección "Estado general" que el explore fue creado con la fecha.
 
 ### Paso 7 — Reportar
 
@@ -121,14 +121,14 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.json `
 - ❌ Elegir un approach en el explore ("vamos por Puppeteer porque X"). Eso va en `FW-02_proposal.md`.
 - ❌ Inventar contexto del codebase sin leerlo — cada afirmación va referenciada.
 - ❌ Escribir `FW-00_explore.md` para stories triviales (bug fixes locales) sólo por "completitud".
-- ❌ Hardcodear el filename `FW-00_explore.md` — resolver siempre por methodology.json.
+- ❌ Hardcodear el filename `FW-00_explore.md` — resolver siempre por methodology.core.yaml.
 
 ---
 
 ## Referencias
 
 - `~/.fremi/framework/settings/config.yaml` → `config.story.yaml`, `conditional_rules.explore_when`, `phase_rules.explore`.
-- `~/.fremi/framework/settings/methodology.json` → `identifiers.workflow_doc.items[name=explore]`.
+- `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=explore]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 16 (condicionales), Regla 3b (bifurcaciones), Regla 6 (SDD dirige diseño).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md`.
 - `~/.fremi/framework/skills/story/references/FW-00_explore-template.md` es symlink que delega acá.

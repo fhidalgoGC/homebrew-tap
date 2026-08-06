@@ -1,11 +1,11 @@
 ---
 name: fremi-story-task
-description: Agrega una nueva tarea al plan.md de una user story. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
+description: Agrega una nueva tarea al plan.md de una user story. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
 ---
 
 # /task — Agregar tarea al plan de una story
 
-Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (cada tarea debe tener al menos un criterio verificable de detección de completitud) y la nomenclatura definida en **`~/.fremi/framework/settings/methodology.json`**.
+Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (cada tarea debe tener al menos un criterio verificable de detección de completitud) y la nomenclatura definida en **`~/.fremi/framework/settings/methodology.core.yaml`**.
 
 > **Importante:** lee `identifiers.task` y `identifiers.workflow_doc.items[]` del JSON. NO hardcodea ni el prefijo de la tarea (`task-`), ni el nombre del archivo plan (`FW-08_plan.md`).
 
@@ -30,7 +30,7 @@ Si la referencia falta y hay **una sola story con tareas en progreso**, asumir e
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer:
    - `task_cfg = identifiers.task` → `prefix`, `id_format`, `compound_id_format`, `location` (suele ser `FW-08_plan.md`), `scope` (story).
    - `wf_cfg = identifiers.workflow_doc` y derivar el filename del item con `name === "plan"` (es donde viven las tareas).
@@ -107,4 +107,4 @@ Decir al usuario:
 - IDs locales a la story, secuenciales, sin reciclar.
 - El skill no marca tareas como hechas — el usuario edita el archivo del plan directamente cuando completa una tarea.
 - Si la tarea reemplaza a otra (cambio de plan), marcar la antigua como `[~] descartada` y crear la nueva con ID nuevo.
-- Si `methodology.json` no es legible → **abortar**. No usar fallbacks hardcoded.
+- Si `methodology.core.yaml` no es legible → **abortar**. No usar fallbacks hardcoded.

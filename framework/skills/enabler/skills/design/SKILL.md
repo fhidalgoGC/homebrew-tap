@@ -23,7 +23,7 @@ Puebla el `EN-02_design.md` de un enabler con las **decisiones técnicas concret
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.design`.
 
 ### Paso 1 — Validar padre

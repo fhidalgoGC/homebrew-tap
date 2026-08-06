@@ -29,7 +29,7 @@ Puebla el `EN-01_definition.md` de un enabler con:
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.enabler`, `identifiers.enabler_doc`.
+- `methodology.core.yaml` → `identifiers.enabler`, `identifiers.enabler_doc`.
 - `config.enabler.yaml` → docs, flow.
 - `config.yaml` → `phase_rules.definition`.
 

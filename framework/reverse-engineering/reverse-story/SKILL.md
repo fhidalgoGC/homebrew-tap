@@ -40,7 +40,7 @@ Reconstruye la **cadena completa de una story** (FW-00..FW-10) a partir de artif
 
 ### Paso 0 — Cargar configuración
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/skills/story/config.user.yaml` — orden de la cadena, docs, conditional_rules.
 3. Leer `config.yaml` master — versioning, phase_rules.
 

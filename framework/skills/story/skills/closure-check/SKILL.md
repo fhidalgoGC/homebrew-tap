@@ -26,9 +26,9 @@ Reporta:
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/settings/config.yaml`.
-3. Extraer de `methodology.json`:
+3. Extraer de `methodology.core.yaml`:
    - `wf_items = identifiers.workflow_doc.items[]` — lista de los 11 docs (FW-00..FW-10) con sus `filename`, `role`, `principio`, `required` y `condition_ref`. Estos son los nombres a leer en el Paso 2.
    - `layers.story.files_in_order` + `layers.story.conditional_files` — orden canónico y qué archivos son opcionales.
    - `identifiers.criterion`, `identifiers.scenario`, `identifiers.test_case`, `identifiers.task` — para parsear IDs internos.

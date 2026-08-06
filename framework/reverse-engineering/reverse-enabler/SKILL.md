@@ -33,7 +33,7 @@ Reconstruye la cadena de 4 docs (EN-01..EN-04) de un enabler a partir de:
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`, `config.enabler.yaml`.
+- `methodology.core.yaml`, `config.enabler.yaml`.
 
 ### Paso 1 — Identificar el enabler
 

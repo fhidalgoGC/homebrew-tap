@@ -46,13 +46,13 @@ Su objetivo es **cerrar el approach técnico** antes de bajar al scope detallado
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/settings/config.yaml`.
 3. De `config.yaml`:
    - `config.story.yaml → docs[name=proposal]` → `required`, `condition_ref`.
    - `conditional_rules.proposal_when` → criterios.
    - `phase_rules.proposal` → reglas obligatorias del doc.
-4. De `methodology.json`:
+4. De `methodology.core.yaml`:
    - `identifiers.workflow_doc.items[name=proposal]` → filename real.
    - `identifiers.adr` → para referenciar/crear ADRs.
 
@@ -61,7 +61,7 @@ Si algún archivo no parsea → abortar.
 ### Paso 1 — Resolver rutas
 
 - `story_folder` (via feature_folder + story_folder).
-- `proposal_filename` (via methodology.json).
+- `proposal_filename` (via methodology.core.yaml).
 - Ruta final: `{story_folder}/{proposal_filename}`.
 - **Cargar contexto previo**:
   - `FW-01_definition.md` (obligatorio, precondición).
@@ -136,14 +136,14 @@ Marcar en `FW-09_checkwork.md` (o el filename resuelto) que el proposal fue crea
 - ❌ Meter detalle de scope in/out en el proposal — eso va en `FW-03_scope.md`.
 - ❌ Meter firmas de funciones internas o pseudocódigo — eso va en `FW-06_design.md`.
 - ❌ Elegir approach silenciosamente cuando hubo bifurcación — Regla 3b obliga a pausar y preguntar.
-- ❌ Hardcodear `FW-02_proposal.md` — resolver por methodology.json.
+- ❌ Hardcodear `FW-02_proposal.md` — resolver por methodology.core.yaml.
 
 ---
 
 ## Referencias
 
 - `~/.fremi/framework/settings/config.yaml` → `config.story.yaml`, `conditional_rules.proposal_when`, `phase_rules.proposal`.
-- `~/.fremi/framework/settings/methodology.json` → `identifiers.workflow_doc.items[name=proposal]`.
+- `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=proposal]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 3b (bifurcaciones), Regla 16 (condicionales), Regla 6 (SDD dirige).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/proposal/references/FW-02_proposal-template.md`.
 - `~/.fremi/framework/skills/story/references/FW-02_proposal-template.md` es symlink que delega acá.

@@ -30,7 +30,7 @@ Crea o actualiza `docs/works/product/definition.md` — la definición **formal*
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.definition`.
 
 ### Paso 1 — Precondiciones (Regla 1)

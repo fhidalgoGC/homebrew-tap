@@ -570,7 +570,7 @@ preferences:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  methodology_nomenclature: ~/.fremi/framework/settings/methodology.json
+  methodology_nomenclature: ~/.fremi/framework/settings/methodology.core.yaml
   rules_hard: ~/.fremi/framework/rules/workflow.md
   flow_narrative: ~/.fremi/framework/flows/workflow.md
   agent_entry_point: CLAUDE.md

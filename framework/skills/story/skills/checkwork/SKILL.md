@@ -39,7 +39,7 @@ Actualiza el `FW-09_checkwork.md` — el **único doc que muta durante la implem
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.workflow_doc.items[name=checkwork]`.
+- `methodology.core.yaml` → `identifiers.workflow_doc.items[name=checkwork]`.
 - `config.yaml` → `phase_rules.apply`.
 
 ### Paso 1 — Validar padre y precondiciones

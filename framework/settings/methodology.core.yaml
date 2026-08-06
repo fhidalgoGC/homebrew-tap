@@ -1,0 +1,168 @@
+# methodology.core.yaml
+# --------------------------------------------------------------
+# Framework methodology defaults. NOT user-editable — a `fremi update`
+# will overwrite this file.
+#
+# Structural: layers, principles, and the semantic naming spec.
+# Per-project overrides go in methodology.user.yaml (which lives at
+# .fremi/settings/methodology.user.yaml inside each project).
+# --------------------------------------------------------------
+
+schema: fremi-methodology-core
+schema_version: 1
+version: 2.1.0
+description: 'Configuración de nomenclatura del framework makingFileReport. Responsabilidad
+  exclusiva: prefijos, formatos de ID, regex de filenames, y el MAPPING name→filename
+  para cada tipo de artifact. NO declara obligatoriedad de docs, reglas por fase,
+  ni configuración operativa — eso vive en `config.yaml` (hermano). División de responsabilidades:
+  `config.yaml` referencia docs por `name` semántico (ej: `explore`, `proposal`);
+  este archivo resuelve ese `name` al filename real (ej: `FW-00_explore.md`) vía `identifiers.<tipo>.items[]`
+  matching por `name`. Cambiar acá para cambiar la convención de nombres (con sweep
+  de archivos existentes). v2.1.0: sincronizado con config.yaml v3 (workflow genérico).'
+_format_spec:
+  description: Convenciones usadas en los `*_format` strings dentro de este archivo.
+  placeholders:
+    '{prefix}': 'Prefijo del identificador (ej: ''FT'', ''HU'', ''FW'').'
+    '{number}': 'Número entero del identificador. Se puede formatear con padding tipo
+      printf, ej: {number:02d} → 01, 02, ..., 99; {number:03d} → 001, 002, ...; {number}
+      → sin padding.'
+    '{id}': 'El identificador ya armado según `id_format` (ej: ''FT-01'').'
+    '{slug}': 'Slug descriptivo en kebab-case (ej: ''core-report-generation'').'
+    '{name}': 'Nombre del archivo workflow (ej: ''definition'', ''bdd-userstories'').'
+    '{feature_id}': 'ID de la feature padre (ej: ''FT-01''). Sólo aplica para identifiers
+      anidados.'
+    '{story_id}': 'ID de la story padre (ej: ''HU-01''). Sólo aplica para identifiers
+      dentro de una story.'
+  cambio_de_convencion_ejemplos:
+    ft_a_f_un_digito: 'Para usar ''F-1'' en lugar de ''FT-01'': cambiar identifiers.feature.prefix
+      de ''FT'' a ''F'' y identifiers.feature.id_format de ''{prefix}-{number:02d}''
+      a ''{prefix}-{number}''.'
+    agregar_padding_3_digitos: 'Para usar ''FT-001'' en lugar de ''FT-01'': cambiar
+      id_format a ''{prefix}-{number:03d}''.'
+    archivo_workflow_compuesto: 'Para que los archivos sean ''FT-01-HU-01-FW-01_definition.md''
+      en vez de ''FW-01_definition.md'': setear identifiers.workflow_doc.use_compound_filename
+      = true y ajustar compound_filename_format.'
+layers:
+  _description: Las 3 capas del flujo, en orden top-down.
+  order:
+  - product
+  - feature
+  - story
+  product:
+    dir: docs/works/product
+    stages_order:
+    - stage: discovery
+      files:
+      - iniciativas.md
+      - ideas.md
+      - planteamiento.md
+    - stage: formalizacion
+      files:
+      - definition.md
+      - strategies.md
+      - decisions.md
+      - plan.md
+  feature:
+    dir: docs/works/features/{feature_folder}
+    required_files:
+    - definition.md
+    optional_files:
+    - decisions.md
+  story:
+    dir: docs/works/features/{feature_folder}/user-stories/{story_folder}
+    files_in_order:
+    - FW-00_explore.md
+    - FW-01_definition.md
+    - FW-02_proposal.md
+    - FW-03_scope.md
+    - FW-04_bdd-userstories.md
+    - FW-05_sdd-spec.md
+    - FW-06_design.md
+    - FW-07_tdd-plan.md
+    - FW-08_plan.md
+    - FW-09_checkwork.md
+    - FW-10_closure.md
+    conditional_files:
+    - FW-00_explore.md
+    - FW-02_proposal.md
+    conditional_ref: ~/.fremi/framework/settings/config.yaml → workflow.story.conditional_rules
+  extra:
+    dir: docs/works/extra
+    filename_pattern: EX-NN_<slug>.md
+    required_sections_in_each_file:
+    - Qué se hizo
+    - Por qué no es feature/story/task
+    - Cambios concretos
+    - Validación / cómo se probó
+    optional_sections:
+    - Vinculaciones
+    - Notas / aprendizajes
+  enabler:
+    _description: Enablers viven en una de 3 ubicaciones según alcance (global, feature,
+      story). La numeración EN-XX es global. Los 4 docs internos (EN-01..EN-04) son
+      obligatorios — cadena liviana sin BDD/SDD/TDD.
+    default_dir: docs/works/enablers/{enabler_folder}
+    feature_scoped_dir: docs/works/features/{feature_folder}/enablers/{enabler_folder}
+    story_scoped_dir: docs/works/features/{feature_folder}/user-stories/{story_folder}/enablers/{enabler_folder}
+    files_in_order:
+    - EN-01_definition.md
+    - EN-02_design.md
+    - EN-03_plan.md
+    - EN-04_closure.md
+    optional_files: []
+    trigger: Sólo se crea cuando el usuario lo pide explícitamente o el trabajo identificado
+      claramente habilita capacidad técnica sin entregar valor user-facing.
+  bug:
+    _description: Bugs viven SIEMPRE dentro de la story que originó el defecto, en
+      su carpeta bugs/. Un archivo único por bug (BG-XX_<slug>.md). Numeración local
+      a la story. Aplica Regla 8 (test rojo de reproducción primero).
+    dir: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs
+    filename_pattern: BG-NN_<slug>.md
+    required_sections_in_each_file:
+    - Síntoma observado
+    - Impacto y severidad
+    - Reproducción y test rojo
+    - Causa raíz
+    - Fix aplicado
+    - Cierre
+    optional_sections:
+    - Vinculaciones (otros bugs, ADRs, releases)
+    - Notas / aprendizajes
+    trigger: Cualquier comportamiento incorrecto detectado en código de producción.
+      Si no encaja en una story existente, primero crear/extender la story (Regla
+      8).
+principles:
+  spec_drives_design:
+    _description: La SDD va antes que Design. Cada artefacto sólo consume decisiones
+      de los anteriores.
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 6
+  fork_triggers_adr:
+    _description: Cuando aparece una bifurcación técnica con 2+ caminos viables, la
+      IA pausa, propone opciones al usuario y crea un ADR con la decisión.
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 3b
+  sync_back:
+    _description: Si trabajando en story/feature se descubre algo que pertenece a
+      una capa superior, actualizar la superior PRIMERO.
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 12
+  closure_required:
+    _description: Una story no es DONE sin FW-10_closure.md validado.
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 11
+  checkwork_live_status:
+    _description: FW-09_checkwork.md es el estado en vivo de la implementación de
+      la story. Se actualiza después de cerrar cada task o vía hook. Es el doc que
+      se consulta para saber 'qué falta'.
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 13
+  extras_documentation:
+    _description: 'Trabajo fuera del flujo capa-feature-story-task se documenta en
+      `docs/works/extra/EX-NN_<slug>.md`. Un archivo por concepto cohesivo: tooling,
+      scripts, fixes de build/IaC, mejoras a la metodología, refactor de utilidades.
+      Sirve para que el trabajo ''invisible'' (no atribuible a una story) quede trazado.'
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 14
+  enablers_and_bugs_are_optional:
+    _description: 'Enablers (EN-XX) y bugs (BG-XX) NO son obligatorios al crear una
+      feature. Se agregan bajo demanda cuando el trabajo lo amerita: un enabler cuando
+      se identifica capacidad técnica habilitadora; un bug cuando se detecta defecto
+      en código de producción. Enablers pueden vivir global, dentro de feature o dentro
+      de story (el alcance lo declara el usuario al crearlo). Bugs viven SIEMPRE dentro
+      de la story que originó el defecto.'
+    rule_ref: ~/.fremi/framework/rules/workflow.md § Regla 15

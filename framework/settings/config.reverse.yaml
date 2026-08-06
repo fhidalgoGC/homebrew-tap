@@ -321,7 +321,7 @@ anti_patterns:
 # ---------------------------------------------------------------------------
 references:
   master_config: ~/.fremi/framework/settings/config.yaml
-  methodology: ~/.fremi/framework/settings/methodology.json
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules_forward: ~/.fremi/framework/rules/workflow.md
   rules_reverse: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32
   flow: ~/.fremi/framework/flows/flow.reverse.md

@@ -15,7 +15,7 @@ Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/ski
 /fremi-pipeline-feature <nombre-descriptivo> [--first-story <nombre-story>] [--mode interactive|auto]
 ```
 
-- `<nombre-descriptivo>`: título de la feature en lenguaje natural. Se convierte a slug según `slug.transforms` del `methodology.json`.
+- `<nombre-descriptivo>`: título de la feature en lenguaje natural. Se convierte a slug según `slug.transforms` del `methodology.core.yaml`.
 - `--first-story <nombre-story>` *(opcional)*: si se pasa, tras crear la feature el pipeline **encadena** `/fremi-pipeline-story <FEATURE_ID> <nombre-story>` para arrancar la primera user story. Sin este flag el pipeline termina en la feature y devuelve control.
 - `--mode` *(opcional)*: overridea el `execution_mode.pipeline_default` de `config.feature.yaml`. Si se usa junto a `--first-story`, el modo se **hereda** al sub-pipeline de story.
 
@@ -44,7 +44,7 @@ Consultar `config.feature.yaml → execution_mode` para el default.
 ## Precondiciones duras (abortan el pipeline)
 
 - **Regla 24 — Framework instalado**: `.claude/skills/fremi-install-framework` es symlink válido y `CLAUDE.md` referencia `~/.fremi/framework/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré `/fremi-install-framework` antes de invocar el pipeline". **No auto-instalar.**
-- `~/.fremi/framework/settings/methodology.json` + `config.feature.yaml` existen y parsean.
+- `~/.fremi/framework/settings/methodology.core.yaml` + `config.feature.yaml` existen y parsean.
 - `config.feature.yaml → active: true`.
 - `docs/works/product/definition.md` existe **con contenido real** (no template vacío).
 - `docs/works/product/plan.md` existe **con contenido real** (aunque tenga 0 features listadas — el pipeline puede agregar la primera).

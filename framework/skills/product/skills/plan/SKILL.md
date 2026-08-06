@@ -36,7 +36,7 @@ Crea o actualiza `docs/works/product/plan.md` — el **roadmap de features** del
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json`.
+- `methodology.core.yaml`.
 - `config.yaml` → `phase_rules.tasks` (el plan del producto tiene rol de "orden", análogo a tasks de story).
 
 ### Paso 1 — Precondiciones (Regla 1)

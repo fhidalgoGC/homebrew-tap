@@ -27,7 +27,7 @@ Puebla el `FW-01_definition.md` de una story con el formato canónico:
 
 ### Paso 0 — Cargar configuración
 
-1. Leer `~/.fremi/framework/settings/methodology.json` (extraer `identifiers.criterion`, `identifiers.workflow_doc.items[name=definition]`).
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml` (extraer `identifiers.criterion`, `identifiers.workflow_doc.items[name=definition]`).
 2. Leer `~/.fremi/framework/settings/config.yaml` (`phase_rules.definition`).
 
 ### Paso 1 — Validar padre y precondiciones

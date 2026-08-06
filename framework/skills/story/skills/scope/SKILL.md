@@ -26,7 +26,7 @@ Puebla el `FW-03_scope.md` con listas explícitas:
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.workflow_doc.items[name=scope]`.
+- `methodology.core.yaml` → `identifiers.workflow_doc.items[name=scope]`.
 - `config.yaml` → `phase_rules.scope`.
 
 ### Paso 1 — Validar padre

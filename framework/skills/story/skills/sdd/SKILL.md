@@ -27,7 +27,7 @@ Puebla el `FW-05_sdd-spec.md` con los **contratos que se sostienen SIN haber dec
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.json` → `identifiers.workflow_doc.items[name=sdd-spec]`.
+- `methodology.core.yaml` → `identifiers.workflow_doc.items[name=sdd-spec]`.
 - `config.yaml` → `phase_rules.sdd`.
 
 ### Paso 1 — Validar padre y precondiciones

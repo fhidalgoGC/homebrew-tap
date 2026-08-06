@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler
-description: Crea un nuevo enabler (trabajo técnico habilitador, sin comportamiento user-facing) con sus 4 docs en cadena liviana (definition → design → plan → closure). Soporta 3 ubicaciones — global, dentro de feature o dentro de story — según el alcance declarado al crearlo. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.json. Usar cuando el usuario identifica un trabajo de plataforma/infra/fundación que habilita capacidad futura.
+description: Crea un nuevo enabler (trabajo técnico habilitador, sin comportamiento user-facing) con sus 4 docs en cadena liviana (definition → design → plan → closure). Soporta 3 ubicaciones — global, dentro de feature o dentro de story — según el alcance declarado al crearlo. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml. Usar cuando el usuario identifica un trabajo de plataforma/infra/fundación que habilita capacidad futura.
 ---
 
 # /fremi-enabler — Crear un nuevo enabler
 
-Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: definition → design → plan → closure), todos prefijados según `~/.fremi/framework/settings/methodology.json`.
+Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: definition → design → plan → closure), todos prefijados según `~/.fremi/framework/settings/methodology.core.yaml`.
 
 > **Importante:** este skill NO tiene prefijos hardcoded. Lee `identifiers.enabler`, `identifiers.enabler_doc` y `identifiers.enabler_doc.items[]` del JSON.
 >
@@ -51,7 +51,7 @@ Si el "enabler" propuesto entrega valor user-facing → en realidad es feature/s
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/methodology.json`.
+1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer:
    - `en_cfg = identifiers.enabler` → `prefix`, `id_format`, `folder_format`, `placements`.
    - `en_doc_cfg = identifiers.enabler_doc` → `prefix`, `id_format`, `filename_format`, `items[]`.

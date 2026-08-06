@@ -13,7 +13,7 @@
 | `rules/` | **Reglas duras** que la IA debe aplicar obligatoriamente (Reglas 1–12 del flujo). | [`rules/README.md`](rules/README.md) |
 | `skills/` | **Skills invocables** por el usuario con `/fremi-<nombre>` (todos con prefijo `fremi-` — Regla 21; ej: `/fremi-feature`, `/fremi-story`, `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr`). Cada skill tiene un `SKILL.md` con frontmatter + procedimiento. | [`skills/README.md`](skills/README.md) |
 | `hooks/` | **Hooks automáticos** que el harness dispara en eventos (ej: `UserPromptSubmit`). El usuario no los invoca. | [`hooks/README.md`](hooks/README.md) |
-| `settings/` | **Configuración runtime estructurada** (JSON). Hoy: `methodology.json` con la nomenclatura del proyecto. | [`settings/README.md`](settings/README.md) |
+| `settings/` | **Configuración runtime estructurada** (JSON). Hoy: `methodology.core.yaml` con la nomenclatura del proyecto. | [`settings/README.md`](settings/README.md) |
 | `plugins/` | **Configuración de plugins externos** (MCP servers, integraciones). Hoy vacío. | [`plugins/README.md`](plugins/README.md) |
 | `commands/` | **Comandos custom** del harness (atajos simples). Hoy vacío. | [`commands/README.md`](commands/README.md) |
 
@@ -26,7 +26,7 @@
 | "Antes de X, debe existir Y" — una regla obligatoria | `rules/workflow.md` (sumar como Regla N) |
 | "El usuario escribe `/foo` y la IA hace ..." | `skills/foo/SKILL.md` |
 | "Cuando el usuario manda un mensaje, automáticamente ..." | `hooks/<nombre>.sh` |
-| "El prefijo de features debería ser X y formato ..." | `settings/methodology.json` |
+| "El prefijo de features debería ser X y formato ..." | `settings/methodology.core.yaml` |
 | "Conectar con Linear / Slack / Notion" | `plugins/<nombre>.json` |
 | "Atajo trivial sin lógica" | `commands/<nombre>.md` |
 
@@ -58,7 +58,7 @@ Cada agente (Claude Code, Cursor, etc.) tiene su propia carpeta de configuració
 | `rules/workflow.md` | IA, vía referencia desde `CLAUDE.md` | Antes de cualquier acción no trivial. |
 | `skills/<X>/SKILL.md` | IA | Cuando el usuario invoca `/X`. |
 | `hooks/<X>.sh` | Harness del agente | Automáticamente en eventos. |
-| `settings/methodology.json` | Skills (en su Paso 0) | Cada vez que un skill se ejecuta. |
+| `settings/methodology.core.yaml` | Skills (en su Paso 0) | Cada vez que un skill se ejecuta. |
 | `plugins/<X>.json` | Plugin externo | Según el plugin. |
 
 ---

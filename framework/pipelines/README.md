@@ -116,7 +116,7 @@ Un pipeline **pausa y pregunta al usuario** si y sólo si aparece una de estas s
 3. **Sync-back a capa superior (Regla 12).** El pipeline detecta que un contenido pertenece a una capa superior (ej: en una story descubre restricción de producto). Pausa, avisa, y espera confirmación para actualizar arriba antes de continuar.
 4. **Precondición dura ausente.** Un step requiere un archivo/versión previa que no existe (ej: pipeline story pide `feature/definition.md` y no está). Aborta con instrucciones claras.
 5. **Información inicial insuficiente.** La IA no puede completar un doc obligatorio ni siquiera con TODOs — pide el mínimo indispensable al usuario.
-6. **Fallo de herramienta / config corrupta.** `methodology.json` no parsea, `config.yaml` inconsistente, permisos de escritura fallan, etc.
+6. **Fallo de herramienta / config corrupta.** `methodology.core.yaml` no parsea, `config.yaml` inconsistente, permisos de escritura fallan, etc.
 
 **Anti-patrones (pipeline NO pausa por esto):**
 - ❌ "¿Confirmás el título del CA?" — la IA elige un título razonable y sigue.
