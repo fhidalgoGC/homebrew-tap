@@ -27,6 +27,12 @@
     "sandbox:uninstall": "./bin/fremi-darwin-arm64 uninstall ./sandbox",
     "sandbox:tree": "find sandbox -type f -o -type l 2>/dev/null | sort | head -50",
     "sandbox:cycle": "bun run sandbox:reset && bun run sandbox:install && bun run sandbox:tree",
+    "fremi:version": "bun run src/index.ts version",
+    "fremi:help": "bun run src/index.ts help",
+    "fremi:install": "mkdir -p sandbox && bun run src/index.ts install ./sandbox",
+    "fremi:uninstall": "bun run src/index.ts uninstall ./sandbox",
+    "fremi:update": "bun run src/index.ts update",
+    "fremi:reset": "rm -rf sandbox && mkdir sandbox && echo 'sandbox reset — try: bun run fremi:install'",
     "release:publish": "bun run build:all && gh release create v$(cat VERSION) bin/fremi-* --repo fhidalgoGC/homebrew-tap --title \"v$(cat VERSION)\" --generate-notes",
     "release:sha256": "shasum -a 256 bin/fremi-*"
   },
