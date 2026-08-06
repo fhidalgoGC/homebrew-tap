@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { discoverSettingSections, pickSection, pickSectionAction } from "../prompts/setting";
+import { runMethodologyMenu } from "../prompts/setting-methodology";
 import { toggleActive, readActive } from "../core/settings-edit";
 
 // `fremi setting [path]` — interactive TUI that lets the user toggle
@@ -29,6 +30,13 @@ export async function runSetting(rawPath?: string): Promise<void> {
     console.clear();
     const section = await pickSection(sections);
     if (!section) break;
+
+    // Methodology gets a specialised editor (paths / slug / identifiers).
+    if (section.name === "methodology") {
+      console.clear();
+      await runMethodologyMenu(section.file);
+      continue;
+    }
 
     while (true) {
       console.clear();

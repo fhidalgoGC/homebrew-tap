@@ -5,7 +5,7 @@ import { installClaudePlugin } from "../agents/claude/plugin-install";
 import { writeUserMarker, readUserMarker } from "../core/user-marker";
 import type { InstallFlags } from "./install";
 
-const FREMI_VERSION = "0.4.2";
+const FREMI_VERSION = "0.4.3";
 
 // `fremi agent install` - materialises fremi as a plugin at USER level for
 // every selected agent. For Claude Code that means writing to

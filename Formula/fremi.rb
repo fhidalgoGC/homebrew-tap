@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.2"
+  version "0.4.3"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.2/fremi-darwin-arm64"
-      sha256 "098c309cfe524e2209032a12c6d637fbc7c7be9ef037dab62740e099d01471e6"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-darwin-arm64"
+      sha256 "f56875507ddfa4cf40d47ce45a50f841b07d85b5a857cc9f48b339f4019b6835"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.2/fremi-darwin-x64"
-      sha256 "f52ea559962c680d60238f618422f505b7ceb22abf60b2763f70f60aa373a196"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-darwin-x64"
+      sha256 "11b069e46c291303358a9ab523826eb87fb87b58f389db40495f7f80c4586210"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.2/fremi-linux-arm64"
-      sha256 "9270c70e948e5131631466083ef7fc8138cdfb11a0547f8e88044d1d3ef1a93c"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-linux-arm64"
+      sha256 "96792309f52b218da2e0110fa81bc7ade2ddd260241c981864a96ee959b026bd"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.2/fremi-linux-x64"
-      sha256 "00366b087d1422a05490bdcefc5a45c0063ac89c703e81faea69b3b88275f1a7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.3/fremi-linux-x64"
+      sha256 "e1022bf4ea3cd86b222b9e56516840029ff721c37f5f9ff0fd4bbd340d28cbe1"
     end
   end
 
@@ -35,19 +35,15 @@ class Fremi < Formula
 
   def caveats
     <<~EOS
-      fremi installed. Two-layer setup:
+      fremi installed. Interactive settings editor:
 
-        fremi agent install                (prompts about MCP too)
-        fremi install <path>               per-project
-        fremi setting [path]               interactive: toggle active per
-                                           section (agents, methodology,
-                                           product, feature, story, enabler)
-        fremi mcp                          runs the MCP server
+        fremi setting [path]      Menu of sections. Pick methodology
+                                  and edit paths, slug rules, or
+                                  identifiers (prefix + id_format per
+                                  type: feature, story, enabler, ...).
 
-      methodology.user.yaml now sits alongside the layer settings under
-      .fremi/settings/ and controls paths, slug rules, and identifier
-      prefixes/formats. Edit it directly to change how features (FT-XX)
-      or stories (HU-XX) are named.
+      Changes are written back to the .fremi/settings/*.user.yaml file,
+      preserving comments and formatting.
     EOS
   end
 

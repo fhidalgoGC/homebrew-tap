@@ -1,6 +1,6 @@
 {
   "name": "fremi-framework",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.7.0",
-    "@modelcontextprotocol/sdk": "^1.30.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "yaml": "^2.9.0"
   }
 }
