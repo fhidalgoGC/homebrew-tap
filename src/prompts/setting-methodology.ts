@@ -27,6 +27,22 @@ import { getFrameworkContentRoot } from "../core/paths";
 // with the default when the project has no override yet.
 
 const BACK = "__back__";
+const CHANGE = "__change__";
+const USE_DEFAULT = "__use_default__";
+
+// Framework-internal paths — pointers to where fremi itself lives on
+// disk. These are NOT project-configurable and should never appear in
+// the interactive editor, since editing them just breaks the tooling.
+const HIDDEN_PATHS = new Set(["frmwk_dir", "flows_doc", "rules_doc"]);
+
+// Hints explaining that certain keys are subdir names relative to a
+// parent path, not full paths. Helps the user understand why the value
+// looks like `user-stories` instead of `docs/works/features/.../user-stories`.
+const PATH_HINTS: Record<string, string> = {
+  user_stories_subdir: "subdir inside each feature folder",
+  enablers_subdir: "subdir inside feature/story folders",
+  bugs_subdir: "subdir inside each story folder",
+};
 
 type MenuResult = "back";
 
@@ -105,12 +121,16 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
     const doc = loadYamlDoc(filePath);
     if (!doc) return;
     const defaults = loadDefaultsDoc(filePath);
-    const keys = listKeys(doc, mapKey);
+    let keys = listKeys(doc, mapKey);
     // Merge keys from defaults so users see fields they haven't set yet.
     if (defaults) {
       for (const k of listKeys(defaults, mapKey)) {
         if (!keys.includes(k)) keys.push(k);
       }
+    }
+    // Filter out framework-internal paths (frmwk_dir, flows_doc, rules_doc).
+    if (mapKey === "paths") {
+      keys = keys.filter((k) => !HIDDEN_PATHS.has(k));
     }
     if (keys.length === 0) {
       note(`No editable keys under ${mapKey}.`, "empty");
@@ -123,6 +143,7 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
       return {
         value: k,
         label: `✏  ${padRight(k, 22)}  ${valuePreviewWithDefault(current, defaultValue)}`,
+        hint: mapKey === "paths" ? PATH_HINTS[k] : undefined,
       };
     });
     options.push({ value: BACK, label: "↩  Back" });
@@ -222,10 +243,23 @@ async function editScalar(filePath: string, dottedPath: string): Promise<void> {
   const defaultStr =
     defaultValue === undefined || defaultValue === null ? "" : String(defaultValue);
 
-  // If the user has no override yet, offer the default as the pre-filled
-  // value so they can accept it with a single Enter. Otherwise pre-fill
-  // with their current value.
-  const prefill = currentStr || defaultStr;
+  const options = [];
+  options.push({
+    value: CHANGE,
+    label: `✏  Change value`,
+    hint: currentStr ? `current: ${currentStr}` : "no current value",
+  });
+  if (defaultStr) {
+    const alreadyDefault = currentStr === defaultStr;
+    options.push({
+      value: USE_DEFAULT,
+      label: `↺  Use default`,
+      hint: alreadyDefault
+        ? `already at default (${defaultStr})`
+        : `reset to: ${defaultStr}`,
+    });
+  }
+  options.push({ value: BACK, label: "↩  Back" });
 
   const messageParts = [dottedPath];
   if (currentStr && defaultStr && currentStr !== defaultStr) {
@@ -239,8 +273,25 @@ async function editScalar(filePath: string, dottedPath: string): Promise<void> {
     messageParts.push("no current, no default");
   }
 
-  const next = await askText({
+  const choice = await askSelect({
     message: messageParts.join("  ·  "),
+    options,
+  });
+
+  if (choice === BACK) return;
+
+  if (choice === USE_DEFAULT) {
+    if (currentStr === defaultStr) return; // already at default, no-op
+    setAtPath(doc, dottedPath, defaultStr);
+    saveYamlDoc(filePath, doc);
+    return;
+  }
+
+  // CHANGE — open the text prompt, pre-filled with current (or default
+  // when there's no current yet).
+  const prefill = currentStr || defaultStr;
+  const next = await askText({
+    message: `${dottedPath} — new value`,
     defaultValue: prefill,
     placeholder: defaultStr ? `default: ${defaultStr}` : undefined,
     validate: (value) => {
