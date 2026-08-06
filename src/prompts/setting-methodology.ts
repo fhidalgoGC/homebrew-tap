@@ -35,14 +35,113 @@ const USE_DEFAULT = "__use_default__";
 // the interactive editor, since editing them just breaks the tooling.
 const HIDDEN_PATHS = new Set(["frmwk_dir", "flows_doc", "rules_doc"]);
 
-// Hints explaining that certain keys are subdir names relative to a
-// parent path, not full paths. Helps the user understand why the value
-// looks like `user-stories` instead of `docs/works/features/.../user-stories`.
+// Ordered display of paths — top-level dirs first, then subdirs, then
+// misc / extras at the end. Keys not listed here are appended in file
+// order. This is the single source of truth for how the paths menu is
+// laid out (and how effective-path previews are rendered).
+const PATHS_ORDER: string[] = [
+  // Top-level folders
+  "product_dir",
+  "features_dir",
+  "enablers_dir_global",
+  // Subdirs (relative to a parent path)
+  "user_stories_subdir",
+  "enablers_subdir",
+  "bugs_subdir",
+  // Extras / misc
+  "extras_dir",
+  "project_dir",
+];
+
+// For each subdir, the template of its effective path. `{feature}` and
+// `{story}` are placeholders that stand for the concrete folder name
+// at runtime. Rendered next to the value so the user sees, at a glance,
+// that `user-stories` actually resolves to `<features>/{feature}/user-stories`.
+function effectivePathTemplate(key: string, value: string): string | null {
+  if (!value) return null;
+  switch (key) {
+    case "user_stories_subdir":
+      return `{features_dir}/{feature}/${value}`;
+    case "enablers_subdir":
+      return `{features_dir}/{feature}[/{story}]/${value}`;
+    case "bugs_subdir":
+      return `{features_dir}/{feature}/user-stories/{story}/${value}`;
+    default:
+      return null;
+  }
+}
+
+// Human-readable hint for each path key. Keeps the intent visible next
+// to the value even after we already render the effective template.
 const PATH_HINTS: Record<string, string> = {
+  product_dir: "product-layer folder",
+  features_dir: "features-layer folder",
+  enablers_dir_global: "global enablers folder",
   user_stories_subdir: "subdir inside each feature folder",
   enablers_subdir: "subdir inside feature/story folders",
   bugs_subdir: "subdir inside each story folder",
+  extras_dir: "extra / tooling docs",
+  project_dir: "project-owned docs",
 };
+
+// Field-kind registry — declares how each scalar field should be
+// edited. Selects present a menu of known options; numbers validate
+// input as integer; text is freeform. This is the single source of
+// truth for "what kind of value does this field accept".
+type FieldKind =
+  | { type: "text" }
+  | { type: "number" }
+  | { type: "select"; options: string[] };
+
+const SLUG_CASE_OPTIONS = [
+  "kebab-case",
+  "snake_case",
+  "camelCase",
+  "PascalCase",
+];
+
+const IDENTIFIER_SCOPE_OPTIONS = [
+  "global",
+  "feature",
+  "story",
+  "enabler",
+  "story_or_feature",
+];
+
+function resolveFieldKind(dottedPath: string): FieldKind {
+  if (dottedPath === "slug.case") {
+    return { type: "select", options: SLUG_CASE_OPTIONS };
+  }
+  if (dottedPath === "slug.max_length") {
+    return { type: "number" };
+  }
+  if (dottedPath.startsWith("identifiers.") && dottedPath.endsWith(".scope")) {
+    return { type: "select", options: IDENTIFIER_SCOPE_OPTIONS };
+  }
+  return { type: "text" };
+}
+
+// id_format is a template like "{prefix}-{number:02d}". Exposing that
+// raw to users is unfriendly, so we parse it into (digits, separator)
+// and rebuild the template after asking those two questions in plain
+// language. Only recognizes the common shape `{prefix}<sep>{number[:0Nd]}`.
+interface ParsedIdFormat {
+  separator: string;
+  digits: number; // 0 = no padding
+}
+
+function parseIdFormat(template: string): ParsedIdFormat | null {
+  const match = template.match(/^\{prefix\}([^{}]*)\{number(?::0(\d+)d)?\}$/);
+  if (!match) return null;
+  const separator = match[1] ?? "";
+  const digits = match[2] ? parseInt(match[2], 10) : 0;
+  return { separator, digits };
+}
+
+function buildIdFormat(parsed: ParsedIdFormat): string {
+  const numberPart = parsed.digits > 0 ? `{number:0${parsed.digits}d}` : "{number}";
+  return `{prefix}${parsed.separator}${numberPart}`;
+}
 
 type MenuResult = "back";
 
@@ -128,9 +227,12 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
         if (!keys.includes(k)) keys.push(k);
       }
     }
-    // Filter out framework-internal paths (frmwk_dir, flows_doc, rules_doc).
+    // Filter out framework-internal paths (frmwk_dir, flows_doc, rules_doc)
+    // and apply the curated PATHS_ORDER so folders come first, subdirs
+    // second, and extras last.
     if (mapKey === "paths") {
       keys = keys.filter((k) => !HIDDEN_PATHS.has(k));
+      keys.sort((a, b) => orderIndex(a) - orderIndex(b));
     }
     if (keys.length === 0) {
       note(`No editable keys under ${mapKey}.`, "empty");
@@ -140,11 +242,10 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
     const options = keys.map((k) => {
       const current = getAtPath(doc, `${mapKey}.${k}`);
       const defaultValue = defaults ? getAtPath(defaults, `${mapKey}.${k}`) : undefined;
-      return {
-        value: k,
-        label: `✏  ${padRight(k, 22)}  ${valuePreviewWithDefault(current, defaultValue)}`,
-        hint: mapKey === "paths" ? PATH_HINTS[k] : undefined,
-      };
+      const label = `✏  ${padRight(k, 22)}  ${valuePreviewWithDefault(current, defaultValue)}`;
+      const hint =
+        mapKey === "paths" ? buildPathHint(k, current, defaultValue) : undefined;
+      return { value: k, label, hint };
     });
     options.push({ value: BACK, label: "↩  Back" });
 
@@ -156,6 +257,31 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
 
     await editScalar(filePath, `${mapKey}.${picked}`);
   }
+}
+
+// Rank helper for sorting the paths menu. Keys listed in PATHS_ORDER
+// keep their declared order; unknown keys go to the end (preserving
+// their original position among themselves via a stable sort).
+function orderIndex(key: string): number {
+  const idx = PATHS_ORDER.indexOf(key);
+  return idx === -1 ? PATHS_ORDER.length : idx;
+}
+
+// Builds the hint text for a paths entry. For subdirs, we prefix the
+// human description with the effective template so the user sees the
+// resolved path (e.g. `{features_dir}/{feature}/user-stories`) rather
+// than just the bare subdir name.
+function buildPathHint(
+  key: string,
+  current: unknown,
+  defaultValue: unknown,
+): string | undefined {
+  const description = PATH_HINTS[key];
+  const effectiveValue = String(current ?? defaultValue ?? "");
+  const template = effectivePathTemplate(key, effectiveValue);
+  if (template && description) return `${description}  ·  ${template}`;
+  if (template) return template;
+  return description;
 }
 
 // -------- Identifier editing (nested — identifiers.<type>.<field>) --------
@@ -287,10 +413,114 @@ async function editScalar(filePath: string, dottedPath: string): Promise<void> {
     return;
   }
 
-  // CHANGE — open the text prompt, pre-filled with current (or default
-  // when there's no current yet).
+  // CHANGE — special-cased UIs first (id_format has a guided wizard),
+  // then fall through to the generic field-kind registry.
   const prefill = currentStr || defaultStr;
-  const next = await askText({
+  if (
+    dottedPath.startsWith("identifiers.") &&
+    dottedPath.endsWith(".id_format")
+  ) {
+    const next = await promptIdFormat(dottedPath, currentStr, defaultStr);
+    if (next === null) return;
+    if (next === currentStr) return;
+    setAtPath(doc, dottedPath, next);
+    saveYamlDoc(filePath, doc);
+    return;
+  }
+
+  const kind = resolveFieldKind(dottedPath);
+  const next = await promptForValue(kind, dottedPath, prefill, defaultStr);
+  if (next === null) return;
+  if (next === currentStr) return; // no change
+
+  setAtPath(doc, dottedPath, kind.type === "number" ? Number(next) : next);
+  saveYamlDoc(filePath, doc);
+}
+
+// Guided prompt for id_format: asks digits + separator in plain
+// language and composes the template. Falls back to a raw text prompt
+// only when the user picks "custom" or the current value doesn't match
+// the simple `{prefix}<sep>{number[:0Nd]}` pattern.
+async function promptIdFormat(
+  dottedPath: string,
+  currentStr: string,
+  defaultStr: string,
+): Promise<string | null> {
+  const parsed = parseIdFormat(currentStr) ?? parseIdFormat(defaultStr);
+
+  const digitsChoice = await askSelect({
+    message: `${dottedPath} — how many digits should the number have?`,
+    options: [
+      { value: "0", label: "no padding    · FT-1, FT-2, ..., FT-42" },
+      { value: "2", label: "2 digits      · FT-01, FT-02, ..., FT-99" },
+      { value: "3", label: "3 digits      · FT-001, FT-002, ..., FT-999" },
+      { value: "4", label: "4 digits      · FT-0001, ..." },
+      { value: "custom", label: "✏  custom template..." },
+    ],
+    defaultValue: parsed ? String(parsed.digits) : "2",
+  });
+
+  if (digitsChoice === "custom") {
+    return askText({
+      message: `${dottedPath} — raw template`,
+      defaultValue: currentStr || defaultStr,
+      placeholder: defaultStr ? `default: ${defaultStr}` : undefined,
+      validate: (value) => {
+        if (value.length === 0) return "value cannot be empty";
+        if (!value.includes("{number")) return "must include {number} or {number:0Nd}";
+        return undefined;
+      },
+    });
+  }
+
+  const separator = await askText({
+    message: `${dottedPath} — separator between prefix and number`,
+    defaultValue: parsed ? parsed.separator : "-",
+    placeholder: "-  ·  _  ·  leave empty for none",
+    validate: () => undefined,
+  });
+
+  return buildIdFormat({
+    separator: separator ?? "",
+    digits: parseInt(digitsChoice, 10),
+  });
+}
+
+// Prompts the user for a new value using the input kind that matches
+// the field. Returns null when the user cancels (esc / ctrl+c).
+async function promptForValue(
+  kind: FieldKind,
+  dottedPath: string,
+  prefill: string,
+  defaultStr: string,
+): Promise<string | null> {
+  if (kind.type === "select") {
+    const options = kind.options.map((opt) => ({
+      value: opt,
+      label: opt === defaultStr ? `${opt}  (default)` : opt,
+    }));
+    const picked = await askSelect({
+      message: `${dottedPath} — pick a value`,
+      options,
+      defaultValue: prefill && kind.options.includes(prefill) ? prefill : undefined,
+    });
+    return picked;
+  }
+
+  if (kind.type === "number") {
+    return askText({
+      message: `${dottedPath} — new value (integer)`,
+      defaultValue: prefill,
+      placeholder: defaultStr ? `default: ${defaultStr}` : undefined,
+      validate: (value) => {
+        if (value.length === 0) return "value cannot be empty";
+        if (!/^-?\d+$/.test(value)) return "must be an integer";
+        return undefined;
+      },
+    });
+  }
+
+  return askText({
     message: `${dottedPath} — new value`,
     defaultValue: prefill,
     placeholder: defaultStr ? `default: ${defaultStr}` : undefined,
@@ -299,11 +529,6 @@ async function editScalar(filePath: string, dottedPath: string): Promise<void> {
       return undefined;
     },
   });
-
-  if (next === currentStr) return; // no change
-
-  setAtPath(doc, dottedPath, next);
-  saveYamlDoc(filePath, doc);
 }
 
 function padRight(str: string, width: number): string {

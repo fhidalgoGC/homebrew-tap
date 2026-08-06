@@ -9,22 +9,22 @@ class Fremi < Formula
   on_macos do
     on_arm do
       url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-darwin-arm64"
-      sha256 "f9e4e9aa06b399a8cd72b099f63c51e2a8078543b618957235e3dad65181ee9e"
+      sha256 "589a2980037f6f155871d40d8e24c0ffef43d1e09287513b5dd213b279017a8c"
     end
     on_intel do
       url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-darwin-x64"
-      sha256 "35731377aab955160fa063a75c086f080f575f3868f79e270f202be52a0fdd30"
+      sha256 "79c614c09d19a36141f8731ca92a5d6d724a4e5d10e0e008b467f78695620a5b"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-linux-arm64"
-      sha256 "fe47cebc2cf35a48653d30e2f1885c9d641ac4664a9ecfeae272f863f89fc25a"
+      sha256 "e97e84b8328325333a68e21e057659f1a935ddcc28c3a7b57cce1f4bca0d10f5"
     end
     on_intel do
       url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.4/fremi-linux-x64"
-      sha256 "cb38f2234970b0323f07eb3d4234e4a91ce79814872d7dfb768782a18932da17"
+      sha256 "b319047974a65b9f709043d86b267fba2a45c4210f548de306c5e3deb76f04a5"
     end
   end
 
