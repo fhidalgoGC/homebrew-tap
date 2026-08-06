@@ -5,7 +5,7 @@ since: 2026-07-13
 
 # ---------------------------------------------------------------------------
 # Configuración USER-EDITABLE de la capa STORY.
-# Vive junto al skill orquestador (docs/frmwk/skills/story/) porque el
+# Vive junto al skill orquestador (~/.fremi/framework/framework/skills/story/) porque el
 # usuario elige acá cómo trabajar. La ESTRUCTURA (topología, DAG, agent
 # options) vive en config.core.yaml — user NO edita eso.
 #
@@ -297,7 +297,7 @@ flow:
 
   # NOTA: la TOPOLOGÍA de paralelismo (qué steps pueden concurrir, qué items
   # internos son paralelizables, qué instancias pueden convivir) vive en
-  # `docs/frmwk/skills/story/config.core.yaml` — es estructura del framework,
+  # `~/.fremi/framework/framework/skills/story/config.core.yaml` — es estructura del framework,
   # no configuración de usuario. Este archivo (settings) sólo tiene el flag
   # on/off de paralelismo (ver config.yaml master → parallelism.enabled).
 
@@ -329,7 +329,7 @@ flow:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  master_config: docs/frmwk/settings/config.yaml
-  methodology: docs/frmwk/settings/methodology.json
-  rules: docs/frmwk/rules/workflow.md
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules: ~/.fremi/framework/framework/rules/workflow.md
   orchestrator_skill: /fremi-story

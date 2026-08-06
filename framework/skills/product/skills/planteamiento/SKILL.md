@@ -82,4 +82,4 @@ Doc **living**:
 
 ## Referencias
 - Template: [`references/planteamiento-template.md`](references/planteamiento-template.md).
-- `docs/frmwk/rules/workflow.md` → Regla 4 (discovery), Regla 3b (bifurcaciones).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 4 (discovery), Regla 3b (bifurcaciones).

@@ -68,4 +68,4 @@ Puebla el `EN-01_definition.md` de un enabler con:
 ## Referencias
 - Template: [`references/EN-01_definition-template.md`](references/EN-01_definition-template.md).
 - `config.enabler.yaml → flow.sequence`.
-- Regla 15 (enablers opcionales) en `docs/frmwk/rules/workflow.md`.
+- Regla 15 (enablers opcionales) en `~/.fremi/framework/framework/rules/workflow.md`.

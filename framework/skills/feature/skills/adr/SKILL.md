@@ -30,7 +30,7 @@ Agrega un nuevo Architecture Decision Record al archivo `docs/works/features/{FT
 
 ### Disparador típico: "bifurcación → opciones → usuario decide → ADR"
 
-Este skill suele invocarse como **paso final** del patrón definido en **Regla 3b** (`docs/frmwk/rules/workflow.md`):
+Este skill suele invocarse como **paso final** del patrón definido en **Regla 3b** (`~/.fremi/framework/framework/rules/workflow.md`):
 
 1. Durante la redacción de un artefacto (típicamente `FW-05_sdd-spec.md`, `FW-06_design.md` o algo a nivel feature/producto), la IA detecta una bifurcación técnica con 2+ caminos viables.
 2. La IA **pausa**, propone las opciones al usuario en el chat (con pros/contras), y **espera la decisión**.
@@ -43,7 +43,7 @@ Si el usuario invoca `/fremi-feature-adr` directamente para registrar una decisi
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `docs/frmwk/settings/methodology.json`.
+1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
 2. Extraer:
    - `adr_cfg = identifiers.adr` → `prefix`, `id_format`, `location_default`, `location_feature`, `regex`.
    - `feat_cfg = identifiers.feature` (para resolver el path cuando scope es una feature).
@@ -84,7 +84,7 @@ Si la decisión surge de la conversación previa, **proponer los campos completa
 
 ### Paso 4 — Anexar al archivo
 
-1. Leer el template canónico de `references/adr-entry-template.md` (relativo a la carpeta del skill: `docs/frmwk/skills/adr/references/adr-entry-template.md`).
+1. Leer el template canónico de `references/adr-entry-template.md` (relativo a la carpeta del skill: `~/.fremi/framework/framework/skills/adr/references/adr-entry-template.md`).
 2. Reemplazar los placeholders del template con los valores recolectados:
    - `{adr_id}` → ID determinado en Paso 2.
    - `<YYYY-MM-DD>` → fecha actual.

@@ -1,11 +1,11 @@
 ---
 name: fremi-story-task
-description: Agrega una nueva tarea al plan.md de una user story. Lee la nomenclatura desde docs/frmwk/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
+description: Agrega una nueva tarea al plan.md de una user story. Lee la nomenclatura desde ~/.fremi/framework/framework/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
 ---
 
 # /task — Agregar tarea al plan de una story
 
-Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (cada tarea debe tener al menos un criterio verificable de detección de completitud) y la nomenclatura definida en **`docs/frmwk/settings/methodology.json`**.
+Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (cada tarea debe tener al menos un criterio verificable de detección de completitud) y la nomenclatura definida en **`~/.fremi/framework/framework/settings/methodology.json`**.
 
 > **Importante:** lee `identifiers.task` y `identifiers.workflow_doc.items[]` del JSON. NO hardcodea ni el prefijo de la tarea (`task-`), ni el nombre del archivo plan (`FW-08_plan.md`).
 
@@ -30,7 +30,7 @@ Si la referencia falta y hay **una sola story con tareas en progreso**, asumir e
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `docs/frmwk/settings/methodology.json`.
+1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
 2. Extraer:
    - `task_cfg = identifiers.task` → `prefix`, `id_format`, `compound_id_format`, `location` (suele ser `FW-08_plan.md`), `scope` (story).
    - `wf_cfg = identifiers.workflow_doc` y derivar el filename del item con `name === "plan"` (es donde viven las tareas).
@@ -69,7 +69,7 @@ Preguntar al usuario (o inferir de la conversación):
 
 ### Paso 4 — Anexar al archivo del plan
 
-1. Leer el template canónico de `references/task-entry-template.md` (relativo a la carpeta del skill: `docs/frmwk/skills/task/references/task-entry-template.md`).
+1. Leer el template canónico de `references/task-entry-template.md` (relativo a la carpeta del skill: `~/.fremi/framework/framework/skills/task/references/task-entry-template.md`).
 2. Reemplazar los placeholders del template con los valores recolectados:
    - `{task_id}` → ID determinado en Paso 2.
    - `<título>`, `<objetivo>`, mapeo SDD/BDD/Design/TDD, criterios de detección y dependencias → con la info del Paso 3.

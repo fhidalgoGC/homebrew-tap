@@ -1,4 +1,4 @@
-# `docs/frmwk/rules/` — Reglas duras de la metodología
+# `~/.fremi/framework/framework/rules/` — Reglas duras de la metodología
 
 > **Esta carpeta es configuración para los agentes (IA).** Los archivos `.md` acá son reglas que la IA **debe aplicar obligatoriamente** al trabajar en el proyecto. No son documentación opcional ni guías sugeridas.
 >
@@ -17,8 +17,8 @@
 
 ## ¿Quién lee estos archivos?
 
-- **CLAUDE.md** (raíz del proyecto) referencia explícitamente `docs/frmwk/rules/workflow.md` como "**Reglas duras**" que deben leerse antes de cualquier acción no trivial. Esto carga las reglas automáticamente en el contexto de la IA.
-- **Skills** (`docs/frmwk/skills/*/SKILL.md`) referencian secciones específicas (ej: "ver Regla 6 en `docs/frmwk/rules/workflow.md`").
+- **CLAUDE.md** (raíz del proyecto) referencia explícitamente `~/.fremi/framework/framework/rules/workflow.md` como "**Reglas duras**" que deben leerse antes de cualquier acción no trivial. Esto carga las reglas automáticamente en el contexto de la IA.
+- **Skills** (`~/.fremi/framework/framework/skills/*/SKILL.md`) referencian secciones específicas (ej: "ver Regla 6 en `~/.fremi/framework/framework/rules/workflow.md`").
 - **Humanos** consultan estos archivos cuando quieren entender por qué la IA pide crear un doc previo o pausar antes de implementar.
 
 ---
@@ -27,9 +27,9 @@
 
 | Archivo | Diferencia |
 |---|---|
-| `docs/frmwk/rules/workflow.md` (este) | **Reglas obligatorias.** "Antes de N, debe existir N-1." Son normativas. |
-| `docs/frmwk/flows/workflow.md` | **Descripción del flujo.** Explicativo, didáctico. Muestra cómo se hace, cuándo, con qué resultado. |
-| `docs/frmwk/settings/methodology.json` | **Configuración de nomenclatura.** Datos estructurados (prefijos, formatos). No tiene reglas — tiene parámetros. |
+| `~/.fremi/framework/framework/rules/workflow.md` (este) | **Reglas obligatorias.** "Antes de N, debe existir N-1." Son normativas. |
+| `~/.fremi/framework/framework/flows/workflow.md` | **Descripción del flujo.** Explicativo, didáctico. Muestra cómo se hace, cuándo, con qué resultado. |
+| `~/.fremi/framework/framework/settings/methodology.json` | **Configuración de nomenclatura.** Datos estructurados (prefijos, formatos). No tiene reglas — tiene parámetros. |
 | `CLAUDE.md` (raíz) | **Punto de entrada para los agentes.** Sintetiza qué leer y qué comportamiento aplicar. |
 
 Una regla nueva va a `rules/workflow.md`. Una explicación didáctica de cómo se aplica esa regla va a `flows/workflow.md`. Un parámetro configurable (ej: padding de dígitos) va a `settings/methodology.json`.
@@ -47,7 +47,7 @@ Una regla nueva va a `rules/workflow.md`. Una explicación didáctica de cómo s
    - **Anti-patrones** (qué NO hacer que viola la regla).
    - **Ejemplos** (cuando ayudan a entender un borde).
 4. Si la regla introduce una excepción a otra regla, mencionar explícitamente cuál y por qué.
-5. Reflejar la regla nueva en `CLAUDE.md` (sección "Comportamiento esperado") y posiblemente en `docs/frmwk/flows/workflow.md` si necesita explicación didáctica.
+5. Reflejar la regla nueva en `CLAUDE.md` (sección "Comportamiento esperado") y posiblemente en `~/.fremi/framework/framework/flows/workflow.md` si necesita explicación didáctica.
 
 ### Cuándo NO crear una regla
 
@@ -66,7 +66,7 @@ Una regla nueva va a `rules/workflow.md`. Una explicación didáctica de cómo s
 
 ## Anti-patrones de esta carpeta
 
-- ❌ Documentación general del flujo (eso va a `docs/frmwk/flows/`).
-- ❌ Configuración parametrizable (eso va a `docs/frmwk/settings/`).
+- ❌ Documentación general del flujo (eso va a `~/.fremi/framework/framework/flows/`).
+- ❌ Configuración parametrizable (eso va a `~/.fremi/framework/framework/settings/`).
 - ❌ Decisiones técnicas del producto (eso va a `docs/works/product/decisions.md`).
 - ❌ Reglas opcionales / sugerencias (las reglas acá son **obligatorias**; lo opcional va a otro lado).

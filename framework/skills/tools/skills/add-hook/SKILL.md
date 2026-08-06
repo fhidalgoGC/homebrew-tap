@@ -64,10 +64,10 @@ Próximo paso:
 
 - Colisión de nombre → abortar.
 - Falla `chmod` → reportar y avisar.
-- NO tocar hooks de framework (`docs/frmwk/hooks/`).
+- NO tocar hooks de framework (`~/.fremi/framework/framework/hooks/`).
 
 ## Referencias
 
 - Template: [`references/hook-template.md`](references/hook-template.md).
-- Hooks del framework para inspiración: [`docs/frmwk/hooks/`](../../../../hooks/).
+- Hooks del framework para inspiración: [`~/.fremi/framework/framework/hooks/`](../../../../hooks/).
 - Ver también: [`/fremi-delete-hook`](../delete-hook/SKILL.md).

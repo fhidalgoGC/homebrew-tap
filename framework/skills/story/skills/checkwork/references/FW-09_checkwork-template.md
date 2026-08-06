@@ -1,6 +1,6 @@
 # Template — `FW-09_checkwork.md` de una story (living)
 
-> **Doc VIVO** (Regla 13). Es el único archivo del workflow que muta durante la implementación. Se actualiza al arrancar/cerrar cada task (o vía hook `docs/frmwk/hooks/sync-checkwork.sh`).
+> **Doc VIVO** (Regla 13). Es el único archivo del workflow que muta durante la implementación. Se actualiza al arrancar/cerrar cada task (o vía hook `~/.fremi/framework/framework/hooks/sync-checkwork.sh`).
 >
 > **Espejo del `FW-08_plan.md`** pero con estado. Refleja: tasks en curso/hechas, % progreso, CAs cubiertos, archivos implementados, bloqueos, próximos pasos.
 >

@@ -34,7 +34,7 @@ Actualiza el `FW-09_checkwork.md` — el **único doc que muta durante la implem
 - Al agregar un archivo nuevo al codebase.
 - Al confirmar cobertura de un CA con un test nuevo.
 
-**No necesario** si el hook `docs/frmwk/hooks/sync-checkwork.sh` está activo — el hook ejecuta este skill automáticamente al detectar cambios en `FW-08_plan.md`.
+**No necesario** si el hook `~/.fremi/framework/framework/hooks/sync-checkwork.sh` está activo — el hook ejecuta este skill automáticamente al detectar cambios en `FW-08_plan.md`.
 
 ## Procedimiento
 
@@ -86,6 +86,6 @@ Doc **living**:
 ## Referencias
 
 - Template: [`references/FW-09_checkwork-template.md`](references/FW-09_checkwork-template.md).
-- Hook: `docs/frmwk/hooks/sync-checkwork.sh` (auto-invoca este skill al detectar cambios en `FW-08`).
+- Hook: `~/.fremi/framework/framework/hooks/sync-checkwork.sh` (auto-invoca este skill al detectar cambios en `FW-08`).
 - `config.yaml → phase_rules.apply`.
-- `docs/frmwk/rules/workflow.md` → Regla 13 (checkwork al día), Regla 11 (100% precondición closure).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 13 (checkwork al día), Regla 11 (100% precondición closure).

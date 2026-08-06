@@ -73,4 +73,4 @@ Reglas duras:
 
 - Template: [`references/FW-05_sdd-spec-template.md`](references/FW-05_sdd-spec-template.md).
 - `config.yaml → phase_rules.sdd`.
-- `docs/frmwk/rules/workflow.md` → Regla 6.3 (SDD antes que Design), Regla 3b (bifurcaciones).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 6.3 (SDD antes que Design), Regla 3b (bifurcaciones).

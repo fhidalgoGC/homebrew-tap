@@ -5,13 +5,13 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-frontmatter.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-version-bump.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-changelog-entry.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-parent-bump-on-closure.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-ancestor-coherence.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-strict-tdd.sh" },
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/sync-checkwork.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-frontmatter.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-version-bump.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-changelog-entry.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-parent-bump-on-closure.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-ancestor-coherence.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-strict-tdd.sh" },
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/sync-checkwork.sh" }
         ]
       }
     ],
@@ -19,21 +19,21 @@
       {
         "matcher": "Write",
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-flow-preconditions.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-flow-preconditions.sh" }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/check-workflow-stage.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/check-workflow-stage.sh" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "${PROJECT_ROOT}/docs/frmwk/hooks/audit-on-stop.sh" }
+          { "type": "command", "command": "${PROJECT_ROOT}/~/.fremi/framework/framework/hooks/audit-on-stop.sh" }
         ]
       }
     ]

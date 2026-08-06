@@ -46,8 +46,8 @@ Su objetivo es **cerrar el approach técnico** antes de bajar al scope detallado
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `docs/frmwk/settings/methodology.json`.
-2. Leer `docs/frmwk/settings/config.yaml`.
+1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
+2. Leer `~/.fremi/framework/framework/settings/config.yaml`.
 3. De `config.yaml`:
    - `config.story.yaml → docs[name=proposal]` → `required`, `condition_ref`.
    - `conditional_rules.proposal_when` → criterios.
@@ -85,8 +85,8 @@ Sin ADR, ninguna decision debe quedar registrada en el proposal.
 
 ### Paso 4 — Cargar template y poblar
 
-1. Cargar `docs/frmwk/skills/proposal/references/FW-02_proposal-template.md` — **este skill es dueño del template canónico**.
-2. `docs/frmwk/skills/story/references/FW-02_proposal-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
+1. Cargar `~/.fremi/framework/framework/skills/proposal/references/FW-02_proposal-template.md` — **este skill es dueño del template canónico**.
+2. `~/.fremi/framework/framework/skills/story/references/FW-02_proposal-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
 3. Si el template local no existe → generar estructura mínima con las secciones obligatorias de `phase_rules.proposal` y avisar al usuario que hay que reponerlo.
 2. Aplicar `phase_rules.proposal` como checklist:
    - Estructura fija: Intent, Scope (resumen), Approach, Decisions, Known Limitations, Impact, Acceptance Criteria, Rollout, Risk.
@@ -142,8 +142,8 @@ Marcar en `FW-09_checkwork.md` (o el filename resuelto) que el proposal fue crea
 
 ## Referencias
 
-- `docs/frmwk/settings/config.yaml` → `config.story.yaml`, `conditional_rules.proposal_when`, `phase_rules.proposal`.
-- `docs/frmwk/settings/methodology.json` → `identifiers.workflow_doc.items[name=proposal]`.
-- `docs/frmwk/rules/workflow.md` → Regla 3b (bifurcaciones), Regla 16 (condicionales), Regla 6 (SDD dirige).
-- **Template canónico** (dueño): `docs/frmwk/skills/proposal/references/FW-02_proposal-template.md`.
-- `docs/frmwk/skills/story/references/FW-02_proposal-template.md` es symlink que delega acá.
+- `~/.fremi/framework/framework/settings/config.yaml` → `config.story.yaml`, `conditional_rules.proposal_when`, `phase_rules.proposal`.
+- `~/.fremi/framework/framework/settings/methodology.json` → `identifiers.workflow_doc.items[name=proposal]`.
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 3b (bifurcaciones), Regla 16 (condicionales), Regla 6 (SDD dirige).
+- **Template canónico** (dueño): `~/.fremi/framework/framework/skills/proposal/references/FW-02_proposal-template.md`.
+- `~/.fremi/framework/framework/skills/story/references/FW-02_proposal-template.md` es symlink que delega acá.

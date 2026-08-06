@@ -83,4 +83,4 @@ Doc **living**:
 ## Referencias
 - Template: [`references/strategies-template.md`](references/strategies-template.md).
 - Skill `/fremi-product-adr` — para registrar la decisión que sale de acá.
-- `docs/frmwk/rules/workflow.md` → Regla 3b (bifurcaciones + ADR).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 3b (bifurcaciones + ADR).

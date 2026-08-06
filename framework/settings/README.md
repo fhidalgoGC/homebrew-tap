@@ -1,4 +1,4 @@
-# `docs/frmwk/settings/` — Configuración runtime de la metodología
+# `~/.fremi/framework/framework/settings/` — Configuración runtime de la metodología
 
 > **Esta carpeta es configuración para los agentes (IA), no para humanos directamente.** Los archivos acá NO son documentación que se lee en orden — son **datos estructurados** que los skills y hooks leen al ejecutarse.
 >
@@ -28,7 +28,7 @@ En caso de superposición (ej: obligatoriedad de `FW-00`/`FW-02` mencionada en a
 
 ## ¿Quién lee estos archivos?
 
-Los **skills** del proyecto (`docs/frmwk/skills/*/SKILL.md`) cargan `methodology.json` como **Paso 0 obligatorio** antes de hacer cualquier otra cosa. Si el JSON falta o no parsea, los skills **abortan** — no usan fallbacks hardcoded.
+Los **skills** del proyecto (`~/.fremi/framework/framework/skills/*/SKILL.md`) cargan `methodology.json` como **Paso 0 obligatorio** antes de hacer cualquier otra cosa. Si el JSON falta o no parsea, los skills **abortan** — no usan fallbacks hardcoded.
 
 Skills que dependen del JSON:
 - `/fremi-feature` — usa `identifiers.feature`, `slug`, `paths`.
@@ -39,7 +39,7 @@ Skills que dependen del JSON:
 - `/fremi-sync-check` — usa `paths`, `identifiers.workflow_doc.items`, `identifiers.adr`.
 - `/fremi-product-iniciativas` / `/fremi-product-ideas` / `/fremi-product-planteamiento` — usa `identifiers.iniciativa`, `layers.product.stages_order`.
 
-Los **hooks** (en `docs/frmwk/hooks/`) hoy no leen el JSON directamente — la convención está hardcoded en bash. Si querés que un hook respete cambios del JSON, hay que parsearlo con `jq` dentro del script.
+Los **hooks** (en `~/.fremi/framework/framework/hooks/`) hoy no leen el JSON directamente — la convención está hardcoded en bash. Si querés que un hook respete cambios del JSON, hay que parsearlo con `jq` dentro del script.
 
 ---
 
@@ -150,8 +150,8 @@ Si agregás un campo nuevo al JSON que el schema no contempla, el IDE muestra wa
 ## Cuándo NO tocar esta carpeta
 
 - **No agregues acá decisiones técnicas del producto** (esas van a `docs/works/product/decisions.md`).
-- **No agregues acá reglas del flujo** (esas van a `docs/frmwk/rules/workflow.md`).
-- **No agregues acá documentación general** (la metodología viva en `docs/frmwk/flows/workflow.md` y `CLAUDE.md`).
+- **No agregues acá reglas del flujo** (esas van a `~/.fremi/framework/framework/rules/workflow.md`).
+- **No agregues acá documentación general** (la metodología viva en `~/.fremi/framework/framework/flows/workflow.md` y `CLAUDE.md`).
 
 Esta carpeta es **sólo configuración runtime** + este README. Nada más.
 
@@ -161,7 +161,7 @@ Esta carpeta es **sólo configuración runtime** + este README. Nada más.
 
 Si en el futuro aparecen nuevos archivos de configuración:
 - **Datos estructurados que la IA lee** → van acá (`.json` con su `.schema.json` y mención en este README).
-- **Comportamientos automatizados** (ej: validación al commit) → van a `docs/frmwk/hooks/` (no acá).
-- **Skills nuevas** → van a `docs/frmwk/skills/<nombre>/SKILL.md` (no acá).
+- **Comportamientos automatizados** (ej: validación al commit) → van a `~/.fremi/framework/framework/hooks/` (no acá).
+- **Skills nuevas** → van a `~/.fremi/framework/framework/skills/<nombre>/SKILL.md` (no acá).
 
 Cualquier archivo nuevo en esta carpeta debe quedar **listado en la tabla de Contenido** de este README con su propósito.

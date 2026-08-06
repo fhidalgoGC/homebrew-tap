@@ -577,7 +577,7 @@ template/
 - (ej: "Hay un archivo `secrets.json` que se copió — revisar si tiene contenido sensible")
 
 ## Posibles divergencias con la metodología del proyecto
-(Cruzar con `docs/frmwk/rules/workflow.md`, `docs/works/product/decisions.md`, `docs/frmwk/settings/methodology.json`.)
+(Cruzar con `~/.fremi/framework/framework/rules/workflow.md`, `docs/works/product/decisions.md`, `~/.fremi/framework/framework/settings/methodology.json`.)
 - (ej: "El template asume CommonJS pero ADR-001 acepta Node 20 — puede usar ESM. No es divergencia técnica pero el código del template está en CommonJS.")
 
 ## TODOs explícitos del template original

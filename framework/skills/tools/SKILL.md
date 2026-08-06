@@ -47,15 +47,15 @@ Ejemplos: `/fremi-add-skill`, `/fremi-delete-hook`, `/fremi-add-mcp`, `/fremi-de
 - El usuario dice "agregá un skill para X", "necesitamos un hook que…", "sumá esta regla al proyecto", "conectá el MCP de Y".
 - Requiere eliminar un asset del proyecto (skill/hook/rule/mcp) que ya no se necesita.
 
-**No usar**: para asets de metodología (`docs/frmwk/`) — esos se editan a mano.
+**No usar**: para asets de metodología (`~/.fremi/framework/framework/`) — esos se editan a mano.
 
 ---
 
 ## Scope
 
-- **`add-skill`, `add-hook`, `add-rule`**: por default crean en `docs/project/` (project-scoped). Con `--scope frmwk` (avanzado, no recomendado) puede tocar `docs/frmwk/`.
+- **`add-skill`, `add-hook`, `add-rule`**: por default crean en `docs/project/` (project-scoped). Con `--scope frmwk` (avanzado, no recomendado) puede tocar `~/.fremi/framework/framework/`.
 - **`add-mcp`, `delete-mcp`**: modifican `.claude/settings.json` (config del agente).
-- **`delete-*`**: por default sólo elimina de `docs/project/`. Con `--force` puede eliminar de `docs/frmwk/` (peligroso).
+- **`delete-*`**: por default sólo elimina de `docs/project/`. Con `--force` puede eliminar de `~/.fremi/framework/framework/` (peligroso).
 
 ---
 

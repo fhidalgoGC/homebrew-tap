@@ -5,7 +5,7 @@ since: 2026-07-13
 
 # ---------------------------------------------------------------------------
 # Configuración USER-EDITABLE de la capa ENABLER.
-# Vive junto al skill orquestador (docs/frmwk/skills/enabler/) porque el
+# Vive junto al skill orquestador (~/.fremi/framework/framework/skills/enabler/) porque el
 # usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
 #
 # 4 docs livianos: definition → design → plan → closure.
@@ -126,7 +126,7 @@ flow:
         - "Bumpea el padre según parent_bump_triggers.enabler_closes (Regla 17)"
 
   # NOTA: la TOPOLOGÍA de paralelismo vive en
-  # `docs/frmwk/skills/enabler/config.core.yaml` — es estructura del framework,
+  # `~/.fremi/framework/framework/skills/enabler/config.core.yaml` — es estructura del framework,
   # no configuración de usuario. Este archivo (settings) sólo tiene el flag
   # on/off (ver config.yaml master → parallelism.enabled).
 
@@ -139,7 +139,7 @@ flow:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  master_config: docs/frmwk/settings/config.yaml
-  methodology: docs/frmwk/settings/methodology.json
-  rules: docs/frmwk/rules/workflow.md
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules: ~/.fremi/framework/framework/rules/workflow.md
   orchestrator_skill: /fremi-enabler

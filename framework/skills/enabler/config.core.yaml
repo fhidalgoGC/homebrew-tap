@@ -11,7 +11,7 @@ since: 2026-07-16
 #
 # Fuente de verdad ESTRUCTURAL — el usuario NO edita.
 # - Toggle on/off → settings/config.yaml → parallelism.enabled.
-# - Config operativa → docs/frmwk/skills/enabler/config.user.yaml.
+# - Config operativa → ~/.fremi/framework/framework/skills/enabler/config.user.yaml.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ since: 2026-08-05
 # al framework).
 #
 # Reverse-engineering es una VÍA FORMAL de alineación — no procedimiento
-# excepcional. Ver Regla 25 en docs/frmwk/rules/reverse.md.
+# excepcional. Ver Regla 25 en ~/.fremi/framework/framework/rules/reverse.md.
 #
 # Este archivo declara:
 #   - Skills disponibles (6) y pipelines (4).
@@ -35,7 +35,7 @@ default_mode: transparent
 skills:
   - name: fremi-reverse-product
     scope: product
-    path: docs/frmwk/reverse-engineering/reverse-product/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-product/
     produces:
       - iniciativas.md
       - ideas.md
@@ -50,7 +50,7 @@ skills:
 
   - name: fremi-reverse-feature
     scope: feature
-    path: docs/frmwk/reverse-engineering/reverse-feature/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-feature/
     produces:
       - FT-XX/definition.md
       - FT-XX/decisions.md   # opcional, si hubo ADRs inferidos
@@ -60,7 +60,7 @@ skills:
 
   - name: fremi-reverse-story
     scope: story
-    path: docs/frmwk/reverse-engineering/reverse-story/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-story/
     produces:
       - FW-00_explore.md   # opcional, si aplicaría según config.story.yaml
       - FW-01_definition.md
@@ -79,7 +79,7 @@ skills:
 
   - name: fremi-reverse-enabler
     scope: enabler
-    path: docs/frmwk/reverse-engineering/reverse-enabler/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-enabler/
     produces:
       - EN-01_definition.md
       - EN-02_design.md
@@ -91,7 +91,7 @@ skills:
 
   - name: fremi-reverse-bug
     scope: bug
-    path: docs/frmwk/reverse-engineering/reverse-bug/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-bug/
     produces:
       - BG-XX_<slug>.md
     single_file: true
@@ -102,7 +102,7 @@ skills:
 
   - name: fremi-reverse-extra
     scope: extra
-    path: docs/frmwk/reverse-engineering/reverse-extra/
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-extra/
     produces:
       - EX-NN_<slug>.md
     single_file: true
@@ -117,14 +117,14 @@ skills:
 pipelines:
   - name: fremi-pipeline-reverse-product
     scope: product
-    path: docs/frmwk/pipelines/pipeline.reverse.product.md
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.product.md
     invokes:
       - fremi-reverse-product
     recommended_mode: interactive   # producto — el más peligroso — interactive fuerte
 
   - name: fremi-pipeline-reverse-feature
     scope: feature
-    path: docs/frmwk/pipelines/pipeline.reverse.feature.md
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.feature.md
     invokes:
       - fremi-reverse-feature
       - fremi-reverse-story    # todas las stories de la feature en cadena
@@ -132,14 +132,14 @@ pipelines:
 
   - name: fremi-pipeline-reverse-story
     scope: story
-    path: docs/frmwk/pipelines/pipeline.reverse.story.md
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.story.md
     invokes:
       - fremi-reverse-story
     recommended_mode: interactive
 
   - name: fremi-pipeline-reverse-enabler
     scope: enabler
-    path: docs/frmwk/pipelines/pipeline.reverse.enabler.md
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.enabler.md
     invokes:
       - fremi-reverse-enabler
     recommended_mode: interactive
@@ -270,35 +270,35 @@ templates:
   strategy: "symlinks desde reverse-<skill>/references/ hacia el skill productor canónico"
   examples:
     reverse-story:
-      - FW-00_explore-template.md → docs/frmwk/skills/story/skills/explore/references/
-      - FW-01_definition-template.md → docs/frmwk/skills/story/skills/definition/references/
-      - FW-02_proposal-template.md → docs/frmwk/skills/story/skills/proposal/references/
-      - FW-03_scope-template.md → docs/frmwk/skills/story/skills/scope/references/
-      - FW-04_bdd-userstories-template.md → docs/frmwk/skills/story/skills/bdd/references/
-      - FW-05_sdd-spec-template.md → docs/frmwk/skills/story/skills/sdd/references/
-      - FW-06_design-template.md → docs/frmwk/skills/story/skills/design/references/
-      - FW-07_tdd-plan-template.md → docs/frmwk/skills/story/skills/tdd/references/
-      - FW-08_plan-template.md → docs/frmwk/skills/story/skills/plan/references/
-      - FW-09_checkwork-template.md → docs/frmwk/skills/story/skills/checkwork/references/
-      - FW-10_closure-template.md → docs/frmwk/skills/story/skills/closure/references/
+      - FW-00_explore-template.md → ~/.fremi/framework/framework/skills/story/skills/explore/references/
+      - FW-01_definition-template.md → ~/.fremi/framework/framework/skills/story/skills/definition/references/
+      - FW-02_proposal-template.md → ~/.fremi/framework/framework/skills/story/skills/proposal/references/
+      - FW-03_scope-template.md → ~/.fremi/framework/framework/skills/story/skills/scope/references/
+      - FW-04_bdd-userstories-template.md → ~/.fremi/framework/framework/skills/story/skills/bdd/references/
+      - FW-05_sdd-spec-template.md → ~/.fremi/framework/framework/skills/story/skills/sdd/references/
+      - FW-06_design-template.md → ~/.fremi/framework/framework/skills/story/skills/design/references/
+      - FW-07_tdd-plan-template.md → ~/.fremi/framework/framework/skills/story/skills/tdd/references/
+      - FW-08_plan-template.md → ~/.fremi/framework/framework/skills/story/skills/plan/references/
+      - FW-09_checkwork-template.md → ~/.fremi/framework/framework/skills/story/skills/checkwork/references/
+      - FW-10_closure-template.md → ~/.fremi/framework/framework/skills/story/skills/closure/references/
     reverse-feature:
-      - definition-template.md → docs/frmwk/skills/feature/references/
-      - adr-entry-template.md → docs/frmwk/skills/feature/skills/adr/references/
+      - definition-template.md → ~/.fremi/framework/framework/skills/feature/references/
+      - adr-entry-template.md → ~/.fremi/framework/framework/skills/feature/skills/adr/references/
     reverse-enabler:
-      - EN-01_definition-template.md → docs/frmwk/skills/enabler/skills/definition/references/
-      - EN-02_design-template.md → docs/frmwk/skills/enabler/skills/design/references/
-      - EN-03_plan-template.md → docs/frmwk/skills/enabler/skills/plan/references/
-      - EN-04_closure-template.md → docs/frmwk/skills/enabler/skills/closure/references/
+      - EN-01_definition-template.md → ~/.fremi/framework/framework/skills/enabler/skills/definition/references/
+      - EN-02_design-template.md → ~/.fremi/framework/framework/skills/enabler/skills/design/references/
+      - EN-03_plan-template.md → ~/.fremi/framework/framework/skills/enabler/skills/plan/references/
+      - EN-04_closure-template.md → ~/.fremi/framework/framework/skills/enabler/skills/closure/references/
     reverse-bug:
-      - BG-template.md → docs/frmwk/skills/story/skills/bug/references/
+      - BG-template.md → ~/.fremi/framework/framework/skills/story/skills/bug/references/
     reverse-product:
-      - iniciativas-template.md → docs/frmwk/skills/product/skills/iniciativas/references/
-      - ideas-template.md → docs/frmwk/skills/product/skills/ideas/references/
-      - planteamiento-template.md → docs/frmwk/skills/product/skills/planteamiento/references/
-      - definition-template.md → docs/frmwk/skills/product/skills/definition/references/
-      - strategies-template.md → docs/frmwk/skills/product/skills/strategies/references/
-      - adr-entry-template.md → docs/frmwk/skills/product/skills/adr/references/
-      - plan-template.md → docs/frmwk/skills/product/skills/plan/references/
+      - iniciativas-template.md → ~/.fremi/framework/framework/skills/product/skills/iniciativas/references/
+      - ideas-template.md → ~/.fremi/framework/framework/skills/product/skills/ideas/references/
+      - planteamiento-template.md → ~/.fremi/framework/framework/skills/product/skills/planteamiento/references/
+      - definition-template.md → ~/.fremi/framework/framework/skills/product/skills/definition/references/
+      - strategies-template.md → ~/.fremi/framework/framework/skills/product/skills/strategies/references/
+      - adr-entry-template.md → ~/.fremi/framework/framework/skills/product/skills/adr/references/
+      - plan-template.md → ~/.fremi/framework/framework/skills/product/skills/plan/references/
     reverse-extra:
       # extra no tiene template canónico dedicado hoy (edición manual)
       # → reverse-extra usa una plantilla inline documentada en su SKILL.md
@@ -320,11 +320,11 @@ anti_patterns:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  master_config: docs/frmwk/settings/config.yaml
-  methodology: docs/frmwk/settings/methodology.json
-  rules_forward: docs/frmwk/rules/workflow.md
-  rules_reverse: docs/frmwk/rules/reverse.md   # Reglas 25-32
-  flow: docs/frmwk/flows/flow.reverse.md
-  skills_dir: docs/frmwk/reverse-engineering/
-  pipelines_dir: docs/frmwk/pipelines/
-  hook_alignment: docs/frmwk/hooks/check-reverse-alignment.sh
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules_forward: ~/.fremi/framework/framework/rules/workflow.md
+  rules_reverse: ~/.fremi/framework/framework/rules/reverse.md   # Reglas 25-32
+  flow: ~/.fremi/framework/framework/flows/flow.reverse.md
+  skills_dir: ~/.fremi/framework/framework/reverse-engineering/
+  pipelines_dir: ~/.fremi/framework/framework/pipelines/
+  hook_alignment: ~/.fremi/framework/framework/hooks/check-reverse-alignment.sh

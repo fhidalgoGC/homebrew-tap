@@ -57,7 +57,7 @@ done
 
 if [[ ${#missing[@]} -gt 0 ]]; then
   echo "⚠️  [check-reverse-alignment] $FILE_PATH — es reverse-engineered pero faltan campos: ${missing[*]}"
-  echo "   Ver Regla 26 en docs/frmwk/rules/reverse.md."
+  echo "   Ver Regla 26 en ~/.fremi/framework/framework/rules/reverse.md."
 fi
 
 # --- 3. Chequear confidence >= 0.5 ------------------------------------------

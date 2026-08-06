@@ -118,4 +118,4 @@ Consultar `config.yaml → parent_bump_triggers.story_closes`:
 - Skill `/fremi-story-closure-check` — auditar ANTES de firmar.
 - Skill `/fremi-story-verify` — corrida final que precede el closure.
 - `config.yaml → phase_rules.closure`, `parent_bump_triggers.story_closes`.
-- `docs/frmwk/rules/workflow.md` → Regla 11 (closure obligatorio para DONE), Regla 17 (bump del padre).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 11 (closure obligatorio para DONE), Regla 17 (bump del padre).

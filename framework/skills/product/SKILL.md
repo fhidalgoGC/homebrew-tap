@@ -64,6 +64,6 @@ docs/works/product/
 
 ## Referencias
 
-- Sub-skills: `docs/frmwk/skills/product/skills/`.
-- Regla 4 (Discovery antes de formalización) en `docs/frmwk/rules/workflow.md`.
-- `docs/frmwk/skills/product/config.user.yaml`.
+- Sub-skills: `~/.fremi/framework/framework/skills/product/skills/`.
+- Regla 4 (Discovery antes de formalización) en `~/.fremi/framework/framework/rules/workflow.md`.
+- `~/.fremi/framework/framework/skills/product/config.user.yaml`.

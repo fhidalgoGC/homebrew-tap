@@ -1,4 +1,4 @@
-# `docs/frmwk/commands/` — Comandos custom (alternativa a skills)
+# `~/.fremi/framework/framework/commands/` — Comandos custom (alternativa a skills)
 
 > **Esta carpeta es configuración del entorno del agente.** Algunos harness exponen el concepto de "comando" además de "skill" — son atajos simples que el usuario invoca pero que no implican un procedimiento complejo. Esta carpeta los aloja.
 >
@@ -8,13 +8,13 @@
 
 ## Estado actual
 
-**Carpeta vacía.** Hoy el proyecto usa **skills** (`docs/frmwk/skills/`) para todo. Los comandos quedan disponibles como categoría aparte por si en el futuro aparecen atajos de bajo nivel.
+**Carpeta vacía.** Hoy el proyecto usa **skills** (`~/.fremi/framework/framework/skills/`) para todo. Los comandos quedan disponibles como categoría aparte por si en el futuro aparecen atajos de bajo nivel.
 
 ---
 
 ## Diferencia con skills
 
-| | Skill (`docs/frmwk/skills/<X>/SKILL.md`) | Comando (`docs/frmwk/commands/<X>.md`) |
+| | Skill (`~/.fremi/framework/framework/skills/<X>/SKILL.md`) | Comando (`~/.fremi/framework/framework/commands/<X>.md`) |
 |---|---|---|
 | Invocación | `/<nombre>` | `/<nombre>` (idéntica) |
 | Estructura | `SKILL.md` con frontmatter + procedimiento Markdown | Un archivo plano con instrucciones cortas |
@@ -28,7 +28,7 @@
 
 ## Cómo agregar un comando
 
-1. Crear `docs/frmwk/commands/<nombre>.md` con instrucciones claras y cortas.
+1. Crear `~/.fremi/framework/framework/commands/<nombre>.md` con instrucciones claras y cortas.
 2. **Documentarlo en este README** (tabla de Contenido).
 3. Wirearlo en la configuración del agente si el harness lo requiere.
 

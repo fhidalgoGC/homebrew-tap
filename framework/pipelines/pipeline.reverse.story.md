@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para la capa STORY. 
 
 Corre en modo **automático** la cadena de reconstrucción para UNA story cuyo código ya existe pero cuyos docs FW-00..FW-10 no fueron creados por el flow forward.
 
-**Fuente de verdad de la secuencia:** [`docs/frmwk/settings/config.reverse.yaml`](../settings/config.reverse.yaml) — declara skills, defaults y policies transversales. **Fuente de verdad del flujo:** [`docs/frmwk/flows/flow.reverse.md`](../flows/flow.reverse.md) — 6 fases canónicas.
+**Fuente de verdad de la secuencia:** [`~/.fremi/framework/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml) — declara skills, defaults y policies transversales. **Fuente de verdad del flujo:** [`~/.fremi/framework/framework/flows/flow.reverse.md`](../flows/flow.reverse.md) — 6 fases canónicas.
 
 **Alcance del pipeline:** planificación completa (FW-00..FW-08) + `FW-09_checkwork` marcado 100% (todo cerrado — el código ya existe) + `FW-10_closure` firmado con matriz de trazabilidad reconstruida. **NO** ejecuta código nuevo — la implementación ya está en producción.
 
@@ -108,9 +108,9 @@ docs/works/features/FT-XX/user-stories/HU-YY_<slug>/
 
 ## Referencias
 
-- Config operativo: [`docs/frmwk/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
-- Reglas específicas: [`docs/frmwk/rules/reverse.md`](../rules/reverse.md) — Reglas 25-32.
-- Flujo descriptivo: [`docs/frmwk/flows/flow.reverse.md`](../flows/flow.reverse.md)
+- Config operativo: [`~/.fremi/framework/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
+- Reglas específicas: [`~/.fremi/framework/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25-32.
+- Flujo descriptivo: [`~/.fremi/framework/framework/flows/flow.reverse.md`](../flows/flow.reverse.md)
 - Skill suelto: [`/fremi-reverse-story`](../reverse-engineering/reverse-story/SKILL.md)
 - Pipeline padre: [`/fremi-pipeline-reverse-feature`](pipeline.reverse.feature.md)
 - README de pipelines: [`README.md`](README.md)

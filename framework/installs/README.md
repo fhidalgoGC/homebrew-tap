@@ -1,4 +1,4 @@
-# `docs/frmwk/installs/` — Skills de instalación del framework
+# `~/.fremi/framework/framework/installs/` — Skills de instalación del framework
 
 Skills que **instalan** el framework en el proyecto — sincronizan `.claude/`, registran hooks, y verifican estructura.
 
@@ -20,7 +20,7 @@ Diferencia con otros skills del framework:
 
 - **Al clonar el proyecto**: `/fremi-install-framework` para sincronizar `.claude/`.
 - **Al importar el framework** a un proyecto nuevo (después de `/fremi-import-template`).
-- **Cuando cambia la estructura** de `docs/frmwk/skills/` — hay que recrear symlinks.
+- **Cuando cambia la estructura** de `~/.fremi/framework/framework/skills/` — hay que recrear symlinks.
 - **Cuando aparecen symlinks broken** — el skill los detecta y recrea.
 
 ---

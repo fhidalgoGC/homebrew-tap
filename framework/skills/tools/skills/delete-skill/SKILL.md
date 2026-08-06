@@ -13,7 +13,7 @@ Elimina un skill del proyecto (por default) o del framework (con `--force`). Bor
 /fremi-delete-skill <name> [--force]
 ```
 
-- `--force`: también permite eliminar skills bajo `docs/frmwk/skills/` (peligroso).
+- `--force`: también permite eliminar skills bajo `~/.fremi/framework/framework/skills/` (peligroso).
 
 ## Cuándo invocarlo
 
@@ -27,7 +27,7 @@ Elimina un skill del proyecto (por default) o del framework (con `--force`). Bor
 ### Paso 0 — Validar entrada
 1. Localizar el skill:
    - Primero: `docs/project/skills/<name>/`.
-   - Si `--force` y no está en project: buscar en `docs/frmwk/skills/<name>/`.
+   - Si `--force` y no está en project: buscar en `~/.fremi/framework/framework/skills/<name>/`.
 2. Si no existe en ningún scope → abortar (no hay nada que borrar).
 
 ### Paso 1 — Detectar dependencias
@@ -35,7 +35,7 @@ Elimina un skill del proyecto (por default) o del framework (con `--force`). Bor
 Buscar referencias al skill en:
 - Otros SKILL.md del framework/proyecto (`grep -r "/<name>" docs/`).
 - `CLAUDE.md`.
-- `docs/frmwk/settings/config.*.yaml` (skill declarado en `flow.sequence`?).
+- `~/.fremi/framework/framework/settings/config.*.yaml` (skill declarado en `flow.sequence`?).
 
 Si hay referencias → mostrar al usuario y pedir confirmación.
 
@@ -43,7 +43,7 @@ Si hay referencias → mostrar al usuario y pedir confirmación.
 
 ```
 ⚠️ Vas a eliminar el skill: <name>
-   Path: docs/project/skills/<name>/ (o docs/frmwk/skills/<name>/ con --force)
+   Path: docs/project/skills/<name>/ (o ~/.fremi/framework/framework/skills/<name>/ con --force)
    Referencias detectadas: <N>
 
 ¿Confirmás?
@@ -54,14 +54,14 @@ Esperar `sí` explícito.
 ### Paso 3 — Eliminar
 
 1. Borrar symlink: `rm .claude/skills/<name>`.
-2. Borrar folder: `rm -rf docs/project/skills/<name>/` (o `docs/frmwk/skills/<name>/` con `--force`).
+2. Borrar folder: `rm -rf docs/project/skills/<name>/` (o `~/.fremi/framework/framework/skills/<name>/` con `--force`).
 
 ### Paso 4 — Reportar
 
 ```
 ✅ Skill eliminado: <name>
 🗑️ Borrado:
-   - docs/project/skills/<name>/ (o docs/frmwk/skills/<name>/)
+   - docs/project/skills/<name>/ (o ~/.fremi/framework/framework/skills/<name>/)
    - .claude/skills/<name>
 
 ⚠️ Referencias que quedaron rotas:
@@ -73,7 +73,7 @@ Esperar `sí` explícito.
 ## Validaciones
 
 - Skill no existe → abortar.
-- Sin `--force` y skill está en `docs/frmwk/` → abortar (necesita `--force` explícito).
+- Sin `--force` y skill está en `~/.fremi/framework/framework/` → abortar (necesita `--force` explícito).
 - Referencias huérfanas → reportar pero no bloquear.
 
 ## Anti-patrones

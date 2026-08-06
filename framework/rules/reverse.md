@@ -1,6 +1,6 @@
 # Reglas del flujo de reverse-engineering — makingFileReport
 
-> **Documento de referencia:** `docs/frmwk/flows/flow.reverse.md`, `docs/frmwk/pipelines/pipeline.reverse.*.md`, `docs/frmwk/reverse-engineering/`.
+> **Documento de referencia:** `~/.fremi/framework/framework/flows/flow.reverse.md`, `~/.fremi/framework/framework/pipelines/pipeline.reverse.*.md`, `~/.fremi/framework/framework/reverse-engineering/`.
 >
 > Este archivo contiene reglas **específicas del flujo de reverse-engineering** — la vía canónica para alinear código pre-existente al framework. Se lee **en adición** a `rules/workflow.md` (reglas forward). Ambos archivos son obligatorios.
 
@@ -20,8 +20,8 @@ Cuando existe trabajo real (endpoint, feature, product, tooling, bug fixeado, en
 
 - **6 skills**: `/fremi-reverse-story`, `/fremi-reverse-feature`, `/fremi-reverse-bug`, `/fremi-reverse-enabler`, `/fremi-reverse-product`, `/fremi-reverse-extra`.
 - **4 pipelines**: `/fremi-pipeline-reverse-product`, `/fremi-pipeline-reverse-feature`, `/fremi-pipeline-reverse-story`, `/fremi-pipeline-reverse-enabler`. Bug y extra son de un solo archivo — se invoca el skill directo.
-- **1 flow**: `docs/frmwk/flows/flow.reverse.md` con las 6 fases canónicas.
-- **1 config**: `docs/frmwk/settings/config.reverse.yaml` con defaults, skills declarados y políticas transversales.
+- **1 flow**: `~/.fremi/framework/framework/flows/flow.reverse.md` con las 6 fases canónicas.
+- **1 config**: `~/.fremi/framework/framework/settings/config.reverse.yaml` con defaults, skills declarados y políticas transversales.
 - **1 hook** (opcional): `check-reverse-alignment.sh` valida post-reverse (Regla 17 aplicada, gaps reportados, coherencia de ancestor).
 
 ### Precondición dura
@@ -82,7 +82,7 @@ Con `--stealth`, los docs quedan indistinguibles de un flow forward normal (no s
 
 ### Override por proyecto
 
-El proyecto puede setear en `docs/frmwk/settings/config.reverse.yaml`:
+El proyecto puede setear en `~/.fremi/framework/framework/settings/config.reverse.yaml`:
 
 ```yaml
 default_mode: transparent   # framework default
@@ -214,8 +214,8 @@ Antes de invocar cualquier skill o pipeline de reverse:
 
 ## Referencias
 
-- `docs/frmwk/rules/workflow.md` — reglas del flow forward (Regla 1-24). Se aplican **también** durante reverse cuando corresponda (Regla 17, 10, 12).
-- `docs/frmwk/flows/flow.reverse.md` — descripción narrativa del flujo canónico de reverse.
-- `docs/frmwk/settings/config.reverse.yaml` — config operativo de reverse.
-- `docs/frmwk/reverse-engineering/README.md` — casos de uso + advertencias.
-- `docs/frmwk/pipelines/pipeline.reverse.*.md` — pipelines de auto-ejecución por capa.
+- `~/.fremi/framework/framework/rules/workflow.md` — reglas del flow forward (Regla 1-24). Se aplican **también** durante reverse cuando corresponda (Regla 17, 10, 12).
+- `~/.fremi/framework/framework/flows/flow.reverse.md` — descripción narrativa del flujo canónico de reverse.
+- `~/.fremi/framework/framework/settings/config.reverse.yaml` — config operativo de reverse.
+- `~/.fremi/framework/framework/reverse-engineering/README.md` — casos de uso + advertencias.
+- `~/.fremi/framework/framework/pipelines/pipeline.reverse.*.md` — pipelines de auto-ejecución por capa.

@@ -69,5 +69,5 @@ Puebla el `FW-07_tdd-plan.md` con la lista planeada de tests `TC-XXX`, cada uno 
 
 - Template: [`references/FW-07_tdd-plan-template.md`](references/FW-07_tdd-plan-template.md).
 - `config.yaml → phase_rules.tdd`, `testing.*`.
-- `docs/frmwk/rules/workflow.md` → Regla 7 (TDD rojo primero).
+- `~/.fremi/framework/framework/rules/workflow.md` → Regla 7 (TDD rojo primero).
 - Skill `/fremi-story-verify` — ejecuta el plan al final.

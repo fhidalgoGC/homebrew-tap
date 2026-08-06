@@ -142,8 +142,8 @@ procedure_after_creation:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  master_config: docs/frmwk/settings/config.yaml
-  methodology: docs/frmwk/settings/methodology.json
-  rules: docs/frmwk/rules/workflow.md
-  regla_8: "docs/frmwk/rules/workflow.md § Regla 8 (test rojo primero)"
-  sibling_scope: docs/frmwk/settings/config.bug.story.yaml
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules: ~/.fremi/framework/framework/rules/workflow.md
+  regla_8: "~/.fremi/framework/framework/rules/workflow.md § Regla 8 (test rojo primero)"
+  sibling_scope: ~/.fremi/framework/framework/settings/config.bug.story.yaml

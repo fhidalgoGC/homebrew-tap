@@ -1,6 +1,6 @@
 # Flujo — Capa BUG (scope: STORY)
 
-> **Config operativa:** [`docs/frmwk/settings/config.bug.story.yaml`](../settings/config.bug.story.yaml)
+> **Config operativa:** [`~/.fremi/framework/framework/settings/config.bug.story.yaml`](../settings/config.bug.story.yaml)
 > **Skill:** [`/fremi-story-bug`](../skills/story/skills/bug/SKILL.md)
 > **Rol:** defecto en código de producción atribuible a **UNA story específica** (default y más común).
 >
@@ -171,4 +171,4 @@ HU-YY/bugs/BG-XX_<slug>.md  (snapshot)
 - Config operativa: [`config.bug.story.yaml`](../settings/config.bug.story.yaml)
 - Sibling scope: [`flow.bug.feature.md`](./flow.bug.feature.md)
 - Regla 8 (test rojo primero): [`workflow.md`](../rules/workflow.md)
-- Template canónico: [`docs/frmwk/skills/story/skills/bug/references/BG-template.md`](../skills/story/skills/bug/references/BG-template.md)
+- Template canónico: [`~/.fremi/framework/framework/skills/story/skills/bug/references/BG-template.md`](../skills/story/skills/bug/references/BG-template.md)

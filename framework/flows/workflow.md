@@ -100,7 +100,7 @@ docs/works/
 
 ## Convención de nomenclatura
 
-**Fuente de verdad**: [`docs/frmwk/settings/methodology.json`](../settings/methodology.json). Las descripciones son resumen.
+**Fuente de verdad**: [`~/.fremi/framework/framework/settings/methodology.json`](../settings/methodology.json). Las descripciones son resumen.
 
 - **Features**: `FT-XX_<slug>` — ID secuencial global, 2 dígitos.
 - **Stories**: `HU-XX_<slug>` — ID secuencial local a la feature, 2 dígitos.
@@ -157,7 +157,7 @@ Si trabajando en capa inferior se descubre algo que pertenece arriba (restricci�
 
 ## Índice de reglas duras
 
-Detalle completo en [`docs/frmwk/rules/workflow.md`](../rules/workflow.md).
+Detalle completo en [`~/.fremi/framework/framework/rules/workflow.md`](../rules/workflow.md).
 
 | # | Regla | Qué garantiza |
 |---|---|---|
@@ -225,8 +225,8 @@ Detalle completo en [`docs/frmwk/rules/workflow.md`](../rules/workflow.md).
 
 ## Referencias
 
-- **Reglas duras**: [`docs/frmwk/rules/workflow.md`](../rules/workflow.md).
-- **Configs operativas**: [`docs/frmwk/settings/config.yaml`](../settings/config.yaml) + 7 `config.<capa>.yaml`.
-- **Nomenclatura**: [`docs/frmwk/settings/methodology.json`](../settings/methodology.json).
-- **Skills invocables**: `docs/frmwk/skills/` (con jerarquía por capa).
+- **Reglas duras**: [`~/.fremi/framework/framework/rules/workflow.md`](../rules/workflow.md).
+- **Configs operativas**: [`~/.fremi/framework/framework/settings/config.yaml`](../settings/config.yaml) + 7 `config.<capa>.yaml`.
+- **Nomenclatura**: [`~/.fremi/framework/framework/settings/methodology.json`](../settings/methodology.json).
+- **Skills invocables**: `~/.fremi/framework/framework/skills/` (con jerarquía por capa).
 - **CLAUDE.md** (entrada del agente): [`../../../CLAUDE.md`](../../../CLAUDE.md).

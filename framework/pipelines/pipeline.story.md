@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa STORY. Corre la cadena de pl
 
 # /fremi-pipeline-story — Pipeline capa STORY
 
-Corre en modo **automático** la secuencia declarada en [`docs/frmwk/skills/story/config.user.yaml → flow.sequence`](../skills/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/framework/skills/story/config.user.yaml → flow.sequence`](../skills/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
 
 **Fuente de verdad de la secuencia:** `config.story.yaml`. Si un step cambia allí, este pipeline se adapta.
 
@@ -46,8 +46,8 @@ Consultar `config.story.yaml → execution_mode` para los defaults. Sugerencia: 
 
 ## Precondiciones duras (abortan el pipeline)
 
-- **Regla 24 — Framework instalado**: `.claude/skills/fremi-install-framework` es symlink válido y `CLAUDE.md` referencia `docs/frmwk/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré `/fremi-install-framework` antes de invocar el pipeline". **No auto-instalar.**
-- `docs/frmwk/settings/methodology.json` + `config.story.yaml` existen y parsean.
+- **Regla 24 — Framework instalado**: `.claude/skills/fremi-install-framework` es symlink válido y `CLAUDE.md` referencia `~/.fremi/framework/framework/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré `/fremi-install-framework` antes de invocar el pipeline". **No auto-instalar.**
+- `~/.fremi/framework/framework/settings/methodology.json` + `config.story.yaml` existen y parsean.
 - `config.story.yaml → active: true`.
 - Feature `{FEATURE_ID}` existe en `docs/works/features/` y su `definition.md` tiene contenido real (no template vacío).
 - Feature `definition.md` tiene frontmatter con `version` (Regla 17). Si no → avisar y proponer migrarla antes.
@@ -162,9 +162,9 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`docs/frmwk/skills/story/config.user.yaml`](../skills/story/config.user.yaml)
-- Reglas: [`docs/frmwk/rules/workflow.md`](../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
-- Flujo descriptivo: [`docs/frmwk/flows/flow.story.md`](../flows/flow.story.md)
+- Config operativa: [`~/.fremi/framework/framework/skills/story/config.user.yaml`](../skills/story/config.user.yaml)
+- Reglas: [`~/.fremi/framework/framework/rules/workflow.md`](../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
+- Flujo descriptivo: [`~/.fremi/framework/framework/flows/flow.story.md`](../flows/flow.story.md)
 - Orquestador manual: [`/fremi-story`](../skills/story/SKILL.md)
-- Sub-skills: `docs/frmwk/skills/story/skills/`
+- Sub-skills: `~/.fremi/framework/framework/skills/story/skills/`
 - Pipeline padre: [`/fremi-pipeline-feature`](pipeline.feature.md) (puede encadenar este pipeline con `--first-story`)

@@ -1,11 +1,11 @@
 ---
 name: fremi-feature
-description: Crea una nueva feature en docs/works/features/ con su definition.md inicial. Lee la nomenclatura desde docs/frmwk/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario quiere crear o registrar una feature nueva del producto. Valida que la capa producto esté lista antes de avanzar.
+description: Crea una nueva feature en docs/works/features/ con su definition.md inicial. Lee la nomenclatura desde ~/.fremi/framework/framework/settings/methodology.json (NO usa prefijos hardcoded). Usar cuando el usuario quiere crear o registrar una feature nueva del producto. Valida que la capa producto esté lista antes de avanzar.
 ---
 
 # /fremi-feature — Crear nueva feature
 
-Crea el folder y el `definition.md` de una nueva feature, respetando la nomenclatura definida en **`docs/frmwk/settings/methodology.json`** y validando precondiciones.
+Crea el folder y el `definition.md` de una nueva feature, respetando la nomenclatura definida en **`~/.fremi/framework/framework/settings/methodology.json`** y validando precondiciones.
 
 > **Importante:** este skill NO tiene prefijos ni formatos hardcoded. Antes de hacer cualquier cosa, lee el JSON de configuración y deriva los patrones de `identifiers.feature`, `slug` y `paths`. Si la convención cambia (ej: `FT-01` → `F-001`), el skill se adapta automáticamente.
 
@@ -27,7 +27,7 @@ Crea el folder y el `definition.md` de una nueva feature, respetando la nomencla
 
 ### Paso 0 — Cargar configuración de nomenclatura (OBLIGATORIO)
 
-1. Leer `docs/frmwk/settings/methodology.json`.
+1. Leer `~/.fremi/framework/framework/settings/methodology.json`.
 2. Extraer la configuración relevante:
    - `feat_cfg = identifiers.feature` → `prefix`, `scope`, `id_format`, `folder_format`, `folder_regex`, `examples`.
    - `slug_cfg = slug` → `regex`, `case`, `max_length`, `transforms`.
@@ -35,7 +35,7 @@ Crea el folder y el `definition.md` de una nueva feature, respetando la nomencla
    - `paths.product_dir` → dónde vive `definition.md` de producto.
    - `paths.fields_for_methodology_doc` (si existe) — referencias a docs internos.
 
-Si el JSON no existe o está corrupto → abortar y avisar al usuario que falta `docs/frmwk/settings/methodology.json`.
+Si el JSON no existe o está corrupto → abortar y avisar al usuario que falta `~/.fremi/framework/framework/settings/methodology.json`.
 
 ### Paso 1 — Validar precondiciones (Regla 1)
 
@@ -78,7 +78,7 @@ Crear:
 └── definition.md
 ```
 
-1. Leer el template canónico de [`references/definition-template.md`](references/definition-template.md) (relativo a la carpeta del skill: `docs/frmwk/skills/feature/references/definition-template.md`).
+1. Leer el template canónico de [`references/definition-template.md`](references/definition-template.md) (relativo a la carpeta del skill: `~/.fremi/framework/framework/skills/feature/references/definition-template.md`).
 2. **Capturar versión del padre (Regla 17)**: leer el frontmatter de `docs/works/product/plan.md` y extraer su `version` actual. Este valor se inyecta como `ancestor.version_at_creation` en el frontmatter del nuevo `definition.md`. Si `plan.md` no tiene frontmatter (pre-Regla 17) → asumir `"0.0.0"` y avisar.
 3. Reemplazar los placeholders del template:
    - `{id}` y `{slug}` → con los valores derivados de Paso 2 y 3.
