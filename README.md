@@ -36,7 +36,7 @@ iwr -useb https://raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/install
 
 ```bash
 fremi version
-# fremi-framework v0.1.5
+# fremi-framework v0.1.6
 ```
 
 With `brew install` the binary is on your PATH immediately. With `curl | bash` you may need to open a new shell (or `source ~/.zshrc`) if `~/.local/bin` was not previously in PATH.
