@@ -29,7 +29,7 @@ export async function initFremiConfig(
 
   const yaml = `# .fremi/config.yaml
 # Per-project overrides of the fremi-framework defaults.
-# The framework master config lives at ~/.fremi/framework/settings/config.yaml.
+# The framework master config lives at ~/.fremi/framework/framework/settings/config.yaml.
 # Only put here what YOU want to override at the project level.
 
 schema: fremi-project-config

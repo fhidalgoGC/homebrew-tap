@@ -1,6 +1,6 @@
 {
   "name": "fremi-framework",
-  "version": "0.2.0",
+  "version": "0.1.6",
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",

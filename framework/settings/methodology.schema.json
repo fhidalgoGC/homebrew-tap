@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makingfilereport/~/.fremi/framework/framework/settings/methodology.schema.json",
+  "title": "Methodology config",
+  "description": "Schema de validación de ~/.fremi/framework/framework/settings/methodology.json. Define la estructura esperada de la configuración de nomenclatura del proyecto.",
+  "type": "object",
+  "required": ["version", "identifiers", "paths", "slug", "layers"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Versión semántica del schema (ej: 1.0.0)."
+    },
+    "description": { "type": "string" },
+    "_format_spec": {
+      "type": "object",
+      "description": "Documentación interna sobre los placeholders usados en los *_format strings. Campo informativo, no validado."
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "slug": {
+      "type": "object",
+      "required": ["case", "regex"],
+      "properties": {
+        "case": { "type": "string" },
+        "regex": { "type": "string", "format": "regex" },
+        "max_length": { "type": "integer", "minimum": 1 },
+        "transforms": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/identifier" }
+    },
+    "layers": {
+      "type": "object",
+      "properties": {
+        "_description": { "type": "string" },
+        "order": { "type": "array", "items": { "type": "string" } },
+        "product": { "type": "object" },
+        "feature": { "type": "object" },
+        "story": { "type": "object" }
+      }
+    },
+    "principles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "_description": { "type": "string" },
+          "rule_ref": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "object",
+      "required": ["prefix", "id_format", "scope"],
+      "properties": {
+        "_description": { "type": "string" },
+        "prefix": {
+          "type": "string",
+          "description": "Prefijo del identificador (ej: FT, HU, FW, ADR, task)."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["global", "feature", "story"],
+          "description": "Alcance de numeración: global al proyecto, local a una feature, o local a una story."
+        },
+        "scope_description": { "type": "string" },
+        "parent": { "type": "string", "enum": ["feature", "story"] },
+        "id_format": {
+          "type": "string",
+          "description": "Formato del ID usando placeholders. Ej: '{prefix}-{number:02d}' produce 'FT-01'."
+        },
+        "folder_format": { "type": "string" },
+        "folder_regex": { "type": "string", "format": "regex" },
+        "filename_format": { "type": "string" },
+        "filename_regex": { "type": "string", "format": "regex" },
+        "regex": { "type": "string", "format": "regex" },
+        "use_compound_filename": { "type": "boolean" },
+        "compound_filename_format": { "type": "string" },
+        "compound_id_format": { "type": "string" },
+        "compound_filename_example": { "type": "string" },
+        "compound_examples": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "location_default": { "type": "string" },
+        "location_feature": { "type": "string" },
+        "examples": { "type": "array", "items": { "type": "string" } },
+        "ordered": { "type": "boolean" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["number", "name"],
+            "properties": {
+              "number": { "type": "integer", "minimum": 1 },
+              "name": { "type": "string" },
+              "filename": { "type": "string" },
+              "role": { "type": "string" },
+              "principio": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

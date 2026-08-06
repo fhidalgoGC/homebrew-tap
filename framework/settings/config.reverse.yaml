@@ -1,0 +1,330 @@
+schema: framework-reverse-config
+schema_version: 1
+layer: reverse
+since: 2026-08-05
+
+# ---------------------------------------------------------------------------
+# Configuración operativa de la VÍA REVERSE (alineación de código pre-existente
+# al framework).
+#
+# Reverse-engineering es una VÍA FORMAL de alineación — no procedimiento
+# excepcional. Ver Regla 25 en ~/.fremi/framework/framework/rules/reverse.md.
+#
+# Este archivo declara:
+#   - Skills disponibles (6) y pipelines (4).
+#   - Defaults transversales (mode, confidence thresholds, git dependency).
+#   - Políticas de gaps (qué se pregunta, qué se marca como TBD).
+#   - Umbrales de salud (ratio reverse/forward — Regla 32).
+# ---------------------------------------------------------------------------
+
+active: true
+
+# ---------------------------------------------------------------------------
+# Default mode (Regla 26)
+# ---------------------------------------------------------------------------
+# transparent = frontmatter incluye reverse_engineered:* con fecha, fuente y
+#               confidence. Trazabilidad histórica visible.
+# stealth     = frontmatter idéntico al flow forward. Indistinguible.
+#               Requiere justificación por ADR a nivel proyecto para cambiar
+#               el default.
+default_mode: transparent
+
+# ---------------------------------------------------------------------------
+# Skills reverse — declaradas
+# ---------------------------------------------------------------------------
+skills:
+  - name: fremi-reverse-product
+    scope: product
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-product/
+    produces:
+      - iniciativas.md
+      - ideas.md
+      - planteamiento.md
+      - definition.md
+      - strategies.md
+      - decisions.md
+      - plan.md
+    single_file: false
+    risk: high    # producto es el más ambicioso — riesgo alto de racionalización post-hoc
+    recommended_mode: transparent
+
+  - name: fremi-reverse-feature
+    scope: feature
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-feature/
+    produces:
+      - FT-XX/definition.md
+      - FT-XX/decisions.md   # opcional, si hubo ADRs inferidos
+    single_file: false
+    risk: medium
+    recommended_mode: transparent
+
+  - name: fremi-reverse-story
+    scope: story
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-story/
+    produces:
+      - FW-00_explore.md   # opcional, si aplicaría según config.story.yaml
+      - FW-01_definition.md
+      - FW-02_proposal.md  # opcional
+      - FW-03_scope.md
+      - FW-04_bdd-userstories.md
+      - FW-05_sdd-spec.md
+      - FW-06_design.md
+      - FW-07_tdd-plan.md
+      - FW-08_plan.md
+      - FW-09_checkwork.md
+      - FW-10_closure.md
+    single_file: false
+    risk: medium
+    recommended_mode: transparent
+
+  - name: fremi-reverse-enabler
+    scope: enabler
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-enabler/
+    produces:
+      - EN-01_definition.md
+      - EN-02_design.md
+      - EN-03_plan.md
+      - EN-04_closure.md
+    single_file: false
+    risk: medium
+    recommended_mode: transparent
+
+  - name: fremi-reverse-bug
+    scope: bug
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-bug/
+    produces:
+      - BG-XX_<slug>.md
+    single_file: true
+    risk: low    # bug es 1 archivo, pero declara Regla 29 (test rojo inconstruible)
+    recommended_mode: transparent
+    special_notes:
+      - "Aplica Regla 29 obligatoriamente — marca 'test rojo' como no reconstruible retroactivamente."
+
+  - name: fremi-reverse-extra
+    scope: extra
+    path: ~/.fremi/framework/framework/reverse-engineering/reverse-extra/
+    produces:
+      - EX-NN_<slug>.md
+    single_file: true
+    risk: low
+    recommended_mode: transparent
+    special_notes:
+      - "Valida cohesión 'un archivo por concepto'. Si los commits mezclan varios conceptos, sugiere split en varios EX-NN."
+
+# ---------------------------------------------------------------------------
+# Pipelines reverse — solo para las capas con múltiples docs (Decisión 1B)
+# ---------------------------------------------------------------------------
+pipelines:
+  - name: fremi-pipeline-reverse-product
+    scope: product
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.product.md
+    invokes:
+      - fremi-reverse-product
+    recommended_mode: interactive   # producto — el más peligroso — interactive fuerte
+
+  - name: fremi-pipeline-reverse-feature
+    scope: feature
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.feature.md
+    invokes:
+      - fremi-reverse-feature
+      - fremi-reverse-story    # todas las stories de la feature en cadena
+    recommended_mode: interactive
+
+  - name: fremi-pipeline-reverse-story
+    scope: story
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.story.md
+    invokes:
+      - fremi-reverse-story
+    recommended_mode: interactive
+
+  - name: fremi-pipeline-reverse-enabler
+    scope: enabler
+    path: ~/.fremi/framework/framework/pipelines/pipeline.reverse.enabler.md
+    invokes:
+      - fremi-reverse-enabler
+    recommended_mode: interactive
+
+# Bug y extra NO tienen pipeline — son 1 archivo, se invoca el skill directo.
+pipeline_exclusions:
+  - scope: bug
+    reason: "Un archivo — el skill directo alcanza."
+  - scope: extra
+    reason: "Un archivo — el skill directo alcanza."
+
+# ---------------------------------------------------------------------------
+# Fases del flujo reverse (declaradas — descritas en flow.reverse.md)
+# ---------------------------------------------------------------------------
+flow:
+  phases:
+    - name: discovery
+      description: Escanear código, tests, git, package.json, IaC, docs sueltos
+      required: true
+    - name: inference
+      description: Mapear artifacts → docs del flow
+      required: true
+    - name: directed-questions
+      description: Preguntar por gaps NO inferibles (Regla 27)
+      required: true
+    - name: timestamps
+      description: Inferir created/last_updated/ancestor via git blame + log (Regla 30)
+      required: true
+    - name: writing
+      description: Escribir docs con templates canónicos (default transparent — Regla 26)
+      required: true
+    - name: parent-bump
+      description: Bumpear padres al firmar closure inferido (parent_bump_triggers — Regla 17)
+      required: true
+
+# ---------------------------------------------------------------------------
+# Políticas transversales
+# ---------------------------------------------------------------------------
+policies:
+
+  # Dependencia de git history
+  git_history:
+    required: false   # reverse puede correr sin .git — con warning
+    fallback_when_missing:
+      - "Preguntar fechas al usuario, O"
+      - "Setear todo a 'hoy' con reverse_engineered_confidence: 0.3"
+    warn_if_missing: true
+
+  # Confidence — cuánto confía la IA en la inferencia
+  confidence:
+    default: 0.85         # base cuando hay git + tests + código
+    boost_when:
+      - tests_cover_all_cas: +0.05
+      - git_history_deep: +0.05
+      - schemas_zod_present: +0.05
+    penalty_when:
+      - no_tests: -0.30
+      - no_git_history: -0.55
+      - conflicting_signals: -0.20
+    min_threshold: 0.5    # bajo esto, marcar doc con "needs_review: true" en frontmatter
+
+  # Preguntas obligatorias (Regla 27) — la IA SIEMPRE pregunta por esto, no inventa
+  mandatory_questions:
+    - question: "So that (propósito de negocio)"
+      applies_to: [reverse-story, reverse-feature, reverse-product]
+      fallback_if_no_answer: "TBD — sin propósito de negocio identificado durante reverse"
+
+    - question: "Iniciativa asociada (init-XXX)"
+      applies_to: [reverse-story, reverse-feature]
+      fallback_if_no_answer: "sin vincular (warning: iniciativa no identificada)"
+
+    - question: "Motivación de ADR descubierto"
+      applies_to: [reverse-story, reverse-feature, reverse-enabler]
+      fallback_if_no_answer: "marcar el ADR como discovered_during_reverse: true sin rationale"
+
+    - question: "RNFs medibles (latencia, throughput, payload)"
+      applies_to: [reverse-story]
+      fallback_if_no_answer: "TBD — completar en primera iteración con métricas reales"
+
+    - question: "CAs sin test asociado (gap real o CA fantasma)"
+      applies_to: [reverse-story]
+      fallback_if_no_answer: "marcar CA con status: unverified"
+
+  # Health monitoring (Regla 32) — ratio reverse/forward
+  health:
+    reverse_ratio_warning: 0.15    # >15% reverse = warning
+    reverse_ratio_critical: 0.30   # >30% reverse = crítico
+    measured_over: last-30-days    # o all-time
+    action_on_warning: "log al hook audit-on-stop.sh — no bloqueante"
+    action_on_critical: "log + notificación explícita al usuario en próxima sesión"
+
+# ---------------------------------------------------------------------------
+# Frontmatter extendido (Regla 26)
+# ---------------------------------------------------------------------------
+frontmatter:
+  transparent_mode:
+    additional_fields:
+      - reverse_engineered: true
+      - reverse_engineered_at: <YYYY-MM-DD>
+      - reverse_engineered_source: <fuentes usadas>  # ej: "git-history+tests+package.json"
+      - reverse_engineered_confidence: <0.0 - 1.0>
+    example: |
+      ---
+      version: 1.0.0
+      created: 2025-11-20
+      last_updated: 2026-08-05
+      doc_type: snapshot
+      ancestor:
+        id: FT-05
+        version_at_creation: "2.1.0"
+      reverse_engineered: true
+      reverse_engineered_at: 2026-08-05
+      reverse_engineered_source: git-history+tests+package.json
+      reverse_engineered_confidence: 0.85
+      ---
+
+  stealth_mode:
+    additional_fields: []   # ninguno — frontmatter idéntico al flow forward
+    override_requirements:
+      - "Justificación en ADR a nivel proyecto"
+      - "Uso: proyectos que quieren 'borrar' el origen reverse con conciencia del trade-off"
+
+# ---------------------------------------------------------------------------
+# Templates — Reverse consume templates canónicos via symlinks (Regla 19)
+# ---------------------------------------------------------------------------
+templates:
+  ownership: "Reverse NO es dueño de los templates. Los skills productores originales lo son."
+  strategy: "symlinks desde reverse-<skill>/references/ hacia el skill productor canónico"
+  examples:
+    reverse-story:
+      - FW-00_explore-template.md → ~/.fremi/framework/framework/skills/story/skills/explore/references/
+      - FW-01_definition-template.md → ~/.fremi/framework/framework/skills/story/skills/definition/references/
+      - FW-02_proposal-template.md → ~/.fremi/framework/framework/skills/story/skills/proposal/references/
+      - FW-03_scope-template.md → ~/.fremi/framework/framework/skills/story/skills/scope/references/
+      - FW-04_bdd-userstories-template.md → ~/.fremi/framework/framework/skills/story/skills/bdd/references/
+      - FW-05_sdd-spec-template.md → ~/.fremi/framework/framework/skills/story/skills/sdd/references/
+      - FW-06_design-template.md → ~/.fremi/framework/framework/skills/story/skills/design/references/
+      - FW-07_tdd-plan-template.md → ~/.fremi/framework/framework/skills/story/skills/tdd/references/
+      - FW-08_plan-template.md → ~/.fremi/framework/framework/skills/story/skills/plan/references/
+      - FW-09_checkwork-template.md → ~/.fremi/framework/framework/skills/story/skills/checkwork/references/
+      - FW-10_closure-template.md → ~/.fremi/framework/framework/skills/story/skills/closure/references/
+    reverse-feature:
+      - definition-template.md → ~/.fremi/framework/framework/skills/feature/references/
+      - adr-entry-template.md → ~/.fremi/framework/framework/skills/feature/skills/adr/references/
+    reverse-enabler:
+      - EN-01_definition-template.md → ~/.fremi/framework/framework/skills/enabler/skills/definition/references/
+      - EN-02_design-template.md → ~/.fremi/framework/framework/skills/enabler/skills/design/references/
+      - EN-03_plan-template.md → ~/.fremi/framework/framework/skills/enabler/skills/plan/references/
+      - EN-04_closure-template.md → ~/.fremi/framework/framework/skills/enabler/skills/closure/references/
+    reverse-bug:
+      - BG-template.md → ~/.fremi/framework/framework/skills/story/skills/bug/references/
+    reverse-product:
+      - iniciativas-template.md → ~/.fremi/framework/framework/skills/product/skills/iniciativas/references/
+      - ideas-template.md → ~/.fremi/framework/framework/skills/product/skills/ideas/references/
+      - planteamiento-template.md → ~/.fremi/framework/framework/skills/product/skills/planteamiento/references/
+      - definition-template.md → ~/.fremi/framework/framework/skills/product/skills/definition/references/
+      - strategies-template.md → ~/.fremi/framework/framework/skills/product/skills/strategies/references/
+      - adr-entry-template.md → ~/.fremi/framework/framework/skills/product/skills/adr/references/
+      - plan-template.md → ~/.fremi/framework/framework/skills/product/skills/plan/references/
+    reverse-extra:
+      # extra no tiene template canónico dedicado hoy (edición manual)
+      # → reverse-extra usa una plantilla inline documentada en su SKILL.md
+      strategy_note: "Sin template canónico — plantilla inline en el SKILL.md"
+
+# ---------------------------------------------------------------------------
+# Anti-patrones (declarativos — la IA los evita al ejecutar reverse)
+# ---------------------------------------------------------------------------
+anti_patterns:
+  - "Usar reverse como forma habitual de trabajar (Regla 31)"
+  - "Marcar como reverse trabajo que sí siguió el flow forward"
+  - "Inventar So that, motivación de ADR, CAs para 'completar' docs (Regla 27)"
+  - "Ocultar gaps al usuario en el reporte final"
+  - "Setear confidence a 1.0 en modo reverse — es para forward"
+  - "Reverse-engineerar un bug pretendiendo que Regla 8 se cumplió (Regla 29)"
+  - "Correr en --stealth sin decisión explícita del proyecto (Regla 26)"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules_forward: ~/.fremi/framework/framework/rules/workflow.md
+  rules_reverse: ~/.fremi/framework/framework/rules/reverse.md   # Reglas 25-32
+  flow: ~/.fremi/framework/framework/flows/flow.reverse.md
+  skills_dir: ~/.fremi/framework/framework/reverse-engineering/
+  pipelines_dir: ~/.fremi/framework/framework/pipelines/
+  hook_alignment: ~/.fremi/framework/framework/hooks/check-reverse-alignment.sh

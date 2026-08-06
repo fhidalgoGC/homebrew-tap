@@ -5,52 +5,20 @@ import { join } from "node:path";
 const FRAMEWORK_REPO = "https://github.com/fhidalgoGC/homebrew-tap.git";
 
 /**
- * Top-level paths inside the source repo that the CLI actually needs at
- * runtime. As of v0.2.0 the framework content sits at the repo root, so
- * these are directly the layer dirs plus a few files.
+ * Paths inside the source repo that the CLI actually needs at runtime.
+ * Everything else (src/, Formula/, Dockerfile*, package.json, install.*,
+ * bun.lock, tsconfig, docs, bin) is developer-only and gets skipped by
+ * the sparse-checkout below.
  */
-const SPARSE_PATHS = [
-  "skills",
-  "rules",
-  "hooks",
-  "flows",
-  "pipelines",
-  "reverse-engineering",
-  "settings",
-  "installs",
-  "plugins",
-  "commands",
-  "VERSION",
-  "LICENSE",
-  "README.md",
-];
+const SPARSE_PATHS = ["framework", "VERSION", "LICENSE", "README.md"];
 
 /**
- * Ensures the framework content is present at `frameworkRoot`.
- *
- * If missing → sparse clone with the paths above (skips CLI source, Formula,
- * Dockerfiles, etc.).
- *
- * v0.2.0 migration: if we detect the OLD nested layout (a `framework/`
- * subdirectory containing VERSION), remove the whole clone and start over
- * so the user ends up on the new flat layout automatically. This is a
- * one-time correction that happens on the first command after upgrading.
+ * Ensures the framework content is present at `frameworkRoot`. If missing,
+ * clones only the paths listed in SPARSE_PATHS from the repo using git's
+ * sparse-checkout — so the user's ~/.fremi/framework never ends up holding
+ * the CLI source code, Docker files, Homebrew formula, etc.
  */
 export function ensureFrameworkContent(frameworkRoot: string): void {
-  // v0.2.0 migration: old nested layout has framework/framework/VERSION.
-  const nestedVersion = join(frameworkRoot, "framework", "VERSION");
-  if (existsSync(nestedVersion)) {
-    console.log(`==> Detected legacy nested framework at ${frameworkRoot}`);
-    console.log(`    Migrating to flat layout (v0.2.0)...`);
-    try {
-      execSync(`rm -rf "${frameworkRoot}"`, { stdio: "inherit" });
-    } catch (err) {
-      throw new Error(
-        `Failed to remove legacy framework dir: ${(err as Error).message}`,
-      );
-    }
-  }
-
   if (existsSync(join(frameworkRoot, "VERSION"))) {
     return;
   }
@@ -74,6 +42,9 @@ export function ensureFrameworkContent(frameworkRoot: string): void {
       `git clone --depth 1 --filter=blob:none --sparse --quiet "${FRAMEWORK_REPO}" "${frameworkRoot}"`,
       { stdio: "inherit" },
     );
+    // --no-cone lets us mix directory prefixes (`framework/`) with
+    // top-level files (VERSION, LICENSE, README.md). Cone mode would
+    // reject the files.
     execSync(
       `git -C "${frameworkRoot}" sparse-checkout set --no-cone ${SPARSE_PATHS.join(" ")}`,
       { stdio: "inherit" },

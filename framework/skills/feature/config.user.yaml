@@ -1,0 +1,143 @@
+schema: framework-layer-user-config
+schema_version: 5
+layer: feature
+since: 2026-07-13
+
+# ---------------------------------------------------------------------------
+# Configuración USER-EDITABLE de la capa FEATURE.
+# Vive junto al skill orquestador (~/.fremi/framework/framework/skills/feature/) porque el
+# usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
+# ---------------------------------------------------------------------------
+
+active: true
+
+# ---------------------------------------------------------------------------
+# Execution mode — override opcional del default global (config.yaml)
+#
+# - `default`: modo por default para skills de esta capa cuando el usuario
+#   no pasa `--mode` en la invocación.
+# - `pipeline_default`: modo por default cuando se invoca /fremi-pipeline-feature.
+#
+# Comentar/omitir todo este bloque para heredar del master.
+# ---------------------------------------------------------------------------
+execution_mode:
+  # Modo default para skills sueltos de esta capa (`/fremi-feature`, `/fremi-feature-adr`).
+  # interactive → pausa DENTRO del skill validando cada sección con el usuario.
+  # auto        → escribe el doc entero de un tirón.
+  default: interactive
+
+  # Modo default para el pipeline (`/fremi-pipeline-feature`).
+  # interactive → pausa ENTRE STEPS (los skills internos SIEMPRE corren en auto).
+  # auto        → corre toda la cadena sin pausa (pausa sólo por stop events).
+  pipeline_default: auto
+
+  notes: >
+    Feature tiene 1 doc obligatorio (definition.md) + decisions.md condicional.
+
+    - Skill suelto en `interactive`: la IA propone cada capacidad, cada línea
+      in-scope, cada restricción, cada término del glosario antes de escribirlos.
+    - Skill suelto en `auto`: compone el definition.md completo; pausa sólo
+      ante Regla 3b, Regla 12 (sync-back a producto) o colisión de slug.
+    - Pipeline en `auto`: crea definition + sync-back + bump del plan padre
+      sin pausas. Si `--first-story` está activo, encadena directo.
+    - Pipeline en `interactive`: los sub-skills internos corren en auto
+      (crean el doc entero de una), pero la IA pausa ENTRE cada step del
+      pipeline — típicamente después de crear la feature y antes de arrancar
+      la primera story si se pasó `--first-story`.
+
+# ---------------------------------------------------------------------------
+# Step agents — elección del tipo de agente por step.
+# Opciones válidas por step viven en config.core.yaml → step_matrix.<step>.agent.options.
+# ---------------------------------------------------------------------------
+step_agents:
+  # definition: main   # core options: [main, subagent, agent]
+  # lifecycle: main    # core options: [main]                  (no overridable)
+
+# ---------------------------------------------------------------------------
+# Docs de la capa
+# ---------------------------------------------------------------------------
+docs:
+  - name: definition
+    file: definition.md
+    required: always
+    doc_type: living
+    skill: /fremi-feature
+    phase: definition
+
+  - name: decisions
+    file: decisions.md
+    required: conditional
+    condition_ref: feature_decisions_when
+    doc_type: living
+    skill: /fremi-feature-adr
+    phase: design
+    lifecycle: growing
+
+  # Futuros (Regla 17 — living specs):
+  # - name: spec
+  #   file: spec.md
+  #   required: conditional
+  #   doc_type: living
+  #   skill: /feature-spec-merge  # a crear
+  #   phase: sdd
+
+# ---------------------------------------------------------------------------
+# Reglas condicionales locales
+# ---------------------------------------------------------------------------
+conditional_rules:
+  feature_decisions_when:
+    description: >
+      `decisions.md` de una feature es OBLIGATORIO cuando la feature tiene
+      ADRs LOCALES (que sólo aplican a esa feature). Opcional en caso contrario.
+    obligatory_if_any:
+      - "Hay al menos un ADR aceptado que aplica sólo a esta feature (no transversal)."
+    optional_default: >
+      Todos los ADRs de la feature son transversales al producto y viven en
+      `docs/works/product/decisions.md`.
+
+# ---------------------------------------------------------------------------
+# FLOW — secuencia de skills para crear/mantener una feature
+# ---------------------------------------------------------------------------
+flow:
+  sequence:
+    - step: 1
+      skill: /fremi-feature
+      preconditions:
+        - "product/plan.md contiene esta feature como planeada"
+        - "product/definition.md con capacidades in-scope"
+      produces: features/FT-XX_<slug>/definition.md
+      side_effects:
+        - "Bumpea MINOR en product/plan.md (Regla 17)"
+
+  # NOTA: la TOPOLOGÍA de paralelismo vive en
+  # `~/.fremi/framework/framework/skills/feature/config.core.yaml` — es estructura del framework,
+  # no configuración de usuario. Este archivo (settings) sólo tiene el flag
+  # on/off (ver config.yaml master → parallelism.enabled).
+
+  # Transversales — corren durante la vida de la feature
+  parallel_allowed:
+    - skill: /fremi-feature-adr
+      when: "aparece decisión técnica local a la feature (Regla 3b)"
+      produces: entries en features/FT-XX/decisions.md
+      side_effects: ["Bumpea MINOR en FT-XX/decisions.md"]
+
+    - skill: /fremi-feature-bug
+      when: "bug transversal a varias stories, o afecta contrato de feature"
+      produces: features/FT-XX/bugs/BG-XX_<slug>.md
+
+    - skill: /fremi-story
+      when: "crear una story dentro de la feature"
+      produces: features/FT-XX/user-stories/HU-YY_<slug>/
+
+    - skill: /fremi-enabler --feature FT-XX
+      when: "trabajo técnico habilitador local a la feature"
+      produces: features/FT-XX/enablers/EN-XX_<slug>/
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules: ~/.fremi/framework/framework/rules/workflow.md
+  orchestrator_skill: /fremi-feature

@@ -1,0 +1,149 @@
+schema: framework-layer-config
+schema_version: 1
+layer: bug
+scope: feature
+since: 2026-07-13
+
+# ---------------------------------------------------------------------------
+# Configuración operativa de BUG con scope FEATURE.
+# Un bug de este tipo vive DENTRO de una feature (transversal a stories).
+# Archivo único BG-XX_<slug>.md.
+#
+# Cuándo se usa: bug transversal a múltiples stories de la feature, o que
+# afecta el contrato de feature sin trazar limpio a UNA story específica.
+# Para bugs locales a una story → ver `config.bug.story.yaml`.
+# ---------------------------------------------------------------------------
+
+active: true
+single_file: true
+
+# ---------------------------------------------------------------------------
+# Ubicación y skill
+# ---------------------------------------------------------------------------
+location: docs/works/features/{feature_folder}/bugs/{filename}
+skill: /fremi-feature-bug
+invocation: "/fremi-feature-bug FT-XX <slug>"
+numbering: local_to_feature   # cada feature arranca desde BG-01 en su carpeta bugs/
+
+when_to_use:
+  - "El bug es transversal a varias stories de la feature (no encaja en una sola)."
+  - "El bug afecta el contrato/spec vivo de la feature (`FT-XX/spec.md` cuando exista) o su definition."
+  - "El bug se detectó DESPUÉS de que múltiples stories de la feature ya cerraron y no tiene sentido reabrir una específica."
+
+when_not_to_use:
+  - "El bug encaja claramente en UNA story existente → usar `/fremi-story-bug` (`config.bug.story.yaml`)."
+  - "El bug es transversal a MÚLTIPLES features → NO es bug de feature. Escalar a story nueva de producto o `EX-NN`."
+  - "Es un cambio de spec consciente → Regla 10 (actualizar spec + ADR)."
+
+# ---------------------------------------------------------------------------
+# Secciones del archivo (comunes con bug de story)
+# ---------------------------------------------------------------------------
+sections:
+  - name: symptom
+    required: always
+    description: Síntoma observado en producción
+
+  - name: impact-severity
+    required: always
+    description: Impacto y severidad (Crítico / Alto / Medio / Bajo)
+
+  - name: reproduction-red-test
+    required: always
+    description: >
+      Reproducción + test rojo (Regla 8). Para bugs de feature, el test rojo
+      puede ir en cualquier suite de la feature (típicamente en la story cuya
+      spec cubre el comportamiento afectado — puede ser difícil elegir cuál).
+
+  - name: root-cause
+    required: always
+    description: Causa raíz identificada
+
+  - name: fix-applied
+    required: always
+    description: Fix aplicado (código + archivos afectados)
+
+  - name: linkages
+    required: conditional
+    condition_ref: bug_linkages_when
+    description: >
+      Vinculaciones — obligatorio para bugs de feature porque suele haber
+      múltiples stories/ADRs involucrados.
+
+  - name: closure
+    required: always
+    description: DoD del bug + sign-off
+
+# ---------------------------------------------------------------------------
+# Reglas condicionales
+# ---------------------------------------------------------------------------
+conditional_rules:
+  bug_linkages_when:
+    description: >
+      La sección `linkages` es obligatoria en bugs de feature cuando el bug
+      se conecta a stories concretas de la feature o ADRs vigentes.
+    obligatory_if_any:
+      - "El bug fue causado por una decisión que sigue en un ADR vigente."
+      - "El bug afecta a múltiples stories específicas — listarlas."
+      - "El fix requirió modificar código atribuible a stories cerradas — nombrarlas."
+      - "El bug se detectó en un release específico — nombrarlo."
+
+# ---------------------------------------------------------------------------
+# FLOW — sólo pasos que son skills invocables.
+# ---------------------------------------------------------------------------
+flow:
+  sequence:
+    - step: 1
+      skill: /fremi-feature-bug
+      action: registrar bug de feature (crear BG-XX_<slug>.md)
+      preconditions:
+        - "Feature existe con FT-XX/definition.md (y FT-XX/spec.md si ya se implementó living-spec)"
+        - "El comportamiento incorrecto contradice contratos declarados a nivel feature (no atribuible limpio a UNA story)"
+      produces: docs/works/features/{feature_folder}/bugs/BG-XX_<slug>.md
+      versioning: snapshot con ancestor.id = FT-XX, version_at_creation = feature@version
+
+  parallel_allowed:
+    - skill: /fremi-story-tdd
+      when: "agregar test rojo al FW-07_tdd-plan de la story cuya spec cubre el comportamiento afectado"
+
+    - skill: /fremi-feature-adr
+      when: "el fix requirió una decisión técnica local a la feature"
+
+    - skill: /fremi-product-adr
+      when: "el fix reveló una decisión técnica transversal al producto"
+
+# ---------------------------------------------------------------------------
+# PROCEDURE AFTER CREATION — acciones NO-skill dentro del ciclo del bug.
+# ---------------------------------------------------------------------------
+procedure_after_creation:
+  - action: Caracterizar reproducción precisa
+    fills_section: reproduction-red-test (parte de repro)
+
+  - action: Identificar suite de tests apropiada (típicamente en la story cuya spec cubre el comportamiento afectado)
+    fills_section: linkages (parte de stories afectadas)
+
+  - action: Agregar test rojo al FW-07_tdd-plan de la story elegida (Regla 8)
+    constraint: "El test DEBE fallar antes de implementar el fix"
+    skill_available: /fremi-story-tdd
+
+  - action: Implementar el fix (puede tocar código de múltiples stories)
+    constraint: "El test rojo pasa a verde"
+
+  - action: Llenar root-cause, fix-applied y linkages
+    fills_section: [root-cause, fix-applied, linkages]
+    constraint: "En bugs de feature, linkages es prácticamente obligatorio (múltiples stories/ADRs involucrados)"
+
+  - action: Firmar sección `## Cierre` del bug
+    fills_section: closure
+    side_effects:
+      - "Bumpea la feature padre según parent_bump_triggers.bug_closes (Regla 17)"
+      - "Rellena ancestor.version_at_closure en el frontmatter del bug"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+# ---------------------------------------------------------------------------
+references:
+  master_config: ~/.fremi/framework/framework/settings/config.yaml
+  methodology: ~/.fremi/framework/framework/settings/methodology.json
+  rules: ~/.fremi/framework/framework/rules/workflow.md
+  regla_8: "~/.fremi/framework/framework/rules/workflow.md § Regla 8 (test rojo primero)"
+  sibling_scope: ~/.fremi/framework/framework/settings/config.bug.story.yaml
