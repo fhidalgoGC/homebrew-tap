@@ -1,0 +1,11 @@
+{
+  "name": "fremi",
+  "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents",
+  "version": "0.3.0",
+  "author": {
+    "name": "fhidalgoGC"
+  },
+  "homepage": "https://github.com/fhidalgoGC/homebrew-tap",
+  "repository": "https://github.com/fhidalgoGC/homebrew-tap",
+  "license": "MIT"
+}
