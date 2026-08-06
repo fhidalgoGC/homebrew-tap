@@ -7,6 +7,8 @@ description: Elimina un skill de proyecto — borra `docs/project/skills/<name>/
 
 Elimina un skill del proyecto (por default) o del framework (con `--force`). Borra el folder fuente en `docs/project/skills/` y desenlaza el symlink de **cada agente instalado** en el proyecto.
 
+> Ver [`references/agent-detection.md`](../../references/agent-detection.md) para la tabla de detección y registro por agente.
+
 ## Sintaxis
 
 ```
@@ -88,5 +90,6 @@ Esperar `sí` explícito.
 
 ## Referencias
 
+- Detección y registro por agente: [`../../references/agent-detection.md`](../../references/agent-detection.md).
 - Ver también: [`/fremi-add-skill`](../add-skill/SKILL.md).
 - Orquestador: [`/fremi`](../../SKILL.md).

@@ -1,11 +1,13 @@
 ---
 name: fremi-delete-mcp
-description: Remueve un MCP server de `.claude/settings.json` bajo `mcpServers.<name>`. NO borra ningún archivo — sólo desregistra la entry. Pide confirmación antes.
+description: Remueve un MCP server — borra `docs/project/mcp/<name>.json` Y desregistra en CADA agente instalado que lo tenga configurado (Claude Code → `.claude/settings.json`, Cursor → `.cursor/mcp.json`). Pide confirmación antes.
 ---
 
 # /fremi-delete-mcp — Remover MCP server
 
-Remueve el registro de un MCP server de `.claude/settings.json`. El MCP queda desconectado del agente. **No borra archivos** — sólo modifica settings.
+Remueve la fuente única del MCP en `docs/project/mcp/<name>.json` y su registro en **cada agente instalado** que lo tenga configurado (hoy Claude Code y Cursor).
+
+> Ver [`references/agent-detection.md`](../../references/agent-detection.md) §2.4.
 
 ## Sintaxis
 
@@ -21,60 +23,74 @@ Remueve el registro de un MCP server de `.claude/settings.json`. El MCP queda de
 ## Procedimiento
 
 ### Paso 0 — Validar entrada
-1. Leer `.claude/settings.json`.
-2. Verificar que `mcpServers.<name>` existe.
-3. Si no → abortar (nada que remover).
+1. Verificar que `docs/project/mcp/<name>.json` existe (fuente única) o que hay algún agente con `mcpServers.<name>` registrado.
+2. Si no hay nada → abortar (nada que remover).
 
-### Paso 1 — Mostrar config actual
+### Paso 1 — Detectar registros por agente
 
-Reportar la config que se va a remover:
+Para cada agente instalado que soporte MCP:
 
-```
-El MCP <name> tiene esta config:
-   type: stdio
-   command: npx
-   args: [...]
-```
+- **Claude Code**: buscar `mcpServers.<name>` en `.claude/settings.json`.
+- **Cursor**: buscar `mcpServers.<name>` en `.cursor/mcp.json`.
+- **Windsurf / Aider**: omitir.
 
-### Paso 2 — Confirmar
+### Paso 2 — Mostrar config actual + confirmar
 
 ```
 ⚠️ Vas a remover el MCP: <name>
-   El agente ya no tendrá acceso a las herramientas de este MCP.
-   No se borran archivos — sólo se desregistra.
+   Fuente: docs/project/mcp/<name>.json
+   Registros detectados:
+     - Claude Code:  .claude/settings.json → mcpServers.<name>
+     - Cursor:       .cursor/mcp.json → mcpServers.<name>
+
+Config:
+   type: stdio
+   command: npx
+   args: [...]
 
 ¿Confirmás? [sí/no]
 ```
 
-### Paso 3 — Actualizar settings.json
+### Paso 3 — Eliminar
 
-1. Leer `.claude/settings.json`.
-2. Remover `mcpServers.<name>`.
-3. Si `mcpServers` queda vacío → dejarlo como `{}` o remover la clave entera (opcional).
-4. Escribir el archivo con formato JSON indentado.
+Para **cada** agente detectado con registro:
+
+- **Claude Code**: remover `mcpServers.<name>` de `.claude/settings.json`.
+- **Cursor**: remover `mcpServers.<name>` de `.cursor/mcp.json`.
+- Si el objeto `mcpServers` queda vacío → dejarlo como `{}` (no borrar la clave).
+
+Después borrar la fuente única: `rm docs/project/mcp/<name>.json`.
 
 ### Paso 4 — Reportar
 
 ```
 ✅ MCP removido: <name>
-📁 Config actualizada: .claude/settings.json → mcpServers (removido)
+🗑️ Borrado:
+   - docs/project/mcp/<name>.json
+
+📖 Registros removidos:
+   ✓ Claude Code   .claude/settings.json → mcpServers.<name>
+   ✓ Cursor        .cursor/mcp.json → mcpServers.<name>
+   • Windsurf      (no registrado — omitido)
 
 Próximo paso:
-   - Reiniciar el agente para que deje de intentar conectar al MCP.
+   - Reiniciar cada agente para que deje de intentar conectar al MCP.
    - Si el MCP era stdio con proceso propio → verificar que no queda proceso zombie.
 ```
 
 ## Validaciones
 
-- MCP no existe en settings.json → abortar.
-- `.claude/settings.json` malformado → abortar antes de modificar.
+- MCP no existe en ningún lugar → abortar.
+- `.claude/settings.json` o `.cursor/mcp.json` malformado → abortar antes de modificar.
+- Fallo al remover algún registro por agente → seguir con los demás y reportar el error, pero NO borrar la fuente única (garantiza que reintento es idempotente).
 
 ## Anti-patrones
 
 - ❌ Remover un MCP sin verificar qué skills lo estaban usando — pueden romperse.
-- ❌ Editar settings.json a mano — usar este skill para consistencia.
+- ❌ Editar settings.json / mcp.json a mano — usar este skill para consistencia entre agentes.
 
 ## Referencias
 
+- Detección y registro por agente: [`../../references/agent-detection.md`](../../references/agent-detection.md).
 - Ver también: [`/fremi-add-mcp`](../add-mcp/SKILL.md).
 - Docs oficiales MCP: [Anthropic MCP](https://docs.anthropic.com/en/docs/agents-and-tools/mcp).

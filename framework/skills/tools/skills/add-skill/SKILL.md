@@ -7,6 +7,8 @@ description: Crea un skill ESPECÍFICO del proyecto bajo `docs/project/skills/<n
 
 Crea un skill nuevo específico del proyecto (`docs/project/skills/<name>/SKILL.md`) y lo enlaza automáticamente a la carpeta de skills de **cada agente instalado en el proyecto** (Claude, Cursor, Windsurf, ...) — así una sola copia del skill queda expuesta a todos los agentes sin duplicar contenido.
 
+> Ver [`references/agent-detection.md`](../../references/agent-detection.md) para la tabla completa de detección y registro por agente / tipo de asset.
+
 ## Sintaxis
 
 ```
@@ -88,5 +90,6 @@ Cuando agregues otro agente al proyecto (ej: `fremi agent install cursor`), volv
 ## Referencias
 
 - Template: [`references/skill-template.md`](references/skill-template.md).
+- Detección y registro por agente: [`../../references/agent-detection.md`](../../references/agent-detection.md).
 - Ver también: [`/fremi-delete-skill`](../delete-skill/SKILL.md) para eliminar skills.
 - Orquestador: [`/fremi`](../../SKILL.md).

@@ -1,11 +1,13 @@
 ---
 name: fremi-delete-rule
-description: Elimina una rule de proyecto — borra `docs/project/rules/<name>.md` Y su referencia en `CLAUDE.md` bajo `## Project rules`. Con `--force` puede eliminar rules del framework. Pide confirmación antes de borrar.
+description: Elimina una rule de proyecto — borra `docs/project/rules/<name>.md` Y desregistra en CADA agente instalado (Claude → `CLAUDE.md`, Cursor → `.cursor/rules/<name>.mdc`, Windsurf → `.windsurfrules`, Aider → `.aider.conf.yml`). Con `--force` puede eliminar rules del framework. Pide confirmación antes de borrar.
 ---
 
 # /fremi-delete-rule — Eliminar rule
 
-Elimina una rule + su referencia en `CLAUDE.md`. Por default sólo project rules; `--force` para framework rules.
+Elimina una rule + su registro en **cada agente instalado**. Por default sólo project rules; `--force` para framework rules.
+
+> Ver [`references/agent-detection.md`](../../references/agent-detection.md) para la tabla completa de detección y registro.
 
 ## Sintaxis
 
@@ -29,7 +31,7 @@ Elimina una rule + su referencia en `CLAUDE.md`. Por default sólo project rules
 ### Paso 1 — Detectar referencias
 
 Buscar en:
-- `CLAUDE.md` bajo `## Project rules`.
+- Todos los agentes instalados (según §1 de agent-detection.md).
 - Otros SKILL.md que la mencionen.
 - Otras rules que referencian a esta.
 
@@ -37,19 +39,25 @@ Buscar en:
 
 ```
 ⚠️ Vas a eliminar la rule: <name>
-   Path: docs/project/rules/<name>.md
-   Referenciada en:
-     - CLAUDE.md (## Project rules)
-     - <otros archivos>
+   Fuente: docs/project/rules/<name>.md
+   Registrada en:
+     - Claude Code:  CLAUDE.md (## Project rules)
+     - Cursor:       .cursor/rules/<name>.mdc (symlink)
+   Otras menciones: <archivos>
 
 ¿Confirmás?
 ```
 
 ### Paso 3 — Eliminar
 
-1. Editar `CLAUDE.md` — quitar el bullet de `docs/project/rules/<name>.md` bajo `## Project rules`.
-2. Si al remover el bullet la sección queda vacía → considerar dejar la sección (con nota "sin rules específicas") o borrarla entera (con `--force`).
-3. Borrar archivo: `rm docs/project/rules/<name>.md`.
+Para **cada** agente detectado, remover el registro:
+
+- **Claude Code**: editar `CLAUDE.md` y quitar el bullet de `docs/project/rules/<name>.md` bajo `## Project rules`. Si la sección queda vacía, dejar el header con nota "sin rules específicas" (no borrar la sección salvo con `--force`).
+- **Cursor**: `rm .cursor/rules/<name>.mdc` si es symlink apuntando a la rule.
+- **Windsurf**: remover la sección `## <name>` de `.windsurfrules`.
+- **Aider**: quitar el path de la lista `read:` en `.aider.conf.yml`.
+
+Después, borrar la fuente única: `rm docs/project/rules/<name>.md`.
 
 ### Paso 4 — Reportar
 
@@ -57,7 +65,11 @@ Buscar en:
 ✅ Rule eliminada: <name>
 🗑️ Borrado:
    - docs/project/rules/<name>.md
-   - Referencia en CLAUDE.md
+
+📖 Registros removidos:
+   ✓ Claude Code   bullet en CLAUDE.md → ## Project rules
+   ✓ Cursor        .cursor/rules/<name>.mdc
+   • Windsurf      (no registrado — omitido)
 
 ⚠️ Otras menciones no auto-removidas:
    - <archivo1>: menciona <name>
@@ -68,9 +80,10 @@ Buscar en:
 
 - Rule no existe → abortar.
 - Sin `--force` y rule está en `~/.fremi/framework/rules/` → abortar.
-- CLAUDE.md no legible → abortar.
+- Fallo al remover algún registro por agente → seguir con los demás y reportar el error, pero NO borrar la fuente única (garantiza que reintento es idempotente).
 
 ## Referencias
 
+- Detección y registro por agente: [`../../references/agent-detection.md`](../../references/agent-detection.md).
 - Ver también: [`/fremi-add-rule`](../add-rule/SKILL.md).
 - Rules del framework: [`~/.fremi/framework/rules/workflow.md`](../../../../rules/workflow.md).
