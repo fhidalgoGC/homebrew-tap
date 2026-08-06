@@ -38,7 +38,9 @@ export async function gatherInstallAnswers(
     agents = flags.agent.split(",").map((s) => s.trim()).filter(Boolean);
   } else if (shouldPrompt(flags)) {
     agents = await askMultiselect({
-      message: "Which agent(s) do you want to install for?",
+      message:
+        "Which agent(s) do you want to install for?\n" +
+        "  ↑↓ move · SPACE toggle · ENTER confirm selection",
       options: AGENT_CATALOG.map((opt) => ({ ...opt })),
       defaults: ["claude"],
     });
