@@ -6,6 +6,7 @@ import { installSkills } from "../core/install-skills";
 import { installHooks } from "../core/install-hooks";
 import { installRules } from "../core/install-rules";
 import { installClaudeMd } from "../core/install-claude-md";
+import { installUserSettings } from "../core/install-user-settings";
 import { initDocsWorks } from "../core/init-docs-works";
 import { initFremiConfig } from "../core/init-config";
 
@@ -44,6 +45,7 @@ export async function runInstall(rawPath?: string): Promise<void> {
     hooks: await installHooks(targetPath, frameworkContent),
     rules: await installRules(targetPath, frameworkContent),
     claudeMd: await installClaudeMd(targetPath, frameworkContent),
+    userSettings: await installUserSettings(targetPath, frameworkContent),
     docsWorks: await initDocsWorks(targetPath),
     config: await initFremiConfig(targetPath, frameworkRoot),
   };
@@ -55,6 +57,7 @@ export async function runInstall(rawPath?: string): Promise<void> {
   console.log(`    Hooks:        ${report.hooks.registered} registered in .claude/settings.json`);
   console.log(`    Rules:        ${report.rules.installed} installed, ${report.rules.skipped} unchanged, ${report.rules.recreated} recreated`);
   console.log(`    CLAUDE.md:    ${report.claudeMd.action}`);
+  console.log(`    Settings:     ${report.userSettings.copied} copied, ${report.userSettings.skipped} kept (already customized)`);
   console.log(`    docs/works/:  ${report.docsWorks.action}`);
   console.log(`    .fremi/:      ${report.config.action}`);
   console.log("");

@@ -11,17 +11,23 @@ const CLAUDE_MD_HEADER = `# Project — powered by fremi-framework
 Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BDD + TDD.
 
 **Reglas duras del framework** (obligatorias antes de cualquier acción no trivial):
-- \`~/.fremi/framework/framework/rules/workflow.md\` — Reglas 1-24 (flow forward).
-- \`~/.fremi/framework/framework/rules/reverse.md\` — Reglas 25-32 (reverse-engineering).
+- \`.claude/rules/workflow.md\` — Reglas 1-24 (flow forward).
+- \`.claude/rules/reverse.md\` — Reglas 25-32 (reverse-engineering).
 
-**Descripción del flujo**:
-- \`~/.fremi/framework/framework/flows/\` — flow.<capa>.md por cada capa.
+**Skills invocables**: prefijo \`/fremi-*\`. Ver \`.claude/skills/\`.
 
-**Skills invocables**: prefijo \`/fremi-*\`. Ver \`~/.fremi/framework/framework/skills/\`.
+**Config del proyecto** (OBEDECER antes de decidir cómo ejecutar un step):
+- \`.fremi/settings/\` — YAMLs \`.user.yaml\` copiados del framework. Estos gobiernan \`execution_mode\`, \`step_agents\` (main / subagent / agent), overrides, etc.
+  - \`agents.user.yaml\` — override de subagents (model, effort, claude_code_agent).
+  - \`<capa>/config.user.yaml\` — config por capa (product, feature, story, enabler).
+- \`.fremi/config.yaml\` — config global del proyecto (stack, testing, preferences).
+
+**Registry canónico de agents** (no editable, viene del framework):
+- \`~/.fremi/framework/framework/settings/agents.core.yaml\` — mapping subagent-alias → Claude Code native agent + model.
 
 **Framework instalado**:
 - Ubicación: \`~/.fremi/framework/\`.
-- CLI: \`fremi version\`, \`fremi install [path]\`.
+- CLI: \`fremi version\`, \`fremi install\`, \`fremi uninstall\`, \`fremi update\`.
 - Repo: https://github.com/fhidalgoGC/homebrew-tap
 
 ---

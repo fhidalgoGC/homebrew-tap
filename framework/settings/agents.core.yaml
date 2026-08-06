@@ -1,0 +1,111 @@
+schema: fremi-agents-core
+schema_version: 1
+since: 2026-08-05
+
+# ============================================================================
+# AGENTS.CORE — registry of agent types the framework can delegate to.
+#
+# Structural (not user-editable). Adding a new subagent type or agent goes
+# here and requires a framework release.
+#
+# Types the step_matrix in each layer's config.core.yaml can declare:
+#   - main:     the primary Claude Code thread (user-facing, single writer).
+#   - subagent: an isolated Claude Code subagent context. Registered below.
+#   - agent:    an external agent (not Claude Code — future work).
+#
+# When a step's config.user.yaml sets `agent: subagent`, the orchestrator
+# resolves which concrete subagent to launch via `step_agents.<step>.resolves_to`
+# (in config.user.yaml). That value MUST match a key under `subagents:` below.
+# ============================================================================
+
+# The `main` type is always available; no entry is needed for it.
+
+# ---------------------------------------------------------------------------
+# Subagent aliases → Claude Code native agents + default runtime config.
+# ---------------------------------------------------------------------------
+subagents:
+  fremi-explore:
+    description: "Codebase exploration + structural mapping."
+    claude_code_agent: Explore
+    model: sonnet
+    effort: default
+    typical_uses:
+      - "story: FW-00_explore"
+      - "reverse: reverse-story explore"
+
+  fremi-plan:
+    description: "Design implementation plans and evaluate approaches."
+    claude_code_agent: Plan
+    model: opus
+    effort: default
+    typical_uses:
+      - "story: FW-05_sdd design draft"
+      - "enabler: EN-02_design"
+
+  fremi-apply:
+    description: "Implement code changes from a task list (strict-TDD aware)."
+    claude_code_agent: sdd-apply
+    model: sonnet
+    effort: default
+    typical_uses:
+      - "story: FW-07_tdd (implementation loop)"
+      - "enabler: apply"
+
+  fremi-verify:
+    description: "Validate implementation against specs, design, and tasks."
+    claude_code_agent: sdd-verify
+    model: sonnet
+    effort: default
+    typical_uses:
+      - "story: FW-08_verify (future)"
+      - "enabler: closure validation"
+
+  fremi-review-readability:
+    description: "Adversarial review — naming, complexity, intention, maintainability."
+    claude_code_agent: review-readability
+    model: sonnet
+    effort: default
+
+  fremi-review-reliability:
+    description: "Adversarial review — behavior-first tests, coverage, edge cases."
+    claude_code_agent: review-reliability
+    model: sonnet
+    effort: default
+
+  fremi-review-risk:
+    description: "Adversarial review — security, dependency risk, data exposure."
+    claude_code_agent: review-risk
+    model: sonnet
+    effort: default
+
+  fremi-review-resilience:
+    description: "Adversarial review — fallbacks, retries, graceful degradation, SLOs."
+    claude_code_agent: review-resilience
+    model: sonnet
+    effort: default
+
+# ---------------------------------------------------------------------------
+# External agents (type: agent) — not yet wired. Reserved for future
+# integrations with domain-specialized services (PRD generators, doc
+# writers, external code review services, etc.).
+# ---------------------------------------------------------------------------
+agents: {}
+
+# ---------------------------------------------------------------------------
+# Orchestration policy — how the framework's pipeline runner treats agents.
+# ---------------------------------------------------------------------------
+orchestration:
+  # When the user's execution_mode is `interactive`, pause after a subagent
+  # returns so the user can validate its output before the pipeline continues.
+  pause_after_subagent_in_interactive: true
+
+  # If a step's `resolves_to` references a subagent key that is not registered
+  # here, choose the fallback:
+  #   - fail:  abort the pipeline and surface the config error.
+  #   - main:  gracefully degrade to running the step in the main agent.
+  on_unknown_subagent: fail
+
+  # If a step declares `agent: agent` but the `agents:` block is empty (no
+  # external agents registered), the orchestrator falls back to main and
+  # emits a warning. Set to `fail` to abort instead.
+  on_unavailable_external_agent: warn-and-fallback-main
