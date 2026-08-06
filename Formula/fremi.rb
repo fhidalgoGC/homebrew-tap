@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.2.4"
+  version "0.2.5"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.4/fremi-darwin-arm64"
-      sha256 "12181e2327097c89cb0175326e5335b568692ef20d0004e4c23720cf644b55f1"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-darwin-arm64"
+      sha256 "872cc6b8155f61fb4b66228457e8649fd25226d95f8e14060cfa2af0731e2b0a"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.4/fremi-darwin-x64"
-      sha256 "2e250369271c8fbb1e984f23d98202d08c80f5b5e702ef99ab28a129bde6c598"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-darwin-x64"
+      sha256 "8b4363d5a93ec3f13aaccac9f1d1a8004be17003ca57ddc33e7c92eeafb52db6"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.4/fremi-linux-arm64"
-      sha256 "1e425f70059317f3424a0bffb9ee6cd0b7e9607e4dce8d8854b72a83fcde239b"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-linux-arm64"
+      sha256 "b26809c05541acf7ee4bde096e0ee6af73d2242816520a2dbb0a20a4b0ff33c1"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.4/fremi-linux-x64"
-      sha256 "51de46346f8c703deb373e9c676b12dbb55812e57d71d8fa13a0595f252d088e"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.2.5/fremi-linux-x64"
+      sha256 "c2df5ddf31c70fc12d6ec613a2930f00579f29e835487cec682b577c0a76c869"
     end
   end
 
@@ -40,8 +40,9 @@ class Fremi < Formula
 
         fremi install /path/to/project
 
-      Interactive mode (default in a terminal): asks which agent(s) to
-      install for. Pass --non-interactive or -y to skip the prompt.
+      Interactive mode (default in a terminal): pick agents by toggling
+      each with ENTER; select 'Done' to finalize. Pass --non-interactive
+      or -y to skip the prompt.
 
       Framework content is fetched automatically to ~/.fremi/framework on
       first `fremi install`. Update it later with `fremi update`.
