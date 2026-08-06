@@ -3,6 +3,7 @@ import { existsSync, statSync } from "node:fs";
 import { getFrameworkContentRoot } from "../core/paths";
 import { uninstallSkills } from "../core/uninstall-skills";
 import { uninstallHooks } from "../core/uninstall-hooks";
+import { uninstallRules } from "../core/uninstall-rules";
 import { uninstallClaudeMd } from "../core/uninstall-claude-md";
 import { uninstallFremiConfig } from "../core/uninstall-fremi-config";
 
@@ -26,6 +27,7 @@ export async function runUninstall(rawPath?: string): Promise<void> {
   const report = {
     skills: await uninstallSkills(targetPath, frameworkContent),
     hooks: await uninstallHooks(targetPath, frameworkContent),
+    rules: await uninstallRules(targetPath, frameworkContent),
     claudeMd: await uninstallClaudeMd(targetPath),
     fremiConfig: await uninstallFremiConfig(targetPath),
   };
@@ -33,6 +35,7 @@ export async function runUninstall(rawPath?: string): Promise<void> {
   console.log("==> Uninstall summary:");
   console.log(`    Skills:       ${report.skills.removed} removed, ${report.skills.kept} kept (non-fremi)`);
   console.log(`    Hooks:        ${report.hooks.removed} removed from .claude/settings.json`);
+  console.log(`    Rules:        ${report.rules.removed} removed, ${report.rules.kept} kept (non-fremi)`);
   console.log(`    CLAUDE.md:    ${report.claudeMd.action}`);
   console.log(`    .fremi/:      ${report.fremiConfig.action}`);
   console.log("");
