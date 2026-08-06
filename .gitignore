@@ -25,3 +25,6 @@ Thumbs.db
 
 # Claude Code local project state
 .claude/
+
+# Local sandbox — pretend-project for testing fremi install/uninstall
+sandbox/

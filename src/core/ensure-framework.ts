@@ -74,7 +74,12 @@ export function ensureFrameworkContent(frameworkRoot: string): void {
   console.log("");
 
   try {
-    execSync(`mkdir -p "${frameworkRoot}"`, { stdio: "ignore" });
+    // `git clone` refuses non-empty target dirs. If frameworkRoot exists but
+    // is NOT a valid git clone (no .git/), remove it first so we can start
+    // fresh. This covers migration leftovers and partial installs.
+    if (existsSync(frameworkRoot) && !existsSync(join(frameworkRoot, ".git"))) {
+      execSync(`rm -rf "${frameworkRoot}"`, { stdio: "ignore" });
+    }
     execSync(
       `git clone --depth 1 --filter=blob:none --sparse --quiet "${FRAMEWORK_REPO}" "${frameworkRoot}"`,
       { stdio: "inherit" },

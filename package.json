@@ -1,6 +1,6 @@
 {
   "name": "fremi-framework",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents (Claude Code by now).",
   "repository": {
     "type": "git",
@@ -20,7 +20,14 @@
     "build:linux-arm64": "bun build ./src/index.ts --compile --target=bun-linux-arm64 --outfile bin/fremi-linux-arm64",
     "build:windows-x64": "bun build ./src/index.ts --compile --target=bun-windows-x64 --outfile bin/fremi-windows-x64.exe",
     "build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sandbox:reset": "rm -rf sandbox && mkdir sandbox && echo 'Fresh sandbox at ./sandbox — run `bun run sandbox:install` to install fremi there'",
+    "sandbox:install": "bun run build:darwin-arm64 && ./bin/fremi-darwin-arm64 install ./sandbox",
+    "sandbox:uninstall": "./bin/fremi-darwin-arm64 uninstall ./sandbox",
+    "sandbox:tree": "find sandbox -type f -o -type l 2>/dev/null | sort | head -50",
+    "sandbox:cycle": "bun run sandbox:reset && bun run sandbox:install && bun run sandbox:tree",
+    "release:publish": "bun run build:all && gh release create v$(cat VERSION) bin/fremi-* --repo fhidalgoGC/homebrew-tap --title \"v$(cat VERSION)\" --generate-notes",
+    "release:sha256": "shasum -a 256 bin/fremi-*"
   },
   "devDependencies": {
     "@types/bun": "latest",
