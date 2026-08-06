@@ -1,0 +1,17 @@
+{
+  "description": "fremi bootstrap - SessionStart calls `fremi verify` to inject project status.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "fremi verify",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
