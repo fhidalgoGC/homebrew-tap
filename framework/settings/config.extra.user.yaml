@@ -1,0 +1,32 @@
+# config.extra.user.yaml
+# --------------------------------------------------------------
+# Per-project overrides for the EXTRA layer. Trabajo fuera del flujo
+# principal (tooling, scripts, IaC, refactor de utilidades — Regla 14).
+#
+# The framework defaults (structural — file layout, sections,
+# templates, anti-patterns) live in config.extra.core.yaml. Only
+# knobs you're likely to tune per-project are exposed here.
+#
+# Master switch:
+#   active: true  -> the extra flow is available in this project
+#   active: false -> `/fremi-extra` and related tooling stay dormant
+# --------------------------------------------------------------
+
+schema: fremi-extra-user
+schema_version: 1
+active: true
+
+# --------------------------------------------------------------
+# Conditional-rule toggles — expand or shrink the set of
+# conditions that make optional sections MANDATORY on your
+# project. Values here are additive on top of the core rules.
+# --------------------------------------------------------------
+conditional_rules:
+  extra_linkages_when:
+    additional_obligatory_if_any: []
+    # Example — always force `linkages` when your project cross-links
+    # to Jira tickets:
+    # - "El extra referencia un ticket externo (Jira, Linear, etc.)."
+
+  extra_notes_when:
+    additional_obligatory_if_any: []

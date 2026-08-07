@@ -1,0 +1,37 @@
+# config.bug.story.user.yaml
+# --------------------------------------------------------------
+# Per-project overrides for BUGS scoped to a STORY. Bugs registered
+# via `/fremi-story-bug FT-XX/HU-YY <slug>` — one file per bug at
+# docs/works/features/{FT-XX}/user-stories/{HU-YY}/bugs/BG-XX_<slug>.md.
+#
+# Structural defaults (sections, template, procedure) live in
+# config.bug.story.core.yaml. Only knobs you're likely to tune
+# per-project are exposed here.
+#
+# Master switch:
+#   active: true  -> `/fremi-story-bug` is available in this project
+#   active: false -> the skill stays dormant
+# --------------------------------------------------------------
+
+schema: fremi-bug-story-user
+schema_version: 1
+active: true
+
+# --------------------------------------------------------------
+# Step agents — which agent type executes the single step of this
+# flow (registering the bug). Snapshot of the core default.
+#
+# Elegir un tipo fuera de las options del core es error.
+# --------------------------------------------------------------
+step_agents:
+  register: main               # core options: [main, subagent, agent]
+
+# --------------------------------------------------------------
+# Conditional-rule toggles — extend when the `linkages` section
+# becomes mandatory beyond the core rules.
+# --------------------------------------------------------------
+conditional_rules:
+  bug_linkages_when:
+    additional_obligatory_if_any: []
+    # Example:
+    # - "El bug corresponde a un release cerrado — nombrar el tag."

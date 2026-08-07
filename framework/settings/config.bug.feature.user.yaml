@@ -1,0 +1,37 @@
+# config.bug.feature.user.yaml
+# --------------------------------------------------------------
+# Per-project overrides for BUGS scoped to a FEATURE (transversal
+# a varias stories). Registrados vía `/fremi-feature-bug FT-XX <slug>`
+# — un archivo por bug en docs/works/features/{FT-XX}/bugs/BG-XX_<slug>.md.
+#
+# Structural defaults (sections, template, procedure) live in
+# config.bug.feature.core.yaml. Only knobs you're likely to tune
+# per-project are exposed here.
+#
+# Master switch:
+#   active: true  -> `/fremi-feature-bug` is available in this project
+#   active: false -> the skill stays dormant
+# --------------------------------------------------------------
+
+schema: fremi-bug-feature-user
+schema_version: 1
+active: true
+
+# --------------------------------------------------------------
+# Step agents — which agent type executes the single step of this
+# flow (registering the bug). Snapshot of the core default.
+#
+# Elegir un tipo fuera de las options del core es error.
+# --------------------------------------------------------------
+step_agents:
+  register: main               # core options: [main, subagent, agent]
+
+# --------------------------------------------------------------
+# Conditional-rule toggles — extend when the `linkages` section
+# becomes mandatory beyond the core rules.
+# --------------------------------------------------------------
+conditional_rules:
+  bug_linkages_when:
+    additional_obligatory_if_any: []
+    # Example:
+    # - "El bug afecta más de UNA feature — cross-linkear las otras."

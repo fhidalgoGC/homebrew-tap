@@ -1,0 +1,56 @@
+# config.reverse.user.yaml
+# --------------------------------------------------------------
+# Per-project overrides for REVERSE ENGINEERING (Reglas 25-32).
+# Vía formal para alinear código pre-existente al framework.
+#
+# Structural defaults (skills catalog, pipelines, templates, anti-
+# patterns) live in config.reverse.core.yaml. Only knobs you're
+# likely to tune per-project are exposed here.
+#
+# Master switch:
+#   active: true  -> `/fremi-reverse-*` skills are available
+#   active: false -> reverse flow stays dormant in this project
+# --------------------------------------------------------------
+
+schema: fremi-reverse-user
+schema_version: 1
+active: true
+
+# --------------------------------------------------------------
+# Default mode (Regla 26). Applies to skills that don't declare
+# `--transparent` / `--stealth` explicitly.
+#
+# transparent = frontmatter incluye reverse_engineered:* con fecha,
+#               fuente, confidence. Trazabilidad histórica visible.
+# stealth     = frontmatter idéntico al flow forward. Requiere
+#               justificación por ADR a nivel proyecto (Regla 26).
+# --------------------------------------------------------------
+default_mode: transparent
+
+# --------------------------------------------------------------
+# Step agents — qué tipo de agente ejecuta cada reverse skill.
+# Snapshot de los defaults del core.
+# --------------------------------------------------------------
+step_agents:
+  fremi-reverse-product: main            # core options: [main, subagent, agent]
+  fremi-reverse-feature: subagent        # core options: [main, subagent, agent]
+  fremi-reverse-story: subagent          # core options: [main, subagent, agent]
+  fremi-reverse-enabler: subagent        # core options: [main, subagent, agent]
+  fremi-reverse-bug: main                # core options: [main, subagent]
+  fremi-reverse-extra: subagent          # core options: [main, subagent]
+
+# --------------------------------------------------------------
+# Confidence — cuánto confía la IA en la inferencia.
+# Snapshot de los defaults; ajustá si tu proyecto tiene menos tests
+# o git-history más pobre y querés bajar el threshold.
+# --------------------------------------------------------------
+confidence:
+  default: 0.85
+  min_threshold: 0.5           # bajo esto, doc marcado con needs_review: true
+
+# --------------------------------------------------------------
+# Health monitoring (Regla 32) — ratio reverse/forward.
+# --------------------------------------------------------------
+health:
+  reverse_ratio_warning: 0.15    # >15% reverse = warning
+  reverse_ratio_critical: 0.30   # >30% reverse = critical
