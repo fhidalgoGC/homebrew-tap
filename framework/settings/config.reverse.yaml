@@ -31,6 +31,13 @@ default_mode: transparent
 
 # ---------------------------------------------------------------------------
 # Skills reverse — declaradas
+#
+# `agent` por skill: main | subagent | agent (ver header de
+# ~/.fremi/framework/skills/story/config.core.yaml). Reverse suele apoyarse
+# fuerte en subagentes (research + inference + timestamps son auto-contenidos),
+# pero la fase de directed-questions (Regla 27) y el firmado final requieren
+# main. El default declarado abajo es el modo recomendado para el skill entero;
+# el orquestador puede spawnear subagentes para fases individuales.
 # ---------------------------------------------------------------------------
 skills:
   - name: fremi-reverse-product
@@ -47,6 +54,22 @@ skills:
     single_file: false
     risk: high    # producto es el más ambicioso — riesgo alto de racionalización post-hoc
     recommended_mode: transparent
+    agent:
+      options: [main, subagent, agent]
+      default: main
+      reasoning:
+        main: >
+          Reverse de producto es el más ambicioso (Regla 32 — riesgo de
+          racionalización post-hoc). Requiere validación humana en directed-
+          questions Y en la elección de qué iniciativas / ideas reflejan
+          la historia real del proyecto vs qué fue accidente.
+        subagent: >
+          Fases de discovery, inference y timestamps del reverse-product
+          se pueden delegar en paralelo (una por doc a producir). El main
+          consolida.
+        agent: >
+          Si hay agente especializado en business-archaeology / product-
+          reconstruction.
 
   - name: fremi-reverse-feature
     scope: feature
@@ -57,6 +80,19 @@ skills:
     single_file: false
     risk: medium
     recommended_mode: transparent
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Reverse de feature es research auto-contenido (mapear código,
+          tests, git-history de una área del proyecto). Encaja perfecto
+          en subagente aislado que retorna el mapeo al main.
+        main: >
+          Si el usuario quiere co-crear el mapeo (validar inferencias sobre
+          la marcha) o hay bifurcaciones grandes en la reconstrucción.
+        agent: >
+          Si hay agente especializado en code-archaeology del stack.
 
   - name: fremi-reverse-story
     scope: story
@@ -76,6 +112,21 @@ skills:
     single_file: false
     risk: medium
     recommended_mode: transparent
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Reverse-story genera hasta 11 docs a partir de código + tests + git.
+          Fases discovery + inference + timestamps son auto-contenidas — ideal
+          para subagente. El main entra para directed-questions (So that,
+          RNFs, CAs sin test) y firma final.
+        main: >
+          Si el usuario quiere validar inferencias step-by-step o co-crear
+          los BDD scenarios en su contexto principal.
+        agent: >
+          Si hay agente especializado en spec-reconstruction / test-to-spec
+          o similar.
 
   - name: fremi-reverse-enabler
     scope: enabler
@@ -88,6 +139,18 @@ skills:
     single_file: false
     risk: medium
     recommended_mode: transparent
+    agent:
+      options: [main, subagent, agent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Enabler reverse mapea infra/tooling ya montado desde IaC + scripts
+          + package.json. Research auto-contenido — subagente ideal.
+        main: >
+          Firma final del enabler (EN-04_closure) — bumpea al padre según
+          Regla 30 + Regla 17.
+        agent: >
+          Si hay agente especializado en infra-archaeology.
 
   - name: fremi-reverse-bug
     scope: bug
@@ -99,6 +162,17 @@ skills:
     recommended_mode: transparent
     special_notes:
       - "Aplica Regla 29 obligatoriamente — marca 'test rojo' como no reconstruible retroactivamente."
+    agent:
+      options: [main, subagent]
+      default: main
+      reasoning:
+        main: >
+          Reverse-bug debe declarar Regla 29 explícitamente (test rojo no
+          reconstruible retroactivamente). Requiere confirmación del usuario
+          sobre la story afectada y la severidad histórica.
+        subagent: >
+          El análisis del commit del fix + diff pre/post puede delegarse en
+          subagente; el main revisa el mapeo antes de firmar.
 
   - name: fremi-reverse-extra
     scope: extra
@@ -110,6 +184,16 @@ skills:
     recommended_mode: transparent
     special_notes:
       - "Valida cohesión 'un archivo por concepto'. Si los commits mezclan varios conceptos, sugiere split en varios EX-NN."
+    agent:
+      options: [main, subagent]
+      default: subagent
+      reasoning:
+        subagent: >
+          Análisis de commits + agrupación en conceptos cohesivos es research
+          mecánico. Subagente propone la partición, el main la valida.
+        main: >
+          Si el usuario quiere revisar concepto por concepto en su thread
+          principal (útil cuando el histórico es pequeño y conocido).
 
 # ---------------------------------------------------------------------------
 # Pipelines reverse — solo para las capas con múltiples docs (Decisión 1B)

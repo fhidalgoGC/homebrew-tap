@@ -89,6 +89,8 @@ conditional_rules:
 
 # ---------------------------------------------------------------------------
 # FLOW — sólo pasos que son skills invocables.
+#
+# `agent` por step: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 flow:
   sequence:
@@ -100,6 +102,20 @@ flow:
         - "El comportamiento incorrecto contradice contratos declarados a nivel feature (no atribuible limpio a UNA story)"
       produces: docs/works/features/{feature_folder}/bugs/BG-XX_<slug>.md
       versioning: snapshot con ancestor.id = FT-XX, version_at_creation = feature@version
+      agent:
+        options: [main, subagent, agent]
+        default: main
+        reasoning:
+          main: >
+            Bug de feature toca contratos transversales — decisión de scope
+            (¿es un bug de feature o de UNA story?) requiere el usuario.
+            Escritura sobre docs de la feature (single-writer).
+          subagent: >
+            Análisis mecánico de reproducción o mapeo de stories afectadas
+            puede delegarse mientras el main valida el diagnóstico.
+          agent: >
+            Si hay agente especializado en bug-triage transversal / regression
+            analysis a nivel feature.
 
   parallel_allowed:
     - skill: /fremi-story-tdd

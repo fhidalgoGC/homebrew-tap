@@ -83,6 +83,8 @@ conditional_rules:
 # FLOW — sólo pasos que son skills invocables.
 # El trabajo interno del bug (caracterizar, fix, firmar) se hace DENTRO del
 # skill /fremi-story-bug guiado por su SKILL.md. Ver `procedure_after_creation`.
+#
+# `agent` por step: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 flow:
   sequence:
@@ -94,6 +96,20 @@ flow:
         - "El comportamiento incorrecto contradice la spec de la story (Regla 8 — si no, extender spec primero)"
       produces: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/BG-XX_<slug>.md
       versioning: snapshot con ancestor.id = HU-YY, version_at_creation = story@version
+      agent:
+        options: [main, subagent, agent]
+        default: main
+        reasoning:
+          main: >
+            Diagnóstico root-cause + firma del bug requieren juicio humano
+            (Regla 8 — test rojo primero, decidir si contradice spec o es CA
+            fantasma). Escritura sobre docs de la story (single-writer).
+          subagent: >
+            Puede delegarse la generación del script de reproducción o el
+            análisis mecánico del stack trace mientras el main decide root-cause.
+          agent: >
+            Si hay agente especializado en bug-triage / regression-analysis
+            del stack del proyecto.
 
   parallel_allowed:
     - skill: /fremi-story-tdd
