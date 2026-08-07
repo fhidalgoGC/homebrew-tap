@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa STORY. Corre la cadena de pl
 
 # /fremi-pipeline-story — Pipeline capa STORY
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/story/config.user.yaml → flow.sequence`](../skills/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/story/config.user.yaml → flow.sequence`](../../skills/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
 
 **Fuente de verdad de la secuencia:** `config.story.yaml`. Si un step cambia allí, este pipeline se adapta.
 
@@ -89,7 +89,7 @@ Después de esto, el pipeline llena cada FW-XX invocando el sub-skill correspond
 
 ## Stop events específicos de esta capa
 
-Además de los stop events genéricos del [README](README.md), este pipeline pausa cuando:
+Además de los stop events genéricos del [README](../README.md), este pipeline pausa cuando:
 
 1. **Conditional rule no inferible (Regla 16).** Antes del step 0 (explore) y del step 2 (proposal), el pipeline evalúa `explore_when` y `proposal_when` de `config.story.yaml`. **Autoevalúa** cuando la información inicial permite inferir con confianza (ej: "migración de X a Y" → explore obligatorio). **Pausa y pregunta** cuando la información es ambigua — típicamente en stories de tamaño medio donde no está claro si aplica el criterio "3+ archivos", "contrato externo nuevo", etc.
 2. **Bifurcación técnica en SDD/Design (Regla 3b).** Aparecen 2+ approaches viables (elección de protocolo, librería, wrapper, adapter…). Presenta opciones (pros/contras), espera decisión, registra `ADR-XXX` vía `/fremi-story-adr` (delta local; se merge al feature al cerrar la story vía Regla 17). **Antes** de continuar el artefacto donde nació la decisión.
@@ -162,9 +162,9 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/story/config.user.yaml`](../skills/story/config.user.yaml)
-- Reglas: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.story.md`](../flows/flow.story.md)
-- Orquestador manual: [`/fremi-story`](../skills/story/SKILL.md)
+- Config operativa: [`~/.fremi/framework/skills/story/config.user.yaml`](../../skills/story/config.user.yaml)
+- Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
+- Flujo descriptivo: [`~/.fremi/framework/flows/flow.story.md`](../../flows/flow.story.md)
+- Orquestador manual: [`/fremi-story`](../../skills/story/SKILL.md)
 - Sub-skills: `~/.fremi/framework/skills/story/skills/`
 - Pipeline padre: [`/fremi-pipeline-feature`](pipeline.feature.md) (puede encadenar este pipeline con `--first-story`)

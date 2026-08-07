@@ -1,0 +1,24 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-reverse-feature
+layer: reverse
+scope: feature
+since: 2026-08-07
+
+# ===========================================================================
+# CONFIG.CORE — pipeline REVERSE FEATURE
+# Fuente ESTRUCTURAL. NO user-editable.
+#
+# Reconstruye UNA feature + todas sus stories en cadena.
+# ===========================================================================
+
+invokes:
+  - /fremi-reverse-feature
+  - /fremi-reverse-story   # una por cada story descubierta en la feature
+
+default_mode: interactive
+sequence_source: ~/.fremi/framework/settings/config.reverse.core.yaml → skills[fremi-reverse-feature]
+doc: ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md
+
+risk: medium
+recommended_reverse_mode: transparent

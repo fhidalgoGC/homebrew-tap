@@ -1,0 +1,16 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-reverse-enabler
+layer: reverse
+scope: enabler
+since: 2026-08-07
+
+invokes:
+  - /fremi-reverse-enabler
+
+default_mode: interactive
+sequence_source: ~/.fremi/framework/settings/config.reverse.core.yaml → skills[fremi-reverse-enabler]
+doc: ~/.fremi/framework/pipelines/reverse-enabler/PIPELINE.md
+
+risk: medium
+recommended_reverse_mode: transparent

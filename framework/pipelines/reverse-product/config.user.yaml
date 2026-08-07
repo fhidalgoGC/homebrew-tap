@@ -1,0 +1,15 @@
+schema: framework-pipeline-user
+schema_version: 1
+active: true
+
+# ===========================================================================
+# CONFIG.USER — pipeline REVERSE PRODUCT
+# ===========================================================================
+
+# auto | interactive
+# Reverse-product default es interactive por riesgo alto (Regla 32).
+mode: interactive
+
+# Modo del frontmatter reverse. Override sólo con ADR (Regla 26).
+# transparent | stealth
+reverse_mode: transparent

@@ -1,0 +1,31 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-story
+layer: story
+since: 2026-08-07
+
+# ===========================================================================
+# CONFIG.CORE — pipeline STORY
+# Fuente ESTRUCTURAL. NO user-editable.
+# ===========================================================================
+
+# Sub-skills orquestados, en el orden del step_matrix de la capa story.
+# FW-00_explore y FW-02_proposal son condicionales según config.story.core.yaml.
+invokes:
+  - /fremi-story-explore          # condicional
+  - /fremi-story-definition
+  - /fremi-story-proposal         # condicional
+  - /fremi-story-scope
+  - /fremi-story-bdd
+  - /fremi-story-sdd
+  - /fremi-story-design
+  - /fremi-story-tdd
+  - /fremi-story-plan
+  - /fremi-story-apply
+  - /fremi-story-verify
+  - /fremi-story-closure-check
+  - /fremi-story-closure
+
+default_mode: interactive
+sequence_source: ~/.fremi/framework/skills/story/config.core.yaml → step_matrix
+doc: ~/.fremi/framework/pipelines/story/PIPELINE.md

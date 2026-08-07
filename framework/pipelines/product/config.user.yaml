@@ -1,0 +1,16 @@
+schema: framework-pipeline-user
+schema_version: 1
+active: true
+
+# ===========================================================================
+# CONFIG.USER — pipeline PRODUCT
+#
+# Overrides per-project del pipeline /fremi-pipeline-product.
+# Estructura (invokes, sequence) vive en config.core.yaml. Acá sólo
+# expones knobs que el usuario tune.
+# ===========================================================================
+
+# Modo de ejecución para este pipeline en este proyecto.
+# auto        → arranca y corre sin pausas entre skills (pausa sólo en stop events).
+# interactive → pausa entre cada sub-skill y pregunta si continúa.
+mode: auto

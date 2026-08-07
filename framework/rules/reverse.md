@@ -1,6 +1,6 @@
 # Reglas del flujo de reverse-engineering — makingFileReport
 
-> **Documento de referencia:** `~/.fremi/framework/flows/flow.reverse.md`, `~/.fremi/framework/pipelines/pipeline.reverse.*.md`, `~/.fremi/framework/reverse-engineering/`.
+> **Documento de referencia:** `~/.fremi/framework/flows/flow.reverse.md`, `~/.fremi/framework/pipelines/reverse-*/PIPELINE.md`, `~/.fremi/framework/reverse-engineering/`.
 >
 > Este archivo contiene reglas **específicas del flujo de reverse-engineering** — la vía canónica para alinear código pre-existente al framework. Se lee **en adición** a `rules/workflow.md` (reglas forward). Ambos archivos son obligatorios.
 
@@ -218,4 +218,4 @@ Antes de invocar cualquier skill o pipeline de reverse:
 - `~/.fremi/framework/flows/flow.reverse.md` — descripción narrativa del flujo canónico de reverse.
 - `~/.fremi/framework/settings/config.reverse.core.yaml` — config operativo de reverse.
 - `~/.fremi/framework/reverse-engineering/README.md` — casos de uso + advertencias.
-- `~/.fremi/framework/pipelines/pipeline.reverse.*.md` — pipelines de auto-ejecución por capa.
+- `~/.fremi/framework/pipelines/reverse-*/PIPELINE.md` — pipelines de auto-ejecución por capa.

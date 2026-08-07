@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa FEATURE. Crea la feature (fo
 
 # /fremi-pipeline-feature — Pipeline capa FEATURE
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/feature/config.user.yaml → flow.sequence`](../skills/feature/config.user.yaml), con extensiones para sync-back automático a producto (Regla 12) y bump del plan padre (Regla 17).
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/feature/config.user.yaml → flow.sequence`](../../skills/feature/config.user.yaml), con extensiones para sync-back automático a producto (Regla 12) y bump del plan padre (Regla 17).
 
 **Fuente de verdad de la secuencia:** `config.feature.yaml`. Si un step cambia allí, este pipeline se adapta.
 
@@ -64,7 +64,7 @@ Al 2026-07-13 la secuencia canónica de la capa feature tiene UN step obligatori
 
 ## Stop events específicos de esta capa
 
-Además de los stop events genéricos del [README](README.md), este pipeline pausa cuando:
+Además de los stop events genéricos del [README](../README.md), este pipeline pausa cuando:
 
 1. **Sync-back a producto necesario (Regla 12).** El pipeline detecta que la feature introduce una capacidad, restricción o término que **no** está en `product/definition.md` y **parece transversal**. Presenta al usuario el gap y propone: (a) actualizar `product/definition.md` antes de continuar, o (b) marcar como específico de la feature y proceder. Espera decisión.
 2. **Bifurcación técnica en `definition.md` (Regla 3b).** El usuario dio información que implica 2+ approaches viables para satisfacer la feature (ej: "generar reporte" = PDF vs. HTML vs. API JSON). Presenta opciones, espera decisión, registra `ADR-XXX` en el scope apropiado (producto o feature) vía `/fremi-product-adr` o `/fremi-feature-adr` según Regla 20.
@@ -126,8 +126,8 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/feature/config.user.yaml`](../skills/feature/config.user.yaml)
-- Reglas: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md) — Reglas 1, 3b, 12, 17, 20.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.feature.md`](../flows/flow.feature.md)
-- Skill manual: [`/fremi-feature`](../skills/feature/SKILL.md)
+- Config operativa: [`~/.fremi/framework/skills/feature/config.user.yaml`](../../skills/feature/config.user.yaml)
+- Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 3b, 12, 17, 20.
+- Flujo descriptivo: [`~/.fremi/framework/flows/flow.feature.md`](../../flows/flow.feature.md)
+- Skill manual: [`/fremi-feature`](../../skills/feature/SKILL.md)
 - Pipeline encadenable: [`/fremi-pipeline-story`](pipeline.story.md)

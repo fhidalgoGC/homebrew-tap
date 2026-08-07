@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa PRODUCTO. Corre la secuencia
 
 # /fremi-pipeline-product — Pipeline capa PRODUCTO
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/product/config.user.yaml → flow.sequence`](../skills/product/config.user.yaml).
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/product/config.user.yaml → flow.sequence`](../../skills/product/config.user.yaml).
 
 **Fuente de verdad de la secuencia:** `config.product.yaml`. Este pipeline **NO duplica** la secuencia — la lee y la respeta. Si un step cambia allí, este pipeline se adapta automáticamente.
 
@@ -65,7 +65,7 @@ El pipeline ejecuta en orden estricto los steps declarados en `config.product.ya
 
 ## Stop events específicos de esta capa
 
-Además de los stop events genéricos definidos en el [README](README.md), este pipeline pausa cuando:
+Además de los stop events genéricos definidos en el [README](../README.md), este pipeline pausa cuando:
 
 1. **Bifurcación en `planteamiento`.** Aparecen 2+ approaches viables para el problema principal → presentar opciones, esperar decisión, registrar como decisión de planteamiento (no ADR — el planteamiento es discovery, no arquitectura).
 2. **Bifurcación en `strategies`.** Aparecen 2+ stacks/arquitecturas viables con trade-offs no-triviales → presentar opciones (pros/contras), esperar decisión, registrar `ADR-XXX` en `product/decisions.md` vía `/fremi-product-adr` **antes** de continuar al plan.
@@ -115,8 +115,8 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/product/config.user.yaml`](../skills/product/config.user.yaml)
-- Reglas: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md) — Reglas 3b, 4, 12, 17.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.product.md`](../flows/flow.product.md)
-- Orquestador manual: [`/fremi-product`](../skills/product/SKILL.md)
+- Config operativa: [`~/.fremi/framework/skills/product/config.user.yaml`](../../skills/product/config.user.yaml)
+- Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 3b, 4, 12, 17.
+- Flujo descriptivo: [`~/.fremi/framework/flows/flow.product.md`](../../flows/flow.product.md)
+- Orquestador manual: [`/fremi-product`](../../skills/product/SKILL.md)
 - Sub-skills: `~/.fremi/framework/skills/product/skills/`

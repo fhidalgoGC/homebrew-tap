@@ -3,7 +3,7 @@
 > **Config operativa:** [`~/.fremi/framework/settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml)
 > **Reglas específicas:** [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25–32.
 > **Skills:** `~/.fremi/framework/reverse-engineering/` (6 skills).
-> **Pipelines:** `~/.fremi/framework/pipelines/pipeline.reverse.*.md` (4 pipelines).
+> **Pipelines:** `~/.fremi/framework/pipelines/reverse-*/PIPELINE.md` (4 pipelines).
 > **Rol:** vía canónica para alinear código pre-existente al framework — reconstruir los docs del flow forward a partir de artifacts sobrevivientes.
 
 ---

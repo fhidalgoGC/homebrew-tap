@@ -1,0 +1,10 @@
+schema: framework-pipeline-user
+schema_version: 1
+active: true
+
+# ===========================================================================
+# CONFIG.USER — pipeline FEATURE
+# ===========================================================================
+
+# auto | interactive
+mode: interactive

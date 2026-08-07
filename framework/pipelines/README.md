@@ -144,7 +144,7 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 ## Convención de nomenclatura
 
-- Los pipelines viven en `~/.fremi/framework/pipelines/pipeline.<capa>.md`.
+- Los pipelines viven en `~/.fremi/framework/pipelines/<capa>/PIPELINE.md`.
 - Se invocan como `/fremi-pipeline-<capa>` (ej: `/fremi-pipeline-story`).
 - El prefijo `fremi-` respeta Regla 21.
 
@@ -179,7 +179,7 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 ## Cómo agregar un pipeline
 
-1. Crear `~/.fremi/framework/pipelines/pipeline.<capa>.md` siguiendo el template de los existentes.
+1. Crear `~/.fremi/framework/pipelines/<capa>/PIPELINE.md` siguiendo el template de los existentes.
 2. Frontmatter con `name: fremi-pipeline-<capa>` + `description`.
 3. Referenciar el `config.<capa>.yaml → flow.sequence` como fuente de verdad de la secuencia — **no duplicar la secuencia en el pipeline**, sólo referenciarla y agregar la política de auto-ejecución.
 4. Declarar los **stop events específicos** de esa capa (además de los genéricos de este README).

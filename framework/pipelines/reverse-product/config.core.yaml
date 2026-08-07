@@ -1,0 +1,27 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-reverse-product
+layer: reverse
+scope: product
+since: 2026-08-07
+
+# ===========================================================================
+# CONFIG.CORE — pipeline REVERSE PRODUCT
+# Fuente ESTRUCTURAL. NO user-editable.
+#
+# Reconstruye la capa producto entera a partir de features/stories
+# existentes + código + docs sueltos. Riesgo declarado HIGH por
+# potencial de racionalización post-hoc (Regla 32).
+# ===========================================================================
+
+invokes:
+  - /fremi-reverse-product
+
+# Reverse-product recomienda interactive (Regla 32 — riesgo alto).
+default_mode: interactive
+
+sequence_source: ~/.fremi/framework/settings/config.reverse.core.yaml → skills[fremi-reverse-product]
+doc: ~/.fremi/framework/pipelines/reverse-product/PIPELINE.md
+
+risk: high
+recommended_reverse_mode: transparent   # Regla 26

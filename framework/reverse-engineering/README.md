@@ -178,10 +178,10 @@ Para reconstruir capas enteras (múltiples docs) en cadena, usar los 4 pipelines
 
 | Pipeline | Reconstruye |
 |---|---|
-| [`/fremi-pipeline-reverse-product`](../pipelines/pipeline.reverse.product.md) | Capa producto (7 docs) + encadena reverse-feature |
-| [`/fremi-pipeline-reverse-feature`](../pipelines/pipeline.reverse.feature.md) | `FT-XX/definition.md` (+ decisions) + encadena reverse-story |
-| [`/fremi-pipeline-reverse-story`](../pipelines/pipeline.reverse.story.md) | 11 docs FW-00..FW-10 de una story |
-| [`/fremi-pipeline-reverse-enabler`](../pipelines/pipeline.reverse.enabler.md) | 4 docs EN-01..EN-04 de un enabler |
+| [`/fremi-pipeline-reverse-product`](../pipelines/reverse-product/PIPELINE.md) | Capa producto (7 docs) + encadena reverse-feature |
+| [`/fremi-pipeline-reverse-feature`](../pipelines/reverse-feature/PIPELINE.md) | `FT-XX/definition.md` (+ decisions) + encadena reverse-story |
+| [`/fremi-pipeline-reverse-story`](../pipelines/reverse-story/PIPELINE.md) | 11 docs FW-00..FW-10 de una story |
+| [`/fremi-pipeline-reverse-enabler`](../pipelines/reverse-enabler/PIPELINE.md) | 4 docs EN-01..EN-04 de un enabler |
 
 **Bug** y **Extra** son 1 archivo — se invoca el skill suelto (`/fremi-reverse-bug`, `/fremi-reverse-extra`), sin pipeline.
 

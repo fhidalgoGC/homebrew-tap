@@ -1,0 +1,20 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-feature
+layer: feature
+since: 2026-08-07
+
+# ===========================================================================
+# CONFIG.CORE — pipeline FEATURE
+# Fuente ESTRUCTURAL. NO user-editable.
+# ===========================================================================
+
+# Sub-skills orquestados. Feature tiene UN step obligatorio (definition);
+# el ciclo de vida (lifecycle) es transversal — stories, bugs y enablers
+# se orquestan aparte.
+invokes:
+  - /fremi-feature
+
+default_mode: interactive
+sequence_source: ~/.fremi/framework/skills/feature/config.core.yaml → step_matrix
+doc: ~/.fremi/framework/pipelines/feature/PIPELINE.md

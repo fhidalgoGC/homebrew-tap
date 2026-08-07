@@ -204,10 +204,10 @@ layers:
     flow: ~/.fremi/framework/flows/flow.reverse.md
     skills_dir: ~/.fremi/framework/reverse-engineering/
     pipelines:
-      - ~/.fremi/framework/pipelines/pipeline.reverse.product.md
-      - ~/.fremi/framework/pipelines/pipeline.reverse.feature.md
-      - ~/.fremi/framework/pipelines/pipeline.reverse.story.md
-      - ~/.fremi/framework/pipelines/pipeline.reverse.enabler.md
+      - ~/.fremi/framework/pipelines/reverse-product/PIPELINE.md
+      - ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md
+      - ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md
+      - ~/.fremi/framework/pipelines/reverse-enabler/PIPELINE.md
     # Bug y extra reverse son 1 archivo — sin pipeline propio.
 
 # ===========================================================================

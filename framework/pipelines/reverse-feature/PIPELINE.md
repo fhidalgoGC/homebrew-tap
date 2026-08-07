@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para la capa FEATURE
 
 Corre en modo **automático** la reconstrucción de una feature entera cuyo código ya existe: primero el `FT-XX/definition.md` (+ opcionalmente `decisions.md`), después una story reverse por cada carpeta bajo `user-stories/` (o inferida de la estructura del código).
 
-**Fuente de verdad:** [`config.reverse.yaml`](../settings/config.reverse.core.yaml) + [`flow.reverse.md`](../flows/flow.reverse.md).
+**Fuente de verdad:** [`config.reverse.yaml`](../../settings/config.reverse.core.yaml) + [`flow.reverse.md`](../../flows/flow.reverse.md).
 
 ## Sintaxis
 
@@ -43,7 +43,7 @@ Corre en modo **automático** la reconstrucción de una feature entera cuyo cód
 
 ## Stop events específicos
 
-Además de los del [README](README.md) y los de `/fremi-pipeline-reverse-story` (heredados en las stories):
+Además de los del [README](../README.md) y los de `/fremi-pipeline-reverse-story` (heredados en las stories):
 
 1. **Feature vs producto** — si al inferir el `FT-XX/definition.md` aparecen capacidades transversales que pertenecen a `product/definition.md`, pausar y sugerir sync-back (Regla 12) — proponer correr `/fremi-pipeline-reverse-product` primero si producto tampoco existe.
 2. **Story ambigua** — el código muestra 2 funcionalidades que podrían ser 1 o 2 stories. Pausar y preguntar al usuario cómo agruparlas.
@@ -84,8 +84,8 @@ docs/works/features/FT-XX_<slug>/
 
 ## Referencias
 
-- [`config.reverse.yaml`](../settings/config.reverse.core.yaml)
-- [`rules/reverse.md`](../rules/reverse.md)
-- [`flow.reverse.md`](../flows/flow.reverse.md)
+- [`config.reverse.yaml`](../../settings/config.reverse.core.yaml)
+- [`rules/reverse.md`](../../rules/reverse.md)
+- [`flow.reverse.md`](../../flows/flow.reverse.md)
 - Sub-pipeline: [`/fremi-pipeline-reverse-story`](pipeline.reverse.story.md)
 - Pipeline padre: [`/fremi-pipeline-reverse-product`](pipeline.reverse.product.md)

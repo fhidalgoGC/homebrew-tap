@@ -201,14 +201,14 @@ skills:
 pipelines:
   - name: fremi-pipeline-reverse-product
     scope: product
-    path: ~/.fremi/framework/pipelines/pipeline.reverse.product.md
+    path: ~/.fremi/framework/pipelines/reverse-product/PIPELINE.md
     invokes:
       - fremi-reverse-product
     recommended_mode: interactive   # producto — el más peligroso — interactive fuerte
 
   - name: fremi-pipeline-reverse-feature
     scope: feature
-    path: ~/.fremi/framework/pipelines/pipeline.reverse.feature.md
+    path: ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md
     invokes:
       - fremi-reverse-feature
       - fremi-reverse-story    # todas las stories de la feature en cadena
@@ -216,14 +216,14 @@ pipelines:
 
   - name: fremi-pipeline-reverse-story
     scope: story
-    path: ~/.fremi/framework/pipelines/pipeline.reverse.story.md
+    path: ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md
     invokes:
       - fremi-reverse-story
     recommended_mode: interactive
 
   - name: fremi-pipeline-reverse-enabler
     scope: enabler
-    path: ~/.fremi/framework/pipelines/pipeline.reverse.enabler.md
+    path: ~/.fremi/framework/pipelines/reverse-enabler/PIPELINE.md
     invokes:
       - fremi-reverse-enabler
     recommended_mode: interactive

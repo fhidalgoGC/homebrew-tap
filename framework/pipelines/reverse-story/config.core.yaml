@@ -1,0 +1,16 @@
+schema: framework-pipeline-core
+schema_version: 1
+name: fremi-pipeline-reverse-story
+layer: reverse
+scope: story
+since: 2026-08-07
+
+invokes:
+  - /fremi-reverse-story
+
+default_mode: interactive
+sequence_source: ~/.fremi/framework/settings/config.reverse.core.yaml → skills[fremi-reverse-story]
+doc: ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md
+
+risk: medium
+recommended_reverse_mode: transparent
