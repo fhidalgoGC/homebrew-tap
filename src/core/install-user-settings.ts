@@ -111,6 +111,17 @@ function mapToDestination(relPath: string): string | null {
       const [, layer, category] = nested;
       return `config.${category}.${layer}.user.yaml`;
     }
+    // Standalone-category layers (extra) — no orchestrator sub-skills.
+    // Flatten to top-level composite name to keep the project's
+    // .fremi/settings/ folder flat + discoverable.
+    //   skills/extra/config.user.yaml → config.extra.user.yaml
+    const standalone = relPath.match(
+      /^skills\/(extra)\/config\.user\.yaml$/,
+    );
+    if (standalone) {
+      const [, category] = standalone;
+      return `config.${category}.user.yaml`;
+    }
     return relPath.slice("skills/".length);
   }
   return null;

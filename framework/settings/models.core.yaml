@@ -98,6 +98,9 @@ skills:
   fremi-delete-hook: haiku
   fremi-delete-mcp: haiku
 
+  # Extra (Regla 14 — trabajo fuera del flujo)
+  fremi-extra: haiku
+
   # Global / transversal
   fremi-sync-check: sonnet
   fremi-install-framework: haiku

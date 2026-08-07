@@ -192,7 +192,7 @@ layers:
         skill: /fremi-feature-bug
 
   extra:
-    config: ~/.fremi/framework/settings/config.extra.core.yaml
+    config: ~/.fremi/framework/skills/extra/config.core.yaml
     active: true
     orchestrator_skill: null   # extra no tiene skill dedicado (edición a mano)
 
@@ -595,5 +595,5 @@ references:
       # Bugs no tienen config.core.yaml todavía (por evaluar si aplica).
       story: ~/.fremi/framework/skills/story/skills/bug/config.core.yaml
       feature: ~/.fremi/framework/skills/feature/skills/bug/config.core.yaml
-    extra: ~/.fremi/framework/settings/config.extra.core.yaml
+    extra: ~/.fremi/framework/skills/extra/config.core.yaml
     reverse: ~/.fremi/framework/settings/config.reverse.core.yaml

@@ -94,10 +94,11 @@ Estructura esperada:
 | **Sub-skills story** (16) | `fremi-story-explore`, `fremi-story-definition`, `fremi-story-proposal`, `fremi-story-scope`, `fremi-story-bdd`, `fremi-story-sdd`, `fremi-story-design`, `fremi-story-tdd`, `fremi-story-plan`, `fremi-story-task`, `fremi-story-checkwork`, `fremi-story-verify`, `fremi-story-closure-check`, `fremi-story-closure`, `fremi-story-adr`, `fremi-story-bug` |
 | **Sub-skills enabler** (4) | `fremi-enabler-definition`, `fremi-enabler-design`, `fremi-enabler-plan`, `fremi-enabler-closure` |
 | **Sub-skills tools** (8) | `fremi-add-skill`, `fremi-add-hook`, `fremi-add-rule`, `fremi-add-mcp`, `fremi-delete-skill`, `fremi-delete-hook`, `fremi-delete-rule`, `fremi-delete-mcp` |
+| **Extra** (1) | `fremi-extra` |
 | **Globales** (1) | `fremi-sync-check` |
 | **Reverse-engineering** (6) | `fremi-reverse-story`, `fremi-reverse-feature`, `fremi-reverse-bug`, `fremi-reverse-enabler`, `fremi-reverse-product`, `fremi-reverse-extra` |
 | **Installer** (1) | `fremi-install-framework` |
-| **Total framework** | **50 skills** |
+| **Total framework** | **51 skills** |
 
 ### Paso 2 — Instalar skills del framework (aplicando convención `fremi-`)
 

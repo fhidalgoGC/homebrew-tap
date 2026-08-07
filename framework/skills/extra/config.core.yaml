@@ -17,10 +17,32 @@ active: true
 single_file: true
 
 location: docs/works/extra/{filename}
-skill: null   # no hay skill dedicado; se edita a mano (o vía scaffold si se
-              # crea un helper genérico en el futuro)
+skill: /fremi-extra   # scaffolder — calcula próximo EX-NN + escribe template
 
 numbering: global   # EX-NN secuencial al proyecto
+
+# ---------------------------------------------------------------------------
+# Step matrix — el skill /fremi-extra ejecuta un solo step (scaffold del
+# archivo). El USUARIO llena el contenido después; el skill no automatiza
+# ese trabajo (eso viola Regla 14 si es spec-driven).
+# ---------------------------------------------------------------------------
+step_matrix:
+  scaffold:
+    skill: /fremi-extra
+    requires_complete: []
+    consumes: []
+    can_run_with: []
+    agent:
+      options: [main]
+      default: main
+      reasoning:
+        main: >
+          Scaffolding + validación del nombre + cálculo del próximo EX-NN
+          global. Trabajo trivial pero requiere confirmar el slug con el
+          usuario (naming), Regla 14 valida que no sea trabajo spec-driven.
+    reason: >
+      El scaffold es mecánico pero necesita al usuario para confirmar
+      slug y clasificación (Regla 14).
 
 # ---------------------------------------------------------------------------
 # Secciones del archivo
@@ -79,7 +101,12 @@ conditional_rules:
 # NO son steps del flow porque no son skills invocables.
 # ---------------------------------------------------------------------------
 flow:
-  sequence: []   # Extra no tiene skills — edición manual del archivo.
+  sequence:
+    - step: 1
+      skill: /fremi-extra
+      action: scaffold un archivo EX-NN_<slug>.md nuevo
+      produces: docs/works/extra/EX-NN_<slug>.md
+      versioning: snapshot con ancestor.id = project, version_at_creation = project@version
   parallel_allowed: []
 
 # ---------------------------------------------------------------------------

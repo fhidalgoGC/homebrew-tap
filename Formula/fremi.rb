@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.13"
+  version "0.4.14"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-darwin-arm64"
-      sha256 "bf5aabfb3021e3997ec766477a814ee6a05b869ce309a5e08f42a99083b6abf0"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.14/fremi-darwin-arm64"
+      sha256 "6fee747debfa94f48ea5920d068ef8fb106f1d32268c6648a2bde198aa8771b4"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-darwin-x64"
-      sha256 "4ac2ac6c59ad6e6319bea563c21cc5ee430fbd526337fe9f99c0a20d7bc1f3e1"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.14/fremi-darwin-x64"
+      sha256 "52a31f944460b34a38a109d7164d6deef88aec47ca5e4cc48dce171b309e715d"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-linux-arm64"
-      sha256 "64a1d317c4a94dc87bd852a574e1f2d9472f48f6e022a049863d488989b11dba"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.14/fremi-linux-arm64"
+      sha256 "a8e2ca64a40028c43a2ae6a53a8e2056205274413145c161a4a500c4ed361ea6"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-linux-x64"
-      sha256 "7c0ace597eb581401f36cbad6c0322d17ba66a6a5024417b337fd4306dc6b2f0"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.14/fremi-linux-x64"
+      sha256 "3f43fdcda91e10f483ece90846fec292d50bc65836f243a7608bdb1180ab9508"
     end
   end
 
@@ -37,19 +37,18 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      New in v0.4.13:
+      New in v0.4.14:
 
-        fremi setting → <layer> now offers TWO editors per layer:
+        /fremi-extra <slug> — scaffolder for the EXTRA layer (Regla 14).
+        Calculates the next EX-NN globally, validates the slug, creates
+        docs/works/extra/EX-NN_<slug>.md from the canonical template
+        with frontmatter (Regla 17).
 
-          🤖  Edit models for this layer
-                which model each sub-skill runs on
-                (opus / sonnet / haiku / concrete model ID)
+        Extra now has its own folder in framework/skills/extra/ with
+        SKILL.md + config + references — mirroring the pattern used by
+        every other category.
 
-          🎭  Edit step agents (main / subagent / agent)
-                which agent TYPE executes each step of the layer's
-                flow. Reads valid options + reasoning from the
-                core config; steps with only one option are
-                surfaced as read-only.
+        Framework total: 51 skills (was 50).
     EOS
   end
 
