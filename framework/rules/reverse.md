@@ -29,7 +29,7 @@ Cuando existe trabajo real (endpoint, feature, product, tooling, bug fixeado, en
 Reverse **NO se usa para trabajo en curso**. Precondiciones:
 
 1. **El trabajo está en producción o mergeado a main** (o al menos en un branch de release confirmado). Trabajo experimental que sigue cambiando no debe reverse-engineerarse — usar el flow forward.
-2. **Framework instalado** (Regla 24) — reverse skills están en `.claude/skills/fremi-reverse-*` y `/fremi-install-framework` corrió.
+2. **Framework instalado** (Regla 24) — reverse skills están en `.claude/skills/fremi-reverse-*`; el CLI `fremi install` corrió en este proyecto.
 3. **Se puede identificar la capa correcta** (product / feature / story / enabler / bug / extra). Si no está claro dónde encaja el trabajo, preguntar al usuario antes de arrancar.
 
 ### Post-condición dura

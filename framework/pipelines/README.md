@@ -98,12 +98,12 @@ Pipeline ≠ velocidad a cualquier costo — respeta **todas** las reglas del fr
 
 Antes de correr **cualquier** pipeline (o skill), el framework debe estar instalado en el proyecto:
 
-- `.claude/skills/fremi-install-framework` es symlink válido.
+- `.claude/skills/fremi-story` es symlink válido.
 - `CLAUDE.md` en la raíz referencia `~/.fremi/framework/rules/workflow.md`.
 
-Si no lo está → el pipeline aborta con `"Corré /fremi-install-framework antes de invocar el pipeline"`. **La IA no auto-instala** — la instalación crea symlinks reales en `.claude/` y necesita aprobación explícita del usuario. Ver Regla 24 en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
+Si no lo está → el pipeline aborta con `"Corré `fremi install` en la terminal antes de invocar el pipeline"`. **La IA no auto-instala** — la instalación crea symlinks reales en `.claude/` y necesita aprobación explícita del usuario. Ver Regla 24 en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
 
-Excepciones (skills bootstrap): `/fremi-install-framework` es el único que puede correr con framework no-instalado.
+Excepciones (skills bootstrap): el CLI `fremi install` es el único que puede correr con framework no-instalado.
 
 ---
 

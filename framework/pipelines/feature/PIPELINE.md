@@ -43,7 +43,7 @@ Consultar `config.feature.yaml → execution_mode` para el default.
 
 ## Precondiciones duras (abortan el pipeline)
 
-- **Regla 24 — Framework instalado**: `.claude/skills/fremi-install-framework` es symlink válido y `CLAUDE.md` referencia `~/.fremi/framework/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré `/fremi-install-framework` antes de invocar el pipeline". **No auto-instalar.**
+- **Regla 24 — Framework instalado**: `.claude/skills/fremi-story` es symlink válido y `CLAUDE.md` referencia `~/.fremi/framework/rules/workflow.md`. Si el framework no está instalado → abortar con: "Corré el CLI `fremi install` antes de invocar el pipeline". **No auto-instalar.**
 - `~/.fremi/framework/settings/methodology.core.yaml` + `config.feature.yaml` existen y parsean.
 - `config.feature.yaml → active: true`.
 - `docs/works/product/definition.md` existe **con contenido real** (no template vacío).

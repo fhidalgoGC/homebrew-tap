@@ -897,12 +897,12 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 
 ### Regla dura — Prefijo `fremi-`
 
-- **Todo skill de `~/.fremi/framework/`** (orquestador, sub-skill, reverse, install, tools) debe:
+- **Todo skill de `~/.fremi/framework/`** (orquestador, sub-skill, reverse, tools) debe:
   - Tener `name: fremi-<...>` en el frontmatter de su `SKILL.md`.
   - Publicarse en `.claude/skills/` como symlink `fremi-<...>`.
   - Invocarse por el usuario como `/fremi-<...>`.
 - **Los skills de proyecto** (`docs/project/skills/`, creados con `/fremi-add-skill`) **NO llevan prefijo** — así se distinguen los skills reusables del framework de los específicos del proyecto en el autocomplete de Claude Code.
-- **El responsable de aplicar la convención** al instalar el framework es `/fremi-install-framework`. Al crear symlinks en `.claude/skills/`, el installer garantiza que cada nombre respete el prefijo, aunque el `name:` interno tuviera drift.
+- **El responsable de aplicar la convención** al instalar el framework es el CLI `fremi install`. Al crear symlinks en `.claude/skills/`, garantiza que cada nombre respete el prefijo, aunque el `name:` interno tuviera drift.
 
 ### Regla dura — Jerarquía física por capa
 
@@ -910,7 +910,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 - **Orquestadores de capa** → `~/.fremi/framework/skills/<capa>/SKILL.md` con `name: fremi-<capa>` (ej: `fremi-story`, `fremi-product`).
 - **Skills globales / transversales** → viven directo en `~/.fremi/framework/skills/<name>/` (ej: `fremi-sync-check`, `fremi-tools`).
 - **Reverse-engineering** → viven en `~/.fremi/framework/reverse-engineering/<name>/` con `name: fremi-reverse-<...>` (ej: `fremi-reverse-story`).
-- **Installer** → vive en `~/.fremi/framework/installs/install-framework/` con `name: fremi-install-framework`.
+- **Installer** — no existe como skill. El CLI `fremi install` (binario en PATH) hace la instalación.
 
 ### Justificación
 
@@ -960,8 +960,9 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 ├── reverse-product/                (name: fremi-reverse-product)
 └── reverse-extra/                  (name: fremi-reverse-extra)
 
-~/.fremi/framework/installs/
-└── install-framework/              (name: fremi-install-framework)
+Bootstrap: el CLI `fremi install` (binario en PATH). No hay skill de
+instalación — la instalación se orquesta desde la terminal, no desde
+un slash-command.
 ```
 
 En `.claude/skills/` los symlinks conservan el prefijo: `fremi-story-explore`, `fremi-product-iniciativas`, `fremi-feature-bug`, `fremi-add-mcp`, etc.
@@ -971,7 +972,7 @@ En `.claude/skills/` los symlinks conservan el prefijo: `fremi-story-explore`, `
 - **Skill nuevo de capa**: ubicarlo en `~/.fremi/framework/skills/<capa>/skills/<sub>/` y usar `name: fremi-<capa>-<sub>`.
 - **Skill nuevo transversal**: ubicarlo en `~/.fremi/framework/skills/<name>/` con `name: fremi-<name>`.
 - **Skill nuevo de proyecto** (via `/fremi-add-skill`): vive en `docs/project/skills/<name>/`, **sin prefijo** `fremi-`.
-- **Verificación en instalación**: `/fremi-install-framework` es idempotente y corrige los symlinks para que respeten la convención `fremi-`.
+- **Verificación en instalación**: el CLI `fremi install` es idempotente y corrige los symlinks para que respeten la convención `fremi-`.
 
 ### Anti-patrones
 
@@ -1049,7 +1050,7 @@ Los hooks en `~/.fremi/framework/hooks/` **validan automáticamente** que las re
 
 ## Regla 24 — Ningún skill del framework se ejecuta sin instalación previa
 
-Antes de invocar **cualquier** skill del framework (`/fremi-*`), pipeline (`/fremi-pipeline-*`), o hook automatizado, la IA debe verificar que **el framework está instalado en el proyecto**. Si no lo está → **abortar** la invocación y proponer correr `/fremi-install-framework`.
+Antes de invocar **cualquier** skill del framework (`/fremi-*`), pipeline (`/fremi-pipeline-*`), o hook automatizado, la IA debe verificar que **el framework está instalado en el proyecto**. Si no lo está → **abortar** la invocación y proponer correr `fremi install` (el CLI).
 
 ### Justificación
 
@@ -1059,17 +1060,21 @@ El framework vive en `~/.fremi/framework/` como fuente de verdad, pero los skill
 
 El framework está instalado cuando **ambas** condiciones se cumplen:
 
-1. **Symlinks `fremi-*` presentes en `.claude/skills/`.** Al menos los orquestadores + `fremi-install-framework` deben existir como symlinks apuntando a `~/.fremi/framework/skills/<capa>/` y `~/.fremi/framework/installs/install-framework/` respectivamente.
+1. **Symlinks `fremi-*` presentes en `.claude/skills/`.** Al menos los orquestadores (`fremi-product`, `fremi-feature`, `fremi-story`, `fremi-enabler`, `fremi-tools`) deben existir como symlinks apuntando a `~/.fremi/framework/skills/<capa>/`.
 2. **`CLAUDE.md` en la raíz** existe y referencia `~/.fremi/framework/rules/workflow.md` y `~/.fremi/framework/flows/workflow.md`.
 
 Check operativo mínimo (barato, sin invocar tooling externo):
 
 ```
-[ -L .claude/skills/fremi-install-framework ] && [ -f CLAUDE.md ] && \
+[ -L .claude/skills/fremi-story ] && [ -f CLAUDE.md ] && \
   grep -q "~/.fremi/framework/rules/workflow.md" CLAUDE.md
 ```
 
 Si el check falla → framework NO instalado.
+
+### Bootstrap
+
+El bootstrap del framework es el **CLI `fremi install`**, no un skill. No existe un `/fremi-install-framework` slash-command — la instalación se orquesta desde el binario `fremi` en la terminal, que crea los symlinks, actualiza `CLAUDE.md`, y copia los settings al proyecto. Sin el CLI no hay forma de arrancar (chicken-and-egg no aplica: el CLI vive en tu PATH, no depende de que Claude pueda descubrir skills).
 
 ### Procedimiento
 
@@ -1080,14 +1085,13 @@ Al recibir una invocación de skill/pipeline/hook, **antes** de ejecutar el proc
 3. Si falla → **abortar sin efectos laterales** con este mensaje:
    ```
    El framework no está instalado en este proyecto.
-   Corré /fremi-install-framework antes de invocar cualquier skill del framework.
+   Corré `fremi install` en la terminal antes de invocar cualquier skill del framework.
    ```
 4. **No** ejecutar el skill ni instalarlo silenciosamente por el usuario.
 
 ### Excepciones (skills exentos del guard)
 
-1. **`/fremi-install-framework`** — el bootstrap. Si Regla 24 lo bloqueara, no habría forma de arrancar el framework (chicken-and-egg). Este skill es el ÚNICO que puede correr con framework no-instalado.
-2. **Skills reverse-engineering (`/fremi-reverse-*`)** — reconstruyen artefactos de trabajo pre-existente. Requieren framework instalado; NO son excepción.
+Ninguna. Todo skill del framework requiere que el CLI `fremi install` haya corrido primero. Los reverse-engineering skills (`/fremi-reverse-*`) no son excepción — requieren framework instalado como cualquier otro.
 
 ### Anti-patrones
 
@@ -1131,7 +1135,7 @@ Config: `~/.fremi/framework/settings/config.reverse.core.yaml`.
 
 Antes de cada acción no trivial:
 
-0. **Verificar instalación (Regla 24)**: antes de invocar cualquier skill/pipeline/hook, chequear que `.claude/skills/fremi-install-framework` es symlink y `CLAUDE.md` existe. Si falla → proponer `/fremi-install-framework` y abortar la invocación.
+0. **Verificar instalación (Regla 24)**: antes de invocar cualquier skill/pipeline/hook, chequear que alguno de los orquestadores (`.claude/skills/fremi-story` por ejemplo) es symlink y `CLAUDE.md` existe. Si falla → proponer correr `fremi install` en la terminal y abortar la invocación.
 1. **Identificar el tipo de pedido**: cambio de visión, nueva idea, nueva feature, nueva story, cambio de comportamiento, **bug** (Regla 8 + 15), **enabler técnico** (Regla 15), refactor, decisión técnica, **tooling/refactor sin habilitar nada** (Regla 14), **alinear código pre-existente sin docs** (Reglas 25-32 en `rules/reverse.md`).
 2. **Identificar la capa**: producto, feature, user story — o **artefacto opcional** (enabler global / dentro de feature / dentro de story; bug dentro de story; extra global). Si el trabajo ya está hecho en código sin docs → vía **reverse** (`rules/reverse.md`).
 3. **Identificar la etapa** dentro de la capa.

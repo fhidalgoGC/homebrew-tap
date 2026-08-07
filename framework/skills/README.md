@@ -12,7 +12,7 @@
 - Deja claro en autocomplete qué skill pertenece a la metodología reusable.
 - Simplifica el sweep cuando se instala el framework en un proyecto nuevo.
 
-El skill `/fremi-install-framework` es el responsable de asegurar que todo lo que se instala en `.claude/skills/` respeta esta convención.
+El skill el CLI `fremi install` es el responsable de asegurar que todo lo que se instala en `.claude/skills/` respeta esta convención.
 
 ---
 
@@ -50,7 +50,7 @@ Ubicados en `~/.fremi/framework/reverse-engineering/`: `fremi-reverse-story`, `f
 
 ### Instalación
 
-Ubicado en `~/.fremi/framework/installs/`: `fremi-install-framework` — instalador idempotente que asegura la convención `fremi-` al montar los symlinks en `.claude/skills/`.
+El CLI `fremi install` (binario en PATH) es el instalador. Idempotente: recorre `~/.fremi/framework/skills/` + `reverse-engineering/`, monta los symlinks en `.claude/skills/` con prefijo `fremi-`, y actualiza `CLAUDE.md` con las referencias necesarias. No hay slash-command de instalación.
 
 ---
 
@@ -102,7 +102,7 @@ Ver `~/.fremi/framework/settings/README.md` para la configuración.
    - Sección **Validaciones** con casos de error.
 4. Listar el skill en este README (tabla de Contenido).
 5. Si el skill respeta o introduce alguna regla, referenciar la regla aplicable en `~/.fremi/framework/rules/workflow.md`.
-6. El symlink en `.claude/skills/` se llama `fremi-<nombre>` (lo maneja `/fremi-install-framework`).
+6. El symlink en `.claude/skills/` se llama `fremi-<nombre>` (lo maneja el CLI `fremi install`).
 
 ### Cuándo NO crear un skill
 

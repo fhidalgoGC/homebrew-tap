@@ -20,9 +20,14 @@ export interface InstallSkillsReport {
 /**
  * Installs skill symlinks into <target>/.claude/skills/ pointing to the framework.
  *
- * Discovery: walks framework/skills/, framework/reverse-engineering/, and
- * framework/installs/ looking for SKILL.md files. The `name:` field of the
- * frontmatter is used as the symlink name (must start with "fremi-" per Regla 21).
+ * Discovery: walks framework/skills/ and framework/reverse-engineering/
+ * looking for SKILL.md files. The `name:` field of the frontmatter is
+ * used as the symlink name (must start with "fremi-" per Regla 21).
+ *
+ * The bootstrap of the framework is the `fremi install` CLI itself —
+ * there is no `/fremi-install-framework` slash-command skill, and Rule
+ * 24 (framework-installed guard) applies to every skill without
+ * exception.
  */
 export async function installSkills(
   targetPath: string,
@@ -33,11 +38,27 @@ export async function installSkills(
   const claudeSkillsDir = resolve(targetPath, ".claude", "skills");
   mkdirSync(claudeSkillsDir, { recursive: true });
 
+  // Legacy sweep: v0.4.14 and earlier installed fremi-install-framework
+  // as a symlink into .claude/skills/. That slash-command was retired in
+  // v0.4.15 (the CLI does the install now). Remove the stale symlink so
+  // Claude Code doesn't surface a broken skill in autocomplete.
+  const legacySymlink = join(claudeSkillsDir, "fremi-install-framework");
+  if (existsSync(legacySymlink) || (() => {
+    try { lstatSync(legacySymlink); return true; } catch { return false; }
+  })()) {
+    try {
+      if (lstatSync(legacySymlink).isSymbolicLink()) {
+        unlinkSync(legacySymlink);
+      }
+    } catch {
+      // best effort — don't block install on cleanup failure
+    }
+  }
+
   // Discover all SKILL.md files under the known framework roots
   const skillRoots = [
     resolve(frameworkContent, "skills"),
     resolve(frameworkContent, "reverse-engineering"),
-    resolve(frameworkContent, "installs"),
   ];
 
   const discovered: Array<{ name: string; skillDir: string }> = [];
