@@ -91,6 +91,20 @@ function readMapOfMaps(
   return out;
 }
 
+// Merged view of catalog + aliases + skillDefaults. The user file
+// takes precedence per-key; anything missing falls back to core. This
+// is what the editor operates on.
+function mergedCoreView(core: CoreDoc, userDoc: YAML.Document.Parsed | null): CoreDoc {
+  if (!userDoc) return core;
+  const userCatalog = readMapOfLists(userDoc, "catalog");
+  const userAliases = readMapOfMaps(userDoc, "aliases");
+  return {
+    catalog: { ...core.catalog, ...userCatalog },
+    aliases: { ...core.aliases, ...userAliases },
+    skillDefaults: core.skillDefaults,
+  };
+}
+
 export async function runModelsMenu(filePath: string): Promise<MenuResult> {
   const core = loadCoreDoc();
   if (!core) {
@@ -105,12 +119,17 @@ export async function runModelsMenu(filePath: string): Promise<MenuResult> {
       return "back";
     }
 
+    // User file can override catalog + aliases per key. This gives the
+    // user local control if new models ship and they don't want to wait
+    // for a `fremi update`.
+    const effective = mergedCoreView(core, doc);
+
     const activeState = readActive(filePath);
     const activeLabel =
       activeState === "true" ? "true" : activeState === "false" ? "false" : "(missing)";
 
-    const aliasOptions = Object.keys(core.aliases[AGENT] ?? {});
-    const catalog = core.catalog[AGENT] ?? [];
+    const aliasOptions = Object.keys(effective.aliases[AGENT] ?? {});
+    const catalog = effective.catalog[AGENT] ?? [];
 
     const choice = await askSelect({
       message: `models  ·  active: ${activeLabel}  ·  agent: ${AGENT}`,
@@ -144,12 +163,12 @@ export async function runModelsMenu(filePath: string): Promise<MenuResult> {
     }
 
     if (choice === "edit-skills") {
-      await editSkillMap(filePath, core);
+      await editSkillMap(filePath, effective);
       continue;
     }
 
     if (choice === "view-catalog") {
-      showCatalog(core);
+      showCatalog(effective);
       continue;
     }
   }
@@ -204,21 +223,40 @@ async function editSkillValue(
   const current = overrides[skill];
   const defaultAlias = core.skillDefaults[skill];
   const aliases = Object.keys(core.aliases[AGENT] ?? {});
+  const concreteModels = core.catalog[AGENT] ?? [];
 
-  const options = aliases.map((alias) => {
+  // Show aliases first (portable across agents), then concrete models
+  // from the catalog (agent-specific pin). Users can pick whichever.
+  const options: Array<{ value: string; label: string; hint?: string }> = [];
+
+  // Aliases section
+  for (const alias of aliases) {
     const concreteModel = core.aliases[AGENT]?.[alias] ?? "?";
     const marks: string[] = [];
     if (alias === current) marks.push("current");
     if (alias === defaultAlias) marks.push("default");
     const hint =
-      concreteModel + (marks.length > 0 ? `  ·  ${marks.join(" · ")}` : "");
-    return {
+      `→ ${concreteModel}` + (marks.length > 0 ? `  ·  ${marks.join(" · ")}` : "");
+    options.push({
       value: alias,
-      label: alias,
+      label: `alias  ${padRight(alias, 8)}`,
       hint,
-    };
-  });
+    });
+  }
 
+  // Concrete models section
+  for (const model of concreteModels) {
+    const marks: string[] = [];
+    if (model === current) marks.push("current");
+    const hint = marks.length > 0 ? marks.join(" · ") : "specific model (agent-locked)";
+    options.push({
+      value: model,
+      label: `model  ${model}`,
+      hint,
+    });
+  }
+
+  // Actions
   options.push({
     value: USE_DEFAULT,
     label: `↺  Use framework default`,
@@ -251,7 +289,7 @@ async function editSkillValue(
     return;
   }
 
-  // choice is an alias
+  // choice is either an alias or a concrete model — both stored as-is.
   if (choice === current) return; // no change
 
   setAtPath(doc, `skills.${skill}`, choice);

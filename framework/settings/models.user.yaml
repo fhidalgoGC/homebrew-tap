@@ -8,9 +8,13 @@
 # from the catalog of aliases available for your agent (Claude Code,
 # Cursor, ...). Or edit this file directly.
 #
-# Values must be aliases (opus / sonnet / haiku) — each alias
-# resolves to a concrete model based on which agent tool is
-# running (see models.core.yaml → aliases).
+# Values can be either:
+#   - An alias (opus / sonnet / haiku) — portable across agents.
+#     The alias resolves to a concrete model at runtime based on
+#     which agent tool you're using (see models.core.yaml → aliases).
+#   - A concrete model ID from the agent's catalog (e.g.
+#     claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5-20251001)
+#     — pins the skill to that exact model regardless of agent.
 #
 # Heuristic behind the defaults:
 #   - opus:   architectural work, design decisions, ADRs, proposals
@@ -25,6 +29,36 @@
 schema: fremi-models-user
 schema_version: 1
 active: true
+
+# --------------------------------------------------------------
+# Model catalog per agent tool. Snapshot of the framework catalog;
+# edit if a new model ships and you don't want to wait for a fremi
+# update. The editor at `fremi setting → models` reads this list
+# to build the "pick a model" menu.
+#
+# Note: the `claude` CLI does NOT expose a way to list its models
+# programmatically (tried --help / error messages / etc.), so this
+# file is the source of truth on your machine. Update by hand as
+# needed.
+# --------------------------------------------------------------
+catalog:
+  claude:
+    - claude-opus-4-7
+    - claude-sonnet-4-6
+    - claude-haiku-4-5-20251001
+  cursor: []      # populated when Cursor support ships
+  windsurf: []
+  aider: []
+
+# --------------------------------------------------------------
+# Aliases — logical names that skills reference. Each alias
+# resolves to a concrete model per agent tool at runtime.
+# --------------------------------------------------------------
+aliases:
+  claude:
+    opus: claude-opus-4-7
+    sonnet: claude-sonnet-4-6
+    haiku: claude-haiku-4-5-20251001
 
 # --------------------------------------------------------------
 # Per-skill model assignment.
