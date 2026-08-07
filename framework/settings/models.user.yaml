@@ -1,15 +1,24 @@
 # models.user.yaml
 # --------------------------------------------------------------
-# Per-project model overrides. Anything you don't override here
-# inherits from models.core.yaml (framework defaults).
+# Per-project model assignments. This file is a snapshot of the
+# framework defaults (models.core.yaml) that you can edit freely.
 #
 # Edit values via `fremi setting → models` — the interactive editor
 # shows the framework default beside every skill and lets you pick
-# from the catalog of models available for your agent (Claude
-# Code, Cursor, ...).
+# from the catalog of aliases available for your agent (Claude Code,
+# Cursor, ...). Or edit this file directly.
+#
+# Values must be aliases (opus / sonnet / haiku) — each alias
+# resolves to a concrete model based on which agent tool is
+# running (see models.core.yaml → aliases).
+#
+# Heuristic behind the defaults:
+#   - opus:   architectural work, design decisions, ADRs, proposals
+#   - sonnet: structured writing (specs, BDD, TDD plans, apply/verify)
+#   - haiku:  mechanical / clerical work (closure, checkwork, scaffold)
 #
 # Master switch:
-#   active: true  -> these overrides are applied
+#   active: true  -> these assignments are applied
 #   active: false -> falls back to core defaults for this project
 # --------------------------------------------------------------
 
@@ -18,15 +27,71 @@ schema_version: 1
 active: true
 
 # --------------------------------------------------------------
-# Per-skill overrides. Values must be aliases (opus / sonnet /
-# haiku) — the alias resolves to a concrete model based on which
-# agent tool is running (see models.core.yaml → aliases).
+# Per-skill model assignment.
 # --------------------------------------------------------------
-skills: {}
-  # Example: use opus for story design in this project.
-  # fremi-story-design: opus
-  #
-  # Example: force sonnet everywhere for cost control.
-  # default: sonnet
-  # fremi-product: sonnet
-  # fremi-feature: sonnet
+skills:
+  default: sonnet
+
+  # Product layer — architectural + discovery
+  fremi-product: opus
+  fremi-product-iniciativas: sonnet
+  fremi-product-ideas: sonnet
+  fremi-product-planteamiento: sonnet
+  fremi-product-definition: sonnet
+  fremi-product-strategies: opus
+  fremi-product-adr: opus
+  fremi-product-plan: sonnet
+
+  # Feature layer
+  fremi-feature: opus
+  fremi-feature-adr: opus
+  fremi-feature-bug: sonnet
+
+  # Story layer — biggest surface
+  fremi-story: sonnet
+  fremi-story-explore: sonnet
+  fremi-story-definition: sonnet
+  fremi-story-proposal: opus
+  fremi-story-scope: sonnet
+  fremi-story-bdd: sonnet
+  fremi-story-sdd: sonnet
+  fremi-story-design: opus            # design decisions → opus
+  fremi-story-tdd: sonnet
+  fremi-story-plan: sonnet
+  fremi-story-task: sonnet
+  fremi-story-checkwork: haiku        # live progress tracking, mechanical
+  fremi-story-verify: sonnet
+  fremi-story-closure-check: haiku
+  fremi-story-closure: sonnet
+  fremi-story-adr: opus
+  fremi-story-bug: sonnet
+
+  # Enabler layer — technical enablement
+  fremi-enabler: sonnet
+  fremi-enabler-definition: sonnet
+  fremi-enabler-design: opus
+  fremi-enabler-plan: sonnet
+  fremi-enabler-closure: sonnet
+
+  # Reverse engineering
+  fremi-reverse-product: opus
+  fremi-reverse-feature: sonnet
+  fremi-reverse-story: sonnet
+  fremi-reverse-enabler: sonnet
+  fremi-reverse-bug: sonnet
+  fremi-reverse-extra: sonnet
+
+  # Tools / scaffolding (all mechanical → haiku)
+  fremi-tools: haiku
+  fremi-add-skill: haiku
+  fremi-add-rule: haiku
+  fremi-add-hook: haiku
+  fremi-add-mcp: haiku
+  fremi-delete-skill: haiku
+  fremi-delete-rule: haiku
+  fremi-delete-hook: haiku
+  fremi-delete-mcp: haiku
+
+  # Global / transversal
+  fremi-sync-check: sonnet
+  fremi-install-framework: haiku
