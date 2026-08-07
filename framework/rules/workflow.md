@@ -908,7 +908,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 
 - **Sub-skills de una capa** → viven en `~/.fremi/framework/skills/<capa>/skills/<sub>/`.
 - **Orquestadores de capa** → `~/.fremi/framework/skills/<capa>/SKILL.md` con `name: fremi-<capa>` (ej: `fremi-story`, `fremi-product`).
-- **Skills globales / transversales** → viven directo en `~/.fremi/framework/skills/<name>/` (ej: `fremi-sync-check`, `fremi-tools`, `fremi-import-template`, `fremi-link-template-assets`).
+- **Skills globales / transversales** → viven directo en `~/.fremi/framework/skills/<name>/` (ej: `fremi-sync-check`, `fremi-tools`).
 - **Reverse-engineering** → viven en `~/.fremi/framework/reverse-engineering/<name>/` con `name: fremi-reverse-<...>` (ej: `fremi-reverse-story`).
 - **Installer** → vive en `~/.fremi/framework/installs/install-framework/` con `name: fremi-install-framework`.
 
@@ -950,9 +950,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 │       ├── delete-hook/            (name: fremi-delete-hook)
 │       ├── delete-rule/            (name: fremi-delete-rule)
 │       └── delete-mcp/             (name: fremi-delete-mcp)
-├── sync-check/                     (name: fremi-sync-check)
-├── import-template/                (name: fremi-import-template)
-└── link-template-assets/           (name: fremi-link-template-assets)
+└── sync-check/                     (name: fremi-sync-check)
 
 ~/.fremi/framework/reverse-engineering/
 ├── reverse-story/                  (name: fremi-reverse-story)
@@ -1089,8 +1087,7 @@ Al recibir una invocación de skill/pipeline/hook, **antes** de ejecutar el proc
 ### Excepciones (skills exentos del guard)
 
 1. **`/fremi-install-framework`** — el bootstrap. Si Regla 24 lo bloqueara, no habría forma de arrancar el framework (chicken-and-egg). Este skill es el ÚNICO que puede correr con framework no-instalado.
-2. **`/fremi-import-template`** — copia un template externo antes de que el framework exista. Puede correr sin install (típicamente **antes** que `/fremi-install-framework`).
-3. **Skills reverse-engineering (`/fremi-reverse-*`)** — reconstruyen artefactos de trabajo pre-existente. Requieren framework instalado; NO son excepción.
+2. **Skills reverse-engineering (`/fremi-reverse-*`)** — reconstruyen artefactos de trabajo pre-existente. Requieren framework instalado; NO son excepción.
 
 ### Anti-patrones
 

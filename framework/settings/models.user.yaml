@@ -1,0 +1,32 @@
+# models.user.yaml
+# --------------------------------------------------------------
+# Per-project model overrides. Anything you don't override here
+# inherits from models.core.yaml (framework defaults).
+#
+# Edit values via `fremi setting → models` — the interactive editor
+# shows the framework default beside every skill and lets you pick
+# from the catalog of models available for your agent (Claude
+# Code, Cursor, ...).
+#
+# Master switch:
+#   active: true  -> these overrides are applied
+#   active: false -> falls back to core defaults for this project
+# --------------------------------------------------------------
+
+schema: fremi-models-user
+schema_version: 1
+active: true
+
+# --------------------------------------------------------------
+# Per-skill overrides. Values must be aliases (opus / sonnet /
+# haiku) — the alias resolves to a concrete model based on which
+# agent tool is running (see models.core.yaml → aliases).
+# --------------------------------------------------------------
+skills: {}
+  # Example: use opus for story design in this project.
+  # fremi-story-design: opus
+  #
+  # Example: force sonnet everywhere for cost control.
+  # default: sonnet
+  # fremi-product: sonnet
+  # fremi-feature: sonnet

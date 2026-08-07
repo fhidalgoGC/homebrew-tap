@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { discoverSettingSections, pickSection, pickSectionAction } from "../prompts/setting";
 import { runMethodologyMenu } from "../prompts/setting-methodology";
+import { runModelsMenu } from "../prompts/setting-models";
 import { toggleActive, readActive } from "../core/settings-edit";
 
 // `fremi setting [path]` — interactive TUI that lets the user toggle
@@ -35,6 +36,13 @@ export async function runSetting(rawPath?: string): Promise<void> {
     if (section.name === "methodology") {
       console.clear();
       await runMethodologyMenu(section.file);
+      continue;
+    }
+
+    // Models gets a specialised editor (per-skill alias mapping).
+    if (section.name === "models") {
+      console.clear();
+      await runModelsMenu(section.file);
       continue;
     }
 

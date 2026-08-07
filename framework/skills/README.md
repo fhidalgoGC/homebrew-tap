@@ -43,8 +43,6 @@ El skill `/fremi-install-framework` es el responsable de asegurar que todo lo qu
 | Skill | Comando | Propósito |
 |---|---|---|
 | `sync-check/` | `/fremi-sync-check` | Audita la sincronía entre capas (producto ↔ feature ↔ story). Detecta divergencias para sync-back. Regla 12. |
-| `import-template/` | `/fremi-import-template <ruta-origen> [--force]` | Importa un proyecto externo a `/template/`. Excluye `.git/`, `node_modules/`, `dist/`, `.serverless/` y carpetas de agentes. Copia `.env*` aunque estén ignorados. Genera 7 docs en `docs/template/`. |
-| `link-template-assets/` | `/fremi-link-template-assets [skills\|rules\|hooks] [--remove]` | Enlaza skills/rules/hooks de `/template/docs/` a `docs/project/` (symlinks, no copias) y los expone al agente. `--remove` invierte la operación sin tocar los assets creados por `/fremi-add-*`. |
 
 ### Reverse-engineering
 

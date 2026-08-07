@@ -103,7 +103,7 @@ Antes de correr **cualquier** pipeline (o skill), el framework debe estar instal
 
 Si no lo está → el pipeline aborta con `"Corré /fremi-install-framework antes de invocar el pipeline"`. **La IA no auto-instala** — la instalación crea symlinks reales en `.claude/` y necesita aprobación explícita del usuario. Ver Regla 24 en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
 
-Excepciones (skills bootstrap): `/fremi-install-framework` y `/fremi-import-template` son los únicos que pueden correr con framework no-instalado.
+Excepciones (skills bootstrap): `/fremi-install-framework` es el único que puede correr con framework no-instalado.
 
 ---
 

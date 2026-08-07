@@ -210,7 +210,7 @@ Detalle completo en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.m
 `/fremi-enabler-definition`, `/fremi-enabler-design`, `/fremi-enabler-plan`, `/fremi-enabler-closure`
 
 **Globales** (transversales):
-`/fremi` (orquestador de add/delete de skills/hooks/rules/mcp), `/fremi-import-template`, `/fremi-link-template-assets`, `/fremi-sync-check`
+`/fremi` (orquestador de add/delete de skills/hooks/rules/mcp), `/fremi-sync-check`
 
 ---
 

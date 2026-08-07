@@ -19,7 +19,6 @@ Diferencia con otros skills del framework:
 ## Cuándo se usan
 
 - **Al clonar el proyecto**: `/fremi-install-framework` para sincronizar `.claude/`.
-- **Al importar el framework** a un proyecto nuevo (después de `/fremi-import-template`).
 - **Cuando cambia la estructura** de `~/.fremi/framework/skills/` — hay que recrear symlinks.
 - **Cuando aparecen symlinks broken** — el skill los detecta y recrea.
 
