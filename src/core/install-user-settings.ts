@@ -90,12 +90,27 @@ function walkForUserYaml(
  * Map a framework-relative source path to its destination path inside
  * `.fremi/settings/`. Returns null if the source is not under a recognized
  * prefix (settings/ or skills/).
+ *
+ * Nested sub-skill configs like `skills/story/skills/bug/config.user.yaml`
+ * are FLATTENED to a composite name at the top-level of `.fremi/settings/`
+ * (config.bug.story.user.yaml) so they stay grouped with the rest of the
+ * user files and remain discoverable by `fremi setting`. The framework
+ * organizes them by category near their SKILL.md; the project keeps a
+ * flat settings folder.
  */
 function mapToDestination(relPath: string): string | null {
   if (relPath.startsWith("settings/")) {
     return relPath.slice("settings/".length);
   }
   if (relPath.startsWith("skills/")) {
+    // Match deep-nested sub-skill configs: skills/<layer>/skills/<category>/config.user.yaml
+    const nested = relPath.match(
+      /^skills\/([^/]+)\/skills\/([^/]+)\/config\.user\.yaml$/,
+    );
+    if (nested) {
+      const [, layer, category] = nested;
+      return `config.${category}.${layer}.user.yaml`;
+    }
     return relPath.slice("skills/".length);
   }
   return null;
