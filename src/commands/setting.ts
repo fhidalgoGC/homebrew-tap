@@ -1,8 +1,8 @@
-import { resolve } from "node:path";
+import { resolve, join } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { discoverSettingSections, pickSection, pickSectionAction } from "../prompts/setting";
 import { runMethodologyMenu } from "../prompts/setting-methodology";
-import { runModelsMenu } from "../prompts/setting-models";
+import { runModelsMenu, runLayerModelsMenu } from "../prompts/setting-models";
 import { toggleActive, readActive } from "../core/settings-edit";
 
 // `fremi setting [path]` — interactive TUI that lets the user toggle
@@ -60,6 +60,16 @@ export async function runSetting(rawPath?: string): Promise<void> {
         const next = toggleActive(section.file);
         console.log(`${section.name}: active -> ${next}`);
         await sleep(700);
+      }
+      if (action.type === "edit-models") {
+        const modelsFile = join(targetPath, ".fremi", "settings", "models.user.yaml");
+        if (!existsSync(modelsFile)) {
+          console.log(`Cannot edit models: ${modelsFile} not found. Run 'fremi install' to seed it.`);
+          await sleep(1500);
+          continue;
+        }
+        console.clear();
+        await runLayerModelsMenu(modelsFile, section.name);
       }
     }
   }

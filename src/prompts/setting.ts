@@ -50,8 +50,21 @@ export function discoverSettingSections(targetPath: string): SettingSection[] {
 }
 
 export interface SectionAction {
-  type: "toggle-active" | "back";
+  type: "toggle-active" | "edit-models" | "back";
 }
+
+// Layers that ship with fremi skills we can filter models by. The
+// section name matches the skill prefix — enabler → `fremi-enabler*`,
+// feature → `fremi-feature*`, etc.
+const LAYERS_WITH_MODELS = new Set([
+  "product",
+  "feature",
+  "story",
+  "enabler",
+  "extra",
+  "bug",
+  "reverse",
+]);
 
 /**
  * Top-level menu: pick a section or Done. Returns null when the user
@@ -89,6 +102,7 @@ export async function pickSection(sections: SettingSection[]): Promise<SettingSe
  */
 export async function pickSectionAction(section: SettingSection): Promise<SectionAction> {
   const state = readActive(section.file);
+  const canEditModels = LAYERS_WITH_MODELS.has(section.name);
 
   const options = [
     {
@@ -96,11 +110,20 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
       label: `✏  Toggle active (currently: ${labelForActive(state)})`,
       hint: state === "missing" ? "no top-level `active:` key in file" : undefined,
     },
-    {
-      value: BACK_TOKEN,
-      label: "↩  Back to sections",
-    },
   ];
+
+  if (canEditModels) {
+    options.push({
+      value: "edit-models",
+      label: `🤖  Edit models for this layer`,
+      hint: `models used by /fremi-${section.name} and its sub-skills`,
+    });
+  }
+
+  options.push({
+    value: BACK_TOKEN,
+    label: "↩  Back to sections",
+  });
 
   const choice = await askSelect({
     message: `${section.name}  ·  ${pathRelativeToCwd(section.file)}`,
@@ -108,6 +131,7 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
   });
 
   if (choice === BACK_TOKEN) return { type: "back" };
+  if (choice === "edit-models") return { type: "edit-models" };
   return { type: "toggle-active" };
 }
 

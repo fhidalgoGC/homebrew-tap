@@ -105,6 +105,40 @@ function mergedCoreView(core: CoreDoc, userDoc: YAML.Document.Parsed | null): Co
   };
 }
 
+// Layer-scoped entry point invoked from `fremi setting → <layer> → 🤖 Edit
+// models for this layer`. Reuses the same editor as the flat top-level
+// menu but only shows skills whose name starts with `fremi-<layer>` —
+// e.g. layer=story → fremi-story, fremi-story-explore, fremi-story-design,
+// ...
+//
+// modelsFilePath: absolute path to .fremi/settings/models.user.yaml.
+// layerName: section name — one of product, feature, story, enabler, ...
+export async function runLayerModelsMenu(
+  modelsFilePath: string,
+  layerName: string,
+): Promise<MenuResult> {
+  const core = loadCoreDoc();
+  if (!core) {
+    note("Cannot load framework models.core.yaml", "error");
+    return "back";
+  }
+
+  const doc = loadYamlDoc(modelsFilePath);
+  if (!doc) {
+    note(`Cannot parse ${modelsFilePath}`, "error");
+    return "back";
+  }
+  const effective = mergedCoreView(core, doc);
+
+  const layerPrefix = `fremi-${layerName}`;
+  const belongsToLayer = (s: string): boolean =>
+    s === layerPrefix || s.startsWith(`${layerPrefix}-`);
+
+  // Give the flat editor the filter. It'll show a scoped list.
+  await editSkillMap(modelsFilePath, effective, belongsToLayer);
+  return "back";
+}
+
 export async function runModelsMenu(filePath: string): Promise<MenuResult> {
   const core = loadCoreDoc();
   if (!core) {
@@ -174,7 +208,11 @@ export async function runModelsMenu(filePath: string): Promise<MenuResult> {
   }
 }
 
-async function editSkillMap(filePath: string, core: CoreDoc): Promise<void> {
+async function editSkillMap(
+  filePath: string,
+  core: CoreDoc,
+  filter?: (skillName: string) => boolean,
+): Promise<void> {
   while (true) {
     const doc = loadYamlDoc(filePath);
     if (!doc) return;
@@ -183,12 +221,14 @@ async function editSkillMap(filePath: string, core: CoreDoc): Promise<void> {
     // defaults dictate WHICH skills appear; the user file dictates
     // whether each is overridden.
     const overrides = readMap(doc, "skills");
-    const allSkills = Object.keys(core.skillDefaults).sort((a, b) => {
-      // Put `default` on top, then group by prefix (fremi-product, fremi-feature, ...)
-      if (a === "default") return -1;
-      if (b === "default") return 1;
-      return a.localeCompare(b);
-    });
+    const allSkills = Object.keys(core.skillDefaults)
+      .filter((s) => (filter ? filter(s) : true))
+      .sort((a, b) => {
+        // Put `default` on top, then group by prefix (fremi-product, fremi-feature, ...)
+        if (a === "default") return -1;
+        if (b === "default") return 1;
+        return a.localeCompare(b);
+      });
 
     const options = allSkills.map((s) => {
       const override = overrides[s];

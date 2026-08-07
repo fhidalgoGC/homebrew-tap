@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.7"
+  version "0.4.8"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.7/fremi-darwin-arm64"
-      sha256 "9843d9af103a3c2e22e2fd78601aedbb1ab3de30416a6103de88305741e0af9f"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.8/fremi-darwin-arm64"
+      sha256 "acbf122220ea0f3764fe3e381c99d22596e5893a149ebc1d97aa32e0c7a287da"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.7/fremi-darwin-x64"
-      sha256 "293be82c3816d87e86d4a13b22e05485ec2da2f0e8c35f04c3d0b209b7dd2b5f"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.8/fremi-darwin-x64"
+      sha256 "3607adde22792c06afe23f243f854788683af10a3427736ac5c1f348015c3f13"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.7/fremi-linux-arm64"
-      sha256 "549960bd993387fb1571716f4aa8068af49975554adfe111a48f79ef554e8d4a"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.8/fremi-linux-arm64"
+      sha256 "bd27a8fe0a07c59f39896985ec464aa85d5b1696dd4dfb42c89a7f25330e407b"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.7/fremi-linux-x64"
-      sha256 "ffb08a659b793cddfb34c3ed01f61225d48cb7d125f9cbad9befd90f6b48ede4"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.8/fremi-linux-x64"
+      sha256 "899684bf1958b0533ed24c7cca2c0a81f61a89fe7bdfbe38e673736ed016cf4d"
     end
   end
 
@@ -37,20 +37,16 @@ class Fremi < Formula
     <<~EOS
       fremi installed. Interactive settings editor:
 
-        fremi setting [path]      Menu of sections. Pick methodology,
-                                  models, or any other section.
+        fremi setting [path]      Menu of sections.
 
-        methodology → paths / slug rules / identifiers (with defaults
-                      + digit wizard for id_format).
-        models      → per-skill alias mapping for all 50 fremi skills.
-                      Pick from aliases (opus/sonnet/haiku, portable
-                      across agents) OR concrete Claude models
-                      (claude-opus-4-7, ..., agent-locked).
-                      Catalog + aliases are editable per-project so
-                      you can add new models as they ship.
+        Each layer section (product, feature, story, enabler, ...)
+        now offers "🤖  Edit models for this layer" — a scoped view
+        of just the sub-skills for that layer, so you don't have to
+        scroll through all 50 skills at once.
 
-      Changes are written back to the .fremi/settings/*.user.yaml file,
-      preserving comments and formatting.
+        methodology → paths / slug rules / identifiers.
+        models      → flat top-level editor with all skills + catalog
+                      + aliases (still available if you want the full list).
     EOS
   end
 
