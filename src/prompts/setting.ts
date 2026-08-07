@@ -56,7 +56,12 @@ export function discoverSettingSections(targetPath: string): SettingSection[] {
 }
 
 export interface SectionAction {
-  type: "toggle-active" | "edit-models" | "edit-default-model" | "back";
+  type:
+    | "toggle-active"
+    | "edit-models"
+    | "edit-default-model"
+    | "edit-step-agents"
+    | "back";
 }
 
 // Layers that ship with fremi skills we can filter models by. The
@@ -135,6 +140,16 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
     });
   }
 
+  if (canEditModels) {
+    // Same set of layers that expose model editing also expose step-agent
+    // editing (main / subagent / agent per step).
+    options.push({
+      value: "edit-step-agents",
+      label: `🎭  Edit step agents (main / subagent / agent)`,
+      hint: `which agent type executes each step of /fremi-${section.name}`,
+    });
+  }
+
   options.push({
     value: BACK_TOKEN,
     label: "↩  Back to sections",
@@ -148,6 +163,7 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
   if (choice === BACK_TOKEN) return { type: "back" };
   if (choice === "edit-models") return { type: "edit-models" };
   if (choice === "edit-default-model") return { type: "edit-default-model" };
+  if (choice === "edit-step-agents") return { type: "edit-step-agents" };
   return { type: "toggle-active" };
 }
 

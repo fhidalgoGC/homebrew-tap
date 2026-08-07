@@ -7,6 +7,7 @@ import {
   runLayerModelsMenu,
   runDefaultModelMenu,
 } from "../prompts/setting-models";
+import { runLayerStepAgentsMenu } from "../prompts/setting-step-agents";
 import { toggleActive, readActive } from "../core/settings-edit";
 
 // `fremi setting [path]` — interactive TUI that lets the user toggle
@@ -78,6 +79,12 @@ export async function runSetting(rawPath?: string): Promise<void> {
       if (action.type === "edit-default-model") {
         console.clear();
         await runDefaultModelMenu(section.file);
+      }
+      if (action.type === "edit-step-agents") {
+        // section.file is .fremi/settings/<layer>/config.user.yaml — the
+        // step agents map lives there. Layer name is the section name.
+        console.clear();
+        await runLayerStepAgentsMenu(section.file, section.name);
       }
     }
   }

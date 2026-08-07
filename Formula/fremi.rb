@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.12"
+  version "0.4.13"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.12/fremi-darwin-arm64"
-      sha256 "e7d612590e8899c0162049b2823540b716c734814e36f9d97477e50fae94e718"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-darwin-arm64"
+      sha256 "bf5aabfb3021e3997ec766477a814ee6a05b869ce309a5e08f42a99083b6abf0"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.12/fremi-darwin-x64"
-      sha256 "9cccaf9aac64ce0bfbf3fbe70c5937fa1417932908e9868b2eaf559f099abe00"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-darwin-x64"
+      sha256 "4ac2ac6c59ad6e6319bea563c21cc5ee430fbd526337fe9f99c0a20d7bc1f3e1"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.12/fremi-linux-arm64"
-      sha256 "1128ded1f27c322f664c87de4b496faabcb55c2183b8350a5a8e3c402ca4cce2"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-linux-arm64"
+      sha256 "64a1d317c4a94dc87bd852a574e1f2d9472f48f6e022a049863d488989b11dba"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.12/fremi-linux-x64"
-      sha256 "64a851d8a5f3c848dcfc6b441796f0bf5ff91538c76a55798296a86b8e29d5e1"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.13/fremi-linux-x64"
+      sha256 "7c0ace597eb581401f36cbad6c0322d17ba66a6a5024417b337fd4306dc6b2f0"
     end
   end
 
@@ -37,17 +37,19 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      Framework organization (v0.4.12):
-        - Configs specific to a single skill now live next to that
-          skill's SKILL.md file. Bug configs moved from
-          framework/settings/ to framework/skills/<layer>/skills/bug/.
-        - Transversal configs (agents, methodology, models, config
-          master, reverse, extra) stay in framework/settings/.
+      New in v0.4.13:
 
-      Project's .fremi/settings/ folder layout is unchanged — bug
-      user configs still land at .fremi/settings/config.bug.<scope>.user.yaml
-      as before. The install mapping flattens nested framework paths
-      so the project stays discoverable by `fremi setting`.
+        fremi setting → <layer> now offers TWO editors per layer:
+
+          🤖  Edit models for this layer
+                which model each sub-skill runs on
+                (opus / sonnet / haiku / concrete model ID)
+
+          🎭  Edit step agents (main / subagent / agent)
+                which agent TYPE executes each step of the layer's
+                flow. Reads valid options + reasoning from the
+                core config; steps with only one option are
+                surfaced as read-only.
     EOS
   end
 
