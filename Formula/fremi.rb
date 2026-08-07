@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.9"
+  version "0.4.10"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.9/fremi-darwin-arm64"
-      sha256 "7c84a2e27d6bff9866151865d349bafa8d7fb7a9042c21675d87e043146ee4b7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.10/fremi-darwin-arm64"
+      sha256 "be9cfd082c896fcdef0876687f8755e140ec48e0cd6241a521654832764802dc"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.9/fremi-darwin-x64"
-      sha256 "b253d9069269d7ae3d2427fc58f48d5f104623ddb554fbca0a1f4ebd7dea59de"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.10/fremi-darwin-x64"
+      sha256 "7a4e48bb51883382533b221a2e403d728455328f6bcb29962b6edfaa9665520b"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.9/fremi-linux-arm64"
-      sha256 "ca2f305ab08fdc5191ccc260e6620a4195e3e26dbfbf4182afafcb0f0c98f5f2"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.10/fremi-linux-arm64"
+      sha256 "023bb456c32139658d8aaa6012fabcc1288df58f259560309e59975eb46106f0"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.9/fremi-linux-x64"
-      sha256 "f7e619cf706ed5f8bc8cc3c294021cb38266306e2e3c75e592252cd4f4fb88b9"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.10/fremi-linux-x64"
+      sha256 "b5ecfeaa5fe132a4422a0e1fe2c99d39d18f7a4e585566b5b35067f1812ea3ef"
     end
   end
 
@@ -35,23 +35,24 @@ class Fremi < Formula
 
   def caveats
     <<~EOS
-      fremi installed. Interactive settings editor:
+      fremi installed.
+
+      Model catalogs are NO LONGER shipped in YAML — `fremi install`
+      fetches the live catalog from GitHub at install time and caches
+      it at .fremi/settings/catalog/<agent>.json. When Anthropic ships
+      a new model, users pick it up on the next `fremi install` without
+      a fremi release bump.
+
+      Interactive settings editor:
 
         fremi setting [path]
 
-        agents  → 🎯 Edit default model  (project-wide fallback, used
-                                          when a skill has no explicit
-                                          override)
-                → subagent overrides (per Claude Code subagent)
+        agents  → 🎯 Edit default model  (project-wide fallback)
+        <layer> → 🤖 Edit models for this layer  (scoped per layer)
+        methodology → paths / slug / identifiers.
 
-        <layer> → 🤖 Edit models for this layer  (product / feature /
-                  story / enabler — scoped to that layer's sub-skills)
-
-        methodology → paths / slug / identifiers (with digit wizard).
-
-      The top-level `models` section is hidden now — everything is
-      edited from either `agents` (default) or the layer sections
-      (per-skill scoped by context).
+      The model picker collapses aliases + a "✏ Choose specific model..."
+      expansion — no more duplicate rows.
     EOS
   end
 

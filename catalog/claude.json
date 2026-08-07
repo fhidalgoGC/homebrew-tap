@@ -1,0 +1,14 @@
+{
+  "_comment": "LIVE catalog of Claude models available via `claude` CLI. Fetched by `fremi install` and `fremi update` from raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/catalog/claude.json. Update this file (not a fremi release) when Anthropic ships a new model — users pick up the change on their next install/update, no binary bump required.",
+  "updated": "2026-08-06",
+  "models": [
+    "claude-opus-4-7",
+    "claude-sonnet-4-6",
+    "claude-haiku-4-5-20251001"
+  ],
+  "aliases": {
+    "opus": "claude-opus-4-7",
+    "sonnet": "claude-sonnet-4-6",
+    "haiku": "claude-haiku-4-5-20251001"
+  }
+}

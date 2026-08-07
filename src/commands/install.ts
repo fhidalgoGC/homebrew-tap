@@ -8,6 +8,7 @@ import { initDocsWorks } from "../core/init-docs-works";
 import { initFremiConfig } from "../core/init-config";
 import { readUserMarker } from "../core/user-marker";
 import { runAgentInstall } from "./agent-install";
+import { fetchAgentCatalogs } from "../core/fetch-catalog";
 
 export interface InstallFlags {
   agent?: string;             // comma-separated list of agents, e.g. "claude,cursor"
@@ -72,6 +73,10 @@ export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Pr
     userSettings: await installUserSettings(targetPath, frameworkContent),
     docsWorks: await initDocsWorks(targetPath),
     config: await initFremiConfig(targetPath, frameworkRoot),
+    // Fetch live model catalog(s) from GitHub — no models are shipped
+    // in the YAML anymore, so this step is what makes the models editor
+    // work on a fresh install.
+    catalogs: await fetchAgentCatalogs(targetPath),
   };
 
   // 5. Report
@@ -80,6 +85,15 @@ export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Pr
   console.log(`    Settings:     ${report.userSettings.copied} copied, ${report.userSettings.skipped} kept (already customized)`);
   console.log(`    docs/works/:  ${report.docsWorks.action}`);
   console.log(`    .fremi/:      ${report.config.action}`);
+  for (const c of report.catalogs) {
+    const summary =
+      c.status === "fetched"
+        ? `${c.models_count} models`
+        : c.status === "cached"
+          ? `network unreachable — kept ${c.models_count} cached models`
+          : `network unreachable — no cache available`;
+    console.log(`    catalog ${c.agent}: ${c.status}  ${summary}`);
+  }
   console.log("");
   console.log(`✓ fremi-framework installed in ${targetPath}`);
   console.log("");

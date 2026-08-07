@@ -1,53 +1,34 @@
 # models.core.yaml
 # --------------------------------------------------------------
-# Framework model assignments. NOT user-editable — a `fremi update`
-# will overwrite this file.
+# Framework model assignments per fremi skill. NOT user-editable
+# — a `fremi update` will overwrite this file.
 #
-# Declares:
-#   - `catalog`  — which concrete models each agent tool exposes
-#   - `aliases`  — logical names (opus/sonnet/haiku) that skills
-#                  reference, resolved per agent at runtime
-#   - `skills`   — default model alias per fremi skill
+# NOTE: the catalog of available models and the alias mapping do
+# NOT live in this file (or in any YAML). They are fetched fresh
+# from GitHub at install/update time and cached at
+# .fremi/settings/catalog/<agent>.json. The editor reads that JSON
+# when you need to pick a model. Rationale: model IDs change more
+# often than fremi releases; keeping them in a YAML forced a full
+# release every time a new model dropped.
 #
-# Per-project overrides go in models.user.yaml (which lives at
-# .fremi/settings/models.user.yaml inside each project).
+# This file only declares which alias (opus / sonnet / haiku) each
+# fremi skill defaults to. Users override in
+# `models.user.yaml → skills` (per-project, per-skill).
 # --------------------------------------------------------------
 
 schema: fremi-models-core
-schema_version: 1
-version: 1.0.0
+schema_version: 2
+version: 2.0.0
 description: >
-  Model assignments per fremi skill. Skills declare which alias they
-  should run under (opus/sonnet/haiku) and the alias resolves to a
-  concrete model based on the agent tool the user is on (Claude,
-  Cursor, ...).
+  Model alias defaults per fremi skill. The catalog + alias mapping
+  are NOT stored here — they're fetched from
+  raw.githubusercontent.com/fhidalgoGC/homebrew-tap/main/catalog/<agent>.json
+  at install/update time and cached locally.
 
 # --------------------------------------------------------------
-# Catalog — the concrete models each supported agent tool exposes.
-# --------------------------------------------------------------
-catalog:
-  claude:
-    - claude-opus-4-7
-    - claude-sonnet-4-6
-    - claude-haiku-4-5-20251001
-  cursor: []       # populated when Cursor support ships
-  windsurf: []
-  aider: []
-
-# --------------------------------------------------------------
-# Aliases — logical names skills use. Resolved per-agent at runtime.
-# --------------------------------------------------------------
-aliases:
-  claude:
-    opus: claude-opus-4-7
-    sonnet: claude-sonnet-4-6
-    haiku: claude-haiku-4-5-20251001
-  # cursor:   (future)
-  # windsurf: (future)
-
-# --------------------------------------------------------------
-# Skills — default model per fremi skill. Unlisted skills fall back
-# to `default`. Users override any of these in models.user.yaml.
+# Skills — default alias per fremi skill. Unlisted skills fall back
+# to the project-wide default (agents.user.yaml → default_model).
+# Users override any of these in models.user.yaml → skills.
 #
 # Heuristic used for the defaults:
 #   - opus:   architectural work, design decisions, ADRs, proposals
@@ -80,18 +61,18 @@ skills:
   fremi-story-scope: sonnet
   fremi-story-bdd: sonnet
   fremi-story-sdd: sonnet
-  fremi-story-design: opus          # design decisions → opus
+  fremi-story-design: opus
   fremi-story-tdd: sonnet
   fremi-story-plan: sonnet
   fremi-story-task: sonnet
-  fremi-story-checkwork: haiku      # live progress tracking, mechanical
+  fremi-story-checkwork: haiku
   fremi-story-verify: sonnet
   fremi-story-closure-check: haiku
   fremi-story-closure: sonnet
   fremi-story-adr: opus
   fremi-story-bug: sonnet
 
-  # Enabler layer — technical enablement
+  # Enabler layer
   fremi-enabler: sonnet
   fremi-enabler-definition: sonnet
   fremi-enabler-design: opus
@@ -106,7 +87,7 @@ skills:
   fremi-reverse-bug: sonnet
   fremi-reverse-extra: sonnet
 
-  # Tools / scaffolding (all mechanical → haiku)
+  # Tools / scaffolding
   fremi-tools: haiku
   fremi-add-skill: haiku
   fremi-add-rule: haiku
