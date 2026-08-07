@@ -105,6 +105,76 @@ function mergedCoreView(core: CoreDoc, userDoc: YAML.Document.Parsed | null): Co
   };
 }
 
+// Entry point invoked from `fremi setting → agents → 🎯 Edit default
+// model`. Edits agents.user.yaml → default_model — the project-wide
+// fallback used by ANY fremi skill that doesn't have an explicit
+// override in models.user.yaml.
+export async function runDefaultModelMenu(
+  agentsFilePath: string,
+): Promise<MenuResult> {
+  const core = loadCoreDoc();
+  if (!core) {
+    note("Cannot load framework models.core.yaml", "error");
+    return "back";
+  }
+
+  const doc = loadYamlDoc(agentsFilePath);
+  if (!doc) {
+    note(`Cannot parse ${agentsFilePath}`, "error");
+    return "back";
+  }
+
+  // agents.user.yaml doesn't declare its own catalog/aliases; use core.
+  const current = getAtPath(doc, "default_model");
+  const currentStr =
+    current === undefined || current === null ? "" : String(current);
+  const aliases = Object.keys(core.aliases[AGENT] ?? {});
+  const concreteModels = core.catalog[AGENT] ?? [];
+
+  const options: Array<{ value: string; label: string; hint?: string }> = [];
+
+  for (const alias of aliases) {
+    const concreteModel = core.aliases[AGENT]?.[alias] ?? "?";
+    const marks: string[] = [];
+    if (alias === currentStr) marks.push("current");
+    const hint =
+      `→ ${concreteModel}` + (marks.length > 0 ? `  ·  ${marks.join(" · ")}` : "");
+    options.push({
+      value: alias,
+      label: `alias  ${padRight(alias, 8)}`,
+      hint,
+    });
+  }
+
+  for (const model of concreteModels) {
+    const marks: string[] = [];
+    if (model === currentStr) marks.push("current");
+    const hint = marks.length > 0 ? marks.join(" · ") : "specific model (agent-locked)";
+    options.push({
+      value: model,
+      label: `model  ${model}`,
+      hint,
+    });
+  }
+
+  options.push({ value: BACK, label: "↩  Back" });
+
+  const messageParts = ["agents.default_model"];
+  messageParts.push(currentStr ? `current: ${currentStr}` : "no value set");
+
+  const choice = await askSelect({
+    message: messageParts.join("  ·  "),
+    options,
+  });
+
+  if (choice === BACK) return "back";
+  if (choice === currentStr) return "back";
+
+  setAtPath(doc, "default_model", choice);
+  saveYamlDoc(agentsFilePath, doc);
+  return "back";
+}
+
 // Layer-scoped entry point invoked from `fremi setting → <layer> → 🤖 Edit
 // models for this layer`. Reuses the same editor as the flat top-level
 // menu but only shows skills whose name starts with `fremi-<layer>` —
@@ -222,13 +292,12 @@ async function editSkillMap(
     // whether each is overridden.
     const overrides = readMap(doc, "skills");
     const allSkills = Object.keys(core.skillDefaults)
+      // Skip the `default` entry — the project-wide fallback now lives
+      // in agents.user.yaml → default_model. Kept in models.core.yaml
+      // only as the last-resort framework default.
+      .filter((s) => s !== "default")
       .filter((s) => (filter ? filter(s) : true))
-      .sort((a, b) => {
-        // Put `default` on top, then group by prefix (fremi-product, fremi-feature, ...)
-        if (a === "default") return -1;
-        if (b === "default") return 1;
-        return a.localeCompare(b);
-      });
+      .sort((a, b) => a.localeCompare(b));
 
     const options = allSkills.map((s) => {
       const override = overrides[s];

@@ -22,6 +22,23 @@ schema_version: 1
 active: true
 
 # ---------------------------------------------------------------------------
+# Default model — fallback used by ANY fremi skill that does NOT have an
+# explicit override in models.user.yaml. Acts as the project-wide "when
+# in doubt, use this" model.
+#
+# Values:
+#   - alias:           opus | sonnet | haiku
+#                      (portable across agents; resolved per agent at
+#                      runtime via models.core.yaml → aliases)
+#   - concrete model:  e.g. claude-opus-4-7, claude-sonnet-4-6,
+#                      claude-haiku-4-5-20251001
+#                      (pins the fallback to that specific model)
+#
+# Edit via `fremi setting → agents → 🎯 Edit default model`.
+# ---------------------------------------------------------------------------
+default_model: sonnet
+
+# ---------------------------------------------------------------------------
 # Overrides — uncomment the entries you want to change.
 # ---------------------------------------------------------------------------
 subagent_overrides:

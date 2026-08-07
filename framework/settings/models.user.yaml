@@ -62,10 +62,12 @@ aliases:
 
 # --------------------------------------------------------------
 # Per-skill model assignment.
+#
+# The project-wide fallback (used when a skill is not listed here)
+# lives in agents.user.yaml → default_model. Edit that via
+# `fremi setting → agents → 🎯 Edit default model`.
 # --------------------------------------------------------------
 skills:
-  default: sonnet
-
   # Product layer — architectural + discovery
   fremi-product: opus
   fremi-product-iniciativas: sonnet

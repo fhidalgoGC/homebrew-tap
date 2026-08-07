@@ -2,7 +2,11 @@ import { resolve, join } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { discoverSettingSections, pickSection, pickSectionAction } from "../prompts/setting";
 import { runMethodologyMenu } from "../prompts/setting-methodology";
-import { runModelsMenu, runLayerModelsMenu } from "../prompts/setting-models";
+import {
+  runModelsMenu,
+  runLayerModelsMenu,
+  runDefaultModelMenu,
+} from "../prompts/setting-models";
 import { toggleActive, readActive } from "../core/settings-edit";
 
 // `fremi setting [path]` — interactive TUI that lets the user toggle
@@ -70,6 +74,10 @@ export async function runSetting(rawPath?: string): Promise<void> {
         }
         console.clear();
         await runLayerModelsMenu(modelsFile, section.name);
+      }
+      if (action.type === "edit-default-model") {
+        console.clear();
+        await runDefaultModelMenu(section.file);
       }
     }
   }

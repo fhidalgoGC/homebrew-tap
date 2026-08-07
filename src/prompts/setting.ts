@@ -16,6 +16,12 @@ export interface SettingSection {
   file: string;      // absolute path to the .user.yaml
 }
 
+// Sections we never show in the top-level menu because they're either
+// covered by other entry points or purely internal storage.
+const HIDDEN_SECTIONS = new Set([
+  "models", // now edited from each layer → "🤖 Edit models for this layer"
+]);
+
 export function discoverSettingSections(targetPath: string): SettingSection[] {
   const root = resolve(targetPath, ".fremi", "settings");
   if (!existsSync(root)) return [];
@@ -25,16 +31,16 @@ export function discoverSettingSections(targetPath: string): SettingSection[] {
   // Top-level *.user.yaml (e.g. agents.user.yaml)
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     if (entry.isFile() && entry.name.endsWith(".user.yaml")) {
-      sections.push({
-        name: entry.name.replace(/\.user\.yaml$/, ""),
-        file: join(root, entry.name),
-      });
+      const name = entry.name.replace(/\.user\.yaml$/, "");
+      if (HIDDEN_SECTIONS.has(name)) continue;
+      sections.push({ name, file: join(root, entry.name) });
     }
     if (entry.isDirectory()) {
       // Nested layer/<file>.user.yaml — one section per subdir.
       const layerRoot = join(root, entry.name);
       for (const sub of readdirSync(layerRoot, { withFileTypes: true })) {
         if (sub.isFile() && sub.name.endsWith(".user.yaml")) {
+          if (HIDDEN_SECTIONS.has(entry.name)) break;
           sections.push({
             name: entry.name,
             file: join(layerRoot, sub.name),
@@ -50,7 +56,7 @@ export function discoverSettingSections(targetPath: string): SettingSection[] {
 }
 
 export interface SectionAction {
-  type: "toggle-active" | "edit-models" | "back";
+  type: "toggle-active" | "edit-models" | "edit-default-model" | "back";
 }
 
 // Layers that ship with fremi skills we can filter models by. The
@@ -103,6 +109,7 @@ export async function pickSection(sections: SettingSection[]): Promise<SettingSe
 export async function pickSectionAction(section: SettingSection): Promise<SectionAction> {
   const state = readActive(section.file);
   const canEditModels = LAYERS_WITH_MODELS.has(section.name);
+  const canEditDefaultModel = section.name === "agents";
 
   const options = [
     {
@@ -111,6 +118,14 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
       hint: state === "missing" ? "no top-level `active:` key in file" : undefined,
     },
   ];
+
+  if (canEditDefaultModel) {
+    options.push({
+      value: "edit-default-model",
+      label: `🎯  Edit default model`,
+      hint: "fallback used when a skill has no explicit override",
+    });
+  }
 
   if (canEditModels) {
     options.push({
@@ -132,6 +147,7 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
 
   if (choice === BACK_TOKEN) return { type: "back" };
   if (choice === "edit-models") return { type: "edit-models" };
+  if (choice === "edit-default-model") return { type: "edit-default-model" };
   return { type: "toggle-active" };
 }
 
