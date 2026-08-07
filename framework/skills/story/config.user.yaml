@@ -53,33 +53,28 @@ execution_mode:
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Cada step tiene sus opciones estructurales declaradas en
-# `config.core.yaml → step_matrix.<step>.agent.options`. Acá el USUARIO
-# elige uno de esos valores (main | subagent | agent). Si no se especifica
-# un step, se usa `config.core.yaml → step_matrix.<step>.agent.default`.
+# Snapshot de los defaults del core (framework/skills/story/config.core.yaml).
+# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
+# Elegir un valor fuera de las opciones válidas es un error de configuración
+# (el step no se ejecuta hasta corregirlo).
 #
-# Validación (obligatoria antes de correr):
-#   - El valor DEBE estar en `options` del core.
-#   - Elegir un valor fuera de options → error, no se ejecuta el step.
-#
-# Todos los steps están listados abajo con su default del core; comentar
-# la línea = usar el default. Descomentar y cambiar para overridear.
+# Tipos: main | subagent | agent (ver header de core).
 # ---------------------------------------------------------------------------
 step_agents:
-  # FW-00_explore: subagent          # core options: [main, subagent, agent]
-  # FW-01_definition: main           # core options: [main]                  (no overridable)
-  # FW-02_proposal: main             # core options: [main]                  (no overridable)
-  # FW-03_scope: main                # core options: [main]                  (no overridable)
-  # FW-04_bdd: subagent              # core options: [main, subagent, agent]
-  # FW-05_sdd: main                  # core options: [main, subagent, agent]
-  # FW-06_design: main               # core options: [main]                  (no overridable)
-  # FW-07_tdd: subagent              # core options: [main, subagent, agent]
-  # FW-08_plan: main                 # core options: [main, subagent]
-  # FW-09_checkwork: main            # core options: [main]                  (no overridable)
-  # apply: subagent                  # core options: [main, subagent, agent]
-  # verify: subagent                 # core options: [main, subagent, agent]
-  # closure-check: subagent          # core options: [main, subagent, agent]
-  # FW-10_closure: main              # core options: [main]                  (no overridable)
+  FW-00_explore: subagent            # core options: [main, subagent, agent]
+  FW-01_definition: main             # core options: [main]                  (no overridable)
+  FW-02_proposal: main               # core options: [main]                  (no overridable)
+  FW-03_scope: main                  # core options: [main]                  (no overridable)
+  FW-04_bdd: subagent                # core options: [main, subagent, agent]
+  FW-05_sdd: main                    # core options: [main, subagent, agent]
+  FW-06_design: main                 # core options: [main]                  (no overridable)
+  FW-07_tdd: subagent                # core options: [main, subagent, agent]
+  FW-08_plan: main                   # core options: [main, subagent]
+  FW-09_checkwork: main              # core options: [main]                  (no overridable)
+  apply: subagent                    # core options: [main, subagent, agent]
+  verify: subagent                   # core options: [main, subagent, agent]
+  closure-check: subagent            # core options: [main, subagent, agent]
+  FW-10_closure: main                # core options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
 # Docs de la capa

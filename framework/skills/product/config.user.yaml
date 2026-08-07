@@ -57,17 +57,21 @@ execution_mode:
 
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
-# Opciones válidas por step viven en config.core.yaml → step_matrix.<step>.agent.options.
-# Si no se especifica un step acá, se usa el `default` del core.
+#
+# Snapshot de los defaults del core (framework/skills/product/config.core.yaml).
+# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
+# Elegir un tipo fuera de las opciones válidas es un error de configuración.
+#
+# Tipos: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 step_agents:
-  # iniciativas: main       # core options: [main]                  (no overridable)
-  # ideas: subagent         # core options: [main, subagent, agent]
-  # planteamiento: main     # core options: [main]                  (no overridable)
-  # definition: main        # core options: [main]                  (no overridable)
-  # strategies: main        # core options: [main, subagent, agent]
-  # decisions: main         # core options: [main]                  (no overridable)
-  # plan: main              # core options: [main]                  (no overridable)
+  iniciativas: main            # core options: [main]                  (no overridable)
+  ideas: subagent              # core options: [main, subagent, agent]
+  planteamiento: main          # core options: [main]                  (no overridable)
+  definition: main             # core options: [main]                  (no overridable)
+  strategies: main             # core options: [main, subagent, agent]
+  decisions: main              # core options: [main]                  (no overridable)
+  plan: main                   # core options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
 # Docs de la capa (7 docs, todos living)

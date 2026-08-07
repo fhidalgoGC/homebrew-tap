@@ -16,14 +16,19 @@ active: true
 
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
-# Opciones válidas por step viven en config.core.yaml → step_matrix.<step>.agent.options.
+#
+# Snapshot de los defaults del core (framework/skills/enabler/config.core.yaml).
+# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
+# Elegir un tipo fuera de las opciones válidas es un error de configuración.
+#
+# Tipos: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 step_agents:
-  # EN-01_definition: main    # core options: [main]                  (no overridable)
-  # EN-02_design: main        # core options: [main, subagent, agent]
-  # EN-03_plan: main          # core options: [main, subagent]
-  # apply: subagent           # core options: [main, subagent, agent]
-  # EN-04_closure: main       # core options: [main]                  (no overridable)
+  EN-01_definition: main       # core options: [main]                  (no overridable)
+  EN-02_design: main           # core options: [main, subagent, agent]
+  EN-03_plan: main             # core options: [main, subagent]
+  apply: subagent              # core options: [main, subagent, agent]
+  EN-04_closure: main          # core options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
 # Docs de la capa (4 docs, todos snapshot)
