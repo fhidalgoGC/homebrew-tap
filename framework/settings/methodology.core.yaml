@@ -85,7 +85,7 @@ layers:
     conditional_files:
     - FW-00_explore.md
     - FW-02_proposal.md
-    conditional_ref: ~/.fremi/framework/settings/config.yaml → workflow.story.conditional_rules
+    conditional_ref: ~/.fremi/framework/settings/config.core.yaml → workflow.story.conditional_rules
   extra:
     dir: docs/works/extra
     filename_pattern: EX-NN_<slug>.md

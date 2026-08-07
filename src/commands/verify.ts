@@ -9,10 +9,14 @@ import { readUserMarker } from "../core/user-marker";
  * Rules:
  *   1. If ~/.claude/.fremi-installed is missing → warn (user-level
  *      install not run yet).
- *   2. If the current project has .fremi/config.yaml AND `enabled: true`
- *      inside → silent. Fremi is active here.
+ *   2. If the current project has .fremi/settings/config.user.yaml
+ *      AND `enabled: true` inside → silent. Fremi is active here.
  *   3. Otherwise → inject an INACTIVE notice so Claude does NOT
  *      auto-invoke fremi-* skills in projects that never opted in.
+ *
+ * Legacy: pre-v0.4.11 installs kept this file at .fremi/config.yaml.
+ * We still recognize that location as a fallback so old projects don't
+ * suddenly turn inactive after a `brew upgrade fremi`.
  *
  * The stdout of this command feeds Claude Code's SessionStart context.
  * Silence on the happy path keeps the model's context clean; a short
@@ -31,20 +35,20 @@ export async function runVerify(): Promise<void> {
     );
   }
 
-  const configPath = join(projectCwd, ".fremi", "config.yaml");
+  const configPath = resolveProjectConfigPath(projectCwd);
   const projectStatus = evaluateProjectStatus(configPath);
 
   if (projectStatus === "inactive-no-config") {
     messages.push(
       "[fremi] fremi is INACTIVE in this project.\n" +
-        "        .fremi/config.yaml is missing at the project root.\n" +
+        "        .fremi/settings/config.user.yaml is missing.\n" +
         "        Do NOT invoke fremi-* skills unless the user explicitly requests\n" +
         "        them or asks to run `fremi install`.",
     );
   } else if (projectStatus === "inactive-disabled") {
     messages.push(
       "[fremi] fremi is INACTIVE in this project.\n" +
-        "        .fremi/config.yaml exists but `enabled: true` is not set.\n" +
+        "        .fremi/settings/config.user.yaml exists but `enabled: true` is not set.\n" +
         "        Do NOT invoke fremi-* skills. Ask the user to flip `enabled` to\n" +
         "        true (or remove the config) if they want fremi active here.",
     );
@@ -62,6 +66,15 @@ export async function runVerify(): Promise<void> {
 }
 
 type ProjectStatus = "active" | "inactive-no-config" | "inactive-disabled";
+
+// Prefer the new location under settings/. Fall back to the legacy
+// path at .fremi/config.yaml so pre-v0.4.11 installs keep working
+// until the user runs `fremi install` and the migration lands.
+function resolveProjectConfigPath(projectCwd: string): string {
+  const newPath = join(projectCwd, ".fremi", "settings", "config.user.yaml");
+  if (existsSync(newPath)) return newPath;
+  return join(projectCwd, ".fremi", "config.yaml");
+}
 
 function evaluateProjectStatus(configPath: string): ProjectStatus {
   if (!existsSync(configPath)) return "inactive-no-config";

@@ -22,7 +22,7 @@ export interface InstallFlags {
  * Since v0.3.0 the heavy content (skills, rules, bootstrap hook) lives at
  * user level under ~/.claude/. This command only writes per-project
  * artifacts: the CLAUDE.md block, user-editable settings under
- * .fremi/settings/, docs/works/, and .fremi/config.yaml.
+ * .fremi/settings/ (including config.user.yaml) and docs/works/.
  *
  * If the user-level marker is missing we transparently run
  * `fremi agent install` first (same interactive/flag semantics) so the

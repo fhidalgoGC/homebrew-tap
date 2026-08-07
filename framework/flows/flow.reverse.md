@@ -1,6 +1,6 @@
 # Flujo — Vía REVERSE (alineación de código pre-existente al framework)
 
-> **Config operativa:** [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
+> **Config operativa:** [`~/.fremi/framework/settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml)
 > **Reglas específicas:** [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25–32.
 > **Skills:** `~/.fremi/framework/reverse-engineering/` (6 skills).
 > **Pipelines:** `~/.fremi/framework/pipelines/pipeline.reverse.*.md` (4 pipelines).
@@ -245,7 +245,7 @@ Ejemplo: reverse-engineering de una story cerrada → bumpear `feature/spec.md`,
 
 - Reglas del flow forward: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
 - Reglas específicas de reverse: [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md).
-- Config operativo: [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml).
+- Config operativo: [`~/.fremi/framework/settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml).
 - Skills: [`~/.fremi/framework/reverse-engineering/`](../reverse-engineering/).
 - Pipelines: [`~/.fremi/framework/pipelines/`](../pipelines/) — buscar `pipeline.reverse.*.md`.
 - Flow forward por capa: `~/.fremi/framework/flows/flow.product.md`, `flow.feature.md`, `flow.story.md`, etc.

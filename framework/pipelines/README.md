@@ -8,7 +8,7 @@
 
 ## Modo de ejecución (`interactive` vs `auto`)
 
-Todos los skills y pipelines del framework respetan un `execution_mode` declarado en `config.yaml` (default global) y overridable por capa en `config.<capa>.yaml`. Ver [`~/.fremi/framework/settings/config.yaml → execution_mode`](../settings/config.yaml) para el schema completo.
+Todos los skills y pipelines del framework respetan un `execution_mode` declarado en `config.yaml` (default global) y overridable por capa en `config.<capa>.yaml`. Ver [`~/.fremi/framework/settings/config.core.yaml → execution_mode`](../settings/config.core.yaml) para el schema completo.
 
 **La semántica del modo depende del nivel de invocación**. Un skill suelto no se comporta igual que un pipeline aunque el modo se llame igual.
 
@@ -171,7 +171,7 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 **Bug y Extra reverse son 1 archivo** — sin pipeline propio; se invocan los skills sueltos: `/fremi-reverse-bug`, `/fremi-reverse-extra`.
 
-**Config operativa reverse:** [`../settings/config.reverse.yaml`](../settings/config.reverse.yaml).
+**Config operativa reverse:** [`../settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml).
 **Reglas específicas reverse:** [`../rules/reverse.md`](../rules/reverse.md).
 **Flow reverse:** [`../flows/flow.reverse.md`](../flows/flow.reverse.md).
 

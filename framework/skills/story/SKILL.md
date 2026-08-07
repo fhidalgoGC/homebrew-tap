@@ -1,11 +1,11 @@
 ---
 name: fremi-story
-description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
+description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.core.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
 ---
 
 # /fremi-story — Crear nueva user story
 
-Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.core.yaml`** (nomenclatura) y **`~/.fremi/framework/settings/config.yaml`** (obligatoriedad operativa).
+Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.core.yaml`** (nomenclatura) y **`~/.fremi/framework/settings/config.core.yaml`** (obligatoriedad operativa).
 
 La cadena canónica tiene **11 docs** (`FW-00..FW-10`), pero dos son de **obligatoriedad condicional** — `FW-00_explore` y `FW-02_proposal` sólo se crean cuando aplican los criterios declarados en `config.story.yaml → conditional_rules` (ver Regla 16).
 
@@ -32,7 +32,7 @@ Si falta alguno → preguntárselo al usuario.
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
-2. Leer `~/.fremi/framework/settings/config.yaml`.
+2. Leer `~/.fremi/framework/settings/config.core.yaml`.
 3. Extraer de `methodology.core.yaml`:
    - `feat_cfg = identifiers.feature` (para resolver la feature padre).
    - `story_cfg = identifiers.story` → `prefix`, `id_format`, `folder_format`, `folder_regex`.

@@ -47,7 +47,7 @@ Su objetivo es **cerrar el approach técnico** antes de bajar al scope detallado
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
-2. Leer `~/.fremi/framework/settings/config.yaml`.
+2. Leer `~/.fremi/framework/settings/config.core.yaml`.
 3. De `config.yaml`:
    - `config.story.yaml → docs[name=proposal]` → `required`, `condition_ref`.
    - `conditional_rules.proposal_when` → criterios.
@@ -142,7 +142,7 @@ Marcar en `FW-09_checkwork.md` (o el filename resuelto) que el proposal fue crea
 
 ## Referencias
 
-- `~/.fremi/framework/settings/config.yaml` → `config.story.yaml`, `conditional_rules.proposal_when`, `phase_rules.proposal`.
+- `~/.fremi/framework/settings/config.core.yaml` → `config.story.yaml`, `conditional_rules.proposal_when`, `phase_rules.proposal`.
 - `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=proposal]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 3b (bifurcaciones), Regla 16 (condicionales), Regla 6 (SDD dirige).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/proposal/references/FW-02_proposal-template.md`.

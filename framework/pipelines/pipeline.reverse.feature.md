@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para la capa FEATURE
 
 Corre en modo **automático** la reconstrucción de una feature entera cuyo código ya existe: primero el `FT-XX/definition.md` (+ opcionalmente `decisions.md`), después una story reverse por cada carpeta bajo `user-stories/` (o inferida de la estructura del código).
 
-**Fuente de verdad:** [`config.reverse.yaml`](../settings/config.reverse.yaml) + [`flow.reverse.md`](../flows/flow.reverse.md).
+**Fuente de verdad:** [`config.reverse.yaml`](../settings/config.reverse.core.yaml) + [`flow.reverse.md`](../flows/flow.reverse.md).
 
 ## Sintaxis
 
@@ -84,7 +84,7 @@ docs/works/features/FT-XX_<slug>/
 
 ## Referencias
 
-- [`config.reverse.yaml`](../settings/config.reverse.yaml)
+- [`config.reverse.yaml`](../settings/config.reverse.core.yaml)
 - [`rules/reverse.md`](../rules/reverse.md)
 - [`flow.reverse.md`](../flows/flow.reverse.md)
 - Sub-pipeline: [`/fremi-pipeline-reverse-story`](pipeline.reverse.story.md)

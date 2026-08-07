@@ -32,7 +32,7 @@ Audita **dos dimensiones** de consistencia del framework:
    - `identifiers.adr` (con `locations.{product, feature, story}` — 3 scopes de ADR).
    - `principles.sync_back.rule_ref` (Regla 12), `principles.checkwork_live_status.rule_ref` (Regla 13).
 
-2. Leer `~/.fremi/framework/settings/config.yaml` (master):
+2. Leer `~/.fremi/framework/settings/config.core.yaml` (master):
    - `layers.*` — descubrir qué capas están `active`.
    - `versioning.*` — reglas de bump, frontmatter obligatorio, parent_bump_triggers.
 
@@ -244,6 +244,6 @@ Para uso de mayor profundidad: complementar con revisión humana periódica.
 
 - Regla 12 (sync-back) en `~/.fremi/framework/rules/workflow.md`.
 - Regla 17 (versionado + linaje) en `~/.fremi/framework/rules/workflow.md`.
-- `~/.fremi/framework/settings/config.yaml` — master (versioning + phase_rules).
+- `~/.fremi/framework/settings/config.core.yaml` — master (versioning + phase_rules).
 - `~/.fremi/framework/settings/config.<capa>.yaml` — 7 archivos per-capa.
 - `~/.fremi/framework/settings/methodology.core.yaml` — nomenclatura y ubicaciones.

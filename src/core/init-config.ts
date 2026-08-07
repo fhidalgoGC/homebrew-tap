@@ -1,45 +1,61 @@
 import { resolve, join, basename } from "node:path";
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync } from "node:fs";
 
 export interface InitConfigReport {
-  action: "created" | "already-exists";
+  action: "created" | "already-exists" | "migrated-legacy";
   errors: string[];
 }
 
 /**
- * Creates .fremi/config.yaml at the project root with per-project overrides.
- * Non-destructive — never overwrites an existing config.
+ * Creates .fremi/settings/config.user.yaml with per-project overrides.
+ *
+ * Layout convention (v0.4.11+): all user-editable YAMLs live under
+ * .fremi/settings/*.user.yaml. Older installs put this file at
+ * .fremi/config.yaml — if that legacy file exists it is moved to the
+ * new location so the migration is transparent.
+ *
+ * Non-destructive — never overwrites an existing user file.
  */
 export async function initFremiConfig(
   targetPath: string,
   frameworkRoot: string,
 ): Promise<InitConfigReport> {
   const fremiDir = resolve(targetPath, ".fremi");
-  const configPath = join(fremiDir, "config.yaml");
+  const settingsDir = join(fremiDir, "settings");
+  const newPath = join(settingsDir, "config.user.yaml");
+  const legacyPath = join(fremiDir, "config.yaml");
 
-  if (existsSync(configPath)) {
+  // Migration path: legacy file exists and the new one doesn't.
+  if (existsSync(legacyPath) && !existsSync(newPath)) {
+    mkdirSync(settingsDir, { recursive: true });
+    renameSync(legacyPath, newPath);
+    return { action: "migrated-legacy", errors: [] };
+  }
+
+  if (existsSync(newPath)) {
     return { action: "already-exists", errors: [] };
   }
 
-  mkdirSync(fremiDir, { recursive: true });
+  mkdirSync(settingsDir, { recursive: true });
 
   const version = readVersion(frameworkRoot);
   const projectName = basename(targetPath);
   const today = new Date().toISOString().slice(0, 10);
 
-  const yaml = `# .fremi/config.yaml
+  const yaml = `# .fremi/settings/config.user.yaml
 # Per-project overrides of the fremi-framework defaults.
-# The framework master config lives at ~/.fremi/framework/framework/settings/config.yaml.
+# The framework master config lives at
+#   ~/.fremi/framework/settings/config.core.yaml
 # Only put here what YOU want to override at the project level.
 
-schema: fremi-project-config
-schema_version: 2
+schema: fremi-project-user
+schema_version: 3
 generated_by: fremi-framework@${version}
 generated_at: ${today}
 
 # ------------------------------------------------------------------------
 # Master switch — fremi skills only run when BOTH:
-#   - this file exists at the project root, AND
+#   - this file exists at .fremi/settings/config.user.yaml, AND
 #   - enabled: true
 # Set enabled: false to keep the config but temporarily disable the
 # framework in this project (skills will be ignored by the SessionStart
@@ -93,7 +109,7 @@ preferences:
   language_artifacts: en       # docs are written in this language
 `;
 
-  writeFileSync(configPath, yaml);
+  writeFileSync(newPath, yaml);
   return { action: "created", errors: [] };
 }
 

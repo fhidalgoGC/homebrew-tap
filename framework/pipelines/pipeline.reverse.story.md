@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para la capa STORY. 
 
 Corre en modo **automático** la cadena de reconstrucción para UNA story cuyo código ya existe pero cuyos docs FW-00..FW-10 no fueron creados por el flow forward.
 
-**Fuente de verdad de la secuencia:** [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml) — declara skills, defaults y policies transversales. **Fuente de verdad del flujo:** [`~/.fremi/framework/flows/flow.reverse.md`](../flows/flow.reverse.md) — 6 fases canónicas.
+**Fuente de verdad de la secuencia:** [`~/.fremi/framework/settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml) — declara skills, defaults y policies transversales. **Fuente de verdad del flujo:** [`~/.fremi/framework/flows/flow.reverse.md`](../flows/flow.reverse.md) — 6 fases canónicas.
 
 **Alcance del pipeline:** planificación completa (FW-00..FW-08) + `FW-09_checkwork` marcado 100% (todo cerrado — el código ya existe) + `FW-10_closure` firmado con matriz de trazabilidad reconstruida. **NO** ejecuta código nuevo — la implementación ya está en producción.
 
@@ -108,7 +108,7 @@ docs/works/features/FT-XX/user-stories/HU-YY_<slug>/
 
 ## Referencias
 
-- Config operativo: [`~/.fremi/framework/settings/config.reverse.yaml`](../settings/config.reverse.yaml)
+- Config operativo: [`~/.fremi/framework/settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml)
 - Reglas específicas: [`~/.fremi/framework/rules/reverse.md`](../rules/reverse.md) — Reglas 25-32.
 - Flujo descriptivo: [`~/.fremi/framework/flows/flow.reverse.md`](../flows/flow.reverse.md)
 - Skill suelto: [`/fremi-reverse-story`](../reverse-engineering/reverse-story/SKILL.md)

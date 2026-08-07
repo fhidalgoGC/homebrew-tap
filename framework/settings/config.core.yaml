@@ -183,21 +183,21 @@ layers:
     orchestrator_skill: null   # bug tiene 2 skills según scope (/fremi-story-bug, /fremi-feature-bug)
     scopes:
       story:
-        config: ~/.fremi/framework/settings/config.bug.story.yaml
+        config: ~/.fremi/framework/settings/config.bug.story.core.yaml
         active: true
         skill: /fremi-story-bug
       feature:
-        config: ~/.fremi/framework/settings/config.bug.feature.yaml
+        config: ~/.fremi/framework/settings/config.bug.feature.core.yaml
         active: true
         skill: /fremi-feature-bug
 
   extra:
-    config: ~/.fremi/framework/settings/config.extra.yaml
+    config: ~/.fremi/framework/settings/config.extra.core.yaml
     active: true
     orchestrator_skill: null   # extra no tiene skill dedicado (edición a mano)
 
   reverse:
-    config: ~/.fremi/framework/settings/config.reverse.yaml
+    config: ~/.fremi/framework/settings/config.reverse.core.yaml
     active: true
     orchestrator_skill: null   # reverse no tiene orquestador único — 6 skills + 4 pipelines
     rules: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32 específicas de reverse
@@ -593,7 +593,7 @@ references:
       core: ~/.fremi/framework/skills/enabler/config.core.yaml
     bug:
       # Bugs no tienen config.core.yaml todavía (por evaluar si aplica).
-      story: ~/.fremi/framework/settings/config.bug.story.yaml
-      feature: ~/.fremi/framework/settings/config.bug.feature.yaml
-    extra: ~/.fremi/framework/settings/config.extra.yaml
-    reverse: ~/.fremi/framework/settings/config.reverse.yaml
+      story: ~/.fremi/framework/settings/config.bug.story.core.yaml
+      feature: ~/.fremi/framework/settings/config.bug.feature.core.yaml
+    extra: ~/.fremi/framework/settings/config.extra.core.yaml
+    reverse: ~/.fremi/framework/settings/config.reverse.core.yaml

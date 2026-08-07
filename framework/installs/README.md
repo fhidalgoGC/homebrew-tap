@@ -39,4 +39,4 @@ No hay riesgo de correrlos varias veces.
 
 - Regla 21 (Skills organizados jerárquicamente por capa) en [`../rules/workflow.md`](../rules/workflow.md).
 - Estructura de skills: [`../skills/`](../skills/).
-- Configuración operativa: [`../settings/config.yaml`](../settings/config.yaml) + `config.<capa>.yaml`.
+- Configuración operativa: [`../settings/config.core.yaml`](../settings/config.core.yaml) + `config.<capa>.yaml`.

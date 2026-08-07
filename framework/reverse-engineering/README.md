@@ -1,6 +1,6 @@
 # `~/.fremi/framework/reverse-engineering/` — Vía formal de alineación de código pre-existente
 
-> **Actualizado 2026-08-05:** reverse-engineering es una **vía de primera clase** del framework (Regla 25), no procedimiento excepcional. Se ejerce cuando existe código en producción sin sus docs del flow. Tiene reglas propias (`rules/reverse.md`, Reglas 25-32), su flow (`flows/flow.reverse.md`), config (`settings/config.reverse.yaml`), 6 skills y 4 pipelines.
+> **Actualizado 2026-08-05:** reverse-engineering es una **vía de primera clase** del framework (Regla 25), no procedimiento excepcional. Se ejerce cuando existe código en producción sin sus docs del flow. Tiene reglas propias (`rules/reverse.md`, Reglas 25-32), su flow (`flows/flow.reverse.md`), config (`settings/config.reverse.core.yaml`), 6 skills y 4 pipelines.
 >
 > **Spelling**: `reverse-engineering` (con doble "e"). El pedido original mencionaba `reverse-enginering` — se corrigió.
 
@@ -189,7 +189,7 @@ Para reconstruir capas enteras (múltiples docs) en cadena, usar los 4 pipelines
 
 - **Reglas específicas de reverse:** [`../rules/reverse.md`](../rules/reverse.md) — Reglas 25-32.
 - **Flujo canónico:** [`../flows/flow.reverse.md`](../flows/flow.reverse.md) — 6 fases.
-- **Config operativa:** [`../settings/config.reverse.yaml`](../settings/config.reverse.yaml) — defaults, skills declarados, policies.
+- **Config operativa:** [`../settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml) — defaults, skills declarados, policies.
 - **Hook de validación:** [`../hooks/check-reverse-alignment.sh`](../hooks/check-reverse-alignment.sh) — reporta ratio, chequea confidence, recuerda parent bump.
 - Regla 10 (docs son fuente de verdad) en [`../rules/workflow.md`](../rules/workflow.md).
 - Regla 17 (versionado + linaje) en [`../rules/workflow.md`](../rules/workflow.md).

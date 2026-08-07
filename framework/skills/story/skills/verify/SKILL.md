@@ -1,6 +1,6 @@
 ---
 name: fremi-story-verify
-description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/settings/config.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); esta skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
+description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/settings/config.core.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); esta skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
 ---
 
 # /fremi-story-verify — Corrida final de verificación (fase verify)
@@ -38,7 +38,7 @@ Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (co
 
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
-1. Leer `~/.fremi/framework/settings/config.yaml`.
+1. Leer `~/.fremi/framework/settings/config.core.yaml`.
 2. Extraer:
    - `testing.strict_tdd`, `testing.test_runner`, `testing.type_checker`.
    - `testing.unit.enabled + command + framework`.
@@ -175,6 +175,6 @@ Si `FW-09_checkwork.md` no existe (caso raro) → crearlo con el bloque como sec
 ## Referencias
 
 - Template local del bloque de reporte: [`references/verify-report-block-template.md`](references/verify-report-block-template.md)
-- `~/.fremi/framework/settings/config.yaml` → `testing.*`, `phase_rules.verify`, `phase_rules.closure` (precondición).
+- `~/.fremi/framework/settings/config.core.yaml` → `testing.*`, `phase_rules.verify`, `phase_rules.closure` (precondición).
 - `~/.fremi/framework/rules/workflow.md` → Regla 7 (TDD durante desarrollo), Regla 11 (closure precondiciona verify).
 - Skill `/fremi-story-closure-check` — corre después de `/fremi-story-verify` PASS.

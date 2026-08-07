@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para un ENABLER — 
 
 Corre en modo **automático** la reconstrucción de los 4 docs de un enabler cuya infraestructura/tooling ya está en producción: `EN-01_definition.md`, `EN-02_design.md`, `EN-03_plan.md`, `EN-04_closure.md`.
 
-**Fuente de verdad:** [`config.reverse.yaml`](../settings/config.reverse.yaml) + [`flow.reverse.md`](../flows/flow.reverse.md).
+**Fuente de verdad:** [`config.reverse.yaml`](../settings/config.reverse.core.yaml) + [`flow.reverse.md`](../flows/flow.reverse.md).
 
 ## Cuándo usarlo
 
@@ -107,7 +107,7 @@ docs/works/features/FT-XX/user-stories/HU-YY/enablers/EN-XX_<slug>/
 
 ## Referencias
 
-- [`config.reverse.yaml`](../settings/config.reverse.yaml)
+- [`config.reverse.yaml`](../settings/config.reverse.core.yaml)
 - [`rules/reverse.md`](../rules/reverse.md) — Regla 25-32.
 - [`flow.reverse.md`](../flows/flow.reverse.md)
 - Skill suelto: [`/fremi-reverse-enabler`](../reverse-engineering/reverse-enabler/SKILL.md)

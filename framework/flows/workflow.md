@@ -42,9 +42,9 @@ Cada capa (y cada scope) tiene su archivo `flow.*.md` con:
 | **Feature** (línea de trabajo grande) | [`flow.feature.md`](./flow.feature.md) | `/fremi-feature` | [`config.feature.yaml`](../settings/config.feature.yaml) |
 | **Story** (unidad de valor — 11 docs) | [`flow.story.md`](./flow.story.md) | `/fremi-story` | [`config.story.yaml`](../settings/config.story.yaml) |
 | **Enabler** (trabajo habilitador) | [`flow.enabler.md`](./flow.enabler.md) | `/fremi-enabler` | [`config.enabler.yaml`](../settings/config.enabler.yaml) |
-| **Bug scope story** (bug local) | [`flow.bug.story.md`](./flow.bug.story.md) | `/fremi-story-bug` | [`config.bug.story.yaml`](../settings/config.bug.story.yaml) |
-| **Bug scope feature** (bug transversal) | [`flow.bug.feature.md`](./flow.bug.feature.md) | `/fremi-feature-bug` | [`config.bug.feature.yaml`](../settings/config.bug.feature.yaml) |
-| **Extra** (fuera del flujo — tooling) | [`flow.extra.md`](./flow.extra.md) | *(sin skill)* | [`config.extra.yaml`](../settings/config.extra.yaml) |
+| **Bug scope story** (bug local) | [`flow.bug.story.md`](./flow.bug.story.md) | `/fremi-story-bug` | [`config.bug.story.yaml`](../settings/config.bug.story.core.yaml) |
+| **Bug scope feature** (bug transversal) | [`flow.bug.feature.md`](./flow.bug.feature.md) | `/fremi-feature-bug` | [`config.bug.feature.yaml`](../settings/config.bug.feature.core.yaml) |
+| **Extra** (fuera del flujo — tooling) | [`flow.extra.md`](./flow.extra.md) | *(sin skill)* | [`config.extra.yaml`](../settings/config.extra.core.yaml) |
 
 ---
 
@@ -226,7 +226,7 @@ Detalle completo en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.m
 ## Referencias
 
 - **Reglas duras**: [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.md).
-- **Configs operativas**: [`~/.fremi/framework/settings/config.yaml`](../settings/config.yaml) + 7 `config.<capa>.yaml`.
+- **Configs operativas**: [`~/.fremi/framework/settings/config.core.yaml`](../settings/config.core.yaml) + 7 `config.<capa>.yaml`.
 - **Nomenclatura**: [`~/.fremi/framework/settings/methodology.core.yaml`](../settings/methodology.core.yaml).
 - **Skills invocables**: `~/.fremi/framework/skills/` (con jerarquía por capa).
 - **CLAUDE.md** (entrada del agente): [`../../../CLAUDE.md`](../../../CLAUDE.md).

@@ -82,7 +82,7 @@ identifiers:
   workflow_doc:
     _description: Documento del workflow dentro de una story. 11 docs en orden fijo
       de ejecución (FW-00..FW-10). FW-00_explore y FW-02_proposal son de OBLIGATORIEDAD
-      CONDICIONAL — la regla operativa vive en `~/.fremi/framework/settings/config.yaml`
+      CONDICIONAL — la regla operativa vive en `~/.fremi/framework/settings/config.core.yaml`
       bajo `workflow.story.conditional_rules`.
     prefix: FW
     scope: story

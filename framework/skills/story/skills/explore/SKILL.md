@@ -43,7 +43,7 @@ Si el usuario invoca `/fremi-story-explore` sin args pero está claro el context
 ### Paso 0 — Cargar configuración (OBLIGATORIO)
 
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
-2. Leer `~/.fremi/framework/settings/config.yaml`.
+2. Leer `~/.fremi/framework/settings/config.core.yaml`.
 3. Extraer de `config.yaml`:
    - `config.story.yaml → docs[]` — buscar entry con `name: "explore"` para obtener `required` y `condition_ref`.
    - `conditional_rules[condition_ref]` — criterios de obligatoriedad.
@@ -127,7 +127,7 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.y
 
 ## Referencias
 
-- `~/.fremi/framework/settings/config.yaml` → `config.story.yaml`, `conditional_rules.explore_when`, `phase_rules.explore`.
+- `~/.fremi/framework/settings/config.core.yaml` → `config.story.yaml`, `conditional_rules.explore_when`, `phase_rules.explore`.
 - `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=explore]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 16 (condicionales), Regla 3b (bifurcaciones), Regla 6 (SDD dirige diseño).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md`.

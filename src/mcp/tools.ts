@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 // MCP tool implementations. Each function receives the project cwd and
 // returns structured JSON. Kept side-effect-free (read-only walks of
-// docs/works/ and .fremi/config.yaml) so they're safe to call
-// repeatedly without contention.
+// docs/works/ and .fremi/settings/config.user.yaml) so they're safe to
+// call repeatedly without contention.
 
 export interface ProjectStatus {
   cwd: string;
@@ -15,14 +15,22 @@ export interface ProjectStatus {
 }
 
 export function toolProjectStatus(cwd: string): ProjectStatus {
-  const configPath = join(cwd, ".fremi", "config.yaml");
-  if (!existsSync(configPath)) {
+  // v0.4.11+ location; fall back to the legacy path for old installs.
+  const newPath = join(cwd, ".fremi", "settings", "config.user.yaml");
+  const legacyPath = join(cwd, ".fremi", "config.yaml");
+  const configPath = existsSync(newPath)
+    ? newPath
+    : existsSync(legacyPath)
+      ? legacyPath
+      : null;
+
+  if (!configPath) {
     return {
       cwd,
       hasConfig: false,
       enabled: false,
       configPath: null,
-      reason: "no .fremi/config.yaml at project root",
+      reason: "no .fremi/settings/config.user.yaml at project root",
     };
   }
   const content = safeRead(configPath);

@@ -404,7 +404,7 @@ anti_patterns:
 # Referencias cruzadas
 # ---------------------------------------------------------------------------
 references:
-  master_config: ~/.fremi/framework/settings/config.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules_forward: ~/.fremi/framework/rules/workflow.md
   rules_reverse: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32

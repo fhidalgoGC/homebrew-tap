@@ -43,7 +43,7 @@ docs/works/
 
 > **Fuente de verdad de la NOMENCLATURA:** `~/.fremi/framework/settings/methodology.core.yaml`. Las descripciones de abajo son resumen — la configuración formal (regex, formats, scopes) vive en ese JSON. Para cambiar prefijos o padding (ej: `FT-01` → `F-001`), editar el JSON y hacer sweep.
 >
-> **Fuente de verdad OPERATIVA:** `~/.fremi/framework/settings/config.yaml`. Manda para scripts/tooling y define la **obligatoriedad condicional** de `FW-00_explore.md` y `FW-02_proposal.md` (ver `config.story.yaml → conditional_rules`), además del stack técnico, testing capabilities y reglas por fase.
+> **Fuente de verdad OPERATIVA:** `~/.fremi/framework/settings/config.core.yaml`. Manda para scripts/tooling y define la **obligatoriedad condicional** de `FW-00_explore.md` y `FW-02_proposal.md` (ver `config.story.yaml → conditional_rules`), además del stack técnico, testing capabilities y reglas por fase.
 
 - **Features:** `FT-XX_<slug>` (`FT-01`, `FT-02`, ...). ID secuencial de 2 dígitos a nivel proyecto. Slug kebab-case descriptivo.
 - **Stories:** `HU-XX_<slug>` (`HU-01`, `HU-02`, ...). ID secuencial de 2 dígitos **dentro de cada feature** (cada feature arranca desde `HU-01`).
@@ -630,7 +630,7 @@ Los otros 9 (`FW-01`, `FW-03..FW-10`) son **obligatorios siempre**.
 
 ### Fuente de verdad: `config.yaml`
 
-`~/.fremi/framework/settings/config.yaml` bajo la clave `config.story.yaml → conditional_rules` declara **cuándo son obligatorios y cuándo se pueden omitir**. Es la única fuente autorizada para decidir esto; los skills que generan/validan stories leen ese archivo.
+`~/.fremi/framework/settings/config.core.yaml` bajo la clave `config.story.yaml → conditional_rules` declara **cuándo son obligatorios y cuándo se pueden omitir**. Es la única fuente autorizada para decidir esto; los skills que generan/validan stories leen ese archivo.
 
 **Criterios actuales (resumen — el detalle vive en `config.yaml`):**
 
@@ -678,7 +678,7 @@ Todos los artifacts del framework llevan una **versión semver** (`MAJOR.MINOR.P
 
 ### Fuente de verdad operativa
 
-`~/.fremi/framework/settings/config.yaml → versioning.*` gobierna:
+`~/.fremi/framework/settings/config.core.yaml → versioning.*` gobierna:
 - **`doc_types.living` / `doc_types.snapshot`** — qué archivos son living y cuáles son snapshot.
 - **`bump_rules`** — cuándo se bumpea MAJOR / MINOR / PATCH.
 - **`frontmatter`** — campos obligatorios en el YAML del inicio de cada doc.
@@ -1123,7 +1123,7 @@ Este archivo (`rules/workflow.md`) se lee **junto con** `rules/reverse.md` cuand
 Skills relacionados: `/fremi-reverse-*` (6 skills en `~/.fremi/framework/reverse-engineering/`).
 Pipelines: `/fremi-pipeline-reverse-*` (4 pipelines en `~/.fremi/framework/pipelines/`).
 Flow: `~/.fremi/framework/flows/flow.reverse.md`.
-Config: `~/.fremi/framework/settings/config.reverse.yaml`.
+Config: `~/.fremi/framework/settings/config.reverse.core.yaml`.
 
 ---
 

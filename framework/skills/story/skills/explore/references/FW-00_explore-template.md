@@ -1,6 +1,6 @@
 # Template — `FW-00_explore.md` de una story
 
-> **Doc CONDICIONAL.** Obligatorio cuando aplica al menos uno de los criterios declarados en `~/.fremi/framework/settings/config.yaml → conditional_rules.explore_when`. Omitir si no aplica (no crear placeholder vacío).
+> **Doc CONDICIONAL.** Obligatorio cuando aplica al menos uno de los criterios declarados en `~/.fremi/framework/settings/config.core.yaml → conditional_rules.explore_when`. Omitir si no aplica (no crear placeholder vacío).
 >
 > **Propósito**: investigar el terreno ANTES de escribir el `FW-01_definition.md`. Documenta contexto real del codebase, alternativas técnicas encontradas, y hallazgos que van a informar la definition y la (eventual) proposal. **NO propone solución elegida** — sólo mapea el terreno.
 >

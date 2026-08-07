@@ -21,7 +21,7 @@ Cuando existe trabajo real (endpoint, feature, product, tooling, bug fixeado, en
 - **6 skills**: `/fremi-reverse-story`, `/fremi-reverse-feature`, `/fremi-reverse-bug`, `/fremi-reverse-enabler`, `/fremi-reverse-product`, `/fremi-reverse-extra`.
 - **4 pipelines**: `/fremi-pipeline-reverse-product`, `/fremi-pipeline-reverse-feature`, `/fremi-pipeline-reverse-story`, `/fremi-pipeline-reverse-enabler`. Bug y extra son de un solo archivo — se invoca el skill directo.
 - **1 flow**: `~/.fremi/framework/flows/flow.reverse.md` con las 6 fases canónicas.
-- **1 config**: `~/.fremi/framework/settings/config.reverse.yaml` con defaults, skills declarados y políticas transversales.
+- **1 config**: `~/.fremi/framework/settings/config.reverse.core.yaml` con defaults, skills declarados y políticas transversales.
 - **1 hook** (opcional): `check-reverse-alignment.sh` valida post-reverse (Regla 17 aplicada, gaps reportados, coherencia de ancestor).
 
 ### Precondición dura
@@ -82,7 +82,7 @@ Con `--stealth`, los docs quedan indistinguibles de un flow forward normal (no s
 
 ### Override por proyecto
 
-El proyecto puede setear en `~/.fremi/framework/settings/config.reverse.yaml`:
+El proyecto puede setear en `~/.fremi/framework/settings/config.reverse.core.yaml`:
 
 ```yaml
 default_mode: transparent   # framework default
@@ -216,6 +216,6 @@ Antes de invocar cualquier skill o pipeline de reverse:
 
 - `~/.fremi/framework/rules/workflow.md` — reglas del flow forward (Regla 1-24). Se aplican **también** durante reverse cuando corresponda (Regla 17, 10, 12).
 - `~/.fremi/framework/flows/flow.reverse.md` — descripción narrativa del flujo canónico de reverse.
-- `~/.fremi/framework/settings/config.reverse.yaml` — config operativo de reverse.
+- `~/.fremi/framework/settings/config.reverse.core.yaml` — config operativo de reverse.
 - `~/.fremi/framework/reverse-engineering/README.md` — casos de uso + advertencias.
 - `~/.fremi/framework/pipelines/pipeline.reverse.*.md` — pipelines de auto-ejecución por capa.

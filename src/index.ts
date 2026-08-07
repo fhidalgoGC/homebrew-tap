@@ -151,13 +151,13 @@ Commands:
 
   install [path]         Install fremi at PROJECT level.
                          Auto-runs 'agent install' first if not done yet.
-                         Writes: CLAUDE.md block, .fremi/config.yaml,
-                                 .fremi/settings/, docs/works/.
+                         Writes: CLAUDE.md block, .fremi/settings/
+                                 (incl. config.user.yaml), docs/works/.
     --agent LIST, -y       (Same flags as 'agent install'.)
 
   uninstall [path]       Remove project-level artifacts (CLAUDE.md block,
-                         .fremi/config.yaml). Preserves docs/works/ and
-                         .fremi/settings/.
+                         .fremi/settings/config.user.yaml). Preserves
+                         docs/works/ and other .fremi/settings/ files.
 
   update                 Pull the latest framework content from GitHub.
   verify                 Health check (silent when everything is OK).

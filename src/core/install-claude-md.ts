@@ -20,7 +20,7 @@ Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BD
 - \`.fremi/settings/\` — YAMLs \`.user.yaml\` copiados del framework. Gobiernan \`execution_mode\`, \`step_agents\` (main / subagent / agent), overrides.
   - \`agents.user.yaml\` — override de subagents (model, effort, claude_code_agent).
   - \`<capa>/config.user.yaml\` — config por capa (product, feature, story, enabler).
-- \`.fremi/config.yaml\` — config global del proyecto (stack, testing, preferences).
+  - \`config.user.yaml\` — config global del proyecto (stack, testing, preferences, master switch \`enabled\`).
 
 **Precedencia de config — REGLA DURA (obligatoria para skills y hooks)**:
 
