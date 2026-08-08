@@ -1,0 +1,82 @@
+# .fremi/sync-check-mute.yaml — template
+# --------------------------------------------------------------
+# Silenciar falsos positivos conocidos de /fremi-sync-check.
+# Copiá este archivo a `.fremi/sync-check-mute.yaml` en la raíz de
+# tu proyecto y agregá las entradas que quieras suprimir. El skill
+# lee este archivo sin preguntar y respeta las entradas.
+#
+# Cómo obtener un mute_key: correr `/fremi-sync-check` una vez y
+# copiar el `mute_key` del hallazgo que querés silenciar.
+# --------------------------------------------------------------
+
+schema: fremi-sync-check-mute
+schema_version: 1
+
+# --------------------------------------------------------------
+# 1) Silenciar hallazgos individuales por su mute_key.
+#    Uso: cuando el skill flageó algo que analizaste y confirmaste
+#    que es intencional / no aplicable.
+# --------------------------------------------------------------
+muted_findings: []
+# Ejemplos:
+# muted_findings:
+#   - key: R-a1b2c3d4
+#     reason: "Restricción intencionalmente local a FT-05 — no aplica al producto."
+#     muted_by: fhidalgo
+#     muted_at: 2026-08-07
+#
+#   - key: A-e5f6g7h8
+#     reason: "ADR local a FT-01 por decisión de scope — no promover."
+#     muted_by: equipo
+#     muted_at: 2026-08-07
+
+# --------------------------------------------------------------
+# 2) Silenciar tipos de hallazgo por término específico.
+#    Uso: bajar el ruido cuando un término aparece en muchos docs
+#    pero es interno del proyecto o ya está documentado en otro lado.
+# --------------------------------------------------------------
+muted_terms:
+  glossary: []
+  # Ejemplos:
+  # glossary:
+  #   - "SDD"          # ya está en el ADR-014 que lo define
+  #   - "TDD"
+  #   - "BDD"
+
+  capabilities: []
+  # Ejemplos:
+  # capabilities:
+  #   - "webhook-delivery"   # capacidad interna, no del in-scope público
+
+  restrictions: []
+  # Ejemplos:
+  # restrictions:
+  #   - "toda request debe incluir header X-Trace-ID"
+
+# --------------------------------------------------------------
+# 3) Silenciar tipos de hallazgo por área del proyecto.
+#    Uso: features experimentales, sandboxes, o áreas legacy que
+#    no siguen las reglas de sync-back o glosario.
+# --------------------------------------------------------------
+muted_scopes: []
+# Ejemplos:
+# muted_scopes:
+#   - path: docs/works/features/FT-05_experimental/**
+#     types: [R, C, G]
+#     reason: "Feature experimental — no aplican reglas de sync-back."
+#
+#   - path: docs/works/features/FT-99_legacy/**
+#     types: [A, R, C, G, M]
+#     reason: "Feature heredada — congelada, no auditar."
+
+# --------------------------------------------------------------
+# Notas:
+# - Este archivo NO se versiona automáticamente por el framework.
+#   Vos decidís si lo commiteás al repo (compartir mutes con el
+#   equipo) o lo agregás a .gitignore (mutes personales).
+# - Cada entrada de `muted_findings` DEBE tener `reason` — el skill
+#   te obliga a documentar por qué es falso positivo (no muteos
+#   ciegos).
+# - Los deterministic (Tier 1: V, CL, I, B) NO son silenciables.
+#   Si aparecen, es porque hay algo real que corregir.
+# --------------------------------------------------------------

@@ -558,6 +558,49 @@ parallelism:
       - "Hooks de validación — pueden detectar violación de merge_hazards."
 
 # ---------------------------------------------------------------------------
+# sync_check — controles anti falso-positivo para /fremi-sync-check
+#
+# Los hallazgos heurísticos (Tipo R, A, C, G, M — Tier 2) reportan
+# solamente si superan `confidence_threshold`. El vocabulario ayuda al
+# skill a decidir cuándo un ADR es "global" (global_scope_terms) y qué
+# términos ignorar del glosario (common_vocabulary_ignore).
+# ---------------------------------------------------------------------------
+sync_check:
+  # Umbral mínimo de confianza para reportar hallazgos Tier 2 en el
+  # reporte principal. Overridable por `--min-confidence N`.
+  confidence_threshold: 0.75
+
+  # Vocabulario que sugiere alcance GLOBAL para el Tipo A (ADRs a
+  # promover). Si el texto del ADR menciona alguno de estos + impacta
+  # ≥ 2 features → hallazgo con confianza ≥ 0.75.
+  global_scope_terms:
+    - stack
+    - runtime
+    - librería base
+    - database
+    - queue
+    - framework de testing
+    - auth
+    - autenticación
+    - formato de payload
+    - contrato de API
+    - versionado
+
+  # Vocabulario a IGNORAR para el Tipo G (glosario faltante). Palabras
+  # que aparecen en muchos docs pero no ameritan entrada de glosario.
+  common_vocabulary_ignore:
+    - API
+    - backend
+    - frontend
+    - response
+    - request
+    - endpoint
+    - service
+    - handler
+    - config
+    - schema
+
+# ---------------------------------------------------------------------------
 # Preferencias operativas del proyecto
 # ---------------------------------------------------------------------------
 preferences:
