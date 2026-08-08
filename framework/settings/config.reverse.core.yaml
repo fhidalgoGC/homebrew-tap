@@ -33,7 +33,7 @@ default_mode: transparent
 # Skills reverse — declaradas
 #
 # `agent` por skill: main | subagent | agent (ver header de
-# ~/.fremi/framework/skills/story/config.core.yaml). Reverse suele apoyarse
+# ~/.fremi/framework/artifacts/story/config.core.yaml). Reverse suele apoyarse
 # fuerte en subagentes (research + inference + timestamps son auto-contenidos),
 # pero la fase de directed-questions (Regla 27) y el firmado final requieren
 # main. El default declarado abajo es el modo recomendado para el skill entero;
@@ -354,35 +354,35 @@ templates:
   strategy: "symlinks desde reverse-<skill>/references/ hacia el skill productor canónico"
   examples:
     reverse-story:
-      - FW-00_explore-template.md → ~/.fremi/framework/skills/story/skills/explore/references/
-      - FW-01_definition-template.md → ~/.fremi/framework/skills/story/skills/definition/references/
-      - FW-02_proposal-template.md → ~/.fremi/framework/skills/story/skills/proposal/references/
-      - FW-03_scope-template.md → ~/.fremi/framework/skills/story/skills/scope/references/
-      - FW-04_bdd-userstories-template.md → ~/.fremi/framework/skills/story/skills/bdd/references/
-      - FW-05_sdd-spec-template.md → ~/.fremi/framework/skills/story/skills/sdd/references/
-      - FW-06_design-template.md → ~/.fremi/framework/skills/story/skills/design/references/
-      - FW-07_tdd-plan-template.md → ~/.fremi/framework/skills/story/skills/tdd/references/
-      - FW-08_plan-template.md → ~/.fremi/framework/skills/story/skills/plan/references/
-      - FW-09_checkwork-template.md → ~/.fremi/framework/skills/story/skills/checkwork/references/
-      - FW-10_closure-template.md → ~/.fremi/framework/skills/story/skills/closure/references/
+      - FW-00_explore-template.md → ~/.fremi/framework/artifacts/story/skills/explore/references/
+      - FW-01_definition-template.md → ~/.fremi/framework/artifacts/story/skills/definition/references/
+      - FW-02_proposal-template.md → ~/.fremi/framework/artifacts/story/skills/proposal/references/
+      - FW-03_scope-template.md → ~/.fremi/framework/artifacts/story/skills/scope/references/
+      - FW-04_bdd-userstories-template.md → ~/.fremi/framework/artifacts/story/skills/bdd/references/
+      - FW-05_sdd-spec-template.md → ~/.fremi/framework/artifacts/story/skills/sdd/references/
+      - FW-06_design-template.md → ~/.fremi/framework/artifacts/story/skills/design/references/
+      - FW-07_tdd-plan-template.md → ~/.fremi/framework/artifacts/story/skills/tdd/references/
+      - FW-08_plan-template.md → ~/.fremi/framework/artifacts/story/skills/plan/references/
+      - FW-09_checkwork-template.md → ~/.fremi/framework/artifacts/story/skills/checkwork/references/
+      - FW-10_closure-template.md → ~/.fremi/framework/artifacts/story/skills/closure/references/
     reverse-feature:
-      - definition-template.md → ~/.fremi/framework/skills/feature/references/
-      - adr-entry-template.md → ~/.fremi/framework/skills/feature/skills/adr/references/
+      - definition-template.md → ~/.fremi/framework/artifacts/feature/references/
+      - adr-entry-template.md → ~/.fremi/framework/artifacts/feature/skills/adr/references/
     reverse-enabler:
-      - EN-01_definition-template.md → ~/.fremi/framework/skills/enabler/skills/definition/references/
-      - EN-02_design-template.md → ~/.fremi/framework/skills/enabler/skills/design/references/
-      - EN-03_plan-template.md → ~/.fremi/framework/skills/enabler/skills/plan/references/
-      - EN-04_closure-template.md → ~/.fremi/framework/skills/enabler/skills/closure/references/
+      - EN-01_definition-template.md → ~/.fremi/framework/artifacts/enabler/skills/definition/references/
+      - EN-02_design-template.md → ~/.fremi/framework/artifacts/enabler/skills/design/references/
+      - EN-03_plan-template.md → ~/.fremi/framework/artifacts/enabler/skills/plan/references/
+      - EN-04_closure-template.md → ~/.fremi/framework/artifacts/enabler/skills/closure/references/
     reverse-bug:
-      - BG-template.md → ~/.fremi/framework/skills/story/skills/bug/references/
+      - BG-template.md → ~/.fremi/framework/artifacts/story/skills/bug/references/
     reverse-product:
-      - iniciativas-template.md → ~/.fremi/framework/skills/product/skills/iniciativas/references/
-      - ideas-template.md → ~/.fremi/framework/skills/product/skills/ideas/references/
-      - planteamiento-template.md → ~/.fremi/framework/skills/product/skills/planteamiento/references/
-      - definition-template.md → ~/.fremi/framework/skills/product/skills/definition/references/
-      - strategies-template.md → ~/.fremi/framework/skills/product/skills/strategies/references/
-      - adr-entry-template.md → ~/.fremi/framework/skills/product/skills/adr/references/
-      - plan-template.md → ~/.fremi/framework/skills/product/skills/plan/references/
+      - iniciativas-template.md → ~/.fremi/framework/artifacts/product/skills/iniciativas/references/
+      - ideas-template.md → ~/.fremi/framework/artifacts/product/skills/ideas/references/
+      - planteamiento-template.md → ~/.fremi/framework/artifacts/product/skills/planteamiento/references/
+      - definition-template.md → ~/.fremi/framework/artifacts/product/skills/definition/references/
+      - strategies-template.md → ~/.fremi/framework/artifacts/product/skills/strategies/references/
+      - adr-entry-template.md → ~/.fremi/framework/artifacts/product/skills/adr/references/
+      - plan-template.md → ~/.fremi/framework/artifacts/product/skills/plan/references/
     reverse-extra:
       # extra no tiene template canónico dedicado hoy (edición manual)
       # → reverse-extra usa una plantilla inline documentada en su SKILL.md

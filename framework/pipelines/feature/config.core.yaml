@@ -16,5 +16,5 @@ invokes:
   - /fremi-feature
 
 default_mode: interactive
-sequence_source: ~/.fremi/framework/skills/feature/config.core.yaml → step_matrix
+sequence_source: ~/.fremi/framework/artifacts/feature/config.core.yaml → step_matrix
 doc: ~/.fremi/framework/pipelines/feature/PIPELINE.md

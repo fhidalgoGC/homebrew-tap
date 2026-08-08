@@ -5,7 +5,7 @@ since: 2026-07-13
 
 # ---------------------------------------------------------------------------
 # Configuración USER-EDITABLE de la capa ENABLER.
-# Vive junto al skill orquestador (~/.fremi/framework/skills/enabler/) porque el
+# Vive junto al skill orquestador (~/.fremi/framework/artifacts/enabler/) porque el
 # usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
 #
 # 4 docs livianos: definition → design → plan → closure.
@@ -17,7 +17,7 @@ active: true
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Snapshot de los defaults del core (framework/skills/enabler/config.core.yaml).
+# Snapshot de los defaults del core (framework/artifacts/enabler/config.core.yaml).
 # Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
 # Elegir un tipo fuera de las opciones válidas es un error de configuración.
 #
@@ -131,7 +131,7 @@ flow:
         - "Bumpea el padre según parent_bump_triggers.enabler_closes (Regla 17)"
 
   # NOTA: la TOPOLOGÍA de paralelismo vive en
-  # `~/.fremi/framework/skills/enabler/config.core.yaml` — es estructura del framework,
+  # `~/.fremi/framework/artifacts/enabler/config.core.yaml` — es estructura del framework,
   # no configuración de usuario. Este archivo (settings) sólo tiene el flag
   # on/off (ver config.yaml master → parallelism.enabled).
 

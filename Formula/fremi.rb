@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.15"
+  version "0.4.16"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.15/fremi-darwin-arm64"
-      sha256 "1aaaaad60eccb4684776493f3b9b4442384c147a2b3d5c9241d8024b96744b4c"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.16/fremi-darwin-arm64"
+      sha256 "6081407ef21c1dbf8e65732a871c141b9166b14e183f1c2478a921e69fb89e9a"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.15/fremi-darwin-x64"
-      sha256 "09b2e48d2c279742b5f5f35b0a1671fd72e9cc65936287f06147cc19490f6d41"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.16/fremi-darwin-x64"
+      sha256 "a91414716580027abd0b52087f216ab679d9811d90af60d707730f225cd2c3db"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.15/fremi-linux-arm64"
-      sha256 "142085c99653a531cd70047a9f4a917bd8037c5f00884b2d086a3670f6e1afd6"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.16/fremi-linux-arm64"
+      sha256 "4de8a07257e26d2a14be61022c79a679b692d5345384ed9ac7a289f080cad6d1"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.15/fremi-linux-x64"
-      sha256 "886662400b87d54659bb7a8326fb66877bcf7ac689166838632e1df46ea5ad24"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.16/fremi-linux-x64"
+      sha256 "31ea74d9b2f3b94a4152f88ccfaaa725a6be4562fe553d3698b5a768d087439d"
     end
   end
 
@@ -37,17 +37,26 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      Removed in v0.4.15:
-        - framework/installs/ folder deleted entirely.
-        - /fremi-install-framework slash-command retired — its symlink
-          is auto-cleaned on the next `fremi install`.
-        - The CLI `fremi install` is now the ONE bootstrap path.
+      Framework layout aligned to SAFe (v0.4.16):
 
-      Rule 24 (framework-installed guard) has no exceptions anymore:
-      every skill requires the CLI to have run first. Reverse skills
-      too — no more chicken-and-egg confusion.
+        framework/artifacts/          SAFe artifact layers
+          ├── product/
+          ├── feature/
+          ├── story/
+          ├── enabler/
+          └── extra/
 
-      Framework total: 50 skills (was 51).
+        framework/skills/             Utility skills (NOT artifacts)
+          ├── tools/
+          └── sync-check/
+
+        framework/reverse-engineering/  Reverse-* skills (unchanged)
+        framework/pipelines/            Pipeline orchestrators (unchanged)
+        framework/settings/             Global config (unchanged)
+
+      Project layout in .fremi/settings/ is UNCHANGED. The install
+      mapping keeps every user file at the same top-level or per-layer
+      folder as before; only the framework's own organization moved.
     EOS
   end
 

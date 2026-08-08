@@ -56,7 +56,13 @@ export async function installSkills(
   }
 
   // Discover all SKILL.md files under the known framework roots
+  // - artifacts/         SAFe-style artifact layers (product, feature,
+  //                      story, enabler, extra) — most skills live here.
+  // - skills/            Utility skills that aren't SAFe artifacts
+  //                      (tools/, sync-check/).
+  // - reverse-engineering/  Reverse-* skills for aligning pre-existing code.
   const skillRoots = [
+    resolve(frameworkContent, "artifacts"),
     resolve(frameworkContent, "skills"),
     resolve(frameworkContent, "reverse-engineering"),
   ];

@@ -40,12 +40,22 @@ interface LayerCore {
 // Layer name comes from the section name (story / feature / product /
 // enabler). Returns null when the core file is missing or malformed.
 function loadLayerCore(layerName: string): LayerCore | null {
-  const corePath = resolve(
+  // Layer configs live under artifacts/ since v0.4.16 (SAFe alignment).
+  // Fall back to the legacy skills/ path so users on older framework
+  // clones still work until they run `fremi update`.
+  const artifactsPath = resolve(
+    getFrameworkContentRoot(),
+    "artifacts",
+    layerName,
+    "config.core.yaml",
+  );
+  const legacyPath = resolve(
     getFrameworkContentRoot(),
     "skills",
     layerName,
     "config.core.yaml",
   );
+  const corePath = existsSync(artifactsPath) ? artifactsPath : legacyPath;
   if (!existsSync(corePath)) return null;
   const doc = loadYamlDoc(corePath);
   if (!doc) return null;

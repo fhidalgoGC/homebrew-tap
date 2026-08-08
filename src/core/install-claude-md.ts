@@ -44,7 +44,7 @@ Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BD
 - User (proyecto):   \`.fremi/settings/agents.user.yaml\` → \`subagent_overrides.fremi-apply.model: opus\`
 - Efectivo:           **\`opus\`** (user gana)
 
-Aplica igual a per-layer: \`.fremi/settings/story/config.user.yaml\` extiende \`~/.fremi/framework/skills/story/config.core.yaml\`.
+Aplica igual a per-layer: \`.fremi/settings/story/config.user.yaml\` extiende \`~/.fremi/framework/artifacts/story/config.core.yaml\`.
 
 **Registry canónico de agents** (no editable, del framework):
 - \`~/.fremi/framework/settings/agents.core.yaml\` — options válidas de subagent + mapping a Claude Code native agent + defaults de model/effort.

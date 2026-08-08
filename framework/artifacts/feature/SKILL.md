@@ -78,7 +78,7 @@ Crear:
 └── definition.md
 ```
 
-1. Leer el template canónico de [`references/definition-template.md`](references/definition-template.md) (relativo a la carpeta del skill: `~/.fremi/framework/skills/feature/references/definition-template.md`).
+1. Leer el template canónico de [`references/definition-template.md`](references/definition-template.md) (relativo a la carpeta del skill: `~/.fremi/framework/artifacts/feature/references/definition-template.md`).
 2. **Capturar versión del padre (Regla 17)**: leer el frontmatter de `docs/works/product/plan.md` y extraer su `version` actual. Este valor se inyecta como `ancestor.version_at_creation` en el frontmatter del nuevo `definition.md`. Si `plan.md` no tiene frontmatter (pre-Regla 17) → asumir `"0.0.0"` y avisar.
 3. Reemplazar los placeholders del template:
    - `{id}` y `{slug}` → con los valores derivados de Paso 2 y 3.

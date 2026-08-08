@@ -114,6 +114,6 @@ Si existen ADRs locales a esta feature:
 ## Referencias
 
 - README del concepto: [`../README.md`](../README.md).
-- Skill del flow normal: [`/fremi-feature`](../../skills/feature/SKILL.md).
+- Skill del flow normal: [`/fremi-feature`](../../artifacts/feature/SKILL.md).
 - Regla 12 (sync-back) — importante al reconstruir feature.
 - Regla 17 (versionado).

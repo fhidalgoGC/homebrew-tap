@@ -113,7 +113,7 @@ Si el usuario decidió omitir `FW-00_explore` y/o `FW-02_proposal`, esas líneas
 
 > **Convención FW-XX_:** el prefijo refleja el orden de ejecución del workflow. La cadena es una progresión de abstracción que siempre baja (abstracto → concreto). **La spec dirige el diseño** (SDD antes que Design). Cada item del JSON trae su `role` y `principio` que se respetan al armar el template.
 
-Cada doc se crea con el template canónico correspondiente de `references/` (relativo a la carpeta del skill: `~/.fremi/framework/skills/story/references/`). Para cada item de `wf_cfg.items[]`, el skill:
+Cada doc se crea con el template canónico correspondiente de `references/` (relativo a la carpeta del skill: `~/.fremi/framework/artifacts/story/references/`). Para cada item de `wf_cfg.items[]`, el skill:
 
 1. Carga `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/FW-01_definition-template.md`).
 2. Reemplaza los placeholders del template:

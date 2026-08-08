@@ -16,7 +16,7 @@ since: 2026-07-16
 #
 # - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.core.yaml → parallelism.enabled`.
 # - Config operativa (docs, flow.sequence, execution_mode, elección de agent
-#   por step) → `~/.fremi/framework/skills/story/config.user.yaml`.
+#   por step) → `~/.fremi/framework/artifacts/story/config.user.yaml`.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------

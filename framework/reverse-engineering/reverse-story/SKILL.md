@@ -41,7 +41,7 @@ Reconstruye la **cadena completa de una story** (FW-00..FW-10) a partir de artif
 ### Paso 0 — Cargar configuración
 
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
-2. Leer `~/.fremi/framework/skills/story/config.user.yaml` — orden de la cadena, docs, conditional_rules.
+2. Leer `~/.fremi/framework/artifacts/story/config.user.yaml` — orden de la cadena, docs, conditional_rules.
 3. Leer `config.yaml` master — versioning, phase_rules.
 
 ### Paso 1 — Identificar el trabajo huérfano
@@ -247,6 +247,6 @@ Un `/fremi-sync-check` posterior no puede distinguir docs reverse-engineered —
 ## Referencias
 
 - README del concepto: [`../README.md`](../README.md).
-- Skill del flow normal: [`/fremi-story`](../../skills/story/SKILL.md).
+- Skill del flow normal: [`/fremi-story`](../../artifacts/story/SKILL.md).
 - Regla 17 (versionado) — [`../../rules/workflow.md`](../../rules/workflow.md).
 - Regla 10 (docs son fuente de verdad) — advertencia importante.

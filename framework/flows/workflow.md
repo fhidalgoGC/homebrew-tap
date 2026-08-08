@@ -42,9 +42,9 @@ Cada capa (y cada scope) tiene su archivo `flow.*.md` con:
 | **Feature** (línea de trabajo grande) | [`flow.feature.md`](./flow.feature.md) | `/fremi-feature` | [`config.feature.yaml`](../settings/config.feature.yaml) |
 | **Story** (unidad de valor — 11 docs) | [`flow.story.md`](./flow.story.md) | `/fremi-story` | [`config.story.yaml`](../settings/config.story.yaml) |
 | **Enabler** (trabajo habilitador) | [`flow.enabler.md`](./flow.enabler.md) | `/fremi-enabler` | [`config.enabler.yaml`](../settings/config.enabler.yaml) |
-| **Bug scope story** (bug local) | [`flow.bug.story.md`](./flow.bug.story.md) | `/fremi-story-bug` | [`config.bug.story.yaml`](../skills/story/skills/bug/config.core.yaml) |
-| **Bug scope feature** (bug transversal) | [`flow.bug.feature.md`](./flow.bug.feature.md) | `/fremi-feature-bug` | [`config.bug.feature.yaml`](../skills/feature/skills/bug/config.core.yaml) |
-| **Extra** (fuera del flujo — tooling) | [`flow.extra.md`](./flow.extra.md) | *(sin skill)* | [`config.extra.yaml`](../skills/extra/config.core.yaml) |
+| **Bug scope story** (bug local) | [`flow.bug.story.md`](./flow.bug.story.md) | `/fremi-story-bug` | [`config.bug.story.yaml`](../artifacts/story/skills/bug/config.core.yaml) |
+| **Bug scope feature** (bug transversal) | [`flow.bug.feature.md`](./flow.bug.feature.md) | `/fremi-feature-bug` | [`config.bug.feature.yaml`](../artifacts/feature/skills/bug/config.core.yaml) |
+| **Extra** (fuera del flujo — tooling) | [`flow.extra.md`](./flow.extra.md) | *(sin skill)* | [`config.extra.yaml`](../artifacts/extra/config.core.yaml) |
 
 ---
 

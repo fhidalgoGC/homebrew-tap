@@ -134,5 +134,5 @@ Consultar `parent_bump_triggers.enabler_closes`:
 ## Referencias
 
 - README del concepto: [`../README.md`](../README.md).
-- Skills del flow normal: [`/fremi-enabler`](../../skills/enabler/SKILL.md) + sub-skills.
+- Skills del flow normal: [`/fremi-enabler`](../../artifacts/enabler/SKILL.md) + sub-skills.
 - Regla 17 (versionado).

@@ -1,7 +1,7 @@
 # Flujo — Capa FEATURE
 
-> **Config operativa:** [`~/.fremi/framework/skills/feature/config.user.yaml`](../settings/config.feature.yaml)
-> **Orquestador:** [`/fremi-feature`](../skills/feature/SKILL.md)
+> **Config operativa:** [`~/.fremi/framework/artifacts/feature/config.user.yaml`](../settings/config.feature.yaml)
+> **Orquestador:** [`/fremi-feature`](../artifacts/feature/SKILL.md)
 > **Rol:** línea de trabajo grande dentro del producto que contiene múltiples user stories.
 
 ---

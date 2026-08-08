@@ -27,5 +27,5 @@ invokes:
   - /fremi-story-closure
 
 default_mode: interactive
-sequence_source: ~/.fremi/framework/skills/story/config.core.yaml → step_matrix
+sequence_source: ~/.fremi/framework/artifacts/story/config.core.yaml → step_matrix
 doc: ~/.fremi/framework/pipelines/story/PIPELINE.md

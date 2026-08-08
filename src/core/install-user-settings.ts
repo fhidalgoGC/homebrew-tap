@@ -17,12 +17,14 @@ export interface InstallUserSettingsReport {
  * Copies every `*.user.yaml` file from the framework content tree into the
  * project's `.fremi/settings/` directory, mirroring the "meaningful" path:
  *
- *   framework/settings/X.user.yaml        → .fremi/settings/X.user.yaml
- *   framework/skills/<layer>/X.user.yaml  → .fremi/settings/<layer>/X.user.yaml
+ *   framework/settings/X.user.yaml               → .fremi/settings/X.user.yaml
+ *   framework/artifacts/<layer>/X.user.yaml      → .fremi/settings/<layer>/X.user.yaml
+ *   framework/artifacts/<layer>/skills/<cat>/... → .fremi/settings/config.<cat>.<layer>.user.yaml
  *
- * The framework/settings/ prefix and framework/skills/ prefix are both
- * stripped so top-level settings live "afuera" and per-layer configs live
- * inside a folder named after the layer.
+ * See mapToDestination() for the exact rules. Top-level settings live
+ * "afuera" and per-layer configs live inside a folder named after the
+ * layer; deep-nested sub-skill configs get flattened to composite names
+ * so the project's settings folder stays discoverable.
  *
  * Idempotent: existing destination files are NEVER overwritten. Users own
  * their per-project settings once installed; framework changes to defaults
@@ -91,7 +93,7 @@ function walkForUserYaml(
  * `.fremi/settings/`. Returns null if the source is not under a recognized
  * prefix (settings/ or skills/).
  *
- * Nested sub-skill configs like `skills/story/skills/bug/config.user.yaml`
+ * Nested sub-skill configs like `artifacts/story/skills/bug/config.user.yaml`
  * are FLATTENED to a composite name at the top-level of `.fremi/settings/`
  * (config.bug.story.user.yaml) so they stay grouped with the rest of the
  * user files and remain discoverable by `fremi setting`. The framework
@@ -102,10 +104,14 @@ function mapToDestination(relPath: string): string | null {
   if (relPath.startsWith("settings/")) {
     return relPath.slice("settings/".length);
   }
-  if (relPath.startsWith("skills/")) {
-    // Match deep-nested sub-skill configs: skills/<layer>/skills/<category>/config.user.yaml
+  // artifacts/ prefix — SAFe-style layers (product, feature, story,
+  // enabler, extra). Uses the same mapping rules the legacy skills/
+  // prefix used to have; skills/ under here now only holds utility
+  // skills (tools, sync-check) which don't produce copyable user files.
+  if (relPath.startsWith("artifacts/")) {
+    // Deep-nested sub-skill configs: artifacts/<layer>/skills/<category>/config.user.yaml
     const nested = relPath.match(
-      /^skills\/([^/]+)\/skills\/([^/]+)\/config\.user\.yaml$/,
+      /^artifacts\/([^/]+)\/skills\/([^/]+)\/config\.user\.yaml$/,
     );
     if (nested) {
       const [, layer, category] = nested;
@@ -114,14 +120,20 @@ function mapToDestination(relPath: string): string | null {
     // Standalone-category layers (extra) — no orchestrator sub-skills.
     // Flatten to top-level composite name to keep the project's
     // .fremi/settings/ folder flat + discoverable.
-    //   skills/extra/config.user.yaml → config.extra.user.yaml
+    //   artifacts/extra/config.user.yaml → config.extra.user.yaml
     const standalone = relPath.match(
-      /^skills\/(extra)\/config\.user\.yaml$/,
+      /^artifacts\/(extra)\/config\.user\.yaml$/,
     );
     if (standalone) {
       const [, category] = standalone;
       return `config.${category}.user.yaml`;
     }
+    return relPath.slice("artifacts/".length);
+  }
+  // Legacy skills/ prefix — no artifact configs live here anymore
+  // (tools/ and sync-check/ don't have user.yaml files), but keep the
+  // fall-through in case a user file lands here in future.
+  if (relPath.startsWith("skills/")) {
     return relPath.slice("skills/".length);
   }
   return null;

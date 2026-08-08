@@ -84,7 +84,7 @@ feature/definition → (feature/decisions opcional)
 ```
 [FW-00_explore] → FW-01_definition → [FW-02_proposal] → FW-03_scope → FW-04_bdd-userstories → FW-05_sdd-spec → FW-06_design → FW-07_tdd-plan → FW-08_plan → FW-09_checkwork → FW-10_closure
 ```
-Docs entre corchetes `[...]` son **condicionales**: obligatorios cuando aplican los criterios declarados en `~/.fremi/framework/skills/story/config.user.yaml → conditional_rules`, opcionales en el resto. Ver Regla 16 abajo.
+Docs entre corchetes `[...]` son **condicionales**: obligatorios cuando aplican los criterios declarados en `~/.fremi/framework/artifacts/story/config.user.yaml → conditional_rules`, opcionales en el resto. Ver Regla 16 abajo.
 
 Antes de proponer trabajar en la etapa N, verificar que N-1 existe y tiene contenido.
 
@@ -915,7 +915,7 @@ Resultado: `fremi-<capa>-<sub>` (ej: `fremi-story-explore`, `fremi-product-adr`,
 ### Justificación
 
 - **Prefijo `fremi-` global**: aísla los skills reusables del framework de los skills específicos del proyecto y garantiza que el usuario reconoce visualmente qué skill viene de la metodología. También simplifica el sweep del installer.
-- **Jerarquía física por capa**: un ingeniero que abre `~/.fremi/framework/skills/story/` ve inmediatamente todos los skills que operan sobre stories, sin tener que buscar en 20+ carpetas planas.
+- **Jerarquía física por capa**: un ingeniero que abre `~/.fremi/framework/artifacts/story/` ve inmediatamente todos los skills que operan sobre stories, sin tener que buscar en 20+ carpetas planas.
 
 ### Ejemplos
 

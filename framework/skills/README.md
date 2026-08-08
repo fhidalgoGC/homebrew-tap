@@ -1,8 +1,10 @@
-# `~/.fremi/framework/skills/` — Skills invocables del proyecto
+# `~/.fremi/framework/skills/` — Skills utilitarios (no-artifact)
 
-> **Esta carpeta es configuración para los agentes (IA).** Cada subcarpeta contiene un skill ejecutable que el usuario invoca con `/fremi-<nombre>`. La IA carga el `SKILL.md` correspondiente y sigue su procedimiento.
+> **Esta carpeta contiene skills que NO son artifacts SAFe.** Solo utilidades transversales que no encajan en el flujo product → feature → story → enabler.
 >
-> Este README es para humanos: explica qué skills hay, qué hace cada uno, y cómo agregar uno nuevo.
+> Los skills que SÍ son artifacts SAFe viven en [`../artifacts/`](../artifacts/) (product, feature, story, enabler, extra). Cada uno con la misma anatomía (SKILL.md + config.core.yaml + config.user.yaml + skills/ + references/).
+>
+> Este README es para humanos: explica qué skills hay acá, qué hace cada uno, y cómo agregar uno nuevo.
 
 ## Convención global — prefijo `fremi-`
 
@@ -16,19 +18,18 @@ El skill el CLI `fremi install` es el responsable de asegurar que todo lo que se
 
 ---
 
-## Contenido
-
-### Orquestadores por capa
+## Contenido de esta carpeta (skills/)
 
 | Skill | Comando | Propósito |
 |---|---|---|
-| `product/` | `/fremi-product [sub]` | Orquestador de la capa producto — encolan las 7 sub-skills (`fremi-product-iniciativas` → `fremi-product-plan`). |
-| `feature/` | `/fremi-feature <nombre>` | Crea una nueva feature (`FT-XX_<slug>/`) con `definition.md`. Valida precondiciones de capa producto. |
-| `story/` | `/fremi-story <FT-XX> <nombre>` | Crea una nueva user story (`HU-XX_<slug>/`) con la cadena FW-01..FW-10 en el orden definido por `methodology.core.yaml`. |
-| `enabler/` | `/fremi-enabler <nombre> [--scope]` | Crea un enabler técnico (global / por feature / por story) con la cadena `EN-01..EN-04`. |
 | `tools/` | `/fremi-tools <acción> <tipo> <name>` | Meta-orquestador de scaffolding de assets bajo `docs/project/`. Sub-skills: `fremi-add-{skill,hook,rule,mcp}`, `fremi-delete-{skill,hook,rule,mcp}`. |
+| `sync-check/` | `/fremi-sync-check` | Audita sincronía entre capas (producto ↔ feature ↔ story) + coherencia de versionado ancestral. Regla 12 + Regla 17. |
 
-### Sub-skills invocables
+## Contenido de `../artifacts/`
+
+Artifacts SAFe (product, feature, story, enabler, extra) — flujo lineal Product Discovery + SDD + BDD + TDD. Cada uno con orquestador + sub-skills. Ver [`../artifacts/`](../artifacts/) para el detalle.
+
+### Sub-skills por capa (viven bajo `../artifacts/<layer>/skills/<sub>/`)
 
 | Capa | Sub-skills |
 |---|---|
@@ -36,13 +37,7 @@ El skill el CLI `fremi install` es el responsable de asegurar que todo lo que se
 | Feature | `fremi-feature-adr`, `fremi-feature-bug` |
 | Story | `fremi-story-explore`, `fremi-story-definition`, `fremi-story-proposal`, `fremi-story-scope`, `fremi-story-bdd`, `fremi-story-sdd`, `fremi-story-design`, `fremi-story-tdd`, `fremi-story-plan`, `fremi-story-task`, `fremi-story-checkwork`, `fremi-story-verify`, `fremi-story-closure-check`, `fremi-story-closure`, `fremi-story-adr`, `fremi-story-bug` |
 | Enabler | `fremi-enabler-definition`, `fremi-enabler-design`, `fremi-enabler-plan`, `fremi-enabler-closure` |
-| Tools | `fremi-add-skill`, `fremi-add-hook`, `fremi-add-rule`, `fremi-add-mcp`, `fremi-delete-skill`, `fremi-delete-hook`, `fremi-delete-rule`, `fremi-delete-mcp` |
-
-### Globales / auditoría
-
-| Skill | Comando | Propósito |
-|---|---|---|
-| `sync-check/` | `/fremi-sync-check` | Audita la sincronía entre capas (producto ↔ feature ↔ story). Detecta divergencias para sync-back. Regla 12. |
+| Tools (acá en `skills/`) | `fremi-add-skill`, `fremi-add-hook`, `fremi-add-rule`, `fremi-add-mcp`, `fremi-delete-skill`, `fremi-delete-hook`, `fremi-delete-rule`, `fremi-delete-mcp` |
 
 ### Reverse-engineering
 

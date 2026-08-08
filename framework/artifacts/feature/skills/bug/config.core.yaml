@@ -162,4 +162,4 @@ references:
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules: ~/.fremi/framework/rules/workflow.md
   regla_8: "~/.fremi/framework/rules/workflow.md § Regla 8 (test rojo primero)"
-  sibling_scope: ~/.fremi/framework/skills/story/skills/bug/config.core.yaml
+  sibling_scope: ~/.fremi/framework/artifacts/story/skills/bug/config.core.yaml

@@ -138,6 +138,6 @@ Reverse-product es útil para **inventariar** el producto tal como está — no 
 ## Referencias
 
 - README del concepto: [`../README.md`](../README.md).
-- Skills del flow normal: [`/fremi-product`](../../skills/product/SKILL.md) + sub-skills.
+- Skills del flow normal: [`/fremi-product`](../../artifacts/product/SKILL.md) + sub-skills.
 - Regla 4 (Discovery antes de formalización) — se está aplicando al revés.
 - Regla 17 (versionado).

@@ -73,7 +73,7 @@ Si la story no existe → abortar y sugerir `/fremi-story` primero (Regla 1).
 ### Paso 3 — Cargar template
 
 1. Cargar `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md` — **este skill es dueño del template canónico**.
-2. `~/.fremi/framework/skills/story/references/FW-00_explore-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
+2. `~/.fremi/framework/artifacts/story/references/FW-00_explore-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
 3. Si el template local no existe → generar contenido mínimo derivado de `phase_rules.explore` + estructura fija ("Contexto", "Alternativas", "Hallazgos", "Preguntas", "Impacto en proposal") y avisar al usuario que hay que reponer el template canónico.
 
 ### Paso 4 — Poblar el explore
@@ -131,4 +131,4 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.y
 - `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=explore]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 16 (condicionales), Regla 3b (bifurcaciones), Regla 6 (SDD dirige diseño).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md`.
-- `~/.fremi/framework/skills/story/references/FW-00_explore-template.md` es symlink que delega acá.
+- `~/.fremi/framework/artifacts/story/references/FW-00_explore-template.md` es symlink que delega acá.

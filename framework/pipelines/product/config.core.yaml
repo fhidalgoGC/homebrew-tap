@@ -9,7 +9,7 @@ since: 2026-08-07
 #
 # Fuente de verdad ESTRUCTURAL del pipeline. NO user-editable.
 # Declara qué sub-skills invoca en qué orden y su modo default. La
-# SECUENCIA REAL vive en ~/.fremi/framework/skills/product/config.core.yaml
+# SECUENCIA REAL vive en ~/.fremi/framework/artifacts/product/config.core.yaml
 # → step_matrix. Este archivo enumera los skills orquestados y su default
 # mode; NO duplica la secuencia paso a paso.
 # ===========================================================================
@@ -30,7 +30,7 @@ default_mode: auto
 # Fuente de la secuencia paso a paso. No la duplicamos acá — el pipeline
 # LA LEE de este archivo al ejecutarse. Si el step_matrix cambia, el
 # pipeline se adapta automáticamente.
-sequence_source: ~/.fremi/framework/skills/product/config.core.yaml → step_matrix
+sequence_source: ~/.fremi/framework/artifacts/product/config.core.yaml → step_matrix
 
 # Archivo doc.
 doc: ~/.fremi/framework/pipelines/product/PIPELINE.md

@@ -35,7 +35,7 @@ Crea un archivo nuevo en la capa **EXTRA** (Regla 14) — trabajo fuera del fluj
 1. Normalizar `<slug>` a kebab-case.
 2. Validar regex `^[a-z][a-z0-9-]*$` y largo ≤ 60.
 3. Verificar Regla 24 — framework instalado (`.claude/skills/fremi-story` es symlink, `CLAUDE.md` referencia rules).
-4. Verificar `.fremi/settings/extra/config.user.yaml → active: true` (o `~/.fremi/framework/skills/extra/config.core.yaml` como fallback).
+4. Verificar `.fremi/settings/extra/config.user.yaml → active: true` (o `~/.fremi/framework/artifacts/extra/config.core.yaml` como fallback).
 
 ### Paso 1 — Confirmar clasificación (Regla 14)
 
@@ -99,8 +99,8 @@ Próximos pasos manuales (el skill NO los automatiza — Regla 14):
   3. (opcional) Agregá `notes-learnings` si hay gotchas para otros.
 
 Referencias:
-  - Config: ~/.fremi/framework/skills/extra/config.core.yaml
-  - Template: ~/.fremi/framework/skills/extra/references/EX-NN-template.md
+  - Config: ~/.fremi/framework/artifacts/extra/config.core.yaml
+  - Template: ~/.fremi/framework/artifacts/extra/references/EX-NN-template.md
   - Regla 14: ~/.fremi/framework/rules/workflow.md
 ```
 

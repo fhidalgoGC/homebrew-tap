@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa FEATURE. Crea la feature (fo
 
 # /fremi-pipeline-feature — Pipeline capa FEATURE
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/feature/config.user.yaml → flow.sequence`](../../skills/feature/config.user.yaml), con extensiones para sync-back automático a producto (Regla 12) y bump del plan padre (Regla 17).
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/artifacts/feature/config.user.yaml → flow.sequence`](../../artifacts/feature/config.user.yaml), con extensiones para sync-back automático a producto (Regla 12) y bump del plan padre (Regla 17).
 
 **Fuente de verdad de la secuencia:** `config.feature.yaml`. Si un step cambia allí, este pipeline se adapta.
 
@@ -126,8 +126,8 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/feature/config.user.yaml`](../../skills/feature/config.user.yaml)
+- Config operativa: [`~/.fremi/framework/artifacts/feature/config.user.yaml`](../../artifacts/feature/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 3b, 12, 17, 20.
 - Flujo descriptivo: [`~/.fremi/framework/flows/flow.feature.md`](../../flows/flow.feature.md)
-- Skill manual: [`/fremi-feature`](../../skills/feature/SKILL.md)
+- Skill manual: [`/fremi-feature`](../../artifacts/feature/SKILL.md)
 - Pipeline encadenable: [`/fremi-pipeline-story`](pipeline.story.md)

@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa PRODUCTO. Corre la secuencia
 
 # /fremi-pipeline-product — Pipeline capa PRODUCTO
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/product/config.user.yaml → flow.sequence`](../../skills/product/config.user.yaml).
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/artifacts/product/config.user.yaml → flow.sequence`](../../artifacts/product/config.user.yaml).
 
 **Fuente de verdad de la secuencia:** `config.product.yaml`. Este pipeline **NO duplica** la secuencia — la lee y la respeta. Si un step cambia allí, este pipeline se adapta automáticamente.
 
@@ -115,8 +115,8 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/product/config.user.yaml`](../../skills/product/config.user.yaml)
+- Config operativa: [`~/.fremi/framework/artifacts/product/config.user.yaml`](../../artifacts/product/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 3b, 4, 12, 17.
 - Flujo descriptivo: [`~/.fremi/framework/flows/flow.product.md`](../../flows/flow.product.md)
-- Orquestador manual: [`/fremi-product`](../../skills/product/SKILL.md)
-- Sub-skills: `~/.fremi/framework/skills/product/skills/`
+- Orquestador manual: [`/fremi-product`](../../artifacts/product/SKILL.md)
+- Sub-skills: `~/.fremi/framework/artifacts/product/skills/`

@@ -5,7 +5,7 @@ description: Pipeline de auto-ejecución de la capa STORY. Corre la cadena de pl
 
 # /fremi-pipeline-story — Pipeline capa STORY
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/skills/story/config.user.yaml → flow.sequence`](../../skills/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
+Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/artifacts/story/config.user.yaml → flow.sequence`](../../artifacts/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
 
 **Fuente de verdad de la secuencia:** `config.story.yaml`. Si un step cambia allí, este pipeline se adapta.
 
@@ -162,9 +162,9 @@ Al terminar, la IA reporta:
 
 ## Referencias
 
-- Config operativa: [`~/.fremi/framework/skills/story/config.user.yaml`](../../skills/story/config.user.yaml)
+- Config operativa: [`~/.fremi/framework/artifacts/story/config.user.yaml`](../../artifacts/story/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
 - Flujo descriptivo: [`~/.fremi/framework/flows/flow.story.md`](../../flows/flow.story.md)
-- Orquestador manual: [`/fremi-story`](../../skills/story/SKILL.md)
-- Sub-skills: `~/.fremi/framework/skills/story/skills/`
+- Orquestador manual: [`/fremi-story`](../../artifacts/story/SKILL.md)
+- Sub-skills: `~/.fremi/framework/artifacts/story/skills/`
 - Pipeline padre: [`/fremi-pipeline-feature`](pipeline.feature.md) (puede encadenar este pipeline con `--first-story`)

@@ -1,7 +1,7 @@
 # Flujo — Capa BUG (scope: FEATURE)
 
-> **Config operativa:** [`~/.fremi/framework/skills/feature/skills/bug/config.core.yaml`](../skills/feature/skills/bug/config.core.yaml)
-> **Skill:** [`/fremi-feature-bug`](../skills/feature/skills/bug/SKILL.md)
+> **Config operativa:** [`~/.fremi/framework/artifacts/feature/skills/bug/config.core.yaml`](../artifacts/feature/skills/bug/config.core.yaml)
+> **Skill:** [`/fremi-feature-bug`](../artifacts/feature/skills/bug/SKILL.md)
 > **Rol:** defecto **transversal a varias stories** de una feature, o que afecta el contrato de feature sin trazar limpio a UNA story específica.
 >
 > Para bugs locales a una story → ver [`flow.bug.story.md`](./flow.bug.story.md).
@@ -164,7 +164,7 @@ FT-XX/bugs/BG-XX_<slug>.md  (snapshot)
 
 ## Referencias
 
-- Config operativa: [`config.bug.feature.yaml`](../skills/feature/skills/bug/config.core.yaml)
+- Config operativa: [`config.bug.feature.yaml`](../artifacts/feature/skills/bug/config.core.yaml)
 - Sibling scope: [`flow.bug.story.md`](./flow.bug.story.md)
 - Regla 8 (test rojo primero): [`workflow.md`](../rules/workflow.md)
-- Template canónico: [`~/.fremi/framework/skills/feature/skills/bug/references/BG-template.md`](../skills/feature/skills/bug/references/BG-template.md)
+- Template canónico: [`~/.fremi/framework/artifacts/feature/skills/bug/references/BG-template.md`](../artifacts/feature/skills/bug/references/BG-template.md)

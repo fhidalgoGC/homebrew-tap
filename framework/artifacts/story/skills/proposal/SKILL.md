@@ -86,7 +86,7 @@ Sin ADR, ninguna decision debe quedar registrada en el proposal.
 ### Paso 4 — Cargar template y poblar
 
 1. Cargar `~/.fremi/framework/skills/proposal/references/FW-02_proposal-template.md` — **este skill es dueño del template canónico**.
-2. `~/.fremi/framework/skills/story/references/FW-02_proposal-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
+2. `~/.fremi/framework/artifacts/story/references/FW-02_proposal-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
 3. Si el template local no existe → generar estructura mínima con las secciones obligatorias de `phase_rules.proposal` y avisar al usuario que hay que reponerlo.
 2. Aplicar `phase_rules.proposal` como checklist:
    - Estructura fija: Intent, Scope (resumen), Approach, Decisions, Known Limitations, Impact, Acceptance Criteria, Rollout, Risk.
@@ -146,4 +146,4 @@ Marcar en `FW-09_checkwork.md` (o el filename resuelto) que el proposal fue crea
 - `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=proposal]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 3b (bifurcaciones), Regla 16 (condicionales), Regla 6 (SDD dirige).
 - **Template canónico** (dueño): `~/.fremi/framework/skills/proposal/references/FW-02_proposal-template.md`.
-- `~/.fremi/framework/skills/story/references/FW-02_proposal-template.md` es symlink que delega acá.
+- `~/.fremi/framework/artifacts/story/references/FW-02_proposal-template.md` es symlink que delega acá.

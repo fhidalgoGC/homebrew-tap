@@ -5,7 +5,7 @@ since: 2026-07-13
 
 # ---------------------------------------------------------------------------
 # Configuración USER-EDITABLE de la capa STORY.
-# Vive junto al skill orquestador (~/.fremi/framework/skills/story/) porque el
+# Vive junto al skill orquestador (~/.fremi/framework/artifacts/story/) porque el
 # usuario elige acá cómo trabajar. La ESTRUCTURA (topología, DAG, agent
 # options) vive en config.core.yaml — user NO edita eso.
 #
@@ -53,7 +53,7 @@ execution_mode:
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Snapshot de los defaults del core (framework/skills/story/config.core.yaml).
+# Snapshot de los defaults del core (framework/artifacts/story/config.core.yaml).
 # Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
 # Elegir un valor fuera de las opciones válidas es un error de configuración
 # (el step no se ejecuta hasta corregirlo).
@@ -292,7 +292,7 @@ flow:
 
   # NOTA: la TOPOLOGÍA de paralelismo (qué steps pueden concurrir, qué items
   # internos son paralelizables, qué instancias pueden convivir) vive en
-  # `~/.fremi/framework/skills/story/config.core.yaml` — es estructura del framework,
+  # `~/.fremi/framework/artifacts/story/config.core.yaml` — es estructura del framework,
   # no configuración de usuario. Este archivo (settings) sólo tiene el flag
   # on/off de paralelismo (ver config.yaml master → parallelism.enabled).
 

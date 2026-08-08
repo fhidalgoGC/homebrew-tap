@@ -1,6 +1,6 @@
 # Flujo — Capa EXTRA
 
-> **Config operativa:** [`~/.fremi/framework/skills/extra/config.core.yaml`](../skills/extra/config.core.yaml)
+> **Config operativa:** [`~/.fremi/framework/artifacts/extra/config.core.yaml`](../artifacts/extra/config.core.yaml)
 > **Skill:** ninguno — edición manual del archivo.
 > **Rol:** trabajo fuera del flujo lineal (tooling, scripts, IaC, refactor de utilidades, mejoras a la metodología). NO usar como excusa para saltar el flujo cuando el trabajo SÍ es spec-driven (Regla 14).
 
@@ -148,6 +148,6 @@ Como no hay padre a bumpear, `EX-NN` no dispara `parent_bump_triggers`. Se firma
 
 ## Referencias
 
-- Config operativa: [`config.extra.yaml`](../skills/extra/config.core.yaml)
+- Config operativa: [`config.extra.yaml`](../artifacts/extra/config.core.yaml)
 - Regla 14 (trabajo fuera del flujo): [`workflow.md`](../rules/workflow.md)
 - Ejemplos existentes: `docs/works/extra/EX-*.md`

@@ -133,6 +133,6 @@ Si nadie recuerda el bug ni el contexto, la reconstrucción es puramente basada 
 ## Referencias
 
 - README del concepto: [`../README.md`](../README.md).
-- Skills del flow normal: [`/fremi-story-bug`](../../skills/story/skills/bug/SKILL.md), [`/fremi-feature-bug`](../../skills/feature/skills/bug/SKILL.md).
+- Skills del flow normal: [`/fremi-story-bug`](../../artifacts/story/skills/bug/SKILL.md), [`/fremi-feature-bug`](../../artifacts/feature/skills/bug/SKILL.md).
 - Regla 8 (test rojo primero) — inconstruible retroactivamente.
 - Regla 17 (versionado).

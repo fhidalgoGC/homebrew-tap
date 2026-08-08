@@ -173,10 +173,18 @@ function symlinkSkillsIntoPlugin(
   const skillsDst = join(pluginRoot, "skills");
   mkdirSync(skillsDst, { recursive: true });
 
+  // Discovery roots:
+  //   artifacts/          SAFe-style artifact layers (product, feature,
+  //                       story, enabler, extra) — the bulk of the skills.
+  //   skills/             Utility skills (tools/, sync-check/).
+  //   reverse-engineering/  Reverse-* skills for aligning pre-existing code.
+  //
+  // The old `installs/` root was removed in v0.4.15 along with the
+  // `/fremi-install-framework` slash-command.
   const skillRoots = [
+    resolve(frameworkContent, "artifacts"),
     resolve(frameworkContent, "skills"),
     resolve(frameworkContent, "reverse-engineering"),
-    resolve(frameworkContent, "installs"),
   ];
 
   const discovered: Array<{ name: string; skillDir: string }> = [];
