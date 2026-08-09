@@ -2,9 +2,11 @@
 
 Este documento es el **índice general** del flujo de trabajo. Cada capa/scope tiene su flow dedicado en un archivo separado.
 
+> **Convención de tokens** — los tokens con curly braces (`{workflow.scope}`, `{enabler.design}`, `{bug.filename}`, `{extra.filename}`, `{feature.id}`, `{story.folder}`, etc.) son **placeholders resueltos por methodology**. Al ejecutarse un skill, se leen contra `~/.fremi/framework/settings/methodology.user.yaml`. Con la nomenclatura default resuelven a `{workflow.scope}`, `{enabler.design}`, `BG-XX_<slug>.md`, `FT-01`, `HU-01_<slug>`, etc. Si el usuario cambia prefijo o padding, los skills se adaptan; estos docs no.
+
 El flujo combina **Product Discovery + SDD + BDD + TDD** organizado en **3 capas + artefactos opcionales**:
 
-```
+`
 PRODUCTO  ──►  FEATURE  ──►  USER STORY  ──►  CÓDIGO
                     │            │
                     │            └── bugs (story-scope) + enablers (story-scope)
@@ -14,7 +16,7 @@ PRODUCTO  ──►  FEATURE  ──►  USER STORY  ──►  CÓDIGO
                     Además, transversales:
                     ─── enablers (global)
                     ─── extras (fuera del flujo)
-```
+`
 
 ---
 
@@ -50,7 +52,7 @@ Cada capa (y cada scope) tiene su archivo `flow.*.md` con:
 
 ## Estructura de `docs/works/`
 
-```
+`
 docs/works/
 ├── product/                                  ← capa PRODUCTO — flow.product.md
 │   ├── iniciativas.md                        ← discovery: objetivos estratégicos
@@ -66,35 +68,35 @@ docs/works/
 │       ├── definition.md
 │       ├── decisions.md                      ← (condicional) ADRs locales
 │       ├── enablers/EN-XX_<slug>/            ← (opcional) enablers feature-scope
-│       ├── bugs/BG-XX_<slug>.md              ← (opcional) bugs feature-scope
+│       ├── bugs/`{bug.filename}`              ← (opcional) bugs feature-scope
 │       └── user-stories/
 │           └── HU-XX_<slug>/                 ← capa USER STORY — flow.story.md
-│               ├── FW-00_explore.md          ← (condicional) investigación previa
-│               ├── FW-01_definition.md       ← problema / por qué
-│               ├── FW-02_proposal.md         ← (condicional) intent + approach
-│               ├── FW-03_scope.md            ← límites
-│               ├── FW-04_bdd-userstories.md  ← qué OBSERVABLE
-│               ├── FW-05_sdd-spec.md         ← qué CONTRACTUAL
-│               ├── FW-06_design.md           ← cómo ESTRUCTURAL
-│               ├── FW-07_tdd-plan.md         ← cómo se VERIFICA
-│               ├── FW-08_plan.md             ← en qué ORDEN
-│               ├── FW-09_checkwork.md        ← estado EN VIVO (living)
-│               ├── FW-10_closure.md          ← cierre + sign-off
+│               ├── `{workflow.explore}`          ← (condicional) investigación previa
+│               ├── `{workflow.definition}`       ← problema / por qué
+│               ├── `{workflow.proposal}`         ← (condicional) intent + approach
+│               ├── `{workflow.scope}`            ← límites
+│               ├── `{workflow.bdd}`  ← qué OBSERVABLE
+│               ├── `{workflow.sdd}`         ← qué CONTRACTUAL
+│               ├── `{workflow.design}`           ← cómo ESTRUCTURAL
+│               ├── `{workflow.tdd}`         ← cómo se VERIFICA
+│               ├── `{workflow.plan}`             ← en qué ORDEN
+│               ├── `{workflow.checkwork}`        ← estado EN VIVO (living)
+│               ├── `{workflow.closure}`          ← cierre + sign-off
 │               ├── decisions.md              ← (opcional) ADRs locales a la story
-│               ├── bugs/BG-XX_<slug>.md      ← (opcional) bugs story-scope
+│               ├── bugs/`{bug.filename}`      ← (opcional) bugs story-scope
 │               └── enablers/EN-XX_<slug>/    ← (opcional) enablers story-scope
 │
 ├── enablers/                                 ← capa ENABLER global — flow.enabler.md
 │   └── EN-XX_<slug>/
-│       ├── EN-01_definition.md
-│       ├── EN-02_design.md
-│       ├── EN-03_plan.md
-│       └── EN-04_closure.md
+│       ├── `{enabler.definition}`
+│       ├── `{enabler.design}`
+│       ├── `{enabler.plan}`
+│       └── `{enabler.closure}`
 │
 └── extra/                                    ← capa EXTRA (fuera del flujo) — flow.extra.md
     ├── EX-01_<slug>.md
     └── EX-02_<slug>.md
-```
+`
 
 ---
 
@@ -105,11 +107,11 @@ docs/works/
 - **Features**: `FT-XX_<slug>` — ID secuencial global, 2 dígitos.
 - **Stories**: `HU-XX_<slug>` — ID secuencial local a la feature, 2 dígitos.
 - **Docs de story**: `FW-XX_<name>.md` (FW-00..FW-10) — 11 docs.
-- **Tasks**: `task-XXX` — 3 dígitos, locales a `FW-08_plan.md`.
+- **Tasks**: `task-XXX` — 3 dígitos, locales a `{workflow.plan}`.
 - **ADRs**: `ADR-NNN` — 3 dígitos, **numeración GLOBAL** compartida entre `product/decisions.md`, `FT-XX/decisions.md` y `HU-YY/decisions.md`.
 - **Enablers**: `EN-XX_<slug>` — 2 dígitos, global al proyecto.
-- **Bugs**: `BG-XX_<slug>.md` — 2 dígitos, local al scope (story o feature).
-- **Extras**: `EX-NN_<slug>.md` — global al proyecto.
+- **Bugs**: `{bug.filename}` — 2 dígitos, local al scope (story o feature).
+- **Extras**: `{extra.filename}` — global al proyecto.
 - **IDs internos de story**: `CA-XXX` (criterios), `SC-XXX` (escenarios BDD), `TC-XXX` (tests). 3 dígitos, locales.
 - **Iniciativas**: `init-XXX` — 3 dígitos, globales.
 
@@ -121,9 +123,9 @@ docs/works/
 
 Cada artefacto sólo puede consumir decisiones de los **anteriores**. Nunca de uno **posterior**. Progresión de abstracción:
 
-```
+`
 [explore] → definition → [proposal] → scope → BDD → SDD → Design → TDD → plan → checkwork → closure
-```
+`
 
 **Reglas de frontera** entre artefactos de story:
 
@@ -166,14 +168,14 @@ Detalle completo en [`~/.fremi/framework/rules/workflow.md`](../rules/workflow.m
 | 3 | Toda decisión técnica → ADR | Trazabilidad |
 | 3b | Bifurcación → opciones → usuario decide → ADR | La IA no decide sola |
 | 4 | Discovery antes de formalización | Producto con hipótesis validadas |
-| 5 | Story empieza por `FW-01_definition` con formato As a / I want / So that | Rol + acción + beneficio |
+| 5 | Story empieza por `{workflow.definition}` con formato As a / I want / So that | Rol + acción + beneficio |
 | 6 | Cadena BDD → SDD → Design | La spec dirige el diseño |
 | 7 | TDD rojo primero | Test antes de código |
 | 7b | Plan = tareas con criterios verificables | Completitud auditable |
 | 8 | Bug fix con test rojo previo | Regresión cubierta |
 | 9 | Refactor no cambia comportamiento | Tests verdes antes y después |
 | 10 | Docs son fuente de verdad | Sin divergencia silenciosa |
-| 11 | Story no es DONE sin `FW-10_closure` validado | Sign-off explícito |
+| 11 | Story no es DONE sin `{workflow.closure}` validado | Sign-off explícito |
 | 12 | Sync-back bidireccional entre capas | Coherencia inter-capa |
 | 13 | Checkwork al día durante implementación | Estado real conocido |
 | 14 | Trabajo fuera del flujo → `EX-NN` | Rastro de tooling/scripts |

@@ -19,14 +19,14 @@ Este skill ejecuta la fase **`verify`** de un artifact (story o enabler). Es el 
 /fremi-story-verify enabler <EN_ID>                        (para enabler global)
 ```
 
-Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (con `FW-09_checkwork.md` cerca de 100%), asumir esa story.
+Si el usuario invoca `/fremi-story-verify` sin args y hay una story en curso (con `{workflow.checkwork}` cerca de 100%), asumir esa story.
 
 ---
 
 ## Cuándo invocarlo
 
 - **Obligatorio** antes de `/fremi-story-closure-check` — el closure precondiciona un verify con verdict PASS o PASS WITH WARNINGS (aceptadas).
-- Cuando `FW-09_checkwork.md` muestra 100% de tasks cerradas.
+- Cuando `{workflow.checkwork}` muestra 100% de tasks cerradas.
 - Después de cualquier cambio significativo post-implementación (fix, refactor, warning fixed).
 - El usuario dice "ya está listo", "correr tests", "verify de esta story", "check final".
 
@@ -54,7 +54,7 @@ Si algún archivo no parsea → abortar.
 
 ### Paso 1 — Precondiciones
 
-1. `FW-09_checkwork.md` (o filename resuelto) del artifact debe existir.
+1. `{workflow.checkwork}` (o filename resuelto) del artifact debe existir.
 2. Verificar que checkwork indica **100% de tasks cerradas** (todas en `## ✅ Listo`, ninguna en `## 🚧 En curso` o `## ⬜ Pendiente`).
 3. Si NO está al 100% → abortar y sugerir cerrar tasks pendientes primero. `/fremi-story-verify` es final, no intermedio.
 
@@ -126,9 +126,9 @@ Recolectar todos los hallazgos y clasificar según `phase_rules.verify`:
 
 ### Paso 5 — Escribir reporte
 
-El reporte va a la sección **"Última corrida de `verify`"** dentro de `FW-09_checkwork.md` del artifact. **NO** se crea un `FW-XX_verify-report.md` dedicado (v3: `config.story.yaml → verify_phase.dedicated_doc = false`).
+El reporte va a la sección **"Última corrida de `verify`"** dentro de `{workflow.checkwork}` del artifact. **NO** se crea un `FW-XX_verify-report.md` dedicado (v3: `config.story.yaml → verify_phase.dedicated_doc = false`).
 
-**Regla 17 — Bump del checkwork (living)**: escribir el reporte de verify dispara **PATCH** en el `FW-09_checkwork.md` (el reporte no cambia el contrato, sólo registra evidencia). Actualizar `last_updated` en frontmatter y agregar entry al changelog:
+**Regla 17 — Bump del checkwork (living)**: escribir el reporte de verify dispara **PATCH** en el `{workflow.checkwork}` (el reporte no cambia el contrato, sólo registra evidencia). Actualizar `last_updated` en frontmatter y agregar entry al changelog:
 ```
 - **v<nueva>** — YYYY-MM-DD — Reporte de verify: <VERDICT>. [origen: /fremi-story-verify]
 ```
@@ -139,7 +139,7 @@ El reporte va a la sección **"Última corrida de `verify`"** dentro de `FW-09_c
 - Verdict calculado (PASS / PASS WITH WARNINGS / FAIL).
 - Issues clasificados en CRITICAL / WARNING / SUGGESTION.
 
-Si `FW-09_checkwork.md` no existe (caso raro) → crearlo con el bloque como sección única + placeholder para el resto (`## Estado general`, `## ✅ Listo`, etc.).
+Si `{workflow.checkwork}` no existe (caso raro) → crearlo con el bloque como sección única + placeholder para el resto (`## Estado general`, `## ✅ Listo`, etc.).
 
 ### Paso 6 — Reportar al usuario
 

@@ -1,11 +1,11 @@
 ---
 name: fremi-story-sdd
-description: Puebla o actualiza el `FW-05_sdd-spec.md` de una story — contratos externos (interfaces que otros consumen) SIN haber decidido tecnología. Doc snapshot. Incluye firmas, schemas de request/response, tabla de errores expuestos, RNFs medibles. Nada que dependa de una decisión técnica interna (librería, wrapper, capa) — eso es Design.
+description: Puebla o actualiza el `{workflow.sdd}` de una story — contratos externos (interfaces que otros consumen) SIN haber decidido tecnología. Doc snapshot. Incluye firmas, schemas de request/response, tabla de errores expuestos, RNFs medibles. Nada que dependa de una decisión técnica interna (librería, wrapper, capa) — eso es Design.
 ---
 
 # /fremi-story-sdd — Poblar FW-05 (contratos externos)
 
-Puebla el `FW-05_sdd-spec.md` con los **contratos que se sostienen SIN haber decidido tecnología**:
+Puebla el `{workflow.sdd}` con los **contratos que se sostienen SIN haber decidido tecnología**:
 - Endpoints / eventos / comandos expuestos.
 - Schemas de request/response.
 - Tabla de códigos de error / mensajes expuestos.
@@ -31,11 +31,11 @@ Puebla el `FW-05_sdd-spec.md` con los **contratos que se sostienen SIN haber dec
 - `config.yaml` → `phase_rules.sdd`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `FW-04_bdd-userstories.md` con SC-XXX + happy path + borde.
-- `FW-01_definition.md` con CAs.
+- `{workflow.bdd}` con SC-XXX + happy path + borde.
+- `{workflow.definition}` con CAs.
 
 ### Paso 2 — Cargar template
-- `references/FW-05_sdd-spec-template.md`.
+- `references/{workflow.sdd}-template.md`.
 
 ### Paso 3 — Poblar aplicando `phase_rules.sdd`
 
@@ -71,6 +71,6 @@ Reglas duras:
 
 ## Referencias
 
-- Template: [`references/FW-05_sdd-spec-template.md`](references/FW-05_sdd-spec-template.md).
+- Template: [`references/{workflow.sdd}-template.md`](references/{workflow.sdd}-template.md).
 - `config.yaml → phase_rules.sdd`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 6.3 (SDD antes que Design), Regla 3b (bifurcaciones).

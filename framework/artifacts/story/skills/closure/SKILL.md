@@ -1,11 +1,11 @@
 ---
 name: fremi-story-closure
-description: Completa/firma el `FW-10_closure.md` de una story — matriz de trazabilidad CA→SC→SDD→Design→test→código + DoD + sign-off. Doc snapshot. Precondiciones: FW-09_checkwork al 100% + `/fremi-story-verify` con verdict PASS o PASS WITH WARNINGS. Bumpea versión de la feature padre (Regla 17). DIFERENTE de `/fremi-story-closure-check` (que audita antes de firmar).
+description: Completa/firma el `{workflow.closure}` de una story — matriz de trazabilidad CA→SC→SDD→Design→test→código + DoD + sign-off. Doc snapshot. Precondiciones: {workflow.checkwork} al 100% + `/fremi-story-verify` con verdict PASS o PASS WITH WARNINGS. Bumpea versión de la feature padre (Regla 17). DIFERENTE de `/fremi-story-closure-check` (que audita antes de firmar).
 ---
 
 # /fremi-story-closure — Completar y firmar FW-10 (cierre de la story)
 
-Completa el `FW-10_closure.md` con la matriz de trazabilidad final, checklist DoD marcado, evidencia (PR/commits), y sign-off con fecha. Este skill **firma el cierre**; `/fremi-story-closure-check` **audita antes de firmar**.
+Completa el `{workflow.closure}` con la matriz de trazabilidad final, checklist DoD marcado, evidencia (PR/commits), y sign-off con fecha. Este skill **firma el cierre**; `/fremi-story-closure-check` **audita antes de firmar**.
 
 **Rol del doc**: garantía formal de que la story está DONE. Sin este archivo firmado, la story sigue abierta (Regla 11).
 
@@ -23,7 +23,7 @@ Flujo típico: `/fremi-story-verify` PASS → `/fremi-story-closure-check` repor
 
 ## Cuándo invocarlo
 
-- `FW-09_checkwork.md` en 100%.
+- `{workflow.checkwork}` en 100%.
 - Última corrida de `/fremi-story-verify` es PASS o PASS WITH WARNINGS (aceptadas).
 - `/fremi-story-closure-check` no reportó gaps CRITICAL.
 - Todos los tests verdes, coverage cumplido, sin bloqueos.
@@ -37,17 +37,17 @@ Flujo típico: `/fremi-story-verify` PASS → `/fremi-story-closure-check` repor
 - `config.yaml` → `phase_rules.closure`, `parent_bump_triggers.story_closes`.
 
 ### Paso 1 — Validar precondiciones DURAS
-1. `FW-09_checkwork.md` % progreso = 100 (verificar en frontmatter o cuerpo).
+1. `{workflow.checkwork}` % progreso = 100 (verificar en frontmatter o cuerpo).
 2. Última entrada en `## Última corrida de verify` del checkwork = **PASS** o **PASS WITH WARNINGS** (aceptadas).
 3. Sin bugs abiertos en `HU-XX/bugs/` (o transferidos a follow-up).
 4. Si algo falla → abortar y reportar qué falta.
 
 ### Paso 2 — Cargar template
-- `references/FW-10_closure-template.md`.
+- `references/{workflow.closure}-template.md`.
 
 ### Paso 3 — Rellenar la matriz de trazabilidad
 
-Para cada CA-XXX del `FW-01_definition.md`:
+Para cada CA-XXX del `{workflow.definition}`:
 1. Buscar el SC-XXX (BDD) que lo cubre.
 2. Buscar la cláusula SDD que aterriza el contrato.
 3. Buscar la sección de Design (FW-06) que la implementa.
@@ -85,7 +85,7 @@ Consultar `config.yaml → parent_bump_triggers.story_closes`:
      - **v<nueva>** — YYYY-MM-DD — HU-YY cierra: <resumen>. [origen: HU-YY_<slug>]
      ```
 
-3. Rellenar `ancestor.version_at_closure` en el frontmatter del `FW-10_closure.md` con la versión FINAL del padre.
+3. Rellenar `ancestor.version_at_closure` en el frontmatter del `{workflow.closure}` con la versión FINAL del padre.
 
 ### Paso 7 — Sign-off y reportar
 - Escribir fecha de cierre, persona/agente que firma, próxima story si aplica.
@@ -114,7 +114,7 @@ Consultar `config.yaml → parent_bump_triggers.story_closes`:
 
 ## Referencias
 
-- Template: [`references/FW-10_closure-template.md`](references/FW-10_closure-template.md).
+- Template: [`references/{workflow.closure}-template.md`](references/{workflow.closure}-template.md).
 - Skill `/fremi-story-closure-check` — auditar ANTES de firmar.
 - Skill `/fremi-story-verify` — corrida final que precede el closure.
 - `config.yaml → phase_rules.closure`, `parent_bump_triggers.story_closes`.

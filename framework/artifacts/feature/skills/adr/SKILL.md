@@ -32,7 +32,7 @@ Agrega un nuevo Architecture Decision Record al archivo `docs/works/features/{FT
 
 Este skill suele invocarse como **paso final** del patrón definido en **Regla 3b** (`~/.fremi/framework/rules/workflow.md`):
 
-1. Durante la redacción de un artefacto (típicamente `FW-05_sdd-spec.md`, `FW-06_design.md` o algo a nivel feature/producto), la IA detecta una bifurcación técnica con 2+ caminos viables.
+1. Durante la redacción de un artefacto (típicamente `{workflow.sdd}`, `{workflow.design}` o algo a nivel feature/producto), la IA detecta una bifurcación técnica con 2+ caminos viables.
 2. La IA **pausa**, propone las opciones al usuario en el chat (con pros/contras), y **espera la decisión**.
 3. Cuando el usuario elige, la IA invoca `/fremi-feature-adr` con el contenido ya casi listo (contexto + alternativas + decisión) — sólo confirma campos antes de anexar.
 4. La IA referencia el ID asignado desde el artefacto donde nació la decisión (`aplica <adr-id>` en una línea del FW-05/FW-06).
@@ -114,7 +114,7 @@ Pasos:
 Decir al usuario:
 - ID asignado (formato del JSON).
 - Archivo donde se guardó.
-- Si requiere actualizar alguna story relacionada (mencionar en su `FW-01_definition.md` o `FW-06_design.md` que aplica `{adr_id}`).
+- Si requiere actualizar alguna story relacionada (mencionar en su `{workflow.definition}` o `{workflow.design}` que aplica `{adr_id}`).
 
 ## Reglas
 

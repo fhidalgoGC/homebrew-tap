@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler-closure
-description: Completa y firma el `EN-04_closure.md` del enabler — sign-off + evidencia + qué quedó habilitado + bump del padre. Doc snapshot. Precondición: todas las tasks del EN-03 en `[x]`.
+description: Completa y firma el `{enabler.closure}` del enabler — sign-off + evidencia + qué quedó habilitado + bump del padre. Doc snapshot. Precondición: todas las tasks del EN-03 en `[x]`.
 ---
 
 # /fremi-enabler-closure — Firmar EN-04 (cierre del enabler)
 
-Completa el `EN-04_closure.md` del enabler y **bumpea el padre** según scope (Regla 17).
+Completa el `{enabler.closure}` del enabler y **bumpea el padre** según scope (Regla 17).
 
 **Rol del doc**: garantía formal de que el enabler está DONE. Sin firmar, el enabler sigue abierto.
 
@@ -17,7 +17,7 @@ Completa el `EN-04_closure.md` del enabler y **bumpea el padre** según scope (R
 
 ## Cuándo invocarlo
 
-- Todas las tasks del `EN-03_plan.md` en `[x]`.
+- Todas las tasks del `{enabler.plan}` en `[x]`.
 - La capacidad técnica declarada en EN-01 está verificada (los criterios técnicos pasan).
 
 ## Procedimiento
@@ -36,7 +36,7 @@ Completa el `EN-04_closure.md` del enabler y **bumpea el padre** según scope (R
 Si falla alguno → abortar y reportar.
 
 ### Paso 2 — Cargar template
-- `references/EN-04_closure-template.md`.
+- `references/{enabler.closure}-template.md`.
 
 ### Paso 3 — Rellenar closure
 
@@ -50,7 +50,7 @@ Si falla alguno → abortar y reportar.
 Según `config.yaml → parent_bump_triggers.enabler_closes`:
 - Placement global → bumpear `product/plan.md` MINOR (registra capacidad habilitada).
 - Placement feature → bumpear `FT-XX/definition.md` MINOR o PATCH según impacto.
-- Placement story → bumpear `HU-YY/FW-01_definition.md` PATCH (informativo).
+- Placement story → bumpear `HU-YY/{workflow.definition}` PATCH (informativo).
 
 Actualizar changelog del padre con entry apuntando al enabler cerrado.
 
@@ -72,6 +72,6 @@ Rellenar `ancestor.version_at_closure` en el frontmatter del EN-04.
 - ❌ Criterios técnicos "verificados manualmente" sin evidencia.
 
 ## Referencias
-- Template: [`references/EN-04_closure-template.md`](references/EN-04_closure-template.md).
+- Template: [`references/{enabler.closure}-template.md`](references/{enabler.closure}-template.md).
 - `config.yaml → phase_rules.closure`, `parent_bump_triggers.enabler_closes`.
 - Regla 11 (closure obligatorio), Regla 17 (bump del padre).

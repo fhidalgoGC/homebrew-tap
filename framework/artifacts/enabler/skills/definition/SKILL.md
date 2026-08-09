@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler-definition
-description: Puebla o actualiza el `EN-01_definition.md` de un enabler — qué habilita, features/stories que dependen, criterios de aceptación técnicos. Doc snapshot. Se invoca después de `/fremi-enabler` (que arma el scaffold de los 4 docs) para completar el primero de la cadena.
+description: Puebla o actualiza el `{enabler.definition}` de un enabler — qué habilita, features/stories que dependen, criterios de aceptación técnicos. Doc snapshot. Se invoca después de `/fremi-enabler` (que arma el scaffold de los 4 docs) para completar el primero de la cadena.
 ---
 
 # /fremi-enabler-definition — Poblar EN-01 (qué habilita el enabler)
 
-Puebla el `EN-01_definition.md` de un enabler con:
+Puebla el `{enabler.definition}` de un enabler con:
 - **Qué habilita**: la capacidad técnica que hace posible.
 - **Features/stories que dependen** del enabler.
 - **Criterios de aceptación técnicos** (no user-facing).
@@ -38,7 +38,7 @@ Puebla el `EN-01_definition.md` de un enabler con:
 - Placement válido: `docs/works/enablers/{EN-XX}/` (global) o dentro de feature/story según scope.
 
 ### Paso 2 — Cargar template
-- `references/EN-01_definition-template.md` (local).
+- `references/{enabler.definition}-template.md` (local).
 
 ### Paso 3 — Poblar aplicando reglas
 
@@ -66,6 +66,6 @@ Puebla el `EN-01_definition.md` de un enabler con:
 - ❌ Criterios subjetivos ("funcione bien").
 
 ## Referencias
-- Template: [`references/EN-01_definition-template.md`](references/EN-01_definition-template.md).
+- Template: [`references/{enabler.definition}-template.md`](references/{enabler.definition}-template.md).
 - `config.enabler.yaml → flow.sequence`.
 - Regla 15 (enablers opcionales) en `~/.fremi/framework/rules/workflow.md`.

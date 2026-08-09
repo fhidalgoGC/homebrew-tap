@@ -1,13 +1,13 @@
 ---
 name: fremi-story
-description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml y la obligatoriedad condicional de FW-00_explore y FW-02_proposal desde ~/.fremi/framework/settings/config.core.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
+description: Crea una nueva user story dentro de una feature, con los 11 docs prefijados (FW-00..FW-10) según la configuración del workflow. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml y la obligatoriedad condicional de {workflow.explore} y {workflow.proposal} desde ~/.fremi/framework/settings/config.core.yaml. NO usa prefijos hardcoded. Usar cuando el usuario quiere crear una historia nueva dentro de una feature existente.
 ---
 
 # /fremi-story — Crear nueva user story
 
 Crea el folder de una user story con los **docs en plantilla** dentro de la feature indicada, todos prefijados según la configuración de **`~/.fremi/framework/settings/methodology.core.yaml`** (nomenclatura) y **`~/.fremi/framework/settings/config.core.yaml`** (obligatoriedad operativa).
 
-La cadena canónica tiene **11 docs** (`FW-00..FW-10`), pero dos son de **obligatoriedad condicional** — `FW-00_explore` y `FW-02_proposal` sólo se crean cuando aplican los criterios declarados en `config.story.yaml → conditional_rules` (ver Regla 16).
+La cadena canónica tiene **11 docs** (`FW-00..FW-10`), pero dos son de **obligatoriedad condicional** — `{workflow.explore}` y `{workflow.proposal}` sólo se crean cuando aplican los criterios declarados en `config.story.yaml → conditional_rules` (ver Regla 16).
 
 > **Importante:** este skill NO tiene prefijos ni nombres de archivos hardcoded. Lee `identifiers.story`, `identifiers.workflow_doc` y `identifiers.workflow_doc.items[]` del JSON para derivar nombres, formatos y orden. Si la convención cambia, el skill se adapta.
 
@@ -67,7 +67,7 @@ Aplicar `slug_cfg.transforms` y validar contra `slug_cfg.regex` (mismas reglas q
 
 ### Paso 4 — Evaluar obligatoriedad condicional de FW-00 y FW-02 (Regla 16)
 
-Para cada item con `required === "conditional"` (por default `FW-00_explore` y `FW-02_proposal`):
+Para cada item con `required === "conditional"` (por default `{workflow.explore}` y `{workflow.proposal}`):
 
 1. Localizar la regla en `config.story.yaml → conditional_rules[condition_ref]`.
 2. Presentar al usuario los criterios `obligatory_if_any[]` y preguntar si aplica **al menos uno**.
@@ -90,32 +90,32 @@ Crear cada uno de los archivos listados en `wf_cfg.items[]` que sean:
 - `required === "conditional"` **y** el usuario aprobó su creación en Paso 4.
 
 Para cada item a crear:
-- Si `wf_cfg.use_compound_filename === false` (default) → usar `item.filename` directo (ej: `FW-01_definition.md`).
-- Si `wf_cfg.use_compound_filename === true` → aplicar `wf_cfg.compound_filename_format` con `{feature_id}`, `{story_id}`, `{id}` (= `FW-XX`), `{name}` (= item.name). Ej: `FT-01-HU-01-FW-01_definition.md`.
+- Si `wf_cfg.use_compound_filename === false` (default) → usar `item.filename` directo (ej: `{workflow.definition}`).
+- Si `wf_cfg.use_compound_filename === true` → aplicar `wf_cfg.compound_filename_format` con `{feature_id}`, `{story_id}`, `{id}` (= `FW-XX`), `{name}` (= item.name). Ej: `FT-01-HU-01-{workflow.definition}`.
 
 Estructura resultante (con ambos condicionales activos + configuración default):
 ```
 {paths.features_dir}/{feature_folder}/{paths.user_stories_subdir}/{story_folder}/
-├── FW-00_explore.md          (item 0: explore — condicional)
-├── FW-01_definition.md       (item 1: definition)
-├── FW-02_proposal.md         (item 2: proposal — condicional)
-├── FW-03_scope.md            (item 3: scope)
-├── FW-04_bdd-userstories.md  (item 4: bdd-userstories)
-├── FW-05_sdd-spec.md         (item 5: sdd-spec)
-├── FW-06_design.md           (item 6: design)
-├── FW-07_tdd-plan.md         (item 7: tdd-plan)
-├── FW-08_plan.md             (item 8: plan)
-├── FW-09_checkwork.md        (item 9: checkwork — vivo durante implementación)
-└── FW-10_closure.md          (item 10: closure)
+├── {workflow.explore}          (item 0: explore — condicional)
+├── {workflow.definition}       (item 1: definition)
+├── {workflow.proposal}         (item 2: proposal — condicional)
+├── {workflow.scope}            (item 3: scope)
+├── {workflow.bdd}  (item 4: bdd-userstories)
+├── {workflow.sdd}         (item 5: sdd-spec)
+├── {workflow.design}           (item 6: design)
+├── {workflow.tdd}         (item 7: tdd-plan)
+├── {workflow.plan}             (item 8: plan)
+├── {workflow.checkwork}        (item 9: checkwork — vivo durante implementación)
+└── {workflow.closure}          (item 10: closure)
 ```
 
-Si el usuario decidió omitir `FW-00_explore` y/o `FW-02_proposal`, esas líneas quedan fuera del layout. Es esperado y correcto.
+Si el usuario decidió omitir `{workflow.explore}` y/o `{workflow.proposal}`, esas líneas quedan fuera del layout. Es esperado y correcto.
 
 > **Convención FW-XX_:** el prefijo refleja el orden de ejecución del workflow. La cadena es una progresión de abstracción que siempre baja (abstracto → concreto). **La spec dirige el diseño** (SDD antes que Design). Cada item del JSON trae su `role` y `principio` que se respetan al armar el template.
 
 Cada doc se crea con el template canónico correspondiente de `references/` (relativo a la carpeta del skill: `~/.fremi/framework/artifacts/story/references/`). Para cada item de `wf_cfg.items[]`, el skill:
 
-1. Carga `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/FW-01_definition-template.md`).
+1. Carga `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/{workflow.definition}-template.md`).
 2. Reemplaza los placeholders del template:
    - `{feature_id}`, `{story_id}`, `{slug}` → con los valores derivados de los pasos anteriores.
    - `<...>` → con la info que el usuario ya proveyó, o se dejan como TODOs para completar.
@@ -124,11 +124,11 @@ Cada doc se crea con el template canónico correspondiente de `references/` (rel
 
 Ver tabla en sección "## Templates" abajo. **No inventar estructura** — todos los `FW-XX_*.md` deben respetar el template correspondiente.
 
-> **Templates faltantes:** al 2026-07-13 los templates para `FW-00_explore-template.md`, `FW-02_proposal-template.md` y `FW-09_checkwork-template.md` **NO existen todavía** en `references/`. Al primer uso, si el archivo falta, el skill genera el doc con una estructura mínima derivada del `role` + `principio` del item en `methodology.core.yaml` y avisa al usuario para crear el template canónico en `references/` en un `EX-NN` posterior.
+> **Templates faltantes:** al 2026-07-13 los templates para `{workflow.explore}-template.md`, `{workflow.proposal}-template.md` y `{workflow.checkwork}-template.md` **NO existen todavía** en `references/`. Al primer uso, si el archivo falta, el skill genera el doc con una estructura mínima derivada del `role` + `principio` del item en `methodology.core.yaml` y avisa al usuario para crear el template canónico en `references/` en un `EX-NN` posterior.
 
 ### Bifurcaciones técnicas durante la story → pausar y preguntar (Regla 3b)
 
-Durante la redacción de cualquier artefacto de la story (especialmente `FW-05_sdd-spec.md` y `FW-06_design.md`), si aparece una **decisión técnica con 2+ caminos viables**:
+Durante la redacción de cualquier artefacto de la story (especialmente `{workflow.sdd}` y `{workflow.design}`), si aparece una **decisión técnica con 2+ caminos viables**:
 
 1. **NO elegir silenciosamente.** Pausar la redacción.
 2. Presentar al usuario **2-3 opciones** con pros/contras explícitos en el chat.
@@ -161,9 +161,9 @@ Agregar la story a la lista "User stories planeadas" de la feature:
 Al terminar de armar los docs iniciales de la story (9 obligatorios + los condicionales que aplicaron):
 
 - Verificar que cada **criterio de aceptación**, **escenario BDD** o **componente** declarado refiera a capacidades ya presentes en `{feature_folder}/definition.md` y `{paths.product_dir}/definition.md` (In-scope).
-- Si el `FW-03_scope` introduce restricciones que parezcan transversales → señalarlas al usuario para evaluar sync-back hacia producto.
-- Si el `FW-04_bdd` o el `FW-05_sdd` declaran capacidades nuevas → idem.
-- Si `FW-06_design` propone una decisión técnica que aplique a más de una story (o feature) → señalarla para promover a ADR de producto vía `/fremi-story-adr`.
+- Si el `{workflow.scope}` introduce restricciones que parezcan transversales → señalarlas al usuario para evaluar sync-back hacia producto.
+- Si el `{workflow.bdd}` o el `{workflow.sdd}` declaran capacidades nuevas → idem.
+- Si `{workflow.design}` propone una decisión técnica que aplique a más de una story (o feature) → señalarla para promover a ADR de producto vía `/fremi-story-adr`.
 
 Si se detecta algo que pertenece arriba, **avisar al usuario**, pausar el desarrollo de la story y proponer el update.
 
@@ -174,15 +174,15 @@ Decir al usuario:
 - Path completo.
 - Qué docs condicionales se crearon (FW-00 y/o FW-02) y con qué justificación (`obligatory_if_any` que aplicó); qué condicionales se omitieron.
 - Si hubo sync-back: qué docs de capa superior se actualizaron.
-- Cuál es el próximo paso: empezar por el primer item creado (`FW-00_explore.md` si fue condicional-activo, o `FW-01_definition.md` en su defecto).
+- Cuál es el próximo paso: empezar por el primer item creado (`{workflow.explore}` si fue condicional-activo, o `{workflow.definition}` en su defecto).
 
 ## Nomenclatura interna (también del JSON)
 
 Dentro de la story, los IDs locales se derivan de:
-- `identifiers.criterion` (CA-XXX) — en el primer doc del workflow (typically `FW-01_definition.md`).
-- `identifiers.scenario` (SC-XXX) — en el doc BDD (typically `FW-04_bdd-userstories.md`).
-- `identifiers.test_case` (TC-XXX) — en el doc TDD (typically `FW-07_tdd-plan.md`).
-- `identifiers.task` (task-XXX) — en el doc plan (typically `FW-08_plan.md`). Ver skill `/fremi-story-task`.
+- `identifiers.criterion` (CA-XXX) — en el primer doc del workflow (typically `{workflow.definition}`).
+- `identifiers.scenario` (SC-XXX) — en el doc BDD (typically `{workflow.bdd}`).
+- `identifiers.test_case` (TC-XXX) — en el doc TDD (typically `{workflow.tdd}`).
+- `identifiers.task` (task-XXX) — en el doc plan (typically `{workflow.plan}`). Ver skill `/fremi-story-task`.
 
 Numeración secuencial dentro de la story, sin reciclar.
 
@@ -194,19 +194,19 @@ Los templates canónicos viven en `references/` (relativo a la carpeta del skill
 
 | # | Item | Archivo resultante | Template canónico | Dueño del template | Obligatoriedad | Rol |
 |---|---|---|---|---|---|---|
-| 0 | `explore` | `FW-00_explore.md` | [`references/FW-00_explore-template.md`](references/FW-00_explore-template.md) *(symlink)* | **`/fremi-story-explore`** | Condicional (Regla 16) | Investigación previa: contexto del codebase, alternativas, hallazgos. |
-| 1 | `definition` | `FW-01_definition.md` | [`references/FW-01_definition-template.md`](references/FW-01_definition-template.md) | `/fremi-story` | Siempre | Problema / por qué — observable. As a / I want / So that + CA-XXX. **Sin solución técnica.** |
-| 2 | `proposal` | `FW-02_proposal.md` | [`references/FW-02_proposal-template.md`](references/FW-02_proposal-template.md) *(symlink)* | **`/fremi-story-proposal`** | Condicional (Regla 16) | Intent + Approach (opciones) + Decisions (ancladas a ADRs) + Impact + Risk + Rollout. |
-| 3 | `scope` | `FW-03_scope.md` | [`references/FW-03_scope-template.md`](references/FW-03_scope-template.md) | `/fremi-story` | Siempre | Límites: in-scope / out-of-scope / dependencias / supuestos. **Sin TBDs.** |
-| 4 | `bdd-userstories` | `FW-04_bdd-userstories.md` | [`references/FW-04_bdd-userstories-template.md`](references/FW-04_bdd-userstories-template.md) | `/fremi-story` | Siempre | Qué OBSERVABLE — Given/When/Then con SC-XXX. **Sin firmas, sin códigos HTTP, sin librerías** (eso es SDD). |
-| 5 | `sdd-spec` | `FW-05_sdd-spec.md` | [`references/FW-05_sdd-spec-template.md`](references/FW-05_sdd-spec-template.md) | `/fremi-story` | Siempre | Qué CONTRACTUAL — interfaces externas, schemas, tabla de errores, RNFs medibles. **Sin libs/wrappers/capas internas** (eso es Design). |
-| 6 | `design` | `FW-06_design.md` | [`references/FW-06_design-template.md`](references/FW-06_design-template.md) | `/fremi-story` | Siempre | Cómo ESTRUCTURAL — tecnologías elegidas (con ADR), componentes, wrappers, diagramas, patrones, estructura de archivos. **Satisface SDD, no la redefine.** |
-| 7 | `tdd-plan` | `FW-07_tdd-plan.md` | [`references/FW-07_tdd-plan-template.md`](references/FW-07_tdd-plan-template.md) | `/fremi-story` | Siempre | Cómo se VERIFICA — TC-XXX mapeados a SC/SDD. **Test rojo primero (Regla 7).** |
-| 8 | `plan` | `FW-08_plan.md` | [`references/FW-08_plan-template.md`](references/FW-08_plan-template.md) | `/fremi-story` | Siempre | En qué ORDEN — task-XXX con criterios verificables (Regla 7b). Usar `/fremi-story-task` para agregar tareas. |
-| 9 | `checkwork` | `FW-09_checkwork.md` | [`references/FW-09_checkwork-template.md`](references/FW-09_checkwork-template.md) | `/fremi-story` | Siempre | Estado en vivo — refleja avance de tasks + CAs cubiertos + archivos implementados. Único doc que muta durante la implementación (Regla 13). |
-| 10 | `closure` | `FW-10_closure.md` | [`references/FW-10_closure-template.md`](references/FW-10_closure-template.md) | `/fremi-story` | Siempre | Cierre — matriz de trazabilidad CA→SC→SDD→Design→test→código + DoD + sign-off. **Sin esto, la story sigue abierta** (Regla 11). |
+| 0 | `explore` | `{workflow.explore}` | [`references/{workflow.explore}-template.md`](references/{workflow.explore}-template.md) *(symlink)* | **`/fremi-story-explore`** | Condicional (Regla 16) | Investigación previa: contexto del codebase, alternativas, hallazgos. |
+| 1 | `definition` | `{workflow.definition}` | [`references/{workflow.definition}-template.md`](references/{workflow.definition}-template.md) | `/fremi-story` | Siempre | Problema / por qué — observable. As a / I want / So that + CA-XXX. **Sin solución técnica.** |
+| 2 | `proposal` | `{workflow.proposal}` | [`references/{workflow.proposal}-template.md`](references/{workflow.proposal}-template.md) *(symlink)* | **`/fremi-story-proposal`** | Condicional (Regla 16) | Intent + Approach (opciones) + Decisions (ancladas a ADRs) + Impact + Risk + Rollout. |
+| 3 | `scope` | `{workflow.scope}` | [`references/{workflow.scope}-template.md`](references/{workflow.scope}-template.md) | `/fremi-story` | Siempre | Límites: in-scope / out-of-scope / dependencias / supuestos. **Sin TBDs.** |
+| 4 | `bdd-userstories` | `{workflow.bdd}` | [`references/{workflow.bdd}-template.md`](references/{workflow.bdd}-template.md) | `/fremi-story` | Siempre | Qué OBSERVABLE — Given/When/Then con SC-XXX. **Sin firmas, sin códigos HTTP, sin librerías** (eso es SDD). |
+| 5 | `sdd-spec` | `{workflow.sdd}` | [`references/{workflow.sdd}-template.md`](references/{workflow.sdd}-template.md) | `/fremi-story` | Siempre | Qué CONTRACTUAL — interfaces externas, schemas, tabla de errores, RNFs medibles. **Sin libs/wrappers/capas internas** (eso es Design). |
+| 6 | `design` | `{workflow.design}` | [`references/{workflow.design}-template.md`](references/{workflow.design}-template.md) | `/fremi-story` | Siempre | Cómo ESTRUCTURAL — tecnologías elegidas (con ADR), componentes, wrappers, diagramas, patrones, estructura de archivos. **Satisface SDD, no la redefine.** |
+| 7 | `tdd-plan` | `{workflow.tdd}` | [`references/{workflow.tdd}-template.md`](references/{workflow.tdd}-template.md) | `/fremi-story` | Siempre | Cómo se VERIFICA — TC-XXX mapeados a SC/SDD. **Test rojo primero (Regla 7).** |
+| 8 | `plan` | `{workflow.plan}` | [`references/{workflow.plan}-template.md`](references/{workflow.plan}-template.md) | `/fremi-story` | Siempre | En qué ORDEN — task-XXX con criterios verificables (Regla 7b). Usar `/fremi-story-task` para agregar tareas. |
+| 9 | `checkwork` | `{workflow.checkwork}` | [`references/{workflow.checkwork}-template.md`](references/{workflow.checkwork}-template.md) | `/fremi-story` | Siempre | Estado en vivo — refleja avance de tasks + CAs cubiertos + archivos implementados. Único doc que muta durante la implementación (Regla 13). |
+| 10 | `closure` | `{workflow.closure}` | [`references/{workflow.closure}-template.md`](references/{workflow.closure}-template.md) | `/fremi-story` | Siempre | Cierre — matriz de trazabilidad CA→SC→SDD→Design→test→código + DoD + sign-off. **Sin esto, la story sigue abierta** (Regla 11). |
 
-> **Nota sobre dueño del template**: `FW-00_explore-template.md` y `FW-02_proposal-template.md` son **symlinks** hacia los skills propios (`/fremi-story-explore`, `/fremi-story-proposal`) que son los dueños canónicos. Los otros 9 templates viven físicamente en `/fremi-story/references/` porque `/fremi-story` es quien los crea (no hay skill dedicado por fase). Si querés editar el template de explore/proposal, editá el archivo del skill dueño — el symlink refleja el cambio automático.
+> **Nota sobre dueño del template**: `{workflow.explore}-template.md` y `{workflow.proposal}-template.md` son **symlinks** hacia los skills propios (`/fremi-story-explore`, `/fremi-story-proposal`) que son los dueños canónicos. Los otros 9 templates viven físicamente en `/fremi-story/references/` porque `/fremi-story` es quien los crea (no hay skill dedicado por fase). Si querés editar el template de explore/proposal, editá el archivo del skill dueño — el symlink refleja el cambio automático.
 
 **Para cambiar la estructura** de cualquier `FW-XX_*.md`, editar el template correspondiente — no este SKILL.md. Si la estructura cambia significativamente, hacer un sweep manual de las stories existentes.
 

@@ -1,12 +1,12 @@
-# Template — `FW-09_checkwork.md` de una story (living)
+# Template — `{workflow.checkwork}` de una story (living)
 
 > **Doc VIVO** (Regla 13). Es el único archivo del workflow que muta durante la implementación. Se actualiza al arrancar/cerrar cada task (o vía hook `~/.fremi/framework/hooks/sync-checkwork.sh`).
 >
-> **Espejo del `FW-08_plan.md`** pero con estado. Refleja: tasks en curso/hechas, % progreso, CAs cubiertos, archivos implementados, bloqueos, próximos pasos.
+> **Espejo del `{workflow.plan}`** pero con estado. Refleja: tasks en curso/hechas, % progreso, CAs cubiertos, archivos implementados, bloqueos, próximos pasos.
 >
 > **Tipo (Regla 17):** **living** — versión propia + changelog al pie. Cada task cerrada bumpea PATCH (o MINOR si agrega archivos nuevos).
 >
-> **Precondición del `FW-10_closure.md`**: este doc debe mostrar 100% completado antes de que se pueda firmar el closure (Regla 11).
+> **Precondición del `{workflow.closure}`**: este doc debe mostrar 100% completado antes de que se pueda firmar el closure (Regla 11).
 
 ---
 
@@ -61,7 +61,7 @@ ancestor:
 
 ## Cobertura por criterio de aceptación (CA)
 
-<Espejo de los CAs del `FW-01_definition.md`. Se marca ✅ cuando existe test verde que lo cubre.>
+<Espejo de los CAs del `{workflow.definition}`. Se marca ✅ cuando existe test verde que lo cubre.>
 
 | CA | Descripción resumida | Estado | Test que lo cubre |
 |---|---|---|---|
@@ -97,7 +97,7 @@ ancestor:
 
 1. <acción 1>
 2. <acción 2>
-3. Cuando 100%: correr `/fremi-story-verify`, luego `/fremi-story-closure-check`, luego firmar `FW-10_closure.md`.
+3. Cuando 100%: correr `/fremi-story-verify`, luego `/fremi-story-closure-check`, luego firmar `{workflow.closure}`.
 
 ## Changelog
 

@@ -1,4 +1,4 @@
-# Template — `FW-08_plan.md` de una story
+# Template — `{workflow.plan}` de una story
 
 > **Para qué:** orden de ejecución. Tareas (`task-XXX`) atómicas con criterios verificables de detección de completitud (Regla 7b).
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo inicial); `/fremi-story-task`, Paso 4 (agregar cada tarea).
@@ -75,4 +75,4 @@ ancestor:
 3. **Toda tarea tiene al menos un criterio verificable** (Regla 7b). Comando que retorna 0, test que pasa, archivo que existe, etc.
 4. **Estados de tarea:** `[ ]` pendiente / `[/]` en curso / `[x]` hecho / `[~]` descartada (con motivo).
 5. **No re-numerar.** Si una tarea se descarta, queda con `[~]` y motivo; el siguiente número sigue siendo el siguiente, no se recicla.
-6. **Bugs durante ejecución** → primero TC nuevo en `FW-07_tdd-plan.md`, después tarea acá para arreglarlo (Regla 8).
+6. **Bugs durante ejecución** → primero TC nuevo en `{workflow.tdd}`, después tarea acá para arreglarlo (Regla 8).

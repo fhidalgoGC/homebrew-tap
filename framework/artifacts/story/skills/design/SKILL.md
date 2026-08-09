@@ -1,11 +1,11 @@
 ---
 name: fremi-story-design
-description: Puebla o actualiza el `FW-06_design.md` de una story — decisiones técnicas (librerías, wrappers, capas, patterns, estructura de archivos) que SATISFACEN el contrato de SDD. Doc snapshot. Incluye Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping (forward). Preferir firmas TypeScript reales sobre pseudocódigo.
+description: Puebla o actualiza el `{workflow.design}` de una story — decisiones técnicas (librerías, wrappers, capas, patterns, estructura de archivos) que SATISFACEN el contrato de SDD. Doc snapshot. Incluye Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping (forward). Preferir firmas TypeScript reales sobre pseudocódigo.
 ---
 
 # /fremi-story-design — Poblar FW-06 (cómo estructural)
 
-Puebla el `FW-06_design.md` con el "cómo estructural" que satisface los contratos de `FW-05_sdd-spec.md`:
+Puebla el `{workflow.design}` con el "cómo estructural" que satisface los contratos de `{workflow.sdd}`:
 - Tecnologías/librerías elegidas + rationale.
 - Componentes/módulos internos + wrappers.
 - Diagrama de secuencia (Mermaid o ASCII).
@@ -27,7 +27,7 @@ Puebla el `FW-06_design.md` con el "cómo estructural" que satisface los contrat
 
 ## Cuándo invocarlo
 
-- `FW-05_sdd-spec.md` con contratos completos.
+- `{workflow.sdd}` con contratos completos.
 - Se descubrió una decisión técnica nueva que hay que registrar.
 
 ## Procedimiento
@@ -37,10 +37,10 @@ Puebla el `FW-06_design.md` con el "cómo estructural" que satisface los contrat
 - `config.yaml` → `phase_rules.design`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `FW-05_sdd-spec.md` con contratos completos, tabla de errores, RNFs.
+- `{workflow.sdd}` con contratos completos, tabla de errores, RNFs.
 
 ### Paso 2 — Cargar template
-- `references/FW-06_design-template.md` (16 secciones — Tecnologías, Componentes, Wrappers, Diagrama, Modelo datos, Pseudocódigo, Patrones, Errores, Concurrencia, Estructura archivos, Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping).
+- `references/{workflow.design}-template.md` (16 secciones — Tecnologías, Componentes, Wrappers, Diagrama, Modelo datos, Pseudocódigo, Patrones, Errores, Concurrencia, Estructura archivos, Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping).
 
 ### Paso 3 — Poblar aplicando `phase_rules.design`
 
@@ -49,7 +49,7 @@ Reglas duras:
 - **Toda librería elegida tiene justificación** — si hay 2+ opciones viables → Regla 3b + `/fremi-story-adr`.
 - **Key Invariants concretos y verificables** — cada invariante testeable.
 - **Edge Cases con ID de requirement SDD (R-XX)** — si un edge case no tiene R asociado, es gap de SDD, volver a Paso 1.
-- **Open Questions se cierran antes de FW-07** — o se transfieren como Known Limitation al `FW-02_proposal.md`.
+- **Open Questions se cierran antes de FW-07** — o se transfieren como Known Limitation al `{workflow.proposal}`.
 - **Acceptance Test Mapping cubre 100%** de requirements SDD.
 - **NO redefinir SDD** (Regla 6.4) — si el design contradice SDD, error de orden.
 
@@ -81,6 +81,6 @@ Reglas duras:
 
 ## Referencias
 
-- Template: [`references/FW-06_design-template.md`](references/FW-06_design-template.md).
+- Template: [`references/{workflow.design}-template.md`](references/{workflow.design}-template.md).
 - `config.yaml → phase_rules.design`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 6.4 (Design satisface SDD, no la redefine), Regla 3b (ADR por bifurcación).

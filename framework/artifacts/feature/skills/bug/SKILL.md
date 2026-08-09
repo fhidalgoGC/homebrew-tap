@@ -43,7 +43,7 @@ Si falta alguno → preguntárselo al usuario.
 | El comportamiento "incorrecto" en realidad NO está especificado en ninguna spec (ni de story ni de feature) | Primero crear/extender la story o la feature (Regla 8); después el bug |
 | Es una mejora / nueva capacidad pedida | `/fremi-feature` o `/fremi-story` |
 | El bug es transversal a MÚLTIPLES features | Escalarlo a story nueva de producto o extra global (`EX-NN`); NO es un bug de feature |
-| Es un cambio de spec consciente (el comportamiento actual está mal especificado) | Cambio en `FW-05_sdd-spec.md` + ADR (Regla 10) |
+| Es un cambio de spec consciente (el comportamiento actual está mal especificado) | Cambio en `{workflow.sdd}` + ADR (Regla 10) |
 | Es un cambio de tooling / build / IaC sin defecto en producción | `EX-NN` en `docs/works/extra/` |
 
 ## Procedimiento
@@ -63,7 +63,7 @@ Si el JSON no existe o no parsea → abortar.
 
 1. Resolver feature: buscar carpeta en `paths.features_dir` que matchee `feat_cfg.folder_regex` y empiece por `FT-XX`. Si no existe → abortar.
 2. Resolver story: buscar carpeta dentro de `{feature_folder}/{paths.user_stories_subdir}/` que matchee `story_cfg.folder_regex` y empiece por `HU-YY`. Si no existe → abortar.
-3. Verificar que la story tenga al menos `FW-01_definition.md` y `FW-05_sdd-spec.md` con contenido real. Si no → la story no está madura para tener bugs (Regla 8 — el bug describe desviación del spec; sin spec, no hay desviación que medir).
+3. Verificar que la story tenga al menos `{workflow.definition}` y `{workflow.sdd}` con contenido real. Si no → la story no está madura para tener bugs (Regla 8 — el bug describe desviación del spec; sin spec, no hay desviación que medir).
 
 Si la story no existe pero el bug es real → **avisar al usuario** y proponer:
 - Opción A: crear/extender la story que cubra el comportamiento esperado, después volver al bug.
@@ -101,9 +101,9 @@ docs/works/features/{FT-XX}_<slug>/user-stories/{HU-YY}_<slug>/
     └── BG-01_<bug-slug>.md   ← un archivo por bug
 ```
 
-### Paso 5 — Conectar con FW-09_checkwork.md de la story
+### Paso 5 — Conectar con {workflow.checkwork} de la story
 
-La story queda **parcialmente reabierta** hasta que el bug se cierre. Agregar una nota a `FW-09_checkwork.md`:
+La story queda **parcialmente reabierta** hasta que el bug se cierre. Agregar una nota a `{workflow.checkwork}`:
 
 ```markdown
 ## 🐞 Bugs abiertos asociados
@@ -121,7 +121,7 @@ Cuando el bug se cierre, mover a:
 ### Paso 6 — Verificar Regla 8 (test rojo PRIMERO)
 
 Antes de implementar el fix, el agente que ejecute el ciclo debe:
-1. Agregar el test de reproducción al test plan de la story (typically `FW-07_tdd-plan.md` como `TC-XXX`).
+1. Agregar el test de reproducción al test plan de la story (typically `{workflow.tdd}` como `TC-XXX`).
 2. Correrlo y confirmar que **falla** (rojo).
 3. Recién entonces escribir el fix.
 4. Confirmar que pasa (verde).
@@ -134,13 +134,13 @@ Decir al usuario:
 - ID y slug del bug.
 - Path completo del archivo.
 - Severidad declarada.
-- Próximo paso: completar la sección "Reproducción" con el repro caracterizado, agregar test rojo a `FW-07_tdd-plan.md`, ejecutar Regla 8.
+- Próximo paso: completar la sección "Reproducción" con el repro caracterizado, agregar test rojo a `{workflow.tdd}`, ejecutar Regla 8.
 
 ## Cambios de spec disparados por un bug (Regla 10)
 
 Si el análisis de causa raíz revela que **la spec de la story estaba mal** (no que la implementación se desvió), entonces:
 1. El bug no es un defecto, es un cambio de comportamiento.
-2. Actualizar `FW-05_sdd-spec.md` (o `FW-04_bdd-userstories.md`) de la story.
+2. Actualizar `{workflow.sdd}` (o `{workflow.bdd}`) de la story.
 3. Registrar ADR con la decisión (vía `/fremi-feature-adr`).
 4. El `BG-XX_<slug>.md` queda como rastro histórico — anotar en su sección "Fix aplicado" que el cambio fue de spec, no de implementación.
 
@@ -149,14 +149,14 @@ Si el análisis de causa raíz revela que **la spec de la story estaba mal** (no
 | Concepto | Cuándo | Estructura |
 |---|---|---|
 | `/fremi-feature-bug` | Defecto en producción atribuible a una story | 1 archivo dentro de `story/bugs/` |
-| Test que falla durante implementación inicial | Forma normal del TDD — no es bug | TC-XXX en `FW-07_tdd-plan.md` |
+| Test que falla durante implementación inicial | Forma normal del TDD — no es bug | TC-XXX en `{workflow.tdd}` |
 | Regresión detectada | Bug (registrar) — usar `/fremi-feature-bug` | igual que defecto |
 | Capacidad faltante (no especificada) | No es bug — es feature/story nueva | `/fremi-feature` o `/fremi-story` |
 
 ## Validaciones
 
 - Sin feature/story padre → abortar.
-- Si la story no tiene `FW-05_sdd-spec.md` con contenido → abortar.
+- Si la story no tiene `{workflow.sdd}` con contenido → abortar.
 - Sin nombre descriptivo → preguntar.
 - Si el JSON no es legible → abortar.
 

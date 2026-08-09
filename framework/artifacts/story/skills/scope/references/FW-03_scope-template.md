@@ -1,9 +1,9 @@
-# Template — `FW-03_scope.md` de una story
+# Template — `{workflow.scope}` de una story
 
 > **Para qué:** acotar la story con listas explícitas de qué entra y qué queda fuera, más las dependencias externas.
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo).
 > **Rol del archivo:** **limita** la story. Sin scope explícito, los escenarios BDD se expanden sin control (Regla 6.1).
-> **Antes de:** `FW-04_bdd-userstories.md`. La spec del scope ACOTA los escenarios.
+> **Antes de:** `{workflow.bdd}`. La spec del scope ACOTA los escenarios.
 > **Sin TBDs.** Si no podés decidir si algo está in o out, decidilo ahora — no lo arrastres a BDD.
 
 ---
@@ -59,6 +59,6 @@ ancestor:
 
 1. **Listas, no prosa.** El scope se decide bullet por bullet. Si un bullet es ambiguo ("manejar usuarios"), partilo.
 2. **Out-of-scope explícito.** No basta omitir cosas; nombralas. La omisión silenciosa es la principal fuente de scope creep.
-3. **Toda dependencia debe existir.** Si dependés de `HU-XX` y no existe todavía → o la creás primero, o esta story arranca bloqueada (declarar el bloqueo en `FW-08_plan.md`).
+3. **Toda dependencia debe existir.** Si dependés de `HU-XX` y no existe todavía → o la creás primero, o esta story arranca bloqueada (declarar el bloqueo en `{workflow.plan}`).
 4. **Sync-back de restricciones (Regla 12).** Si al escribir scope aparece una restricción que aplica a varias stories → mover a `feature/definition.md` o `product/definition.md`.
 5. **Supuestos vs dependencias:** una dependencia es algo que existe en el sistema (otra story, otro servicio). Un supuesto es una condición del entorno (ej: "el cliente puede leer JSON").

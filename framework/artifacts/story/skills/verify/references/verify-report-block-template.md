@@ -1,6 +1,6 @@
-# Template — Bloque de reporte de `/fremi-story-verify` (para insertar en `FW-09_checkwork.md`)
+# Template — Bloque de reporte de `/fremi-story-verify` (para insertar en `{workflow.checkwork}`)
 
-Este bloque se **inserta o reemplaza** dentro de `FW-09_checkwork.md` del artifact bajo la sección `## Última corrida de verify`. No se crea un archivo dedicado — la decisión operativa vive en `config.story.yaml → verify_phase.dedicated_doc = false`.
+Este bloque se **inserta o reemplaza** dentro de `{workflow.checkwork}` del artifact bajo la sección `## Última corrida de verify`. No se crea un archivo dedicado — la decisión operativa vive en `config.story.yaml → verify_phase.dedicated_doc = false`.
 
 **Uso**:
 1. Ejecutar los checks declarados en `config.yaml → testing.*`.
@@ -42,7 +42,7 @@ Este bloque se **inserta o reemplaza** dentro de `FW-09_checkwork.md` del artifa
 ## Reglas de uso
 
 1. **Verdict debe respetar exit codes reales.** No marcar PASS si algún test falló, ni "adornar" el reporte. Si es aceptable, es WARNING con justificación explícita del usuario.
-2. **Cada CRITICAL bloquea closure.** No se firma `FW-10_closure.md` con CRITICAL abierto.
+2. **Cada CRITICAL bloquea closure.** No se firma `{workflow.closure}` con CRITICAL abierto.
 3. **WARNINGS requieren aceptación explícita del usuario** para no bloquear closure. Documentar la justificación en la línea de cada warning.
 4. **Timestamp preciso** — `YYYY-MM-DD HH:MM` real de la corrida, no aproximado.
-5. **Si `FW-09_checkwork.md` no existe** (caso raro) → crear el archivo con este bloque como sección única + placeholder para el resto del contenido (`## Estado general`, `## ✅ Listo`, etc.).
+5. **Si `{workflow.checkwork}` no existe** (caso raro) → crear el archivo con este bloque como sección única + placeholder para el resto del contenido (`## Estado general`, `## ✅ Listo`, etc.).

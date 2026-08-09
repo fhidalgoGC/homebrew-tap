@@ -1,11 +1,11 @@
 ---
 name: fremi-story-definition
-description: Puebla o actualiza el `FW-01_definition.md` de una story — problema/por qué en formato "As a / I want / So that" + criterios de aceptación CA-XXX. Doc snapshot. Se invoca cuando el usuario quiere formalizar/refinar la definition de una story existente, o cuando `/fremi-story` armó el esqueleto y hay que rellenarlo. Sin solución técnica — es negocio/usuario.
+description: Puebla o actualiza el `{workflow.definition}` de una story — problema/por qué en formato "As a / I want / So that" + criterios de aceptación CA-XXX. Doc snapshot. Se invoca cuando el usuario quiere formalizar/refinar la definition de una story existente, o cuando `/fremi-story` armó el esqueleto y hay que rellenarlo. Sin solución técnica — es negocio/usuario.
 ---
 
 # /fremi-story-definition — Poblar FW-01 (problema / por qué)
 
-Puebla el `FW-01_definition.md` de una story con el formato canónico:
+Puebla el `{workflow.definition}` de una story con el formato canónico:
 - **As a** `<rol>` / **I want** `<acción>` / **So that** `<beneficio>`.
 - Criterios de aceptación `CA-XXX` observables.
 
@@ -33,18 +33,18 @@ Puebla el `FW-01_definition.md` de una story con el formato canónico:
 ### Paso 1 — Validar padre y precondiciones
 
 - `{feature_folder}/definition.md` debe existir con contenido (Regla 1).
-- Si el `FW-01_definition.md` de la story ya tiene contenido → confirmar con el usuario antes de sobreescribir. Ofrecer edición aditiva (agregar CA nuevo).
+- Si el `{workflow.definition}` de la story ya tiene contenido → confirmar con el usuario antes de sobreescribir. Ofrecer edición aditiva (agregar CA nuevo).
 
 ### Paso 2 — Cargar template
 
-- `references/FW-01_definition-template.md` (local a este skill).
+- `references/{workflow.definition}-template.md` (local a este skill).
 
 ### Paso 3 — Poblar aplicando `phase_rules.definition`
 
 Reglas duras:
 - Formato obligatorio: `As a <rol> / I want <acción> / So that <beneficio>`.
 - Criterios `CA-XXX` numerados según `identifiers.criterion`.
-- **Sin decisiones técnicas** — sólo negocio/usuario. Si hay "el handler retorna 200" → mover a `FW-05_sdd-spec.md`.
+- **Sin decisiones técnicas** — sólo negocio/usuario. Si hay "el handler retorna 200" → mover a `{workflow.sdd}`.
 - Cubrir happy path + al menos un caso de borde/error.
 
 ### Paso 4 — Versionado (Regla 17)
@@ -74,6 +74,6 @@ Reglas duras:
 
 ## Referencias
 
-- Template canónico: [`references/FW-01_definition-template.md`](references/FW-01_definition-template.md).
+- Template canónico: [`references/{workflow.definition}-template.md`](references/{workflow.definition}-template.md).
 - `~/.fremi/framework/settings/config.core.yaml → phase_rules.definition`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 5 (formato definition), Regla 6 (frontera BDD/SDD/Design).

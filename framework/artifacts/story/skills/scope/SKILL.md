@@ -1,11 +1,11 @@
 ---
 name: fremi-story-scope
-description: Puebla o actualiza el `FW-03_scope.md` de una story — límites explícitos in-scope / out-of-scope + dependencias. Doc snapshot. Se invoca cuando la definition ya existe y hay que acotar la story antes de meterse en BDD. Sin scope explícito los escenarios BDD se expanden sin control (Regla 6.1).
+description: Puebla o actualiza el `{workflow.scope}` de una story — límites explícitos in-scope / out-of-scope + dependencias. Doc snapshot. Se invoca cuando la definition ya existe y hay que acotar la story antes de meterse en BDD. Sin scope explícito los escenarios BDD se expanden sin control (Regla 6.1).
 ---
 
 # /fremi-story-scope — Poblar FW-03 (límites de la story)
 
-Puebla el `FW-03_scope.md` con listas explícitas:
+Puebla el `{workflow.scope}` con listas explícitas:
 - **In-scope** — qué SÍ entra.
 - **Out-of-scope** — qué NO entra (para acotar expectativas).
 - **Dependencias** — otras stories o features de las que depende.
@@ -20,7 +20,7 @@ Puebla el `FW-03_scope.md` con listas explícitas:
 
 ## Cuándo invocarlo
 
-- `FW-01_definition.md` completo y hay que acotar la story.
+- `{workflow.definition}` completo y hay que acotar la story.
 - Se descubrió durante BDD/SDD que algo está fuera de scope y hay que actualizarlo.
 
 ## Procedimiento
@@ -30,11 +30,11 @@ Puebla el `FW-03_scope.md` con listas explícitas:
 - `config.yaml` → `phase_rules.scope`.
 
 ### Paso 1 — Validar padre
-- `FW-01_definition.md` de la story debe existir y estar completo (con CAs).
+- `{workflow.definition}` de la story debe existir y estar completo (con CAs).
 - `{feature_folder}/definition.md` debe listar la story como planeada.
 
 ### Paso 2 — Cargar template
-- `references/FW-03_scope-template.md` (local).
+- `references/{workflow.scope}-template.md` (local).
 
 ### Paso 3 — Poblar aplicando `phase_rules.scope`
 - Listas explícitas In-scope / Out-of-scope / Dependencias.
@@ -62,6 +62,6 @@ Puebla el `FW-03_scope.md` con listas explícitas:
 
 ## Referencias
 
-- Template: [`references/FW-03_scope-template.md`](references/FW-03_scope-template.md).
+- Template: [`references/{workflow.scope}-template.md`](references/{workflow.scope}-template.md).
 - `config.yaml → phase_rules.scope`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 6.1 (Scope antes que BDD).

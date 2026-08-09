@@ -6,6 +6,8 @@
 > **Pipelines:** `~/.fremi/framework/pipelines/reverse-*/PIPELINE.md` (4 pipelines).
 > **Rol:** vía canónica para alinear código pre-existente al framework — reconstruir los docs del flow forward a partir de artifacts sobrevivientes.
 
+> **Convención de tokens** — `{workflow.X}` (story docs), `{enabler.X}` (enabler docs), `{bug.filename}` (BG) y `{extra.filename}` (EX) resuelven contra `~/.fremi/framework/settings/methodology.user.yaml` al ejecutarse un skill reverse. Con la nomenclatura default resuelven a `{workflow.explore}`..`{workflow.closure}`, `{enabler.definition}`..`{enabler.closure}`, `BG-XX_<slug>.md`, `EX-NN_<slug>.md`.
+
 ---
 
 ## Qué produce esta vía
@@ -18,14 +20,14 @@ Cada skill reverse produce el conjunto de docs de la capa correspondiente, **exa
 | `/fremi-reverse-feature` | `FT-XX/definition.md` (+ `decisions.md` si aplica) | Feature |
 | `/fremi-reverse-story` | `FW-00..FW-10` (11 docs) | Story |
 | `/fremi-reverse-enabler` | `EN-01..EN-04` (4 docs) | Enabler |
-| `/fremi-reverse-bug` | `BG-XX_<slug>.md` (1 archivo) | Bug (declara Regla 29) |
-| `/fremi-reverse-extra` | `EX-NN_<slug>.md` (1 archivo) | Extra |
+| `/fremi-reverse-bug` | `{bug.filename}` (1 archivo) | Bug (declara Regla 29) |
+| `/fremi-reverse-extra` | `{extra.filename}` (1 archivo) | Extra |
 
 ---
 
 ## Diagrama del flujo (6 fases canónicas)
 
-```
+`
                      TRABAJO EN CÓDIGO YA EXISTENTE
                      ──────────────────────────────
                               │
@@ -111,7 +113,7 @@ Cada skill reverse produce el conjunto de docs de la capa correspondiente, **exa
         │  · Padres bumpeados                      │
         │  · Sugerencia de revisión humana (R28)   │
         └──────────────────────────────────────────┘
-```
+`
 
 ---
 
@@ -137,14 +139,14 @@ Mapeos concretos artifact → doc:
 | Fragmento del código/tests | Doc reconstruido |
 |---|---|
 | Estructura `describe('...') → it('...')` de tests | Escenarios BDD `SC-XXX` (Given/When/Then reconstruido del wording) |
-| Schema Zod / interface TS de request/response | Sección de contratos en `FW-05_sdd-spec.md` |
-| Códigos HTTP retornados por el handler | Tabla de errores en `FW-05_sdd-spec.md` |
-| Dependencias de `package.json` + estructura de carpetas | Sección "Tecnologías elegidas" en `FW-06_design.md` |
-| Wrappers, adapters, capas internas del handler | Sección "Estructura interna" en `FW-06_design.md` |
-| Commits git (uno por cambio significativo) | `task-XXX` en `FW-08_plan.md` con estado `[x]` |
-| Enumeración de tests existentes | `TC-XXX` en `FW-07_tdd-plan.md` con mapeo a SC-XXX |
-| README de la lambda / feature | Base para `FW-01_definition.md` (excepto `So that` — Regla 27) |
-| IaC + variables de entorno | Sección "Infraestructura" en `EN-02_design.md` |
+| Schema Zod / interface TS de request/response | Sección de contratos en `{workflow.sdd}` |
+| Códigos HTTP retornados por el handler | Tabla de errores en `{workflow.sdd}` |
+| Dependencias de `package.json` + estructura de carpetas | Sección "Tecnologías elegidas" en `{workflow.design}` |
+| Wrappers, adapters, capas internas del handler | Sección "Estructura interna" en `{workflow.design}` |
+| Commits git (uno por cambio significativo) | `task-XXX` en `{workflow.plan}` con estado `[x]` |
+| Enumeración de tests existentes | `TC-XXX` en `{workflow.tdd}` con mapeo a SC-XXX |
+| README de la lambda / feature | Base para `{workflow.definition}` (excepto `So that` — Regla 27) |
+| IaC + variables de entorno | Sección "Infraestructura" en `{enabler.design}` |
 
 ### Fase 3 — Preguntas dirigidas (Regla 27)
 
@@ -164,7 +166,7 @@ Los pipelines interactive pausan aquí; los pipelines auto acumulan preguntas y 
 
 Inferencia de fechas via `git log`:
 
-```bash
+`bash
 # Fecha de creación del archivo/módulo
 git log --diff-filter=A --follow --format="%ai" -- <archivo> | tail -1
 
@@ -173,7 +175,7 @@ git log -1 --format="%ai" -- <archivo>
 
 # Versión del padre en una fecha específica
 git blame -L <línea-frontmatter-version>,+1 -- <archivo-padre>
-```
+`
 
 **Si no hay `.git`**: reverse pide al usuario las fechas manualmente, o setea todo a "hoy" con `reverse_engineered_confidence: 0.3` como señal fuerte de baja confianza.
 
@@ -181,12 +183,12 @@ git blame -L <línea-frontmatter-version>,+1 -- <archivo-padre>
 
 Default `--transparent`: el frontmatter incluye el bloque:
 
-```yaml
+`yaml
 reverse_engineered: true
 reverse_engineered_at: 2026-08-05
 reverse_engineered_source: git-history+tests
 reverse_engineered_confidence: 0.85
-```
+`
 
 Con `--stealth` (override explícito, requiere justificación por proyecto), el bloque se omite y el doc queda indistinguible de uno producido por el flow forward.
 

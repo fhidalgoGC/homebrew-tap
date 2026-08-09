@@ -1,8 +1,8 @@
-# Template — `FW-02_proposal.md` de una story
+# Template — `{workflow.proposal}` de una story
 
 > **Doc CONDICIONAL.** Obligatorio cuando aplica al menos uno de los criterios declarados en `~/.fremi/framework/settings/config.core.yaml → conditional_rules.proposal_when`. Omitir si no aplica.
 >
-> **Propósito**: puente entre `FW-01_definition.md` (por qué existe la story) y `FW-03_scope.md` (alcance detallado). Declara el **intent técnico**, el **approach elegido** (con opciones si hubo bifurcación), las **decisions numeradas** (cada una anclada a un ADR), el **impact** (archivos afectados con delta LOC) y el **risk** de la story.
+> **Propósito**: puente entre `{workflow.definition}` (por qué existe la story) y `{workflow.scope}` (alcance detallado). Declara el **intent técnico**, el **approach elegido** (con opciones si hubo bifurcación), las **decisions numeradas** (cada una anclada a un ADR), el **impact** (archivos afectados con delta LOC) y el **risk** de la story.
 >
 > **Regla de frontera**: no repetir criterios de aceptación de negocio (van en definition). No listar todos los in/out-of-scope (va en scope). Sí explicar el CÓMO alto nivel y las DECISIONES técnicas antes de bajar a scope detallado + BDD.
 
@@ -12,7 +12,7 @@
 
 **Fecha**: <YYYY-MM-DD>
 **Trigger**: <qué criterio de `proposal_when` disparó este doc>
-**Explore de referencia**: `FW-00_explore.md` (si existe) — <resumen ejecutivo del hallazgo clave>
+**Explore de referencia**: `{workflow.explore}` (si existe) — <resumen ejecutivo del hallazgo clave>
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## 2. Scope (resumen)
 
-Este proposal cubre la solución técnica de la story `{story_id}`. El **detalle** de in/out-of-scope vive en `FW-03_scope.md`. Acá va sólo el **encuadre**:
+Este proposal cubre la solución técnica de la story `{story_id}`. El **detalle** de in/out-of-scope vive en `{workflow.scope}`. Acá va sólo el **encuadre**:
 
 - **Foco técnico**: <endpoints/módulos/capas afectados>.
 - **Alcance de PR**: <si es un PR único, o si el usuario decidió chained PRs — ver `config.yaml → phase_rules.tasks`>.
@@ -75,7 +75,7 @@ Este proposal cubre la solución técnica de la story `{story_id}`. El **detalle
 
 ## 7. Acceptance Criteria
 
-<Referencias directas a los CA-XXX del `FW-01_definition.md`. NO redefinirlos — solo enumerar cuáles cubre este proposal.>
+<Referencias directas a los CA-XXX del `{workflow.definition}`. NO redefinirlos — solo enumerar cuáles cubre este proposal.>
 
 - CA-001 (definition) → cubierto por Decision 1 + archivos de sección 6.
 - CA-002 (definition) → cubierto por Decision 2 + test x.

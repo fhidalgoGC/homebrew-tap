@@ -6,13 +6,15 @@
 >
 > Para bugs locales a una story → ver [`flow.bug.story.md`](./flow.bug.story.md).
 
+> **Convención de tokens** — `{bug.filename}` resuelve contra `~/.fremi/framework/settings/methodology.user.yaml → identifiers.bug`. Default: `BG-XX_<slug>.md`.
+
 ---
 
 ## Qué produce esta capa
 
 **1 archivo único** por bug:
 
-- Ubicación: `docs/works/features/{FT-XX}/bugs/BG-XX_<slug>.md`
+- Ubicación: `docs/works/features/{FT-XX}/bugs/`{bug.filename}`
 - Numeración: **local a cada feature** — cada feature arranca desde `BG-01`.
 
 **Secciones**: mismas que bug de story (symptom, impact-severity, reproduction-red-test, root-cause, fix-applied, linkages, closure). **Diferencia clave**: en bug de feature, la sección `linkages` es **prácticamente siempre obligatoria** (múltiples stories/ADRs involucrados).
@@ -21,7 +23,7 @@
 
 ## Diagrama del flujo
 
-```
+`
      Detección del bug
               │
               ▼
@@ -40,7 +42,7 @@
               │       a nivel feature (no atribuible limpio a UNA story)
               │
               ▼
-     FT-XX/bugs/BG-XX_<slug>.md    (snapshot, v1.0.0)
+     FT-XX/bugs/`{bug.filename}`    (snapshot, v1.0.0)
               │
               │ ancestor.id = FT-XX
               │ ancestor.version_at_creation = versión de FT-XX/definition.md
@@ -54,7 +56,7 @@
         (típicamente en la story cuya spec
          cubre el comportamiento afectado)
 
-     3. Agregar test rojo al FW-07_tdd-plan     ← invoca /fremi-story-tdd (parallel_allowed)
+     3. Agregar test rojo al {workflow.tdd}     ← invoca /fremi-story-tdd (parallel_allowed)
         de la story elegida (Regla 8)             El test DEBE fallar antes del fix
 
      4. Implementar el fix (puede tocar código
@@ -80,7 +82,7 @@
      /fremi-story-tdd    — agregar test rojo al FW-07 de la story cuya spec cubre el bug
      /fremi-feature-adr  — si el fix requiere decisión técnica local a la feature
      /fremi-product-adr  — si el fix reveló decisión técnica transversal al producto
-```
+`
 
 ---
 
@@ -90,7 +92,7 @@
 - **Preconditions**:
   - Feature existe con `FT-XX/definition.md` (y `FT-XX/spec.md` si ya se implementó living-spec).
   - El comportamiento incorrecto contradice contratos declarados a nivel feature (NO atribuible limpio a UNA story).
-- **Produces**: `FT-XX/bugs/BG-XX_<slug>.md` (snapshot).
+- **Produces**: `FT-XX/bugs/`{bug.filename}` (snapshot).
 - **Regla 17**: `ancestor.id: FT-XX`, `ancestor.version_at_creation` = versión actual de la feature.
 
 ---
@@ -99,7 +101,7 @@
 
 1. **Caracterizar reproducción precisa**.
 2. **Identificar suite de tests apropiada** — típicamente en la story cuya spec cubre el comportamiento afectado. Este paso llena parte de `linkages`.
-3. **Agregar test rojo al `FW-07_tdd-plan` de la story elegida** (Regla 8) — con skill disponible `/fremi-story-tdd`.
+3. **Agregar test rojo al `{workflow.tdd}` de la story elegida** (Regla 8) — con skill disponible `/fremi-story-tdd`.
    - **Constraint**: el test DEBE fallar antes de implementar el fix.
 4. **Implementar el fix** — puede tocar código de múltiples stories.
 5. **Llenar `root-cause`, `fix-applied` y `linkages`** — en bugs de feature, `linkages` es prácticamente obligatoria.
@@ -110,7 +112,7 @@
 ## Transversales (parallel_allowed)
 
 ### `/fremi-story-tdd`
-- **When**: agregar test rojo al `FW-07_tdd-plan` de la story cuya spec cubre el comportamiento afectado.
+- **When**: agregar test rojo al `{workflow.tdd}` de la story cuya spec cubre el comportamiento afectado.
 
 ### `/fremi-feature-adr`
 - **When**: el fix requirió una decisión técnica local a la feature.
@@ -134,11 +136,11 @@
 
 ## Regla 17 — dependencia ancestral
 
-```
+`
 FT-XX/definition.md (versión al momento del bug)
         │
         ▼
-FT-XX/bugs/BG-XX_<slug>.md  (snapshot)
+FT-XX/bugs/`{bug.filename}`  (snapshot)
    ├── ancestor.id = FT-XX
    ├── ancestor.version_at_creation = versión de definition.md al crear
    └── ancestor.version_at_closure = versión final de definition.md al cerrar
@@ -148,7 +150,7 @@ FT-XX/bugs/BG-XX_<slug>.md  (snapshot)
              - PATCH: respetó contrato de feature
              - MINOR: extendió contrato
              - MAJOR: cambió contrato
-```
+`
 
 ---
 

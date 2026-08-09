@@ -1,9 +1,9 @@
-# Template — `EN-03_plan.md` de un enabler
+# Template — `{enabler.plan}` de un enabler
 
 > **Para qué:** orden de ejecución. Tareas atómicas con criterios verificables (Regla 7b).
 > **Usado por:** `/fremi-enabler`, Paso 4 (crear archivo inicial).
-> **Rol del archivo:** **en qué orden se construye el enabler**. Es la operacionalización de `EN-02_design.md` en pasos atómicos.
-> **No introduce comportamiento.** Sólo ejecuta lo decidido en `EN-02_design.md`.
+> **Rol del archivo:** **en qué orden se construye el enabler**. Es la operacionalización de `{enabler.design}` en pasos atómicos.
+> **No introduce comportamiento.** Sólo ejecuta lo decidido en `{enabler.design}`.
 
 ---
 
@@ -28,8 +28,8 @@
 
 - **Objetivo:** <1-2 líneas — qué construye>
 - **Implementa de:**
-  - **Decisión:** D-XX de `EN-02_design.md`
-  - **Criterio:** CA-XXX de `EN-01_definition.md` (si aplica)
+  - **Decisión:** D-XX de `{enabler.design}`
+  - **Criterio:** CA-XXX de `{enabler.definition}` (si aplica)
 - **Detección de completitud:**
   - [ ] <criterio verificable 1 — comando / test / archivo>
   - [ ] <criterio verificable 2>
@@ -40,7 +40,7 @@
 
 ### task-XXX — Verificación integral
 
-- **Objetivo:** validar que todos los CA del `EN-01_definition.md` se cumplen.
+- **Objetivo:** validar que todos los CA del `{enabler.definition}` se cumplen.
 - **Detección de completitud:**
   - [ ] CA-001 verificable con <comando>
   - [ ] CA-002 verificable con <comando>
@@ -65,5 +65,5 @@
 2. **Toda tarea tiene mapeo** a una decisión (`D-XX`) o criterio técnico (`CA-XXX`) del enabler.
 3. **Criterios verificables automáticamente** cuando sea posible — comando que retorna 0, test que pasa, archivo que existe.
 4. **Estados:** `[ ]` pendiente / `[/]` en curso / `[x]` hecho / `[~]` descartada (con motivo, no se recicla número).
-5. **Verificación final obligatoria.** La última tarea siempre revalida todos los CA del `EN-01_definition.md`. Sin esto el enabler no se puede cerrar.
+5. **Verificación final obligatoria.** La última tarea siempre revalida todos los CA del `{enabler.definition}`. Sin esto el enabler no se puede cerrar.
 6. **Bugs encontrados durante la ejecución del enabler** → si el bug es del enabler mismo, agregar tarea de fix acá. Si el bug es en código de una story → seguir Regla 8 y registrar `BG-XX` en la story afectada.

@@ -55,7 +55,7 @@ since: 2026-07-16
 # para que el usuario valide antes de continuar.
 # ---------------------------------------------------------------------------
 step_matrix:
-  FW-00_explore:
+  {workflow.explore}:
     skill: /fremi-story-explore
     requires_complete: [feature/definition.md]
     consumes:
@@ -81,11 +81,11 @@ step_matrix:
       Primer step de la story. Requiere que la feature padre exista con
       definition real (Regla 1).
 
-  FW-01_definition:
+  {workflow.definition}:
     skill: /fremi-story-definition
-    requires_complete: [feature/definition.md, "FW-00_explore (si aplicó)"]
+    requires_complete: [feature/definition.md, "{workflow.explore} (si aplicó)"]
     consumes:
-      - "FW-00_explore.md — hallazgos que reencuadran el problema"
+      - "{workflow.explore} — hallazgos que reencuadran el problema"
       - "feature/definition.md — capacidades y user_stories_seed"
     can_run_with: []
     agent:
@@ -101,11 +101,11 @@ step_matrix:
       que esté firmado. Sin insumos no se puede escribir el As a / I want
       / So that con CAs.
 
-  FW-02_proposal:
+  {workflow.proposal}:
     skill: /fremi-story-proposal
-    requires_complete: [FW-01_definition]
+    requires_complete: [{workflow.definition}]
     consumes:
-      - "FW-01_definition.md — CAs para armar intent + approach"
+      - "{workflow.definition} — CAs para armar intent + approach"
     can_run_with: [/fremi-story-adr]
     agent:
       options: [main]
@@ -120,12 +120,12 @@ step_matrix:
       dispara un ADR. El ADR puede escribirse en paralelo con el resto del
       proposal, pero ambos requieren la definition completa.
 
-  FW-03_scope:
+  {workflow.scope}:
     skill: /fremi-story-scope
-    requires_complete: [FW-01_definition]
+    requires_complete: [{workflow.definition}]
     consumes:
-      - "FW-01_definition.md — CAs para acotar in/out-of-scope"
-      - "FW-02_proposal.md (si aplicó) — impact + rollout limitan el scope"
+      - "{workflow.definition} — CAs para acotar in/out-of-scope"
+      - "{workflow.proposal} (si aplicó) — impact + rollout limitan el scope"
     can_run_with: []
     agent:
       options: [main]
@@ -138,12 +138,12 @@ step_matrix:
       Scope acota la story a partir de los CAs. Sin definition no se puede
       acotar; sin proposal (si aplica) queda ambigua la frontera.
 
-  FW-04_bdd:
+  {workflow.bdd}:
     skill: /fremi-story-bdd
-    requires_complete: [FW-03_scope]
+    requires_complete: [{workflow.scope}]
     consumes:
-      - "FW-01_definition.md — CAs que se traducen a escenarios SC-XXX"
-      - "FW-03_scope.md — in-scope define qué escenarios cubrir"
+      - "{workflow.definition} — CAs que se traducen a escenarios SC-XXX"
+      - "{workflow.scope} — in-scope define qué escenarios cubrir"
     can_run_with: []
     agent:
       options: [main, subagent, agent]
@@ -163,12 +163,12 @@ step_matrix:
       Sin scope explícito los escenarios se expanden sin control (Regla 6.1).
       SC-XXX paralelizable internamente.
 
-  FW-05_sdd:
+  {workflow.sdd}:
     skill: /fremi-story-sdd
-    requires_complete: [FW-04_bdd]
+    requires_complete: [{workflow.bdd}]
     consumes:
-      - "FW-04_bdd-userstories.md — SCs para derivar contratos externos"
-      - "FW-03_scope.md — dependencias que fijan integraciones"
+      - "{workflow.bdd} — SCs para derivar contratos externos"
+      - "{workflow.scope} — dependencias que fijan integraciones"
     can_run_with: [/fremi-story-adr]
     agent:
       options: [main, subagent, agent]
@@ -189,11 +189,11 @@ step_matrix:
       Sin BDD no hay contrato externo (Regla 6.2). Bifurcaciones concurren
       con ADRs.
 
-  FW-06_design:
+  {workflow.design}:
     skill: /fremi-story-design
-    requires_complete: [FW-05_sdd]
+    requires_complete: [{workflow.sdd}]
     consumes:
-      - "FW-05_sdd-spec.md — contratos que el design debe satisfacer"
+      - "{workflow.sdd} — contratos que el design debe satisfacer"
       - "product/strategies.md — stack global aplicable"
       - "product/decisions.md — ADRs de producto que restringen tech"
     can_run_with: [/fremi-story-adr]
@@ -210,13 +210,13 @@ step_matrix:
     reason: >
       Design satisface el contrato SDD, no lo redefine (Regla 6.4).
 
-  FW-07_tdd:
+  {workflow.tdd}:
     skill: /fremi-story-tdd
-    requires_complete: [FW-05_sdd, FW-06_design]
+    requires_complete: [{workflow.sdd}, {workflow.design}]
     consumes:
-      - "FW-04_bdd.md — SC-XXX para mapear TC-XXX"
-      - "FW-05_sdd.md — cláusulas y errores para mapear TC-XXX"
-      - "FW-06_design.md — decisiones técnicas para elegir unit/integration/e2e"
+      - "{workflow.bdd} — SC-XXX para mapear TC-XXX"
+      - "{workflow.sdd} — cláusulas y errores para mapear TC-XXX"
+      - "{workflow.design} — decisiones técnicas para elegir unit/integration/e2e"
     can_run_with: []
     agent:
       options: [main, subagent, agent]
@@ -233,12 +233,12 @@ step_matrix:
     reason: >
       Sin SDD y Design cerrados no se puede plantear cobertura.
 
-  FW-08_plan:
+  {workflow.plan}:
     skill: /fremi-story-plan
-    requires_complete: [FW-07_tdd]
+    requires_complete: [{workflow.tdd}]
     consumes:
-      - "FW-06_design.md — estructura de archivos para descomponer tasks"
-      - "FW-07_tdd-plan.md — TCs a cubrir por task"
+      - "{workflow.design} — estructura de archivos para descomponer tasks"
+      - "{workflow.tdd} — TCs a cubrir por task"
     can_run_with: [/fremi-story-task]
     agent:
       options: [main, subagent]
@@ -257,11 +257,11 @@ step_matrix:
   # Fase de implementación (post-plan)
   apply:
     phase: apply
-    requires_complete: [FW-08_plan]
+    requires_complete: [{workflow.plan}]
     consumes:
-      - "FW-08_plan.md — cola de tasks a ejecutar (respetando depends_on)"
-      - "FW-07_tdd-plan.md — TCs a implementar (Regla 7 rojo primero)"
-      - "FW-06_design.md — estructura de archivos donde escribir código"
+      - "{workflow.plan} — cola de tasks a ejecutar (respetando depends_on)"
+      - "{workflow.tdd} — TCs a implementar (Regla 7 rojo primero)"
+      - "{workflow.design} — estructura de archivos donde escribir código"
     can_run_with:
       - /fremi-story-task
       - /fremi-story-checkwork
@@ -275,7 +275,7 @@ step_matrix:
         subagent: >
           Cada task es unidad aislada: leer design, escribir test rojo,
           implementar, verde. Un subagente por task encaja perfecto.
-          El main coordina + serializa FW-09_checkwork.
+          El main coordina + serializa {workflow.checkwork}.
         main: >
           Si el usuario prefiere ejecutar cada task él mismo (con la IA
           asistiendo en la conversación principal, sin fan-out).
@@ -287,16 +287,16 @@ step_matrix:
         - "Elegir próxima task (respetando depends_on)."
         - "Lanzar subagente/agente con contexto de la task (design, TDs, archivos)."
         - "Recibir reporte del subagente."
-        - "Serializar update de FW-09_checkwork (single-writer)."
+        - "Serializar update de {workflow.checkwork} (single-writer)."
         - "Pausar ante bifurcaciones Regla 3b (el sub NO decide)."
     reason: >
       Sin plan no hay lista de tasks para ejecutar.
 
-  FW-09_checkwork:
+  {workflow.checkwork}:
     skill: /fremi-story-checkwork
-    requires_complete: [FW-08_plan]
+    requires_complete: [{workflow.plan}]
     consumes:
-      - "FW-08_plan.md — tasks para reflejar estado en vivo"
+      - "{workflow.plan} — tasks para reflejar estado en vivo"
     can_run_with: []
     single_writer: true
     agent:
@@ -312,9 +312,9 @@ step_matrix:
 
   verify:
     skill: /fremi-story-verify
-    requires_complete: ["FW-09_checkwork al 100%", "todas las tasks del FW-08 en [x]"]
+    requires_complete: ["{workflow.checkwork} al 100%", "todas las tasks del FW-08 en [x]"]
     consumes:
-      - "FW-09_checkwork.md — evidencia de tasks cerradas y CAs cubiertos"
+      - "{workflow.checkwork} — evidencia de tasks cerradas y CAs cubiertos"
       - "config.testing.test_runner / type_checker / coverage — comandos a correr"
     can_run_with: []
     agent:
@@ -356,7 +356,7 @@ step_matrix:
     reason: >
       Auditoría antes de firmar. Requiere verify pasado.
 
-  FW-10_closure:
+  {workflow.closure}:
     skill: /fremi-story-closure
     requires_complete: [verify, closure-check]
     consumes:
@@ -382,7 +382,7 @@ step_matrix:
 # El agent-type usado internamente hereda del step (o del override del user).
 # ---------------------------------------------------------------------------
 internal_items:
-  FW-04_bdd:
+  {workflow.bdd}:
     unit: SC-XXX
     allow_parallel: true
     max_concurrent: 5
@@ -390,9 +390,9 @@ internal_items:
     reason: >
       Cada escenario Given/When/Then es independiente del resto. Un
       subagente puede generar SC-001..SC-005 en paralelo si conoce los CAs
-      de FW-01_definition.
+      de {workflow.definition}.
 
-  FW-05_sdd:
+  {workflow.sdd}:
     unit: contract
     allow_parallel: true
     max_concurrent: 3
@@ -403,7 +403,7 @@ internal_items:
     merge_hazards:
       - "Contratos que comparten schema/tipo — resolver en una sola pasada."
 
-  FW-06_design:
+  {workflow.design}:
     unit: component
     allow_parallel: true
     max_concurrent: 3
@@ -414,7 +414,7 @@ internal_items:
     merge_hazards:
       - "Elecciones de tecnología deben resolverse ANTES de descomponer en components (Regla 3b)."
 
-  FW-07_tdd:
+  {workflow.tdd}:
     unit: TC-XXX
     allow_parallel: true
     max_concurrent: 5
@@ -423,7 +423,7 @@ internal_items:
       Cada TC-XXX mapea a un SC-XXX o cláusula SDD independiente.
       El plan de coverage se consolida al final.
 
-  FW-08_plan:
+  {workflow.plan}:
     unit: task-XXX
     allow_parallel: false
     allow_parallel_when: >
@@ -446,7 +446,7 @@ internal_items:
       Tasks independientes (diferentes módulos/archivos) pueden ejecutarse
       por subagentes en paralelo.
     merge_hazards:
-      - "Multiple writers a FW-09_checkwork.md → serialize."
+      - "Multiple writers a {workflow.checkwork} → serialize."
       - "Coverage/testing global corre después del merge, no en paralelo."
 
 # ---------------------------------------------------------------------------

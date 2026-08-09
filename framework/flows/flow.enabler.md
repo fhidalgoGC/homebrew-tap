@@ -4,6 +4,8 @@
 > **Orquestador:** [`/fremi-enabler`](../artifacts/enabler/SKILL.md)
 > **Rol:** trabajo técnico habilitador. NO tiene comportamiento user-facing por sí solo — habilita que features/stories puedan existir o cumplir sus contratos.
 
+> **Convención de tokens** — los tokens `{enabler.X}` (ej: `{enabler.design}`, `{enabler.plan}`) resuelven contra `~/.fremi/framework/settings/methodology.user.yaml → identifiers.enabler_doc.items` al ejecutarse un skill. Con la nomenclatura default resuelven a `{enabler.definition}` .. `{enabler.closure}`.
+
 ---
 
 ## Qué produce esta capa
@@ -12,10 +14,10 @@
 
 | # | Doc | Skill | doc_type |
 |---|---|---|---|
-| 1 | `EN-01_definition.md` | `/fremi-enabler-definition` | snapshot |
-| 2 | `EN-02_design.md` | `/fremi-enabler-design` | snapshot |
-| 3 | `EN-03_plan.md` | `/fremi-enabler-plan` | snapshot |
-| 4 | `EN-04_closure.md` | `/fremi-enabler-closure` | snapshot |
+| 1 | `{enabler.definition}` | `/fremi-enabler-definition` | snapshot |
+| 2 | `{enabler.design}` | `/fremi-enabler-design` | snapshot |
+| 3 | `{enabler.plan}` | `/fremi-enabler-plan` | snapshot |
+| 4 | `{enabler.closure}` | `/fremi-enabler-closure` | snapshot |
 
 **Sin BDD/SDD/TDD** — el enabler no tiene comportamiento user-facing. Esa parte vive en las features/stories que consumen el enabler.
 
@@ -35,7 +37,7 @@
 
 ## Diagrama del flujo
 
-```
+`
      /fremi-enabler <nombre> [--feature FT-XX | --story FT-XX/HU-YY]
               │
               │ Precondiciones:
@@ -45,19 +47,19 @@
      Scaffold de los 4 docs (esqueletos vacíos)
               │
               ▼
-     /fremi-enabler-definition ────► EN-01_definition.md  [qué habilita + vinculaciones]
+     /fremi-enabler-definition ────► `{enabler.definition}`  [qué habilita + vinculaciones]
               │
               ▼
-     /fremi-enabler-design ────────► EN-02_design.md      [tech + estructura + ADRs]
+     /fremi-enabler-design ────────► `{enabler.design}`      [tech + estructura + ADRs]
               │
               ▼
-     /fremi-enabler-plan ──────────► EN-03_plan.md        [T-XXX con criterios verificables]
+     /fremi-enabler-plan ──────────► `{enabler.plan}`        [T-XXX con criterios verificables]
               │
               ▼
               (implementación fuera del ciclo de docs)
               │
               ▼
-     /fremi-enabler-closure ───────► EN-04_closure.md FIRMADO
+     /fremi-enabler-closure ───────► `{enabler.closure}` FIRMADO
               │
               │ side_effect (Regla 17):
               └── bumpea el padre según scope y parent_bump_triggers.enabler_closes
@@ -67,7 +69,7 @@
 
      /fremi-product-adr / /fremi-feature-adr / /fremi-story-adr — según scope del enabler
                                                  (para decisiones técnicas en EN-02)
-```
+`
 
 ---
 
@@ -80,14 +82,14 @@
 
 ### Step 2 — `/fremi-enabler-definition <EN-ID>`
 - **Preconditions**: scaffold creado.
-- **Produces**: `EN-01_definition.md` poblado con:
+- **Produces**: `{enabler.definition}` poblado con:
   - Qué habilita (capacidad técnica).
   - Vinculaciones (features/stories que dependen).
   - Criterios técnicos de aceptación (verificables).
 
 ### Step 3 — `/fremi-enabler-design <EN-ID>`
 - **Preconditions**: EN-01 con contenido real.
-- **Produces**: `EN-02_design.md` poblado con:
+- **Produces**: `{enabler.design}` poblado con:
   - Tecnologías + librerías + versiones + justificación.
   - Estructura de archivos a crear.
   - Firmas TypeScript reales (o equivalente en otro stack).
@@ -95,18 +97,18 @@
 
 ### Step 4 — `/fremi-enabler-plan <EN-ID>`
 - **Preconditions**: EN-02 con estructura declarada.
-- **Produces**: `EN-03_plan.md` con task-XXX + criterios verificables (Regla 7b).
+- **Produces**: `{enabler.plan}` con task-XXX + criterios verificables (Regla 7b).
 
 ### Step 5 — `/fremi-enabler-closure <EN-ID>`
 - **Preconditions**:
   - Todas las tasks de EN-03 en `[x]`.
   - Criterios técnicos de EN-01 verificados (comandos ejecutables, recursos existen).
-- **Produces**: `EN-04_closure.md` FIRMADO.
+- **Produces**: `{enabler.closure}` FIRMADO.
 - **Side effects** (Regla 17):
   - Bumpea el padre según scope y `parent_bump_triggers.enabler_closes`:
     - Global → bumpea `product/plan.md` MINOR.
     - Feature → bumpea `FT-XX/definition.md` MINOR o PATCH según impacto.
-    - Story → bumpea `HU-YY/FW-01_definition.md` PATCH (informativo).
+    - Story → bumpea `HU-YY/`{workflow.definition}` PATCH (informativo).
   - Rellena `ancestor.version_at_closure` en el frontmatter del EN-04.
 
 ---
@@ -135,28 +137,28 @@
 
 ## Regla 17 — dependencia ancestral
 
-```
+`
 Padre (según scope):
   - Global   → product/plan.md
   - Feature  → FT-XX/definition.md
-  - Story    → HU-YY/FW-01_definition.md
+  - Story    → HU-YY/`{workflow.definition}`
         │
         ▼
-EN-01_definition.md (ancestor.version_at_creation = versión del padre al crear)
+`{enabler.definition}` (ancestor.version_at_creation = versión del padre al crear)
         │
         ▼
-EN-02_design.md
+`{enabler.design}`
         │
         ▼
-EN-03_plan.md
+`{enabler.plan}`
         │
         ▼
-EN-04_closure.md (rellena ancestor.version_at_closure al firmar)
+`{enabler.closure}` (rellena ancestor.version_at_closure al firmar)
         │
         │ side_effect: bumpea el padre
         ▼
 Padre (nueva versión)
-```
+`
 
 ---
 

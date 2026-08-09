@@ -1,13 +1,13 @@
 ---
 name: fremi-story-checkwork
-description: Actualiza el `FW-09_checkwork.md` de una story — doc VIVO que refleja estado real de implementación (tasks listas / en curso / pendientes, CAs cubiertos, archivos implementados). Living doc (bumpea PATCH por cada task cerrada). Se invoca al arrancar/cerrar cada task, y también automáticamente por el hook `sync-checkwork.sh` cuando existe.
+description: Actualiza el `{workflow.checkwork}` de una story — doc VIVO que refleja estado real de implementación (tasks listas / en curso / pendientes, CAs cubiertos, archivos implementados). Living doc (bumpea PATCH por cada task cerrada). Se invoca al arrancar/cerrar cada task, y también automáticamente por el hook `sync-checkwork.sh` cuando existe.
 ---
 
 # /fremi-story-checkwork — Actualizar FW-09 (estado en vivo)
 
-Actualiza el `FW-09_checkwork.md` — el **único doc que muta durante la implementación** (Regla 13). Refleja el estado real de la story: qué está listo, en curso, pendiente; CAs cubiertos por tests; archivos implementados.
+Actualiza el `{workflow.checkwork}` — el **único doc que muta durante la implementación** (Regla 13). Refleja el estado real de la story: qué está listo, en curso, pendiente; CAs cubiertos por tests; archivos implementados.
 
-**Rol del doc**: espejo del `FW-08_plan.md` con estado real + cobertura.
+**Rol del doc**: espejo del `{workflow.plan}` con estado real + cobertura.
 
 **Diferencia con `/fremi-story-plan`**:
 - `/fremi-story-plan` — crea/refresca el archivo del plan (`FW-08`).
@@ -34,7 +34,7 @@ Actualiza el `FW-09_checkwork.md` — el **único doc que muta durante la implem
 - Al agregar un archivo nuevo al codebase.
 - Al confirmar cobertura de un CA con un test nuevo.
 
-**No necesario** si el hook `~/.fremi/framework/hooks/sync-checkwork.sh` está activo — el hook ejecuta este skill automáticamente al detectar cambios en `FW-08_plan.md`.
+**No necesario** si el hook `~/.fremi/framework/hooks/sync-checkwork.sh` está activo — el hook ejecuta este skill automáticamente al detectar cambios en `{workflow.plan}`.
 
 ## Procedimiento
 
@@ -43,11 +43,11 @@ Actualiza el `FW-09_checkwork.md` — el **único doc que muta durante la implem
 - `config.yaml` → `phase_rules.apply`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `FW-08_plan.md` con al menos 1 task.
+- `{workflow.plan}` con al menos 1 task.
 - Si `--task task-XXX`: verificar que existe en el plan.
 
 ### Paso 2 — Cargar template si no existe
-- `references/FW-09_checkwork-template.md` (living doc).
+- `references/{workflow.checkwork}-template.md` (living doc).
 
 ### Paso 3 — Aplicar `--action` según `phase_rules.apply`
 
@@ -81,11 +81,11 @@ Doc **living**:
 - ❌ Marcar task como ✅ sin que su criterio verificable pase (viola Regla 7b).
 - ❌ Actualizar checkwork sin bumpear versión (viola Regla 17).
 - ❌ Ignorar bloqueos — deben quedar registrados.
-- ❌ Reemplazar `FW-08_plan.md` con este archivo — son distintos (Regla 13).
+- ❌ Reemplazar `{workflow.plan}` con este archivo — son distintos (Regla 13).
 
 ## Referencias
 
-- Template: [`references/FW-09_checkwork-template.md`](references/FW-09_checkwork-template.md).
+- Template: [`references/{workflow.checkwork}-template.md`](references/{workflow.checkwork}-template.md).
 - Hook: `~/.fremi/framework/hooks/sync-checkwork.sh` (auto-invoca este skill al detectar cambios en `FW-08`).
 - `config.yaml → phase_rules.apply`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 13 (checkwork al día), Regla 11 (100% precondición closure).

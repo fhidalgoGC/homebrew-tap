@@ -20,10 +20,10 @@ since: 2026-07-16
 # Tipos de agent: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 step_matrix:
-  EN-01_definition:
+  {enabler.definition}:
     skill: /fremi-enabler-definition
     requires_complete:
-      - "padre existe según scope (product/definition.md OR feature/definition.md OR story/FW-01_definition.md)"
+      - "padre existe según scope (product/definition.md OR feature/definition.md OR story/{workflow.definition})"
     consumes:
       - "padre (según scope) — para vincular qué features/stories dependen"
     can_run_with: []
@@ -39,11 +39,11 @@ step_matrix:
       Primer doc de la cadena. Requiere el padre según scope declarado
       (--global / --feature / --story).
 
-  EN-02_design:
+  {enabler.design}:
     skill: /fremi-enabler-design
-    requires_complete: [EN-01_definition]
+    requires_complete: [{enabler.definition}]
     consumes:
-      - "EN-01_definition.md — qué habilita, criterios técnicos"
+      - "{enabler.definition} — qué habilita, criterios técnicos"
       - "product/decisions.md — ADRs globales que restringen tech"
       - "product/strategies.md — stack global aplicable"
     can_run_with:
@@ -61,18 +61,18 @@ step_matrix:
         subagent: >
           Análisis de decisiones técnicas individuales (una librería, un
           pattern, una config de infra) PUEDEN hacerse en subagentes en
-          paralelo (ver internal_items.EN-02_design). La consolidación final
+          paralelo (ver internal_items.{enabler.design}). La consolidación final
           y las bifurcaciones las hace el main.
         agent: >
           Si hay agente especializado en infra design / arquitectura.
     reason: >
       Sin definition no hay contra qué diseñar.
 
-  EN-03_plan:
+  {enabler.plan}:
     skill: /fremi-enabler-plan
-    requires_complete: [EN-02_design]
+    requires_complete: [{enabler.design}]
     consumes:
-      - "EN-02_design.md — decisiones técnicas para descomponer en tasks"
+      - "{enabler.design} — decisiones técnicas para descomponer en tasks"
     can_run_with: []
     agent:
       options: [main, subagent]
@@ -90,10 +90,10 @@ step_matrix:
   # Fase apply del enabler
   apply:
     phase: apply
-    requires_complete: [EN-03_plan]
+    requires_complete: [{enabler.plan}]
     consumes:
-      - "EN-03_plan.md — cola de tasks a ejecutar"
-      - "EN-02_design.md — decisiones para implementar cada task"
+      - "{enabler.plan} — cola de tasks a ejecutar"
+      - "{enabler.design} — decisiones para implementar cada task"
     can_run_with:
       - "any-scope ADR skill"
     agent:
@@ -111,14 +111,14 @@ step_matrix:
     reason: >
       Sin plan no hay tasks para ejecutar.
 
-  EN-04_closure:
+  {enabler.closure}:
     skill: /fremi-enabler-closure
     requires_complete:
       - "todas las tasks de EN-03 en [x]"
       - "criterios técnicos de EN-01 verificados"
     consumes:
-      - "EN-03_plan.md — verifica que todas las tasks estén cerradas"
-      - "EN-01_definition.md — criterios de aceptación técnicos a verificar"
+      - "{enabler.plan} — verifica que todas las tasks estén cerradas"
+      - "{enabler.definition} — criterios de aceptación técnicos a verificar"
       - "padre (según scope) — versión actual para bumpear (Regla 17)"
     can_run_with: []
     agent:
@@ -135,7 +135,7 @@ step_matrix:
 # INTERNAL ITEMS
 # ---------------------------------------------------------------------------
 internal_items:
-  EN-02_design:
+  {enabler.design}:
     unit: technical-decision
     allow_parallel: true
     max_concurrent: 3
@@ -147,7 +147,7 @@ internal_items:
       - "Elecciones que se afectan mutuamente (stack + librería + tooling) — resolver en pasada única."
       - "Bifurcaciones Regla 3b siempre pausan — no paralelizable."
 
-  EN-03_plan:
+  {enabler.plan}:
     unit: task-XXX (T-XXX del enabler)
     allow_parallel: false
     allow_parallel_when: >

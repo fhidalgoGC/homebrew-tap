@@ -1,4 +1,4 @@
-# Template — `FW-07_tdd-plan.md` de una story
+# Template — `{workflow.tdd}` de una story
 
 > **Para qué:** plan de tests que verifica el comportamiento (BDD), los contratos (SDD) y la estructura (Design).
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo).
@@ -22,7 +22,7 @@ ancestor:
 
 # Plan de tests (TDD)
 
-> Plan derivado de `FW-04_bdd-userstories.md` (SC-XXX), `FW-05_sdd-spec.md` (contratos) y `FW-06_design.md` (estructura interna). Cada test apunta a uno o más de esos elementos. Sin mapeo, el test no debería existir.
+> Plan derivado de `{workflow.bdd}` (SC-XXX), `{workflow.sdd}` (contratos) y `{workflow.design}` (estructura interna). Cada test apunta a uno o más de esos elementos. Sin mapeo, el test no debería existir.
 
 ## Tests planeados
 
@@ -77,7 +77,7 @@ ancestor:
 ## Notas
 
 - **Test rojo principal:** TC-XXX (el que captura el comportamiento más representativo de la story; se escribe primero).
-- **Orden sugerido de implementación:** TC-XXX → TC-YYY → ... (derivar del `FW-08_plan.md`).
+- **Orden sugerido de implementación:** TC-XXX → TC-YYY → ... (derivar del `{workflow.plan}`).
 - **CI:** la suite debe correr en `npm test` (o equivalente) sin requerir credenciales externas.
 ```
 

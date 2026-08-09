@@ -1,11 +1,11 @@
 ---
 name: fremi-story-explore
-description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — típicamente `FW-00_explore.md`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.core.yaml` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
+description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — típicamente `{workflow.explore}`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.core.yaml` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
 ---
 
 # /fremi-story-explore — Investigación previa (fase explore de una story)
 
-Este skill instancia o actualiza el doc **`explore`** de una story (por default `FW-00_explore.md`, pero el filename real se resuelve por config — no está hardcoded acá).
+Este skill instancia o actualiza el doc **`explore`** de una story (por default `{workflow.explore}`, pero el filename real se resuelve por config — no está hardcoded acá).
 
 Su objetivo es **mapear el terreno técnico** antes de decidir cómo resolver la story. **No propone solución** — sólo documenta contexto del codebase, alternativas identificadas, hallazgos y preguntas abiertas.
 
@@ -49,7 +49,7 @@ Si el usuario invoca `/fremi-story-explore` sin args pero está claro el context
    - `conditional_rules[condition_ref]` — criterios de obligatoriedad.
    - `phase_rules.explore` — reglas específicas de la fase.
 4. Extraer de `methodology.core.yaml`:
-   - `identifiers.workflow_doc.items[]` — buscar item con `name: "explore"` para obtener el `filename` real (ej: `FW-00_explore.md`).
+   - `identifiers.workflow_doc.items[]` — buscar item con `name: "explore"` para obtener el `filename` real (ej: `{workflow.explore}`).
    - `paths.features_dir`, `paths.user_stories_subdir`.
 
 Si alguno de los archivos no parsea → abortar.
@@ -58,7 +58,7 @@ Si alguno de los archivos no parsea → abortar.
 
 1. `feature_folder = {paths.features_dir}/<FEATURE_ID>_<slug>` (matchear con `identifiers.feature.folder_regex`).
 2. `story_folder = {feature_folder}/{paths.user_stories_subdir}/<STORY_ID>_<slug>` (idem `identifiers.story`).
-3. `explore_filename = <item.filename>` (típicamente `FW-00_explore.md`, pero **no hardcodear**).
+3. `explore_filename = <item.filename>` (típicamente `{workflow.explore}`, pero **no hardcodear**).
 4. Ruta final: `{story_folder}/{explore_filename}`.
 
 Si la story no existe → abortar y sugerir `/fremi-story` primero (Regla 1).
@@ -72,8 +72,8 @@ Si la story no existe → abortar y sugerir `/fremi-story` primero (Regla 1).
 
 ### Paso 3 — Cargar template
 
-1. Cargar `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md` — **este skill es dueño del template canónico**.
-2. `~/.fremi/framework/artifacts/story/references/FW-00_explore-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
+1. Cargar `~/.fremi/framework/skills/explore/references/{workflow.explore}-template.md` — **este skill es dueño del template canónico**.
+2. `~/.fremi/framework/artifacts/story/references/{workflow.explore}-template.md` es un **symlink** que apunta acá; no es un archivo alternativo.
 3. Si el template local no existe → generar contenido mínimo derivado de `phase_rules.explore` + estructura fija ("Contexto", "Alternativas", "Hallazgos", "Preguntas", "Impacto en proposal") y avisar al usuario que hay que reponer el template canónico.
 
 ### Paso 4 — Poblar el explore
@@ -103,13 +103,13 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.y
 - Ruta del archivo creado/actualizado.
 - Criterio de `explore_when` que aplicó.
 - Cuántas alternativas quedaron identificadas.
-- Sugerir próximo paso: `/fremi-story` para completar `FW-01_definition` (si no existe), o `/fremi-story-proposal` para pasar a decidir approach (si la story amerita proposal).
+- Sugerir próximo paso: `/fremi-story` para completar `{workflow.definition}` (si no existe), o `/fremi-story-proposal` para pasar a decidir approach (si la story amerita proposal).
 
 ---
 
 ## Validaciones
 
-- Story padre debe existir (folder + `FW-01_definition.md`). Si no → abortar con Regla 1.
+- Story padre debe existir (folder + `{workflow.definition}`). Si no → abortar con Regla 1.
 - No sobreescribir contenido existente sin confirmación explícita.
 - Al menos una sección de "Alternativas" o "Contexto" debe tener contenido no-placeholder.
 - Referencias `archivo:línea` deben apuntar a archivos que existen.
@@ -118,10 +118,10 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.y
 
 ## Anti-patrones
 
-- ❌ Elegir un approach en el explore ("vamos por Puppeteer porque X"). Eso va en `FW-02_proposal.md`.
+- ❌ Elegir un approach en el explore ("vamos por Puppeteer porque X"). Eso va en `{workflow.proposal}`.
 - ❌ Inventar contexto del codebase sin leerlo — cada afirmación va referenciada.
-- ❌ Escribir `FW-00_explore.md` para stories triviales (bug fixes locales) sólo por "completitud".
-- ❌ Hardcodear el filename `FW-00_explore.md` — resolver siempre por methodology.core.yaml.
+- ❌ Escribir `{workflow.explore}` para stories triviales (bug fixes locales) sólo por "completitud".
+- ❌ Hardcodear el filename `{workflow.explore}` — resolver siempre por methodology.core.yaml.
 
 ---
 
@@ -130,5 +130,5 @@ Si `{story_folder}/{checkwork_filename}` existe (resolver con methodology.core.y
 - `~/.fremi/framework/settings/config.core.yaml` → `config.story.yaml`, `conditional_rules.explore_when`, `phase_rules.explore`.
 - `~/.fremi/framework/settings/methodology.core.yaml` → `identifiers.workflow_doc.items[name=explore]`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 16 (condicionales), Regla 3b (bifurcaciones), Regla 6 (SDD dirige diseño).
-- **Template canónico** (dueño): `~/.fremi/framework/skills/explore/references/FW-00_explore-template.md`.
-- `~/.fremi/framework/artifacts/story/references/FW-00_explore-template.md` es symlink que delega acá.
+- **Template canónico** (dueño): `~/.fremi/framework/skills/explore/references/{workflow.explore}-template.md`.
+- `~/.fremi/framework/artifacts/story/references/{workflow.explore}-template.md` es symlink que delega acá.

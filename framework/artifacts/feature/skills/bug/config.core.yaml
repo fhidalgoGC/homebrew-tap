@@ -119,7 +119,7 @@ flow:
 
   parallel_allowed:
     - skill: /fremi-story-tdd
-      when: "agregar test rojo al FW-07_tdd-plan de la story cuya spec cubre el comportamiento afectado"
+      when: "agregar test rojo al {workflow.tdd} de la story cuya spec cubre el comportamiento afectado"
 
     - skill: /fremi-feature-adr
       when: "el fix requirió una decisión técnica local a la feature"
@@ -137,7 +137,7 @@ procedure_after_creation:
   - action: Identificar suite de tests apropiada (típicamente en la story cuya spec cubre el comportamiento afectado)
     fills_section: linkages (parte de stories afectadas)
 
-  - action: Agregar test rojo al FW-07_tdd-plan de la story elegida (Regla 8)
+  - action: Agregar test rojo al {workflow.tdd} de la story elegida (Regla 8)
     constraint: "El test DEBE fallar antes de implementar el fix"
     skill_available: /fremi-story-tdd
 

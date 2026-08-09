@@ -1,9 +1,9 @@
-# Template — `FW-06_design.md` de una story
+# Template — `{workflow.design}` de una story
 
 > **Para qué:** decisiones técnicas que **satisfacen** la SDD. Librerías, wrappers, capas, patterns, estructura de archivos.
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo).
 > **Rol del archivo:** **cómo ESTRUCTURAL** — tecnologías elegidas, componentes internos, contratos internos derivados.
-> **Antes de:** `FW-07_tdd-plan.md`. El TDD se planea contra esta estructura.
+> **Antes de:** `{workflow.tdd}`. El TDD se planea contra esta estructura.
 > **Frontera crítica (Regla 6.4):** acá NO se redefine la SDD. Si una decisión de Design contradice o expande la SDD → mover a SDD primero (o crear ADR si es una bifurcación) y después diseñar.
 > **NO es UI/UX.** Para diseño visual referenciar Figma/wireframes desde un link externo.
 >
@@ -25,7 +25,7 @@ ancestor:
 
 # Diseño técnico
 
-> Decisiones técnicas que satisfacen los contratos de `FW-05_sdd-spec.md`. Nada acá redefine el contrato externo — sólo cómo se cumple internamente.
+> Decisiones técnicas que satisfacen los contratos de `{workflow.sdd}`. Nada acá redefine el contrato externo — sólo cómo se cumple internamente.
 
 ## Tecnologías y librerías elegidas
 
@@ -97,7 +97,7 @@ function generarReporte(input):
 
 ## Manejo de errores internos
 
-> Cómo se propagan los errores entre módulos (excepciones, Result types, tagged unions, etc.). Cómo se mapean a los códigos expuestos en `FW-05_sdd-spec.md`.
+> Cómo se propagan los errores entre módulos (excepciones, Result types, tagged unions, etc.). Cómo se mapean a los códigos expuestos en `{workflow.sdd}`.
 
 - <regla 1>
 - <regla 2 — ej: "GraphQLError de la query principal se traduce a 502 al consumidor con body `{ error: 'upstream_error' }`">
@@ -156,8 +156,8 @@ src/
 ## Open Questions
 
 > Dudas técnicas NO resueltas al momento del design. **Deben cerrarse antes de
-> `FW-07_tdd-plan.md`** — o aceptarse explícitamente como **Known Limitation**
-> transferida al `FW-02_proposal.md`. NO se arrastran en silencio a la
+> `{workflow.tdd}`** — o aceptarse explícitamente como **Known Limitation**
+> transferida al `{workflow.proposal}`. NO se arrastran en silencio a la
 > implementación.
 
 - [ ] <duda 1 — quién la resuelve y cuándo>
@@ -169,8 +169,8 @@ src/
 ## Acceptance Test Mapping (forward)
 
 > Matriz **forward** de requirement SDD → test planeado. Alimenta directamente
-> el `FW-07_tdd-plan.md`. Es el puente forward — la matriz backward completa
-> (con test verde + archivo de código) vive en `FW-10_closure.md`.
+> el `{workflow.tdd}`. Es el puente forward — la matriz backward completa
+> (con test verde + archivo de código) vive en `{workflow.closure}`.
 
 | Requirement (SDD) | Test planeado (TC-XXX) | Archivo esperado |
 |---|---|---|
@@ -194,5 +194,5 @@ src/
 6. **Wrappers sólo cuando aportan.** Envolver una lib "por las dudas" agrega ruido. Envolverla porque necesitás test seam, abstracción real o swapping futuro tiene sentido.
 7. **Key Invariants concretos y verificables.** Si una invariante no se puede validar con un test o inspección, es una aspiración, no una invariante.
 8. **Edge Cases con ID de requirement.** Cada caso borde referencia el R-XX de SDD que cubre. Los edge cases sin requirement asociado son señal de gap en SDD (Regla 6).
-9. **Open Questions se resuelven ANTES de FW-07.** No arrastrar dudas técnicas silenciosamente a la implementación — o se cierran, o se documentan como Known Limitation en `FW-02_proposal.md`.
+9. **Open Questions se resuelven ANTES de FW-07.** No arrastrar dudas técnicas silenciosamente a la implementación — o se cierran, o se documentan como Known Limitation en `{workflow.proposal}`.
 10. **Acceptance Test Mapping cubre 100% de requirements.** Cada R-XX de SDD debe tener TC-XXX asociado. Si un requirement queda sin test planeado, el design está incompleto.

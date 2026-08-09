@@ -1,11 +1,11 @@
 ---
 name: fremi-story-plan
-description: Puebla la estructura inicial del `FW-08_plan.md` de una story — el archivo del plan de ejecución con secciones para task-XXX. Doc snapshot como estructura, pero las entries `task-XXX` se agregan con `/fremi-story-task`. Este skill crea el esqueleto; `/fremi-story-task` puebla las tareas individuales.
+description: Puebla la estructura inicial del `{workflow.plan}` de una story — el archivo del plan de ejecución con secciones para task-XXX. Doc snapshot como estructura, pero las entries `task-XXX` se agregan con `/fremi-story-task`. Este skill crea el esqueleto; `/fremi-story-task` puebla las tareas individuales.
 ---
 
 # /fremi-story-plan — Poblar FW-08 (estructura del plan de ejecución)
 
-Puebla la **estructura inicial** del `FW-08_plan.md`: resumen, secciones (Backlog / En curso / Cerradas), notas de orden y dependencias.
+Puebla la **estructura inicial** del `{workflow.plan}`: resumen, secciones (Backlog / En curso / Cerradas), notas de orden y dependencias.
 
 **Rol del doc**: en qué **orden** se construye la story. Las `task-XXX` individuales se agregan con `/fremi-story-task`; este skill crea el archivo con esqueleto.
 
@@ -32,11 +32,11 @@ Puebla la **estructura inicial** del `FW-08_plan.md`: resumen, secciones (Backlo
 - `config.yaml` → `phase_rules.tasks`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `FW-07_tdd-plan.md` con TCs mapeados (el orden lo influye).
-- `FW-06_design.md` con estructura de archivos a crear (el plan la sigue).
+- `{workflow.tdd}` con TCs mapeados (el orden lo influye).
+- `{workflow.design}` con estructura de archivos a crear (el plan la sigue).
 
 ### Paso 2 — Cargar template
-- `references/FW-08_plan-template.md`.
+- `references/{workflow.plan}-template.md`.
 
 ### Paso 3 — Poblar aplicando `phase_rules.tasks`
 
@@ -65,7 +65,7 @@ Puebla la **estructura inicial** del `FW-08_plan.md`: resumen, secciones (Backlo
 
 ## Referencias
 
-- Template: [`references/FW-08_plan-template.md`](references/FW-08_plan-template.md).
+- Template: [`references/{workflow.plan}-template.md`](references/{workflow.plan}-template.md).
 - Skill `/fremi-story-task` — agrega entries.
 - `config.yaml → phase_rules.tasks`.
 - `~/.fremi/framework/rules/workflow.md` → Regla 7b (tareas con criterios verificables).

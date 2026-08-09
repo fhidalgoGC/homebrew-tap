@@ -21,7 +21,7 @@
 <Qué hace mal el sistema en lenguaje observable. Foco en el "qué", no en el "porqué".>
 
 Ejemplo:
-> El endpoint `POST /reports/render` devuelve `500 Internal Server Error` cuando el body multipart NO incluye el campo `html`. Se espera `400 Bad Request` con detalle del campo faltante (ver `FW-05_sdd-spec.md` de HU-02).
+> El endpoint `POST /reports/render` devuelve `500 Internal Server Error` cuando el body multipart NO incluye el campo `html`. Se espera `400 Bad Request` con detalle del campo faltante (ver `{workflow.sdd}` de HU-02).
 
 ## Impacto y severidad
 
@@ -53,7 +53,7 @@ Ejemplo:
 - **Cómo correrlo:** `<comando>`
 - **Estado del test al crearlo:** [ ] rojo (falla) → [ ] verde después del fix
 
-> Si la story que originó el bug NO tenía el caso cubierto en `FW-07_tdd-plan.md`, **también** sumar el TC-XXX correspondiente en ese plan. Regla 8 + Regla 10 (los docs son fuente de verdad).
+> Si la story que originó el bug NO tenía el caso cubierto en `{workflow.tdd}`, **también** sumar el TC-XXX correspondiente en ese plan. Regla 8 + Regla 10 (los docs son fuente de verdad).
 
 ## Causa raíz
 
@@ -68,11 +68,11 @@ Ejemplo:
 - **Cambio puntual:** <qué se modificó>
 - **¿Cambia la spec de la story?**
   - [ ] No (el bug era una desviación accidental del spec)
-  - [ ] Sí — actualizar `FW-05_sdd-spec.md` de `{story_id}` + ADR (Regla 10)
+  - [ ] Sí — actualizar `{workflow.sdd}` de `{story_id}` + ADR (Regla 10)
 
 ## Vinculaciones
 
-- **Story que originó el bug:** `{feature_id}_{story_id}` (esta story queda parcialmente reabierta hasta que el fix se mergee — actualizar `FW-09_checkwork.md`).
+- **Story que originó el bug:** `{feature_id}_{story_id}` (esta story queda parcialmente reabierta hasta que el fix se mergee — actualizar `{workflow.checkwork}`).
 - **ADRs aplicables:** <ninguno / ADR-XXX>
 - **Otros bugs relacionados:** <BG-XX, si hay patrón>
 - **Release / hotfix:** <versión / tag / fecha de deploy>
@@ -86,7 +86,7 @@ Ejemplo:
   - [ ] Test de reproducción pasa (verde).
   - [ ] Toda la suite de la story afectada sigue verde.
   - [ ] Sin regresiones en stories vinculadas.
-  - [ ] `FW-09_checkwork.md` de `{story_id}` reflejó el ciclo (bug abierto → fix → cierre).
+  - [ ] `{workflow.checkwork}` de `{story_id}` reflejó el ciclo (bug abierto → fix → cierre).
   - [ ] Si hubo cambio de spec → actualización + ADR registrados.
 - **Sign-off:** <nombre> · <fecha>
 
@@ -107,5 +107,5 @@ Ejemplo:
 3. **Test rojo PRIMERO** (Regla 8). El fix sin test es prohibido — sin test no hay forma de saber si la regresión vuelve.
 4. **Severidad explícita.** "Crítica" implica que se trabaja antes que cualquier feature en curso.
 5. **Vinculación obligatoria a una story.** Si no hay story que cubra ese comportamiento → crear/extender la story primero (Regla 8). El bug "vive" dentro de la story.
-6. **Cambio de spec → ADR** (Regla 10). Si el comportamiento esperado descrito en `FW-05_sdd-spec.md` de la story estaba mal y el fix lo cambia, eso es una decisión de producto/diseño que merece registro.
+6. **Cambio de spec → ADR** (Regla 10). Si el comportamiento esperado descrito en `{workflow.sdd}` de la story estaba mal y el fix lo cambia, eso es una decisión de producto/diseño que merece registro.
 7. **Sin cierre, el bug sigue abierto.** Igual que la Regla 11 con las stories — el DoD del bug es checklist con evidencia.

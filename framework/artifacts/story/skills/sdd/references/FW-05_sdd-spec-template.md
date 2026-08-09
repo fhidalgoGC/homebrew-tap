@@ -1,9 +1,9 @@
-# Template — `FW-05_sdd-spec.md` de una story
+# Template — `{workflow.sdd}` de una story
 
 > **Para qué:** contratos **externos** de la story. Lo que otros consumen — sin haber decidido tecnología interna.
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo).
 > **Rol del archivo:** **qué CONTRACTUAL** — interfaces expuestas, schemas, tabla de errores expuestos, requisitos no funcionales medibles.
-> **Antes de:** `FW-06_design.md`. La spec dirige el diseño.
+> **Antes de:** `{workflow.design}`. La spec dirige el diseño.
 > **Frontera crítica (Regla 6.3):** si para escribir un contrato necesitás haber decidido librería/framework/wrapper → eso es Design, no SDD. Pregunta de control: "¿este contrato se sostiene independientemente del stack interno que elijamos?". Si no, está mal ubicado.
 
 ---
@@ -22,7 +22,7 @@ ancestor:
 
 # Especificación técnica (contratos externos)
 
-> Contratos que se sostienen **sin haber decidido tecnología interna**. Las decisiones sobre librerías, wrappers, capas internas, patterns y archivos van a `FW-06_design.md`.
+> Contratos que se sostienen **sin haber decidido tecnología interna**. Las decisiones sobre librerías, wrappers, capas internas, patterns y archivos van a `{workflow.design}`.
 
 ## Interfaces expuestas
 

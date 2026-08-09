@@ -10,9 +10,9 @@ Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: de
 > **Importante:** este skill NO tiene prefijos hardcoded. Lee `identifiers.enabler`, `identifiers.enabler_doc` y `identifiers.enabler_doc.items[]` del JSON.
 >
 > **Regla 17 — Living Versioning**: los 4 docs del enabler son **snapshot**. Al crear cada uno, el skill:
-> 1. Captura la versión actual del padre (product/plan.md si global; FT-XX/definition.md si feature-scoped; FT-XX/HU-YY/FW-01_definition.md si story-scoped).
+> 1. Captura la versión actual del padre (product/plan.md si global; FT-XX/definition.md si feature-scoped; FT-XX/HU-YY/{workflow.definition} si story-scoped).
 > 2. Inyecta el frontmatter con `version: 1.0.0`, `doc_type: snapshot`, `ancestor.id` y `ancestor.version_at_creation`.
-> 3. Al firmar `EN-04_closure.md`, verifica bump del padre (según `config.yaml → versioning.parent_bump_triggers.enabler_closes`) y rellena `ancestor.version_at_closure`.
+> 3. Al firmar `{enabler.closure}`, verifica bump del padre (según `config.yaml → versioning.parent_bump_triggers.enabler_closes`) y rellena `ancestor.version_at_closure`.
 
 ## Sintaxis
 
@@ -99,7 +99,7 @@ Aplicar `en_cfg.folder_format` (default: `{id}_{slug}`) → carpeta del enabler 
 
 Crear los 4 archivos listados en `en_doc_cfg.items[]`. Para cada item:
 
-1. Cargar `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/EN-01_definition-template.md`).
+1. Cargar `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/{enabler.definition}-template.md`).
 2. Reemplazar los placeholders:
    - `{enabler_id}` → ej `EN-02`.
    - `{slug}` → slug normalizado.
@@ -111,10 +111,10 @@ Estructura resultante (placement global):
 ```
 docs/works/enablers/
 └── {en_id}_{slug}/
-    ├── EN-01_definition.md   (qué habilita y por qué)
-    ├── EN-02_design.md       (cómo se construye)
-    ├── EN-03_plan.md         (tareas atómicas)
-    └── EN-04_closure.md      (sign-off al cierre)
+    ├── {enabler.definition}   (qué habilita y por qué)
+    ├── {enabler.design}       (cómo se construye)
+    ├── {enabler.plan}         (tareas atómicas)
+    └── {enabler.closure}      (sign-off al cierre)
 ```
 
 Estructura resultante (placement feature):
@@ -122,10 +122,10 @@ Estructura resultante (placement feature):
 docs/works/features/{FT-XX}_<slug>/
 └── enablers/
     └── {en_id}_{slug}/
-        ├── EN-01_definition.md
-        ├── EN-02_design.md
-        ├── EN-03_plan.md
-        └── EN-04_closure.md
+        ├── {enabler.definition}
+        ├── {enabler.design}
+        ├── {enabler.plan}
+        └── {enabler.closure}
 ```
 
 Estructura resultante (placement story):
@@ -133,31 +133,31 @@ Estructura resultante (placement story):
 docs/works/features/{FT-XX}_<slug>/user-stories/{HU-YY}_<slug>/
 └── enablers/
     └── {en_id}_{slug}/
-        ├── EN-01_definition.md
-        ├── EN-02_design.md
-        ├── EN-03_plan.md
-        └── EN-04_closure.md
+        ├── {enabler.definition}
+        ├── {enabler.design}
+        ├── {enabler.plan}
+        └── {enabler.closure}
 ```
 
 ### Paso 5 — Registrar vinculaciones
 
-En `EN-01_definition.md` § "Vinculado a", listar las features/stories que justifican el enabler.
+En `{enabler.definition}` § "Vinculado a", listar las features/stories que justifican el enabler.
 
-Si el placement es `feature` o `story`, esa vinculación ya está implícita por la ubicación física. Aún así, dejarla explícita en el doc para que `EN-04_closure.md` pueda mapearla en el sign-off.
+Si el placement es `feature` o `story`, esa vinculación ya está implícita por la ubicación física. Aún así, dejarla explícita en el doc para que `{enabler.closure}` pueda mapearla en el sign-off.
 
 ### Bifurcaciones técnicas → Regla 3b
 
-Durante la redacción de `EN-02_design.md`, si aparece una decisión técnica con 2+ caminos viables (típico: elección de librería, layer vs container image, IaC tool, etc.):
+Durante la redacción de `{enabler.design}`, si aparece una decisión técnica con 2+ caminos viables (típico: elección de librería, layer vs container image, IaC tool, etc.):
 
 1. **NO elegir silenciosamente.** Pausar la redacción.
 2. Presentar al usuario **2-3 opciones** con pros/contras explícitos.
 3. Esperar la decisión.
 4. Invocar `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr` para registrar (en `product/decisions.md` o `FT-XX/decisions.md` si es local a feature).
-5. Continuar referenciando `ADR-XXX` desde `EN-02_design.md`.
+5. Continuar referenciando `ADR-XXX` desde `{enabler.design}`.
 
 ### Paso 6 — Validar sincronía (Regla 12)
 
-Si el `EN-01_definition.md` declara una capacidad que pertenece a `product/definition.md` o que afecta a múltiples features, avisar y proponer sync-back hacia capa superior antes de continuar.
+Si el `{enabler.definition}` declara una capacidad que pertenece a `product/definition.md` o que afecta a múltiples features, avisar y proponer sync-back hacia capa superior antes de continuar.
 
 ### Paso 7 — Reportar
 
@@ -166,7 +166,7 @@ Decir al usuario:
 - Path completo.
 - Placement elegido (global / feature / story).
 - Features/stories vinculadas.
-- Próximo paso: completar `EN-01_definition.md` (qué habilita, vinculado a quién, criterios técnicos).
+- Próximo paso: completar `{enabler.definition}` (qué habilita, vinculado a quién, criterios técnicos).
 
 ## Diferencias con `/fremi-feature`, `/fremi-story` y `extra/`
 
@@ -194,9 +194,9 @@ Test rápido: ¿qué pasa si NO hago este trabajo?
 
 | Item (`en_doc_cfg.items[]`) | Archivo | Template |
 |---|---|---|
-| 1. `definition` | `EN-01_definition.md` | [`references/EN-01_definition-template.md`](references/EN-01_definition-template.md) |
-| 2. `design` | `EN-02_design.md` | [`references/EN-02_design-template.md`](references/EN-02_design-template.md) |
-| 3. `plan` | `EN-03_plan.md` | [`references/EN-03_plan-template.md`](references/EN-03_plan-template.md) |
-| 4. `closure` | `EN-04_closure.md` | [`references/EN-04_closure-template.md`](references/EN-04_closure-template.md) |
+| 1. `definition` | `{enabler.definition}` | [`references/{enabler.definition}-template.md`](references/{enabler.definition}-template.md) |
+| 2. `design` | `{enabler.design}` | [`references/{enabler.design}-template.md`](references/{enabler.design}-template.md) |
+| 3. `plan` | `{enabler.plan}` | [`references/{enabler.plan}-template.md`](references/{enabler.plan}-template.md) |
+| 4. `closure` | `{enabler.closure}` | [`references/{enabler.closure}-template.md`](references/{enabler.closure}-template.md) |
 
 Para cambiar la estructura de cualquier doc → editar el template correspondiente, no este SKILL.md.

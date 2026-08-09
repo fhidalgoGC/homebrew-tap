@@ -1,8 +1,8 @@
-# Template — `EN-02_design.md` de un enabler
+# Template — `{enabler.design}` de un enabler
 
 > **Para qué:** decisiones técnicas concretas para construir el enabler. Es el "cómo" estructural.
 > **Usado por:** `/fremi-enabler`, Paso 4 (crear archivo).
-> **Rol del archivo:** describe **tecnologías, librerías, arquitectura, fases de migración, rollback plan**. Sólo después de tener `EN-01_definition.md` cerrado.
+> **Rol del archivo:** describe **tecnologías, librerías, arquitectura, fases de migración, rollback plan**. Sólo después de tener `{enabler.definition}` cerrado.
 > **Bifurcaciones técnicas → Regla 3b.** Si hay 2+ caminos viables (ej: Puppeteer vs Playwright para el layer), pausar, proponer opciones al usuario y crear ADR antes de continuar.
 
 ---

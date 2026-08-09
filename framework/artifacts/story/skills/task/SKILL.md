@@ -7,7 +7,7 @@ description: Agrega una nueva tarea al plan.md de una user story. Lee la nomencl
 
 Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (cada tarea debe tener al menos un criterio verificable de detección de completitud) y la nomenclatura definida en **`~/.fremi/framework/settings/methodology.core.yaml`**.
 
-> **Importante:** lee `identifiers.task` y `identifiers.workflow_doc.items[]` del JSON. NO hardcodea ni el prefijo de la tarea (`task-`), ni el nombre del archivo plan (`FW-08_plan.md`).
+> **Importante:** lee `identifiers.task` y `identifiers.workflow_doc.items[]` del JSON. NO hardcodea ni el prefijo de la tarea (`task-`), ni el nombre del archivo plan (`{workflow.plan}`).
 
 ## Sintaxis
 
@@ -32,7 +32,7 @@ Si la referencia falta y hay **una sola story con tareas en progreso**, asumir e
 
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Extraer:
-   - `task_cfg = identifiers.task` → `prefix`, `id_format`, `compound_id_format`, `location` (suele ser `FW-08_plan.md`), `scope` (story).
+   - `task_cfg = identifiers.task` → `prefix`, `id_format`, `compound_id_format`, `location` (suele ser `{workflow.plan}`), `scope` (story).
    - `wf_cfg = identifiers.workflow_doc` y derivar el filename del item con `name === "plan"` (es donde viven las tareas).
    - `story_cfg = identifiers.story`, `feat_cfg = identifiers.feature`.
    - También: filenames de los items `sdd-spec`, `bdd-userstories`, `tdd-plan` (para validar mapeo).
@@ -44,7 +44,7 @@ Si el JSON no parsea → abortar.
 1. Parsear el argumento `<FEATURE_ID>_<STORY_ID>` según los `id_format` del JSON.
 2. Buscar carpeta `{paths.features_dir}/{feature_folder}/{paths.user_stories_subdir}/{story_folder}/`.
 3. Si no existe → avisar y abortar.
-4. Verificar que el archivo del plan (`FW-08_plan.md` o lo que diga el item del JSON) exista en esa story.
+4. Verificar que el archivo del plan (`{workflow.plan}` o lo que diga el item del JSON) exista en esa story.
 
 ### Paso 2 — Determinar el ID de tarea
 
@@ -80,9 +80,9 @@ Preguntar al usuario (o inferir de la conversación):
 ### Paso 5 — Validar sincronía (Regla 12)
 
 Al crear la tarea, verificar:
-- Que el contrato SDD que la tarea implementa ya esté en el doc SDD de la story (filename derivado del JSON, default `FW-05_sdd-spec.md`).
+- Que el contrato SDD que la tarea implementa ya esté en el doc SDD de la story (filename derivado del JSON, default `{workflow.sdd}`).
 - Que el escenario BDD referenciado ya exista en el doc BDD.
-- Que el test TDD esté en el doc TDD (default `FW-07_tdd-plan.md`).
+- Que el test TDD esté en el doc TDD (default `{workflow.tdd}`).
 - Que la decisión de Design tenga ADR cuando corresponda (Regla 3b).
 - Si la tarea introduce un concepto/componente/decisión que **no está** en SDD/BDD/Design/TDD, eso ya es un gap: o se agrega al spec primero, o se promueve más arriba si es transversal.
 

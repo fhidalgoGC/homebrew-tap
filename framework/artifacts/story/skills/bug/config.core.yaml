@@ -92,7 +92,7 @@ flow:
       skill: /fremi-story-bug
       action: registrar bug de story (crear BG-XX_<slug>.md)
       preconditions:
-        - "Story existe con FW-01_definition.md y FW-05_sdd-spec.md"
+        - "Story existe con {workflow.definition} y {workflow.sdd}"
         - "El comportamiento incorrecto contradice la spec de la story (Regla 8 — si no, extender spec primero)"
       produces: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/BG-XX_<slug>.md
       versioning: snapshot con ancestor.id = HU-YY, version_at_creation = story@version
@@ -113,7 +113,7 @@ flow:
 
   parallel_allowed:
     - skill: /fremi-story-tdd
-      when: "agregar el test rojo de reproducción al FW-07_tdd-plan de la story (Regla 8)"
+      when: "agregar el test rojo de reproducción al {workflow.tdd} de la story (Regla 8)"
 
     - skill: /fremi-story-adr
       when: "el fix requirió una decisión técnica local a la story"
@@ -128,7 +128,7 @@ procedure_after_creation:
   - action: Caracterizar reproducción precisa
     fills_section: reproduction-red-test (parte de repro)
 
-  - action: Agregar test rojo al FW-07_tdd-plan.md de la story (Regla 8)
+  - action: Agregar test rojo al {workflow.tdd} de la story (Regla 8)
     fills_section: reproduction-red-test (parte de test)
     constraint: "El test DEBE fallar antes de implementar el fix"
     skill_available: /fremi-story-tdd

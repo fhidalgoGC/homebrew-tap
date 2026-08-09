@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler-plan
-description: Puebla o actualiza el `EN-03_plan.md` de un enabler — tareas atómicas T-XXX con criterios verificables de detección de completitud (Regla 7b). Doc snapshot. Se invoca después de `/fremi-enabler-design`.
+description: Puebla o actualiza el `{enabler.plan}` de un enabler — tareas atómicas T-XXX con criterios verificables de detección de completitud (Regla 7b). Doc snapshot. Se invoca después de `/fremi-enabler-design`.
 ---
 
 # /fremi-enabler-plan — Poblar EN-03 (tareas atómicas del enabler)
 
-Puebla el `EN-03_plan.md` con las **tareas atómicas** `T-XXX` que materializan el design de EN-02.
+Puebla el `{enabler.plan}` con las **tareas atómicas** `T-XXX` que materializan el design de EN-02.
 
 **Rol del doc**: en qué orden se construye el enabler. Cada tarea con criterios verificables (Regla 7b).
 
@@ -17,7 +17,7 @@ Puebla el `EN-03_plan.md` con las **tareas atómicas** `T-XXX` que materializan 
 
 ## Cuándo invocarlo
 
-- `EN-02_design.md` completo.
+- `{enabler.design}` completo.
 - Se agrega/refina una tarea.
 
 ## Procedimiento
@@ -27,10 +27,10 @@ Puebla el `EN-03_plan.md` con las **tareas atómicas** `T-XXX` que materializan 
 - `config.yaml` → `phase_rules.tasks`.
 
 ### Paso 1 — Validar padre
-- `EN-02_design.md` con estructura de archivos declarada.
+- `{enabler.design}` con estructura de archivos declarada.
 
 ### Paso 2 — Cargar template
-- `references/EN-03_plan-template.md`.
+- `references/{enabler.plan}-template.md`.
 
 ### Paso 3 — Poblar aplicando `phase_rules.tasks`
 
@@ -56,5 +56,5 @@ Cada task-XXX debe tener:
 - ❌ Task sin mapeo a EN-02 — huérfana.
 
 ## Referencias
-- Template: [`references/EN-03_plan-template.md`](references/EN-03_plan-template.md).
+- Template: [`references/{enabler.plan}-template.md`](references/{enabler.plan}-template.md).
 - Regla 7b (criterios verificables).

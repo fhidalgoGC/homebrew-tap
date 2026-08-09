@@ -1,9 +1,9 @@
-# Template — `EN-01_definition.md` de un enabler
+# Template — `{enabler.definition}` de un enabler
 
 > **Para qué:** describir qué capacidad técnica habilita este enabler, quién la necesita y por qué. Primer artefacto del workflow de enabler.
 > **Usado por:** `/fremi-enabler`, Paso 4 (crear archivo).
 > **Placeholders:** `{enabler_id}`, `{slug}` se reemplazan con los valores derivados; `<...>` con el contenido real.
-> **Rol del archivo:** describe **qué se habilita y para quién**. NO describe comportamiento user-facing (eso son features/stories que dependen del enabler). NO describe el cómo técnico (eso es `EN-02_design.md`).
+> **Rol del archivo:** describe **qué se habilita y para quién**. NO describe comportamiento user-facing (eso son features/stories que dependen del enabler). NO describe el cómo técnico (eso es `{enabler.design}`).
 
 ---
 

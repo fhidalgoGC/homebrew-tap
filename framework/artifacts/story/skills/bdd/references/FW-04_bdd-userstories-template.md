@@ -1,10 +1,10 @@
-# Template — `FW-04_bdd-userstories.md` de una story
+# Template — `{workflow.bdd}` de una story
 
 > **Para qué:** comportamiento **observable** por el usuario, en formato Given/When/Then.
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo).
 > **Rol del archivo:** **qué OBSERVABLE** — qué experimenta el usuario en cada situación.
-> **Antes de:** `FW-05_sdd-spec.md`. Los contratos técnicos derivan del comportamiento observable, no al revés.
-> **Frontera crítica (Regla 6):** acá NO se escribe nada que dependa de tecnología interna. Códigos HTTP, schemas, firmas, librerías → todo eso va a `FW-05_sdd-spec.md`. La pregunta de control: "¿podría escribir este escenario sin saber qué stack se usa?" Si no, está mal ubicado.
+> **Antes de:** `{workflow.sdd}`. Los contratos técnicos derivan del comportamiento observable, no al revés.
+> **Frontera crítica (Regla 6):** acá NO se escribe nada que dependa de tecnología interna. Códigos HTTP, schemas, firmas, librerías → todo eso va a `{workflow.sdd}`. La pregunta de control: "¿podría escribir este escenario sin saber qué stack se usa?" Si no, está mal ubicado.
 
 ---
 
@@ -22,7 +22,7 @@ ancestor:
 
 # Escenarios BDD
 
-> Comportamiento esperado en Given/When/Then. **Sin firmas, sin tipos, sin códigos HTTP, sin schemas, sin librerías.** Esas decisiones nacen recién en `FW-05_sdd-spec.md`.
+> Comportamiento esperado en Given/When/Then. **Sin firmas, sin tipos, sin códigos HTTP, sin schemas, sin librerías.** Esas decisiones nacen recién en `{workflow.sdd}`.
 
 ```gherkin
 Feature: <título de la story — mismo que FW-01>
@@ -57,8 +57,8 @@ Feature: <título de la story — mismo que FW-01>
 
 ## Notas sobre los escenarios
 
-- <observaciones libres sobre supuestos comunes, alcance, edge cases conocidos que NO se cubrieron acá y se documentan en `FW-03_scope.md`>
-- <referencias a CA-XXX de `FW-01_definition.md` que cada SC-XXX cubre — para alimentar la matriz de trazabilidad de `FW-10_closure.md`>
+- <observaciones libres sobre supuestos comunes, alcance, edge cases conocidos que NO se cubrieron acá y se documentan en `{workflow.scope}`>
+- <referencias a CA-XXX de `{workflow.definition}` que cada SC-XXX cubre — para alimentar la matriz de trazabilidad de `{workflow.closure}`>
 ```
 
 ---
@@ -68,6 +68,6 @@ Feature: <título de la story — mismo que FW-01>
 1. **Sólo lenguaje observable.** "El usuario ve un PDF" ✓. "El handler retorna 200 con Content-Type: application/pdf" ✗ (SDD).
 2. **Numeración SC-XXX local a la story.** Secuencial, sin reciclar.
 3. **Cubrir al menos: caso feliz + un caso de error + un caso de borde.** Si la story se reduce a "caso feliz", está mal acotada.
-4. **Vincular a CA-XXX.** Cada criterio de aceptación de `FW-01_definition.md` debe estar cubierto por al menos un SC-XXX.
+4. **Vincular a CA-XXX.** Cada criterio de aceptación de `{workflow.definition}` debe estar cubierto por al menos un SC-XXX.
 5. **Frontera BDD vs SDD:** la pregunta de control es "¿podría escribir esto sin saber qué stack se usa?". Si la respuesta es no → mover a SDD.
 6. **Scenario Outline para variantes paramétricas.** No repetir 5 escenarios casi idénticos.

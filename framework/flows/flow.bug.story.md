@@ -6,13 +6,15 @@
 >
 > Para bugs transversales a varias stories → ver [`flow.bug.feature.md`](./flow.bug.feature.md).
 
+> **Convención de tokens** — `{bug.filename}` resuelve contra `~/.fremi/framework/settings/methodology.user.yaml → identifiers.bug`. Default: `BG-XX_<slug>.md`.
+
 ---
 
 ## Qué produce esta capa
 
 **1 archivo único** por bug (`single_file: true`):
 
-- Ubicación: `docs/works/features/{FT-XX}/user-stories/{HU-YY}/bugs/BG-XX_<slug>.md`
+- Ubicación: `docs/works/features/{FT-XX}/user-stories/{HU-YY}/bugs/`{bug.filename}`
 - Numeración: **local a cada story** — cada story arranca desde `BG-01` en su carpeta `bugs/`.
 
 **Secciones del archivo**:
@@ -31,7 +33,7 @@
 
 ## Diagrama del flujo
 
-```
+`
      Detección del bug
               │
               ▼
@@ -45,21 +47,21 @@
      /fremi-story-bug FT-XX/HU-YY <slug>
               │
               │ Precondiciones:
-              │  ├── Story existe con FW-01_definition.md + FW-05_sdd-spec.md
+              │  ├── Story existe con `{workflow.definition}` + `{workflow.sdd}`
               │  └── Comportamiento incorrecto documentado en spec de la story
               │
               ▼
-     HU-YY/bugs/BG-XX_<slug>.md    (snapshot, v1.0.0)
+     HU-YY/bugs/`{bug.filename}`    (snapshot, v1.0.0)
               │
               │ ancestor.id = HU-YY
-              │ ancestor.version_at_creation = versión de FW-01_definition.md
+              │ ancestor.version_at_creation = versión de `{workflow.definition}`
               │
               ▼
      ═══ PROCEDURE AFTER CREATION (no-skill, dentro del ciclo del bug) ═══
 
      1. Caracterizar reproducción precisa       → completa sección `reproduction-red-test`
 
-     2. Agregar test rojo al FW-07_tdd-plan     ← invoca /fremi-story-tdd (parallel_allowed)
+     2. Agregar test rojo al {workflow.tdd}     ← invoca /fremi-story-tdd (parallel_allowed)
         de la story (Regla 8)                     El test DEBE fallar antes del fix
 
      3. Implementar el fix
@@ -84,7 +86,7 @@
      /fremi-story-tdd    — agregar test rojo al FW-07 (Regla 8, step 2)
      /fremi-story-adr    — si el fix requiere decisión técnica local a la story
      /fremi-feature-adr  — si el fix reveló decisión técnica de feature
-```
+`
 
 ---
 
@@ -92,9 +94,9 @@
 
 ### Step 1 — `/fremi-story-bug FT-XX/HU-YY <slug>`
 - **Preconditions**:
-  - Story existe con `FW-01_definition.md` y `FW-05_sdd-spec.md`.
+  - Story existe con `{workflow.definition}` y `{workflow.sdd}`.
   - El comportamiento incorrecto contradice la spec de la story (Regla 8 — si no, extender spec primero).
-- **Produces**: `HU-YY/bugs/BG-XX_<slug>.md` (snapshot).
+- **Produces**: `HU-YY/bugs/`{bug.filename}` (snapshot).
 - **Regla 17**: `ancestor.id: HU-YY`, `ancestor.version_at_creation` = versión actual de la story.
 
 ---
@@ -104,7 +106,7 @@
 Estas acciones son parte del **trabajo interno del bug**, guiado por el `SKILL.md` de `/fremi-story-bug`. **NO son steps del flow** (no son skills invocables), pero completan el ciclo:
 
 1. **Caracterizar reproducción precisa** → llena parte de `reproduction-red-test`.
-2. **Agregar test rojo al FW-07_tdd-plan de la story (Regla 8)** — con skill disponible `/fremi-story-tdd` para hacerlo formal.
+2. **Agregar test rojo al {workflow.tdd} de la story (Regla 8)** — con skill disponible `/fremi-story-tdd` para hacerlo formal.
    - **Constraint**: el test DEBE fallar antes de implementar el fix.
 3. **Implementar el fix** → el test rojo pasa a verde.
 4. **Llenar `root-cause` y `fix-applied`** en el archivo del bug.
@@ -115,7 +117,7 @@ Estas acciones son parte del **trabajo interno del bug**, guiado por el `SKILL.m
 ## Transversales (parallel_allowed)
 
 ### `/fremi-story-tdd`
-- **When**: agregar el test rojo de reproducción al `FW-07_tdd-plan` de la story (Regla 8).
+- **When**: agregar el test rojo de reproducción al `{workflow.tdd}` de la story (Regla 8).
 
 ### `/fremi-story-adr`
 - **When**: el fix requirió una decisión técnica local a la story (Regla 3b).
@@ -139,11 +141,11 @@ Estas acciones son parte del **trabajo interno del bug**, guiado por el `SKILL.m
 
 ## Regla 17 — dependencia ancestral
 
-```
-HU-YY/FW-01_definition.md (versión al momento del bug)
+`
+HU-YY/`{workflow.definition}` (versión al momento del bug)
         │
         ▼
-HU-YY/bugs/BG-XX_<slug>.md  (snapshot)
+HU-YY/bugs/`{bug.filename}`  (snapshot)
    ├── ancestor.id = HU-YY
    ├── ancestor.version_at_creation = versión al crear
    └── ancestor.version_at_closure = versión final del padre al cerrar
@@ -153,14 +155,14 @@ HU-YY/bugs/BG-XX_<slug>.md  (snapshot)
              - PATCH: respetó contrato
              - MINOR: extendió contrato
              - MAJOR: cambió contrato (viola spec — necesita ADR)
-```
+`
 
 ---
 
 ## Reglas aplicables
 
 - **Regla 8** — Bug fix con test rojo PRIMERO antes del fix (obligatorio).
-- **Regla 10** — Si el fix cambia el contrato → actualizar `FW-05_sdd-spec.md` de la story + ADR.
+- **Regla 10** — Si el fix cambia el contrato → actualizar `{workflow.sdd}` de la story + ADR.
 - **Regla 15** — Bugs son opcionales (se crean bajo demanda al detectar defecto).
 - **Regla 17** — Versionado + bump del padre al cerrar.
 

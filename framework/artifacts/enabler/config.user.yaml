@@ -24,39 +24,39 @@ active: true
 # Tipos: main | subagent | agent (ver header de story/config.core.yaml).
 # ---------------------------------------------------------------------------
 step_agents:
-  EN-01_definition: main       # core options: [main]                  (no overridable)
-  EN-02_design: main           # core options: [main, subagent, agent]
-  EN-03_plan: main             # core options: [main, subagent]
+  {enabler.definition}: main       # core options: [main]                  (no overridable)
+  {enabler.design}: main           # core options: [main, subagent, agent]
+  {enabler.plan}: main             # core options: [main, subagent]
   apply: subagent              # core options: [main, subagent, agent]
-  EN-04_closure: main          # core options: [main]                  (no overridable)
+  {enabler.closure}: main          # core options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
 # Docs de la capa (4 docs, todos snapshot)
 # ---------------------------------------------------------------------------
 docs:
   - name: definition
-    file: EN-01_definition.md
+    file: {enabler.definition}
     required: always
     doc_type: snapshot
     skill: /fremi-enabler
     phase: definition
 
   - name: design
-    file: EN-02_design.md
+    file: {enabler.design}
     required: always
     doc_type: snapshot
     skill: /fremi-enabler
     phase: design
 
   - name: plan
-    file: EN-03_plan.md
+    file: {enabler.plan}
     required: always
     doc_type: snapshot
     skill: /fremi-enabler
     phase: tasks
 
   - name: closure
-    file: EN-04_closure.md
+    file: {enabler.closure}
     required: always
     doc_type: snapshot
     skill: /fremi-enabler
@@ -97,36 +97,36 @@ flow:
       preconditions:
         - "Padre existe según scope (product / feature / story)"
       produces:
-        - EN-01_definition.md (esqueleto)
-        - EN-02_design.md (esqueleto)
-        - EN-03_plan.md (esqueleto)
-        - EN-04_closure.md (esqueleto)
+        - {enabler.definition} (esqueleto)
+        - {enabler.design} (esqueleto)
+        - {enabler.plan} (esqueleto)
+        - {enabler.closure} (esqueleto)
 
     - step: 2
       skill: /fremi-enabler-definition
       preconditions:
         - "scaffold del enabler creado"
-      produces: EN-01_definition.md poblado
+      produces: {enabler.definition} poblado
 
     - step: 3
       skill: /fremi-enabler-design
       preconditions:
-        - "EN-01_definition.md con contenido real"
-      produces: EN-02_design.md poblado
+        - "{enabler.definition} con contenido real"
+      produces: {enabler.design} poblado
       side_effects: ["ADRs generados si hubo bifurcaciones (Regla 3b)"]
 
     - step: 4
       skill: /fremi-enabler-plan
       preconditions:
-        - "EN-02_design.md con estructura de archivos"
-      produces: EN-03_plan.md con task-XXX
+        - "{enabler.design} con estructura de archivos"
+      produces: {enabler.plan} con task-XXX
 
     - step: 5
       skill: /fremi-enabler-closure
       preconditions:
         - "Todas las tasks de EN-03 en [x]"
         - "Criterios técnicos de EN-01 verificados"
-      produces: EN-04_closure.md firmado
+      produces: {enabler.closure} firmado
       side_effects:
         - "Bumpea el padre según parent_bump_triggers.enabler_closes (Regla 17)"
 

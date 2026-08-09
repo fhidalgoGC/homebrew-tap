@@ -1,4 +1,4 @@
-# Template — `FW-10_closure.md` de una story
+# Template — `{workflow.closure}` de una story
 
 > **Para qué:** Definition of Done explícito de la story, con matriz de trazabilidad de criterio→BDD→SDD→Design→test→código.
 > **Usado por:** `/fremi-story`, Paso 4 (crear archivo inicial con esqueleto); `/fremi-story-closure-check` para auditar antes del sign-off (Regla 11).
@@ -21,13 +21,13 @@ ancestor:
 
 # Cierre de story: `{feature_id}_{story_id}_{slug}`
 
-> ⏳ **Estado:** En curso. Completar cuando todas las tareas de `FW-08_plan.md` estén `[x]` y todos los TC de `FW-07_tdd-plan.md` estén verdes.
+> ⏳ **Estado:** En curso. Completar cuando todas las tareas de `{workflow.plan}` estén `[x]` y todos los TC de `{workflow.tdd}` estén verdes.
 >
 > **Regla 17 — Bump del padre al firmar**: al completar sign-off, el skill `/fremi-story-closure-check` debe verificar que `FT-XX/definition.md` (y `FT-XX/spec.md`, `FT-XX/decisions.md` cuando existan como living) fueron bumpeados según `parent_bump_triggers.story_closes` de `config.yaml`. Escribir la versión final en `ancestor.version_at_closure` de arriba.
 
 ## Matriz de trazabilidad
 
-> Cada **criterio de aceptación** de `FW-01_definition.md` debe mapear a:
+> Cada **criterio de aceptación** de `{workflow.definition}` debe mapear a:
 > - escenario BDD (`FW-04`)
 > - contrato SDD (`FW-05`)
 > - decisión Design (`FW-06`)
@@ -45,14 +45,14 @@ ancestor:
 
 ## Definition of Done
 
-- [ ] **Nada fuera del `FW-03_scope.md` fue implementado.** Verificado revisión de diff vs scope.
-- [ ] **Implementación coincide con `FW-06_design.md`.** Estructura de archivos, componentes y patterns aplicados se respetan.
+- [ ] **Nada fuera del `{workflow.scope}` fue implementado.** Verificado revisión de diff vs scope.
+- [ ] **Implementación coincide con `{workflow.design}`.** Estructura de archivos, componentes y patterns aplicados se respetan.
 - [ ] **Todos los SC-XXX tienen test que pasa.** Cubrimiento del `FW-04` por TC concretos.
 - [ ] **Todos los contratos SDD implementados.** Cubrimiento del `FW-05`.
-- [ ] **Todos los TC-XXX marcados `[x]`** en `FW-07_tdd-plan.md`.
-- [ ] **Todas las task-XXX marcadas `[x]`** en `FW-08_plan.md` (excluyendo `[~]` descartadas con motivo).
+- [ ] **Todos los TC-XXX marcados `[x]`** en `{workflow.tdd}`.
+- [ ] **Todas las task-XXX marcadas `[x]`** en `{workflow.plan}` (excluyendo `[~]` descartadas con motivo).
 - [ ] **ADRs aplicables respetados.** ADRs referenciados desde `FW-06` se cumplen en el código.
-- [ ] **Coverage ≥ umbrales declarados en `FW-07_tdd-plan.md`** (semánticamente, no sólo el número).
+- [ ] **Coverage ≥ umbrales declarados en `{workflow.tdd}`** (semánticamente, no sólo el número).
 - [ ] **Sin divergencias con capas superiores** (Regla 12). Producto + feature reflejan lo que la story descubrió.
 - [ ] **Documentación actualizada si correspondía** (README de módulo, docs públicas, glosario).
 - [ ] **Lint + format limpios.** Comando `<lint cmd>` retorna 0.

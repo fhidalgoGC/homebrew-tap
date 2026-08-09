@@ -1,4 +1,4 @@
-# Template — `EN-04_closure.md` de un enabler
+# Template — `{enabler.closure}` de un enabler
 
 > **Para qué:** cierre formal del enabler. Confirma que la capacidad técnica quedó habilitada y que las features/stories vinculadas pueden avanzar.
 > **Usado por:** `/fremi-enabler`, Paso 4 (crear archivo inicial — se completa al cierre).
@@ -14,11 +14,11 @@
 
 ## Capacidad habilitada (confirmada)
 
-<Una frase: "El enabler dejó habilitado <X>". Refleja lo que decía `EN-01_definition.md` § Capacidad habilitada, pero confirmado.>
+<Una frase: "El enabler dejó habilitado <X>". Refleja lo que decía `{enabler.definition}` § Capacidad habilitada, pero confirmado.>
 
 ## Trazabilidad de criterios
 
-> Cada CA del `EN-01_definition.md` debe estar mapeado a evidencia técnica.
+> Cada CA del `{enabler.definition}` debe estar mapeado a evidencia técnica.
 
 | CA | Descripción | Verificación | Estado |
 |---|---|---|---|
@@ -30,12 +30,12 @@
 
 | Decisión | Doc fuente | ADR | Implementada en |
 |---|---|---|---|
-| D-01 | `EN-02_design.md` | `ADR-XXX` (si aplica) | <archivos / recursos> |
-| D-02 | `EN-02_design.md` | — | <archivos / recursos> |
+| D-01 | `{enabler.design}` | `ADR-XXX` (si aplica) | <archivos / recursos> |
+| D-02 | `{enabler.design}` | — | <archivos / recursos> |
 
 ## Tareas ejecutadas
 
-> Resumen del `EN-03_plan.md` con estado final. Sólo debería haber `[x]` o `[~]` con motivo. Si hay `[ ]` o `[/]` → el enabler NO se puede cerrar.
+> Resumen del `{enabler.plan}` con estado final. Sólo debería haber `[x]` o `[~]` con motivo. Si hay `[ ]` o `[/]` → el enabler NO se puede cerrar.
 
 - task-001 — <título> — [x] cerrada el <fecha>
 - task-002 — <título> — [x] cerrada el <fecha>
@@ -43,7 +43,7 @@
 
 ## Features / stories que ya pueden avanzar
 
-> El enabler tenía vinculaciones declaradas en `EN-01_definition.md`. Confirmar que ahora cada una puede ejecutar.
+> El enabler tenía vinculaciones declaradas en `{enabler.definition}`. Confirmar que ahora cada una puede ejecutar.
 
 - **`FT-XX`** — <feature que estaba bloqueada> — ✅ desbloqueada
 - **`FT-YY_HU-ZZ`** — <story que estaba bloqueada> — ✅ desbloqueada
@@ -69,9 +69,9 @@
 
 ## DoD (Definition of Done)
 
-- [ ] Todos los CA del `EN-01_definition.md` verificados con evidencia.
-- [ ] Implementación coincide con `EN-02_design.md`.
-- [ ] Todas las tasks del `EN-03_plan.md` en `[x]` o `[~]`.
+- [ ] Todos los CA del `{enabler.definition}` verificados con evidencia.
+- [ ] Implementación coincide con `{enabler.design}`.
+- [ ] Todas las tasks del `{enabler.plan}` en `[x]` o `[~]`.
 - [ ] ADRs aplicables registrados en `docs/works/product/decisions.md` (o feature local).
 - [ ] Features/stories vinculadas pueden avanzar (verificado).
 - [ ] Sin divergencias con capas superiores (Regla 12).

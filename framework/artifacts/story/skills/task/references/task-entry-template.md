@@ -1,4 +1,4 @@
-# Template — Entrada de tarea en `FW-08_plan.md`
+# Template — Entrada de tarea en `{workflow.plan}`
 
 > **Para qué:** estructura canónica de una tarea (`task-XXX`) que se anexa a la sección "Tareas" del plan de una user story.
 > **Usado por:** `/fremi-story-task`, Paso 4 (anexar al archivo del plan).
@@ -13,10 +13,10 @@
 - **Objetivo:** <1-2 líneas. Qué construye o resuelve esta tarea — sin entrar en cómo.>
 
 - **Implementa de:**
-  - **SDD:** <contrato exacto del FW-05_sdd-spec.md que esta tarea materializa>
-  - **BDD:** SC-XXX, SC-YYY (escenarios del FW-04_bdd-userstories.md que esta tarea hace pasar)
-  - **Design:** <decisión técnica del FW-06_design.md que esta tarea aplica; mencionar ADR-XXX si la decisión tiene ADR>
-  - **TDD:** TC-XXX, TC-YYY (tests del FW-07_tdd-plan.md que esta tarea verifica)
+  - **SDD:** <contrato exacto del {workflow.sdd} que esta tarea materializa>
+  - **BDD:** SC-XXX, SC-YYY (escenarios del {workflow.bdd} que esta tarea hace pasar)
+  - **Design:** <decisión técnica del {workflow.design} que esta tarea aplica; mencionar ADR-XXX si la decisión tiene ADR>
+  - **TDD:** TC-XXX, TC-YYY (tests del {workflow.tdd} que esta tarea verifica)
 
 - **Detección de completitud:**
   - [ ] <criterio verificable 1 — idealmente comando o test concreto>

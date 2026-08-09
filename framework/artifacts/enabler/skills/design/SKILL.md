@@ -1,11 +1,11 @@
 ---
 name: fremi-enabler-design
-description: Puebla o actualiza el `EN-02_design.md` de un enabler — decisiones técnicas concretas (tecnologías, librerías, capas, infraestructura) + ADRs aplicables. Doc snapshot. Se invoca después de `/fremi-enabler-definition`.
+description: Puebla o actualiza el `{enabler.design}` de un enabler — decisiones técnicas concretas (tecnologías, librerías, capas, infraestructura) + ADRs aplicables. Doc snapshot. Se invoca después de `/fremi-enabler-definition`.
 ---
 
 # /fremi-enabler-design — Poblar EN-02 (cómo se construye técnicamente)
 
-Puebla el `EN-02_design.md` de un enabler con las **decisiones técnicas concretas** que satisfacen los criterios de EN-01.
+Puebla el `{enabler.design}` de un enabler con las **decisiones técnicas concretas** que satisfacen los criterios de EN-01.
 
 **Rol del doc**: cómo se construye el enabler. Tecnologías elegidas, componentes internos, ADRs por bifurcación (Regla 3b).
 
@@ -17,7 +17,7 @@ Puebla el `EN-02_design.md` de un enabler con las **decisiones técnicas concret
 
 ## Cuándo invocarlo
 
-- `EN-01_definition.md` completo.
+- `{enabler.definition}` completo.
 - Se descubre una decisión técnica nueva.
 
 ## Procedimiento
@@ -27,10 +27,10 @@ Puebla el `EN-02_design.md` de un enabler con las **decisiones técnicas concret
 - `config.yaml` → `phase_rules.design`.
 
 ### Paso 1 — Validar padre
-- `EN-01_definition.md` con contenido real.
+- `{enabler.definition}` con contenido real.
 
 ### Paso 2 — Cargar template
-- `references/EN-02_design-template.md`.
+- `references/{enabler.design}-template.md`.
 
 ### Paso 3 — Poblar aplicando `phase_rules.design`
 
@@ -63,6 +63,6 @@ Puebla el `EN-02_design.md` de un enabler con las **decisiones técnicas concret
 - ❌ Wrappers sin justificación real.
 
 ## Referencias
-- Template: [`references/EN-02_design-template.md`](references/EN-02_design-template.md).
+- Template: [`references/{enabler.design}-template.md`](references/{enabler.design}-template.md).
 - `config.yaml → phase_rules.design`, `config.enabler.yaml`.
 - Regla 3b (ADR por bifurcación).
