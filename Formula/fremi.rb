@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.17"
+  version "0.4.18"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.17/fremi-darwin-arm64"
-      sha256 "19479abc4d49ce3791e1a19c2686e8c84938e76c48e65bbe7ab3b5111e46b04d"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.18/fremi-darwin-arm64"
+      sha256 "932251eb5a4bcd857c0885dfb0d30f39949244eb227993eba50591e3f45fc6fa"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.17/fremi-darwin-x64"
-      sha256 "608491163a1da968a8e4ca6da756b2542242aebb4e26b55c729238495541b5c9"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.18/fremi-darwin-x64"
+      sha256 "e0c8750f417975fc7c1ddbe6e155cc2662ed1d554659302c2cddaa131d0bcd85"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.17/fremi-linux-arm64"
-      sha256 "829acb7ec5c367f615ec77ccd1d1963208aeed86ff7606710f2050a931a44f03"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.18/fremi-linux-arm64"
+      sha256 "808e983f8a79eed0049b6dcf544c8e924253643251321eca977c931712d62b34"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.17/fremi-linux-x64"
-      sha256 "c54f17b200bc916c6cf10d85b41529625489b88d4a8df79105581f44be6ca80b"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.18/fremi-linux-x64"
+      sha256 "e3bc64f36489c38eb12f9341c085437a5ca592740926f3c6f81fb02dcbe88de6"
     end
   end
 
@@ -37,15 +37,15 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      What's new in v0.4.17 — framework hooks are wired automatically:
+      What's new in v0.4.18 — uninstall leaves no trace:
 
-        `fremi install` (via `fremi agent install`) now discovers every hook
-        in the framework and registers it in the Claude Code plugin at
-        ~/.claude/plugins/cache/fremi/fremi/<version>/hooks/hooks.json
+        `fremi uninstall --purge` removes the whole .fremi/ tree, not just
+        config.user.yaml. `fremi uninstall --with-user` (alias --all) chains
+        the user-level cleanup, so one command removes fremi for EVERY
+        project. docs/works/ is never touched.
 
-        Each hook declares its own event and matcher in its header, so hooks
-        added to any layer, pipeline or reverse-skill are picked up with no
-        CLI change. Previously only the SessionStart bootstrap was wired.
+        Fixed: the MCP server entry now points at the fremi binary that is
+        actually running, instead of always resolving `which fremi`.
 
       Upgrading from an older version:
 
