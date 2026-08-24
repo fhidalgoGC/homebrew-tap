@@ -132,6 +132,24 @@ Los hooks domain-específicos se registran adicionalmente desde cada `artifacts/
 
 ---
 
+## Costo de ejecución (medido, v0.4.17)
+
+Los 14 hooks de `UserPromptSubmit` (1 cross-domain + 7 de pipeline + 6 de reverse) corren en **cada prompt**. Medición en darwin-arm64, caché caliente, prompt sin slash-command (o sea: los 13 de precondición hacen early-exit):
+
+| | |
+|---|---|
+| `check-workflow-stage.sh` (hace trabajo real) | ~41 ms |
+| cada hook de precondición (early-exit) | ~9 ms |
+| baseline de referencia: `bash -c 'exit 0'` | ~2,5 ms |
+| suma serial de los 14 | ~161 ms |
+| **wall-clock real (el harness los corre en paralelo)** | **~47 ms** |
+
+Conclusión: el wall-clock lo domina `check-workflow-stage.sh`; los 13 de precondición suman ~6 ms sobre él. **No vale consolidarlos en un dispatcher único** — la ganancia teórica es de milisegundos y costaría 13 scripts de rewrite más un punto único de falla.
+
+Si algún día ese número crece (más capas, más pipelines), el lever correcto es el early-exit: cada hook de precondición debe salir ANTES de tocar disco, con sólo el chequeo del slash-command en el prompt. Los ~9 ms de hoy son casi todo spawn de proceso + `jq`, no I/O.
+
+---
+
 ## Dependencias
 
 - **`jq`** — para parsear el JSON payload de los hooks (todos lo usan).

@@ -1,6 +1,6 @@
 import { resolve, join } from "node:path";
 import { existsSync, readdirSync } from "node:fs";
-import { askSelect, note } from "./_helpers";
+import { askSelect, note, type OptionEntry } from "./_helpers";
 import { readActive } from "../core/settings-edit";
 
 // Discovery + interactive selection for `fremi setting`. Reads the
@@ -116,7 +116,7 @@ export async function pickSectionAction(section: SettingSection): Promise<Sectio
   const canEditModels = LAYERS_WITH_MODELS.has(section.name);
   const canEditDefaultModel = section.name === "agents";
 
-  const options = [
+  const options: OptionEntry<string>[] = [
     {
       value: "toggle-active",
       label: `✏  Toggle active (currently: ${labelForActive(state)})`,

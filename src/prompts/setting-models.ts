@@ -1,7 +1,7 @@
 import { resolve, dirname, basename } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import * as YAML from "yaml";
-import { askSelect, note } from "./_helpers";
+import { askSelect, note, type OptionEntry } from "./_helpers";
 import {
   loadYamlDoc,
   saveYamlDoc,
@@ -150,7 +150,7 @@ async function pickConcreteModel(
   catalog: CatalogFile,
   currentValue: string,
 ): Promise<string | null> {
-  const options = catalog.models.map((m) => ({
+  const options: OptionEntry<string>[] = catalog.models.map((m) => ({
     value: m,
     label: m,
     hint: m === currentValue ? "current" : undefined,

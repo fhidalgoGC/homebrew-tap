@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import * as YAML from "yaml";
-import { askSelect, askText, note } from "./_helpers";
+import { askSelect, askText, note, type OptionEntry } from "./_helpers";
 import {
   loadYamlDoc,
   saveYamlDoc,
@@ -239,7 +239,7 @@ async function editMapValues(filePath: string, mapKey: string): Promise<void> {
       return;
     }
 
-    const options = keys.map((k) => {
+    const options: OptionEntry<string>[] = keys.map((k) => {
       const current = getAtPath(doc, `${mapKey}.${k}`);
       const defaultValue = defaults ? getAtPath(defaults, `${mapKey}.${k}`) : undefined;
       const label = `✏  ${padRight(k, 22)}  ${valuePreviewWithDefault(current, defaultValue)}`;

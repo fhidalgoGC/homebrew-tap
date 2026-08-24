@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
-import { askSelect, note } from "./_helpers";
+import { askSelect, note, type OptionEntry } from "./_helpers";
 import {
   loadYamlDoc,
   saveYamlDoc,
@@ -109,7 +109,7 @@ export async function runLayerStepAgentsMenu(
 
     const overrides = readMap(doc, "step_agents");
 
-    const options = core.steps.map((step) => {
+    const options: OptionEntry<string>[] = core.steps.map((step) => {
       const stepInfo = core.info[step];
       const current = overrides[step] ?? stepInfo.default;
       const editable = stepInfo.options.length > 1;
@@ -125,7 +125,7 @@ export async function runLayerStepAgentsMenu(
         hint,
       };
     });
-    options.push({ value: BACK, label: "↩  Back", hint: undefined });
+    options.push({ value: BACK, label: "↩  Back" });
 
     const picked = await askSelect({
       message: `${layerName}.step_agents — pick a step:`,
