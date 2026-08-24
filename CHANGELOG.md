@@ -4,7 +4,10 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
-## [Unreleased]
+## [0.4.19] — 2026-08-24
+
+Un proyecto ahora carga su propio fremi: skills, rules y hooks viven en el
+proyecto, y el home de la máquina queda con lo mínimo.
 
 ### Changed
 - **Un proyecto ahora es autocontenido.** `fremi install` escribe
