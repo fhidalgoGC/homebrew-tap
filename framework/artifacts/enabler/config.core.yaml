@@ -1,7 +1,9 @@
 schema: framework-layer-core
-schema_version: 4
+schema_version: 5
 layer: enabler
-since: 2026-07-16
+since: 2026-08-10
+# v5 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO agent_matrix + parallelism topology.
 # v4 (2026-07-16): `agent` pasa a ser estructura con `options` + `default` + `reasoning`.
 # v3 (2026-07-16): agrega `agent` (main | subagent) + `agent_reason` por step.
 # v2 (2026-07-16): agrega `requires_complete` + `consumes` a step_matrix.
@@ -9,175 +11,208 @@ since: 2026-07-16
 # ===========================================================================
 # CONFIG.CORE — capa ENABLER
 #
-# Fuente de verdad ESTRUCTURAL — el usuario NO edita.
-# - Toggle on/off → settings/config.core.yaml → parallelism.enabled.
-# - Config operativa → ~/.fremi/framework/artifacts/enabler/config.user.yaml.
+# Fuente de verdad ESTRUCTURAL — el usuario NO edita este archivo.
+# Sólo el mantenedor del framework lo cambia cuando la topología de
+# ejecución muta (agent options nuevos, paralelismo diferente, etc.).
+#
+# Este archivo NO contiene la SECUENCIA del workflow — eso vive en
+# workflow.yaml. Acá sólo:
+#   - agent_matrix: qué agentes pueden ejecutar cada step (options + default + reasoning)
+#   - single_writer: qué steps son single-writer
+#   - internal_items: paralelismo INTRA-step (items del mismo tipo generados en paralelo)
+#   - cross_instance: paralelismo INTER-enabler (múltiples enablers a la vez)
+#
+# - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.core.yaml → parallelism.enabled`.
+# - Elección concreta de agent por step → `config.user.yaml → step_agents`.
+# - Steps enumerados acá deben existir en `workflow.yaml` con el mismo `id`.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# STEP MATRIX — cadena de 4 docs.
-# Ejes: requires_complete, consumes, can_run_with, agent{options/default/reasoning}.
-# Tipos de agent: main | subagent | agent (ver header de story/config.core.yaml).
+# AGENT MATRIX — para cada step del workflow, qué tipos de agente son
+# ESTRUCTURALMENTE viables.
+#
+# Tipos:
+#   - main     → el agente principal (thread del usuario). Necesario ante
+#                decisiones de negocio, bifurcaciones Regla 3b, escritura
+#                sobre docs living single-writer, o co-creación con el usuario.
+#   - subagent → subagente aislado spawneado vía Task tool (context propio,
+#                retorna al main). Ideal para trabajo auto-contenido:
+#                research, generación determinista, ejecución mecánica.
+#   - agent    → agente ESPECIALIZADO (subagent_type específico como Explore,
+#                Plan, sdd-apply, o un agent-type custom del proyecto). Se
+#                diferencia de `subagent` en que tiene system prompt de
+#                dominio + tools acotados.
+#
+# Sólo los tipos listados en `options` son elegibles. El usuario elige uno en
+# `config.user.yaml → step_agents`; si no lo elige, se usa `default`.
+# Elegir un tipo que NO está en `options` es error de configuración.
+#
+# `single_writer: true` → la ESCRITURA sobre el doc producido se serializa
+# aunque el step corra con subagentes.
+#
+# Regla dura: subagentes y agentes NUNCA interactúan con el usuario. Si
+# `execution_mode: interactive`, el main pausa al retornar el subagente/agente
+# para que el usuario valide antes de continuar.
 # ---------------------------------------------------------------------------
-step_matrix:
-  {enabler.definition}:
-    skill: /fremi-enabler-definition
-    requires_complete:
-      - "padre existe según scope (product/definition.md OR feature/definition.md OR story/{workflow.definition})"
-    consumes:
-      - "padre (según scope) — para vincular qué features/stories dependen"
-    can_run_with: []
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Definir qué habilita el enabler y a quién sirve — decisión técnico-
-          estratégica que requiere validación humana. Los criterios de
-          aceptación técnicos deben ser negociados con el usuario.
-    reason: >
-      Primer doc de la cadena. Requiere el padre según scope declarado
-      (--global / --feature / --story).
+agent_matrix:
 
-  {enabler.design}:
-    skill: /fremi-enabler-design
-    requires_complete: [{enabler.definition}]
-    consumes:
-      - "{enabler.definition} — qué habilita, criterios técnicos"
-      - "product/decisions.md — ADRs globales que restringen tech"
-      - "product/strategies.md — stack global aplicable"
-    can_run_with:
-      - /fremi-product-adr
-      - /fremi-feature-adr
-      - /fremi-story-adr
-    agent:
-      options: [main, subagent, agent]
-      default: main
-      reasoning:
-        main: >
-          Design del enabler es la capa con más bifurcaciones técnicas
-          (Regla 3b). Elecciones cascadean al proyecto. Main obligatorio
-          para pausar y decidir con el usuario.
-        subagent: >
-          Análisis de decisiones técnicas individuales (una librería, un
-          pattern, una config de infra) PUEDEN hacerse en subagentes en
-          paralelo (ver internal_items.{enabler.design}). La consolidación final
-          y las bifurcaciones las hace el main.
-        agent: >
-          Si hay agente especializado en infra design / arquitectura.
-    reason: >
-      Sin definition no hay contra qué diseñar.
+  definition:
+    options: [main]
+    default: main
+    reasoning:
+      main: >
+        Definir qué habilita el enabler y a quién sirve — decisión técnico-
+        estratégica que requiere validación humana. Los criterios técnicos de
+        aceptación del enabler deben ser negociados con el usuario. No
+        delegable a subagente sin perder la conversación de framing.
 
-  {enabler.plan}:
-    skill: /fremi-enabler-plan
-    requires_complete: [{enabler.design}]
-    consumes:
-      - "{enabler.design} — decisiones técnicas para descomponer en tasks"
-    can_run_with: []
-    agent:
-      options: [main, subagent]
-      default: main
-      reasoning:
-        main: >
-          Descomposición requiere juicio: orden, granularidad, criterios
-          verificables (Regla 7b) + declaración de depends_on para el DAG.
-        subagent: >
-          Si el usuario acepta que el sub proponga una descomposición
-          inicial y el main revise/priorice.
-    reason: >
-      Sin design (elección de tech + estructura) no hay unidad de trabajo.
+  design:
+    options: [main, subagent, agent]
+    default: main
+    reasoning:
+      main: >
+        Design del enabler es la capa con más bifurcaciones técnicas (Regla
+        3b). Elecciones cascadean al resto del proyecto (stack, IaC, librerías).
+        Main obligatorio para pausar y decidir con el usuario antes de anclar
+        cada decisión. Componentes individuales pueden paralelizarse en
+        subagentes DESPUÉS de resolver las bifurcaciones (ver internal_items).
+      subagent: >
+        Análisis de decisiones técnicas individuales no dependientes entre sí
+        (una librería, una config de infra, un pattern) puede hacerse en
+        subagentes en paralelo (ver internal_items.design). La consolidación
+        final y las bifurcaciones Regla 3b las resuelve el main.
+      agent: >
+        Si hay agente especializado en infra design / arquitectura con tools
+        acotados a search/read + knowledge del stack del proyecto.
 
-  # Fase apply del enabler
+  plan:
+    options: [main, subagent]
+    default: main
+    reasoning:
+      main: >
+        Descomposición en tasks requiere juicio: orden, granularidad, criterios
+        verificables (Regla 7b) + declaración de depends_on para el DAG interno.
+        El usuario suele intervenir en la priorización de tasks de infra.
+      subagent: >
+        Si el usuario acepta que el sub proponga una descomposición inicial
+        y el main revise/priorice al final. Viable cuando el design está
+        muy detallado y la descomposición es mecánica.
+
   apply:
-    phase: apply
-    requires_complete: [{enabler.plan}]
-    consumes:
-      - "{enabler.plan} — cola de tasks a ejecutar"
-      - "{enabler.design} — decisiones para implementar cada task"
-    can_run_with:
-      - "any-scope ADR skill"
-    agent:
-      options: [main, subagent, agent]
-      default: subagent
-      reasoning:
-        subagent: >
-          Cada task del enabler es unidad aislada (crear layer, config
-          de infra, script). Un subagente por task encaja perfecto.
-          El main coordina + serializa checkwork.
-        main: >
-          Si el usuario prefiere ejecutar cada task en su thread principal.
-        agent: >
-          Si hay agente especializado en infra-apply / IaC.
-    reason: >
-      Sin plan no hay tasks para ejecutar.
+    options: [main, subagent, agent]
+    default: subagent
+    orchestration:
+      main_responsibilities:
+        - "Elegir próxima task (respetando depends_on del doc `plan`)."
+        - "Lanzar subagente/agente con contexto de la task (design, decisiones, paths)."
+        - "Recibir reporte del subagente."
+        - "Pausar ante bifurcaciones Regla 3b (el sub NO decide)."
+    reasoning:
+      subagent: >
+        Cada task del enabler es unidad aislada (crear layer, config de infra,
+        script, setup). Un subagente por task encaja perfecto. El main coordina
+        y serializa actualizaciones al doc `plan`.
+      main: >
+        Si el usuario prefiere ejecutar cada task en su thread principal (con
+        la IA asistiendo en la conversación, sin fan-out).
+      agent: >
+        Si hay agente especializado en infra-apply / IaC con tools acotados a
+        Edit/Write/Bash y knowledge del stack del proyecto.
 
-  {enabler.closure}:
-    skill: /fremi-enabler-closure
-    requires_complete:
-      - "todas las tasks de EN-03 en [x]"
-      - "criterios técnicos de EN-01 verificados"
-    consumes:
-      - "{enabler.plan} — verifica que todas las tasks estén cerradas"
-      - "{enabler.definition} — criterios de aceptación técnicos a verificar"
-      - "padre (según scope) — versión actual para bumpear (Regla 17)"
-    can_run_with: []
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Firma final + bump del padre (Regla 17). Escritura sobre docs
-          compartidos con el padre (single-writer).
-    reason: >
-      Precondiciones duras: 100% tasks + criterios técnicos cumplidos.
+  closure:
+    options: [main]
+    default: main
+    single_writer: true
+    reasoning:
+      main: >
+        Firma final del enabler + bump del padre según scope (Regla 17).
+        Escritura sobre docs compartidos con el padre (product/plan.md,
+        doc `definition` de la feature, o doc `definition` de la story).
+        Single-writer para evitar race conditions cuando múltiples enablers
+        cierran en paralelo bajo el mismo padre.
 
 # ---------------------------------------------------------------------------
-# INTERNAL ITEMS
+# INTERNAL ITEMS — paralelismo INTRA-step.
+#
+# Dentro de un step que produce N items del mismo tipo, ¿pueden generarse
+# en paralelo por subagentes? El agent-type usado internamente hereda del
+# step (o del override en config.user.yaml → step_agents).
+#
+# Steps ausentes acá → items secuenciales (default).
 # ---------------------------------------------------------------------------
 internal_items:
-  {enabler.design}:
+
+  design:
     unit: technical-decision
     allow_parallel: true
     max_concurrent: 3
     merge_strategy: append-per-section
     reason: >
-      Decisiones técnicas independientes (librería A + config infra B +
-      pattern C) pueden analizarse en paralelo.
+      Decisiones técnicas independientes (librería A vs B, config de infra C,
+      pattern D) pueden analizarse en paralelo por subagentes. Cada subagente
+      recibe el doc `definition` + product/decisions.md + product/strategies.md
+      y produce su sección del design.
     merge_hazards:
-      - "Elecciones que se afectan mutuamente (stack + librería + tooling) — resolver en pasada única."
-      - "Bifurcaciones Regla 3b siempre pausan — no paralelizable."
+      - "Elecciones que se afectan mutuamente (stack + librería + tooling compartido) — resolver en una sola pasada."
+      - "Bifurcaciones Regla 3b siempre pausan al main — no paralelizable hasta que el usuario decida."
 
-  {enabler.plan}:
-    unit: task-XXX (T-XXX del enabler)
+  plan:
+    unit: task
     allow_parallel: false
     allow_parallel_when: >
-      Como en story — CREACIÓN secuencial (orden importa), EJECUCIÓN puede
-      paralelizar tasks sin dependencias.
+      Como en story — CREACIÓN secuencial (el orden de las tasks importa).
+      EJECUCIÓN (apply) puede paralelizar tasks sin dependencias directas.
     reason: >
-      Tasks del enabler suelen tener dependencias fuertes (crear layer →
-      desplegar → validar). Sin `depends_on` explícito, default secuencial.
+      Tasks del enabler suelen tener dependencias fuertes de infraestructura
+      (crear layer → desplegar → validar → siguiente step). Sin `depends_on`
+      explícito, default secuencial. El identificador de task es configurable
+      — ver methodology.core.yaml → identifiers.task.
 
   apply:
-    unit: task-XXX
+    unit: task
     allow_parallel: true
     max_concurrent: 2
     conditions:
-      - "Tasks declaran `depends_on: []` o lista explícita."
-      - "Tasks paralelas NO tocan la misma infra/config compartida."
+      - "Tasks declaran `depends_on: []` o lista explícita de tasks previas."
+      - "Tasks paralelas NO tocan la misma infra / config compartida."
     reason: >
-      Tasks de tooling/config independientes (ej: dos layers distintos)
-      pueden ejecutarse en paralelo por subagentes.
+      Tasks de tooling/config independientes (ej: dos layers distintos de
+      Lambda, dos scripts sin dependencia mutua) pueden ejecutarse en paralelo
+      por subagentes.
+    merge_hazards:
+      - "Tasks que comparten un estado de infra — serialize via depends_on."
 
 # ---------------------------------------------------------------------------
-# CROSS INSTANCE — entre múltiples enablers.
+# CROSS INSTANCE — paralelismo INTER-enabler.
+# Entre múltiples enablers corriendo al mismo tiempo.
 # ---------------------------------------------------------------------------
 cross_instance:
+
   any_scope:
     allow_parallel_creation: true
     allow_parallel_lifecycle: true
     conditions:
-      - "Enablers NO comparten infraestructura crítica en construcción."
-      - "Numeración EN-XX global se serializa al asignar ID."
+      - "Enablers NO comparten infraestructura crítica en construcción simultánea."
+      - "Numeración del enabler (global al proyecto) se serializa al asignar ID — ver methodology.core.yaml → identifiers.enabler."
+    merge_hazards:
+      - "Dos enablers cerrando bajo el mismo padre en paralelo → race en bump del padre. Serialize al closure."
     reason: >
-      Enablers en distintos scopes (global + feature) son independientes.
-      Enablers en el mismo scope pueden solaparse si no comparten dependencias.
+      Enablers en scopes distintos (global + feature + story) son
+      independientes entre sí. Enablers en el mismo scope pueden solaparse si
+      no comparten dependencias de infra. La serialización de la asignación de
+      ID y el bump del padre al closure son los únicos puntos de coordinación.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`). Si no existe, fallback al
+# TEMPLATE del framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/enabler/workflow.yaml
+  user_choices:
+    runtime: .fremi/settings/enabler/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/enabler/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/enabler/rules/applies.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml

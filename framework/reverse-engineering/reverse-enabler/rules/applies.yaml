@@ -1,0 +1,95 @@
+schema: framework-reverse-skill-rules-applies
+schema_version: 1
+skill: fremi-reverse-enabler
+since: 2026-08-11
+mode: reverse
+
+# ===========================================================================
+# APPLIES — reglas que el skill reverse-enabler enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+#
+# Nota sobre scope variable:
+#   reverse-enabler opera con 3 scopes posibles: global, feature-scoped o
+#   story-scoped (Regla 15 + 20). Las reglas transversales aplican a los 3.
+#   La precondición upper-layer varía según scope — se resuelve en los
+#   stop-events y en el hook de precondiciones.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/enabler/rules/applies.yaml
+  note: >
+    El skill reverse reconstruye los 4 docs del artifact enabler
+    (definition/design/plan/closure). Las reglas del artifact aplican al
+    RESULTADO — pero se completan con reverse-specific rules (R25-R32) que
+    gobiernan la reconstrucción.
+
+# ---------------------------------------------------------------------------
+# Rules específicas del skill reverse
+# ---------------------------------------------------------------------------
+skill_rules:
+  - rules_file: ~/.fremi/framework/reverse-engineering/reverse-enabler/rules/stop-events.md
+    scope: reverse-skill
+    note: >
+      Stop events específicos de este skill reverse: scope ambiguo, numeración
+      de enabler en conflicto, features/stories vinculadas no claras, ADRs
+      retroactivos técnicos, Regla 25 precondiciones. Scope variable:
+      global / feature / story.
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+    rules: [R25, R26, R27, R28, R29, R30, R31, R32]
+    scope: global
+    note: >
+      Régimen completo de reverse. R26 (transparent default), R27 (preguntas
+      dirigidas para gaps — scope, features/stories vinculadas, rationale de
+      ADRs técnicos), R28 (no reemplaza revisión humana), R29 (R8 N/A para
+      enabler — Regla 29 aplica sólo a bugs), R30 (R17 sí aplica con
+      timestamps inferidos).
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr reverse.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      R17 aplica en reverse (R30). Frontmatter con timestamps inferidos del
+      git history + parent bump obligatorio al firmar el doc closure del
+      enabler. El padre que se bumpea varía según scope:
+        global → registra en índice de enablers
+        feature-scoped → bumpea feature/definition.md
+        story-scoped → bumpea feature/spec.md de la story padre
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      ADRs retroactivos técnicos del enabler (ej: elección de runtime, tooling
+      de IaC) deben respetar R3/R3b/R20 con discovered_during_reverse: true.
+      Motivación de ADR es gap no-inferible → pausa (R27) para pedir contexto.
+      Scope del ADR según alcance de la decisión (R20).
+
+  - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+    rules: [R15]
+    scope: global
+    note: >
+      R15 aplica: enabler es un artefacto opcional. En reverse se reconstruye
+      porque el enabler ya fue montado en producción (R25 — precondición dura).
+      Verificar criterio de activación: ¿bloquea o degrada al menos una
+      feature/story si no existe? Si no → puede ser extra/ (Regla 14).
+
+references:
+  artifact_applies: ~/.fremi/framework/artifacts/enabler/rules/applies.yaml
+  reverse_rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  reverse_config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  reverse_flow: ~/.fremi/framework/reverse-engineering/flow.md
+  skill_doc: ~/.fremi/framework/reverse-engineering/reverse-enabler/SKILL.md

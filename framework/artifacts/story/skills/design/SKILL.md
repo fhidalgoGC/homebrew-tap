@@ -1,9 +1,11 @@
 ---
 name: fremi-story-design
-description: Puebla o actualiza el `{workflow.design}` de una story — decisiones técnicas (librerías, wrappers, capas, patterns, estructura de archivos) que SATISFACEN el contrato de SDD. Doc snapshot. Incluye Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping (forward). Preferir firmas TypeScript reales sobre pseudocódigo.
+description: Puebla o actualiza el doc `design` (`{workflow.design}`) de una story — decisiones técnicas (librerías, wrappers, capas, patterns, estructura de archivos) que SATISFACEN el contrato de SDD. Doc snapshot. Incluye Key Invariants, Edge Cases Pin-Down, Open Questions, Acceptance Test Mapping (forward). Preferir firmas TypeScript reales sobre pseudocódigo.
 ---
 
-# /fremi-story-design — Poblar FW-06 (cómo estructural)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+# /fremi-story-design — Poblar el doc `design` (cómo estructural)
 
 Puebla el `{workflow.design}` con el "cómo estructural" que satisface los contratos de `{workflow.sdd}`:
 - Tecnologías/librerías elegidas + rationale.
@@ -14,8 +16,8 @@ Puebla el `{workflow.design}` con el "cómo estructural" que satisface los contr
 - Estructura de archivos a crear.
 - **Key Invariants** (invariantes verificables).
 - **Edge Cases Pin-Down** (con IDs de requirement).
-- **Open Questions** (deben cerrarse antes de FW-07).
-- **Acceptance Test Mapping (forward)** — R-XX → TC-XXX planeado.
+- **Open Questions** (deben cerrarse antes del doc `tdd`).
+- **Acceptance Test Mapping (forward)** — requirement SDD → test case planeado.
 
 **Rol del doc**: cómo se implementa internamente sin redefinir el contrato de SDD (Regla 6.4).
 
@@ -49,7 +51,7 @@ Reglas duras:
 - **Toda librería elegida tiene justificación** — si hay 2+ opciones viables → Regla 3b + `/fremi-story-adr`.
 - **Key Invariants concretos y verificables** — cada invariante testeable.
 - **Edge Cases con ID de requirement SDD (R-XX)** — si un edge case no tiene R asociado, es gap de SDD, volver a Paso 1.
-- **Open Questions se cierran antes de FW-07** — o se transfieren como Known Limitation al `{workflow.proposal}`.
+- **Open Questions se cierran antes del doc `tdd`** — o se transfieren como Known Limitation al `{workflow.proposal}`.
 - **Acceptance Test Mapping cubre 100%** de requirements SDD.
 - **NO redefinir SDD** (Regla 6.4) — si el design contradice SDD, error de orden.
 
@@ -67,7 +69,7 @@ Reglas duras:
 - Diagrama de secuencia del caso feliz end-to-end.
 - Estructura de archivos declarada.
 - Key Invariants no vacías, cada una verificable.
-- Cada R-XX de SDD tiene al menos un TC-XXX planeado en Acceptance Mapping.
+- Cada requirement del doc `sdd` tiene al menos un test case planeado en el Acceptance Mapping.
 - Open Questions vacías (o transferidas a Known Limitations en proposal).
 
 ## Anti-patrones
@@ -75,7 +77,7 @@ Reglas duras:
 - ❌ Elegir librería "porque sí" — Regla 3b + ADR obligatorios.
 - ❌ Design que contradice SDD — o SDD está mal (volver) o Design está mal.
 - ❌ Wrappers "por las dudas" — envolver una lib requiere justificación (test seam, abstracción real, swapping futuro).
-- ❌ Open Questions arrastradas a FW-07 sin resolver — no se arranca TDD con dudas.
+- ❌ Open Questions arrastradas al doc `tdd` sin resolver — no se arranca TDD con dudas.
 - ❌ Pseudocódigo cuando ya sabés qué escribir en TypeScript real.
 - ❌ Requirement SDD sin TC planeado — gap del design.
 

@@ -1,0 +1,173 @@
+schema: framework-layer-workflow
+schema_version: 1
+layer: feature
+since: 2026-08-10
+
+# ===========================================================================
+# WORKFLOW — capa FEATURE
+#
+# Fuente de verdad ÚNICA de la secuencia canónica de la feature.
+# El orquestador (/fremi-feature) y su pipeline leen este archivo para saber:
+#   - qué steps existen
+#   - qué doc produce cada uno
+#   - qué template usar
+#   - qué precondiciones tiene (DAG)
+#   - qué consume del padre/steps previos
+#   - qué skill invocar
+#   - qué steps pueden correr en paralelo (can_run_with)
+#   - qué versionado aplica al doc que produce
+#
+# Este archivo NO contiene:
+#   - qué agente ejecuta cada step (main/subagent/agent) → config.core.yaml
+#   - la elección del usuario para agentes o modo → config.user.yaml
+#   - reglas globales que aplican al ejecutar cada step → rules/applies.yaml
+#
+# Docs referenciados conceptualmente — los filenames reales se resuelven desde
+# `~/.fremi/framework/settings/methodology.core.yaml` (paths.feature.*).
+# Los tokens `{feature.<id>}` resuelven al filename real del doc de esa fase.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEPS — secuencia canónica de la feature
+#
+# Cada step declara:
+#   - id: nombre corto, único (usado como key en config.core/user.yaml)
+#   - order: posición en la secuencia (para render y sorting)
+#   - skill: skill invocable que ejecuta el step (null si no hay skill dedicado)
+#   - phase: nombre lógico de la fase (para agrupar métricas)
+#   - produces: doc que resulta (token o "N/A" si no produce doc dedicado)
+#   - doc_type: snapshot | living | none
+#   - required: always | conditional
+#   - condition_ref: (sólo si required=conditional) nombre de la regla en config.user.yaml
+#   - requires_complete: precondiciones duras (DAG). Docs/steps previos que deben existir.
+#   - consumes: qué información se lee de los predecesores (para razonar contexto)
+#   - can_run_with: skills transversales que pueden concurrir mientras corre este step
+#   - template: path al template canónico (relativo al skill dueño)
+#   - versioning: nota sobre el schema de versionado del doc producido
+#   - reason: por qué existe la precondición
+# ---------------------------------------------------------------------------
+steps:
+
+  - id: definition
+    order: 0
+    skill: /fremi-feature
+    phase: definition
+    produces: "doc `definition` de la feature (living)"
+    doc_type: living
+    required: always
+    requires_complete:
+      - "product/definition.md (con contenido real)"
+      - "product/plan.md (existe, aunque sea con 0 features listadas)"
+    consumes:
+      - "product/definition.md — capacidades in-scope + glosario"
+      - "product/plan.md — versión actual para ancestor.version_at_creation (Regla 17)"
+      - "product/strategies.md — stack global aplicable (opcional pero recomendado)"
+    can_run_with:
+      - /fremi-feature-adr
+    template: references/definition-template.md
+    versioning: "living — version: 0.1.0 al crear; MINOR al agregar capacidades; MAJOR si el contrato de la feature cambia; ancestor.version_at_creation = product/plan@version"
+    side_effects:
+      - "Bumpea MINOR en product/plan.md (agrega la feature al roadmap — Regla 17)"
+    reason: >
+      Regla 1 — no se crea feature sin capa producto lista. Sin
+      product/plan.md no se puede capturar ancestor.version_at_creation
+      (Regla 17). Sin product/definition.md no se puede validar que las
+      capacidades de la feature están en el in-scope del producto.
+
+  - id: lifecycle
+    order: 1
+    skill: null               # lifecycle es fase transversal sin skill dedicado; los
+                              # skills que la componen se listan en can_run_with y en
+                              # parallel_allowed abajo.
+    phase: lifecycle
+    produces: N/A             # lifecycle no produce un doc propio — produce stories,
+                              # bugs, enablers y ADRs que viven dentro de la feature
+    doc_type: none
+    required: always
+    requires_complete: [definition]
+    consumes:
+      - "doc `definition` de la feature — capacidades + user_stories_seed como roadmap de stories a crear"
+      - "product/decisions.md — ADRs de producto que restringen tech de las stories"
+    can_run_with:
+      - /fremi-feature-adr          # ADRs locales que van apareciendo
+      - /fremi-feature-bug          # bugs transversales a la feature
+      - /fremi-story                # crear stories dentro de la feature
+      - /fremi-pipeline-story       # ídem, versión pipeline
+      - /fremi-enabler --feature    # enabler local a la feature
+    template: null
+    versioning: >
+      N/A — lifecycle no produce doc. Los docs que produce cada skill
+      transversal (stories, bugs, enablers, ADRs) tienen su propio versionado.
+      El doc `definition` de la feature se bumpea según parent_bump_triggers
+      cuando stories/bugs/enablers cierran (Regla 17).
+    reason: >
+      Una feature está viva mientras existan sus stories. Lifecycle
+      modela la fase post-definition donde la feature crece con stories,
+      bugs, enablers y ADRs. No tiene un skill único porque es una fase
+      coordinada por el main (ve Regla 12 — sync-back bidireccional).
+
+# ---------------------------------------------------------------------------
+# PARALLEL ALLOWED — transversales que pueden invocarse durante TODA la feature
+# (fuera del DAG de steps). No aparecen en `steps[]` porque no tienen orden
+# fijo — se disparan cuando el trabajo los amerita.
+# ---------------------------------------------------------------------------
+parallel_allowed:
+  - skill: /fremi-feature-adr
+    when: "aparece decisión técnica local a la feature (Regla 3b)"
+    writes_to: "doc `decisions` de la feature"
+    filename_source: "methodology.core.yaml → layers.feature.decisions_filename"
+    side_effects:
+      - "Crea el doc `decisions` si no existe (Regla conditional_rules.feature_decisions_when)"
+      - "Bumpea MINOR del doc `decisions` al agregar un ADR nuevo"
+
+  - skill: /fremi-feature-bug
+    when: "bug transversal a varias stories, o afecta contrato de la feature sin trazar a UNA story"
+    writes_to: "carpeta `bugs/` de la feature"
+    filename_source: "methodology.core.yaml → layers.bug.filename_pattern"
+    side_effects:
+      - "Aplica Regla 8 (test rojo primero)"
+
+  - skill: /fremi-story
+    when: "crear una story dentro de la feature"
+    writes_to: "carpeta de stories dentro de la feature"
+    filename_source: "methodology.core.yaml → identifiers.story"
+    side_effects:
+      - "Bumpea el doc `definition` de la feature (MINOR) al agregar la story"
+
+  - skill: /fremi-pipeline-story
+    when: "crear y completar una story entera dentro de la feature (modo pipeline)"
+    writes_to: "carpeta de stories dentro de la feature"
+    filename_source: "methodology.core.yaml → identifiers.story"
+    side_effects:
+      - "Bumpea el doc `definition` de la feature al cerrar cada story"
+
+  - skill: "/fremi-enabler --feature <feature-id>"
+    invocation_note: "ID concreto según methodology.core.yaml → identifiers.feature"
+    when: "trabajo técnico habilitador local a la feature"
+    writes_to: "carpeta `enablers/` de la feature"
+    filename_source: "methodology.core.yaml → layers.enabler.feature_scoped_dir"
+    side_effects: []
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# Resolución de paths:
+#   - `config.core.yaml`, `workflow.yaml`, `rules/applies.yaml` viven SÓLO en el
+#     framework (`~/.fremi/framework/artifacts/<capa>/`) — el usuario NO los edita.
+#   - `config.user.yaml` es user-editable: runtime lee del PROYECTO
+#     (`<project>/.fremi/settings/<capa>/config.user.yaml`). Si no existe,
+#     fallback al TEMPLATE del framework
+#     (`~/.fremi/framework/artifacts/<capa>/config.user.yaml`).
+#   - `fremi install` copia el template del framework al proyecto en la
+#     instalación inicial.
+# ---------------------------------------------------------------------------
+references:
+  agent_matrix: ~/.fremi/framework/artifacts/feature/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/feature/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/feature/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-feature

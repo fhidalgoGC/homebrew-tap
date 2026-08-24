@@ -7,7 +7,7 @@ since: 2026-07-13
 # ---------------------------------------------------------------------------
 # Configuración operativa de BUG con scope STORY.
 # Un bug de este tipo vive DENTRO de una story concreta.
-# Archivo único BG-XX_<slug>.md.
+# Archivo único por bug — filename derivado de identifiers.bug.filename_format.
 #
 # Cuándo se usa: bug atribuible a UNA story específica (default y más común).
 # Para bugs transversales a varias stories → ver `config.bug.feature.yaml`.
@@ -21,8 +21,8 @@ single_file: true
 # ---------------------------------------------------------------------------
 location: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/{filename}
 skill: /fremi-story-bug
-invocation: "/fremi-story-bug FT-XX/HU-YY <slug>"
-numbering: local_to_story   # cada story arranca desde BG-01 en su carpeta bugs/
+invocation: "/fremi-story-bug {feature_id}/{story_id} <slug>"   # IDs según methodology.core.yaml
+numbering: local_to_story   # cada story arranca desde el primer ID en su carpeta bugs/
 
 when_to_use:
   - "El bug encaja claramente en UNA story existente."
@@ -90,12 +90,12 @@ flow:
   sequence:
     - step: 1
       skill: /fremi-story-bug
-      action: registrar bug de story (crear BG-XX_<slug>.md)
+      action: registrar bug de story (crear archivo de bug en carpeta bugs/ de la story)
       preconditions:
         - "Story existe con {workflow.definition} y {workflow.sdd}"
         - "El comportamiento incorrecto contradice la spec de la story (Regla 8 — si no, extender spec primero)"
-      produces: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/BG-XX_<slug>.md
-      versioning: snapshot con ancestor.id = HU-YY, version_at_creation = story@version
+      produces: docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/{bug_filename}  # filename via identifiers.bug.filename_format
+      versioning: snapshot con ancestor.id = story_id, version_at_creation = story@version
       agent:
         options: [main, subagent, agent]
         default: main

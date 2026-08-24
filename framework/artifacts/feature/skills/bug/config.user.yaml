@@ -1,8 +1,8 @@
 # config.bug.feature.user.yaml
 # --------------------------------------------------------------
 # Per-project overrides for BUGS scoped to a FEATURE (transversal
-# a varias stories). Registrados vía `/fremi-feature-bug FT-XX <slug>`
-# — un archivo por bug en docs/works/features/{FT-XX}/bugs/BG-XX_<slug>.md.
+# a varias stories). Registrados vía `/fremi-feature-bug <FEATURE_ID> <slug>`
+# — un archivo por bug en docs/works/features/{feature_folder}/bugs/{filename}.
 #
 # Structural defaults (sections, template, procedure) live in
 # config.bug.feature.core.yaml. Only knobs you're likely to tune

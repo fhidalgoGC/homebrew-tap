@@ -1,18 +1,20 @@
 ---
 name: fremi-enabler-plan
-description: Puebla o actualiza el `{enabler.plan}` de un enabler — tareas atómicas T-XXX con criterios verificables de detección de completitud (Regla 7b). Doc snapshot. Se invoca después de `/fremi-enabler-design`.
+description: Puebla o actualiza el `{enabler.plan}` de un enabler — tareas atómicas con criterios verificables de detección de completitud (Regla 7b). Doc snapshot. Se invoca después de `/fremi-enabler-design`.
 ---
 
-# /fremi-enabler-plan — Poblar EN-03 (tareas atómicas del enabler)
+> **Nota sobre identificadores:** los prefijos concretos (carpeta enabler, formato de task ID) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos (`definition`, `design`, `plan`, `closure`) y conceptos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
-Puebla el `{enabler.plan}` con las **tareas atómicas** `T-XXX` que materializan el design de EN-02.
+# /fremi-enabler-plan — Poblar el doc `plan` del enabler
+
+Puebla el `{enabler.plan}` con las **tareas atómicas** (ID formato según `identifiers.task`) que materializan el `design` del enabler.
 
 **Rol del doc**: en qué orden se construye el enabler. Cada tarea con criterios verificables (Regla 7b).
 
 ## Sintaxis
 
 ```
-/fremi-enabler-plan <EN-ID>
+/fremi-enabler-plan <ENABLER_ID>
 ```
 
 ## Cuándo invocarlo
@@ -34,9 +36,9 @@ Puebla el `{enabler.plan}` con las **tareas atómicas** `T-XXX` que materializan
 
 ### Paso 3 — Poblar aplicando `phase_rules.tasks`
 
-Cada task-XXX debe tener:
+Cada tarea debe tener:
 - **Objetivo** claro (qué construye).
-- **Mapeo** a EN-02 (qué componente/decisión implementa).
+- **Mapeo** al step `design` (qué componente/decisión implementa).
 - **Criterios verificables** de detección de completitud (Regla 7b): comando exit 0, archivo existe con contenido X, test pasa, etc.
 - **Estado** explícito `[ ]` / `[/]` / `[x]`.
 
@@ -48,12 +50,12 @@ Cada task-XXX debe tener:
 - Sugerir implementar según el plan; al terminar → `/fremi-enabler-closure`.
 
 ## Validaciones
-- Cada task tiene criterio verificable.
-- Cada task mapea a EN-02.
+- Cada tarea tiene criterio verificable.
+- Cada tarea mapea al step `design`.
 
 ## Anti-patrones
-- ❌ Task vaga ("configurar Terraform") — necesita criterio verificable.
-- ❌ Task sin mapeo a EN-02 — huérfana.
+- ❌ Tarea vaga ("configurar Terraform") — necesita criterio verificable.
+- ❌ Tarea sin mapeo al step `design` — huérfana.
 
 ## Referencias
 - Template: [`references/{enabler.plan}-template.md`](references/{enabler.plan}-template.md).

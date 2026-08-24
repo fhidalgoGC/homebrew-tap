@@ -1,0 +1,70 @@
+schema: framework-pipeline-rules-applies
+schema_version: 1
+pipeline: product
+since: 2026-08-11
+
+# ===========================================================================
+# APPLIES — reglas que el pipeline enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+# El pipeline hereda las reglas del artifact que orquesta + suma las suyas
+# (stop events específicos declarados en stop-events.md).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  note: >
+    El pipeline invoca sub-skills del artifact product. Todas las reglas que
+    aplican al artifact product aplican también durante la ejecución del
+    pipeline: jerarquía (R1), versionado (R17), sync-back (R10, R12),
+    ADRs (R3, R3b, R20), discovery antes de formalización (R4).
+
+# ---------------------------------------------------------------------------
+# Rules específicas del pipeline
+# ---------------------------------------------------------------------------
+pipeline_rules:
+  - rules_file: ~/.fremi/framework/pipelines/product/rules/stop-events.md
+    scope: pipeline
+    note: >
+      Stop events: cuándo el pipeline PAUSA (bifurcaciones R3b, info
+      insuficiente para derivar iniciativas, falta de criterios de éxito
+      medibles, elección de stack en strategies, fallo de tooling).
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr el pipeline.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter versionado + bumps de docs living obligatorios durante el
+      pipeline (sin preguntar). Cada doc product es living y arranca en v0.1.0.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      Bifurcaciones técnicas siempre disparan ADR + pausa (Regla 3b es stop
+      event). Scope correcto para ADRs de producto: product/decisions.md.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      Sync-back activo — aunque product es la capa raíz, R12 aplica en
+      dirección inversa (producto → feature/story si ya existen capas
+      inferiores con docs desactualizados).
+
+references:
+  artifact_workflow: ~/.fremi/framework/artifacts/product/workflow.yaml
+  artifact_applies: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  pipeline_doc: ~/.fremi/framework/pipelines/product/PIPELINE.md

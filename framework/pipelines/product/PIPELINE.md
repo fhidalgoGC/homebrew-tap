@@ -117,6 +117,6 @@ Al terminar, la IA reporta:
 
 - Config operativa: [`~/.fremi/framework/artifacts/product/config.user.yaml`](../../artifacts/product/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 3b, 4, 12, 17.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.product.md`](../../flows/flow.product.md)
+- Flujo descriptivo: [`~/.fremi/framework/artifacts/product/flow.md`](../../artifacts/product/flow.md)
 - Orquestador manual: [`/fremi-product`](../../artifacts/product/SKILL.md)
 - Sub-skills: `~/.fremi/framework/artifacts/product/skills/`

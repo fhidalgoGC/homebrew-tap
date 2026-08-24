@@ -1,7 +1,9 @@
 schema: framework-layer-core
-schema_version: 4
+schema_version: 5
 layer: feature
-since: 2026-07-16
+since: 2026-08-10
+# v5 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO agent_matrix + parallelism topology.
 # v4 (2026-07-16): `agent` pasa a ser estructura con `options` + `default` + `reasoning`.
 # v3 (2026-07-16): agrega `agent` (main | subagent) + `agent_reason` por step.
 # v2 (2026-07-16): agrega `requires_complete` + `consumes` a step_matrix.
@@ -9,102 +11,141 @@ since: 2026-07-16
 # ===========================================================================
 # CONFIG.CORE — capa FEATURE
 #
-# Fuente de verdad ESTRUCTURAL — el usuario NO edita.
-# - Toggle on/off → settings/config.core.yaml → parallelism.enabled.
-# - Config operativa → ~/.fremi/framework/artifacts/feature/config.user.yaml.
+# Fuente de verdad ESTRUCTURAL — el usuario NO edita este archivo.
+# Sólo el mantenedor del framework lo cambia cuando la topología de
+# ejecución muta (agent options nuevos, paralelismo diferente, etc.).
+#
+# Este archivo NO contiene la SECUENCIA del workflow — eso vive en
+# workflow.yaml. Acá sólo:
+#   - agent_matrix: qué agentes pueden ejecutar cada step (options + default + reasoning)
+#   - single_writer: qué steps son single-writer
+#   - internal_items: paralelismo INTRA-step (secciones del mismo doc generadas en paralelo)
+#   - cross_instance: paralelismo INTER-feature (múltiples features a la vez)
+#
+# - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.core.yaml → parallelism.enabled`.
+# - Elección concreta de agent por step → `config.user.yaml → step_agents`.
+# - Steps enumerados acá deben existir en `workflow.yaml` con el mismo `id`.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# STEP MATRIX — feature tiene UN step obligatorio (create definition).
-# Ejes: requires_complete, consumes, can_run_with, agent{options/default/reasoning}.
-# Tipos de agent: main | subagent | agent (ver header de story/config.core.yaml).
+# AGENT MATRIX — para cada step del workflow, qué tipos de agente son
+# ESTRUCTURALMENTE viables.
+#
+# Tipos:
+#   - main     → el agente principal (thread del usuario). Necesario ante
+#                decisiones de negocio, bifurcaciones Regla 3b, escritura
+#                sobre docs living single-writer, o co-creación con el usuario.
+#   - subagent → subagente aislado spawneado vía Task tool (context propio,
+#                retorna al main). Ideal para trabajo auto-contenido:
+#                research, generación determinista, ejecución mecánica.
+#   - agent    → agente ESPECIALIZADO (subagent_type específico como Explore,
+#                Plan, sdd-apply, o un agent-type custom del proyecto). Se
+#                diferencia de `subagent` en que tiene system prompt de
+#                dominio + tools acotados.
+#
+# Sólo los tipos listados en `options` son elegibles. El usuario elige uno en
+# `config.user.yaml → step_agents`; si no lo elige, se usa `default`.
+# Elegir un tipo que NO está en `options` es error de configuración.
+#
+# `single_writer: true` → la ESCRITURA sobre el doc producido se serializa
+# aunque el step corra con subagentes.
+#
+# Regla dura: subagentes y agentes NUNCA interactúan con el usuario. Si
+# `execution_mode: interactive`, el main pausa al retornar el subagente/agente
+# para que el usuario valide antes de continuar.
 # ---------------------------------------------------------------------------
-step_matrix:
+agent_matrix:
+
   definition:
-    skill: /fremi-feature
-    requires_complete:
-      - "product/definition.md (con contenido real)"
-      - "product/plan.md (existe, aunque tenga 0 features listadas)"
-    consumes:
-      - "product/definition.md — capacidades in-scope + glosario"
-      - "product/plan.md — versión actual para ancestor.version_at_creation (Regla 17)"
-      - "product/strategies.md — stack global aplicable (opcional pero recomendado)"
-    can_run_with: [/fremi-feature-adr]
-    agent:
-      options: [main, subagent, agent]
-      default: main
-      reasoning:
-        main: >
-          Formalización con el usuario: capacidades, in-scope, restricciones,
-          criterios de éxito. Escritura sobre product/plan.md (single-writer).
-          Bifurcaciones al elegir approach de la feature.
-        subagent: >
-          Secciones internas del definition.md (capabilities, user_stories_seed,
-          constraints, success_criteria) pueden generarse por subagentes en
-          paralelo (ver internal_items.definition). El main consolida y valida.
-        agent: >
-          Si hay agente especializado en feature framing / PRD generation.
-    reason: >
-      Regla 1 — no se crea feature sin capa producto lista. Sin product/plan.md
-      no se puede capturar ancestor.version_at_creation (Regla 17).
+    options: [main, subagent, agent]
+    default: main
+    reasoning:
+      main: >
+        Formalización con el usuario: capacidades, in-scope, restricciones,
+        criterios de éxito. Escritura sobre product/plan.md (single-writer).
+        Bifurcaciones al elegir approach de la feature (Regla 3b).
+      subagent: >
+        Secciones internas del doc `definition` (capabilities,
+        user_stories_seed, constraints, success_criteria) pueden generarse
+        por subagentes en paralelo (ver internal_items.definition). El main
+        consolida y valida.
+      agent: >
+        Si hay agente especializado en feature framing / PRD generation.
 
-  # Transversales durante la vida de la feature (después del step 1)
   lifecycle:
-    requires_complete: [definition]
-    can_run_with:
-      - /fremi-feature-adr          # ADRs locales que van apareciendo
-      - /fremi-feature-bug          # bugs transversales a la feature
-      - /fremi-story                # crear stories dentro
-      - /fremi-pipeline-story       # ídem, versión pipeline
-      - /fremi-enabler --feature    # enabler local a feature
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Coordinación de sub-ciclos (stories, bugs, enablers). El main
-          orquesta y delega a subagentes cuando los sub-ciclos lo permiten
-          (ej: cada story dentro de la feature puede correr apply en subs).
-    reason: >
-      Una feature está viva mientras existan sus stories.
+    options: [main]
+    default: main
+    reasoning:
+      main: >
+        Coordinación de sub-ciclos (stories, bugs, enablers). El main
+        orquesta y delega a subagentes cuando los sub-ciclos lo permiten
+        (ej: cada story dentro de la feature puede correr su step `apply`
+        en subagentes). El main serializa los bumps al doc `definition`
+        de la feature al cerrar cada sub-ciclo (single-writer sobre el
+        doc living compartido).
 
 # ---------------------------------------------------------------------------
-# INTERNAL ITEMS — secciones del definition.md
+# INTERNAL ITEMS — paralelismo INTRA-step.
+#
+# Dentro de un step que produce N secciones del mismo doc, ¿pueden generarse
+# en paralelo por subagentes? El agent-type usado internamente hereda del
+# step (o del override en config.user.yaml → step_agents).
+#
+# Steps ausentes acá → secciones secuenciales (default).
 # ---------------------------------------------------------------------------
 internal_items:
+
   definition:
+    unit: section
     allow_parallel: true
     max_concurrent: 3
     parallelizable_sections:
-      - capabilities        # capacidades in-scope
+      - capabilities        # capacidades in-scope de la feature
       - user_stories_seed   # listado inicial de stories planeadas
-      - constraints         # restricciones locales
+      - constraints         # restricciones locales a la feature
       - success_criteria    # criterios de éxito medibles
     serialize_sections:
       - metadata            # frontmatter (versión, ancestor) — single write
       - glossary            # glosario final — merge al cierre
     reason: >
-      Secciones descriptivas son independientes. Un subagente puede generar
-      capabilities + user_stories_seed + constraints en paralelo si conoce
-      la descripción de la feature.
+      Secciones descriptivas son independientes entre sí. Un subagente
+      puede generar capabilities + user_stories_seed + constraints en
+      paralelo si conoce la descripción de la feature.
     merge_hazards:
       - "Términos del glosario mencionados en múltiples secciones — consolidar al final."
       - "Sync-back con product/definition.md (Regla 12) → serialize."
 
 # ---------------------------------------------------------------------------
-# CROSS INSTANCE — entre features del MISMO producto.
+# CROSS INSTANCE — paralelismo INTER-feature.
+# Entre múltiples features del mismo producto corriendo al mismo tiempo.
 # ---------------------------------------------------------------------------
 cross_instance:
+
   same_product:
     allow_parallel_creation: true
     allow_parallel_lifecycle: true
     conditions:
-      - "Features NO comparten user stories (cada HU pertenece a UNA feature)."
+      - "Features NO comparten stories (cada story pertenece a UNA feature)."
       - "Features tocan áreas del codebase distintas."
-      - "Bumps del product/plan.md se serializan (Regla 17)."
+      - "Bumps del doc `plan` de producto se serializan (Regla 17)."
     merge_hazards:
-      - "Creación simultánea de dos features → race en el próximo FT-XX. Serialize la asignación de ID."
-      - "Cierre simultáneo → race en bump de product/plan.md. Serialize."
+      - "Creación simultánea de dos features → race en la asignación de ID de feature. Serialize."
+      - "Cierre simultáneo → race en bump del doc `plan` de producto. Serialize."
     reason: >
-      Común querer avanzar varias features en paralelo. Subagentes pueden
-      orquestar esto respetando las condiciones + serialize points.
+      Común querer avanzar varias features en paralelo. Los subagentes
+      pueden orquestar esto respetando las condiciones + serialize points.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`). Si no existe, fallback al
+# TEMPLATE del framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/feature/workflow.yaml
+  user_choices:
+    runtime: .fremi/settings/feature/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/feature/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml

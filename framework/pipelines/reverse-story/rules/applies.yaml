@@ -1,0 +1,88 @@
+schema: framework-pipeline-rules-applies
+schema_version: 1
+pipeline: reverse-story
+since: 2026-08-11
+mode: reverse
+
+# ===========================================================================
+# APPLIES — reglas que el pipeline reverse-story enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/story/rules/applies.yaml
+  note: >
+    El pipeline reverse invoca skills que RECONSTRUYEN los docs del workflow story
+    (11 docs — por default `FW-00..FW-10`). Las reglas del artifact aplican al
+    RESULTADO — pero se completan con reverse-specific rules (R25-R32) que
+    gobiernan la reconstrucción.
+
+# ---------------------------------------------------------------------------
+# Rules específicas del pipeline reverse
+# ---------------------------------------------------------------------------
+pipeline_rules:
+  - rules_file: ~/.fremi/framework/pipelines/reverse-story/rules/stop-events.md
+    scope: pipeline
+    note: >
+      Stop events reverse: cuándo pausa para pedir input (Regla 27 — gaps
+      no-inferibles: So that, iniciativa, motivación ADR, RNFs, CAs sin test),
+      abortar (Regla 25 precondiciones), o marcar limitación
+      (Regla 29 — R8 inconstruible si hubo bugs previos).
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+    rules: [R25, R26, R27, R28, R29, R30, R31, R32]
+    scope: global
+    note: >
+      Régimen completo de reverse. R26 (transparent default), R27 (preguntas
+      dirigidas para gaps — So that, iniciativa, motivación ADR, RNFs, CAs
+      sin test), R28 (no reemplaza revisión humana), R29 (R8 inconstruible
+      retroactivamente si hubo bugs previos), R30 (R17 sí aplica con timestamps
+      inferidos del git history).
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr reverse.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      R17 aplica en reverse (R30). Frontmatter con timestamps inferidos del
+      git history + parent bump obligatorio al firmar closure inferido.
+      Bumpear: feature/spec.md + feature/decisions.md + feature/definition.md
+      según parent_bump_triggers.story_closes.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      ADRs retroactivos reconstruidos deben respetar R3/R3b/R20.
+      Motivación de ADR es gap no-inferible → pausa (R27) para pedir
+      contexto al usuario. Bifurcaciones inferidas del código (elección de
+      librería/pattern) → ADR con discovered_during_reverse: true (Regla 3b retroactiva).
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      R10: si el código diverge de lo que los docs reconstruidos dicen,
+      actualizar spec + ADR (no silenciar la divergencia).
+      R12: si durante la reconstrucción se detecta algo que pertenece a la
+      feature o al producto → actualizar la capa superior PRIMERO.
+
+references:
+  artifact_workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  artifact_applies: ~/.fremi/framework/artifacts/story/rules/applies.yaml
+  reverse_rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  reverse_config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  reverse_flow: ~/.fremi/framework/reverse-engineering/flow.md
+  pipeline_doc: ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md

@@ -1,9 +1,11 @@
 ---
 name: fremi-story-sdd
-description: Puebla o actualiza el `{workflow.sdd}` de una story — contratos externos (interfaces que otros consumen) SIN haber decidido tecnología. Doc snapshot. Incluye firmas, schemas de request/response, tabla de errores expuestos, RNFs medibles. Nada que dependa de una decisión técnica interna (librería, wrapper, capa) — eso es Design.
+description: Puebla o actualiza el doc `sdd` (`{workflow.sdd}`) de una story — contratos externos (interfaces que otros consumen) SIN haber decidido tecnología. Doc snapshot. Incluye firmas, schemas de request/response, tabla de errores expuestos, RNFs medibles. Nada que dependa de una decisión técnica interna (librería, wrapper, capa) — eso es Design.
 ---
 
-# /fremi-story-sdd — Poblar FW-05 (contratos externos)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, escenarios) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+# /fremi-story-sdd — Poblar el doc `sdd` (contratos externos)
 
 Puebla el `{workflow.sdd}` con los **contratos que se sostienen SIN haber decidido tecnología**:
 - Endpoints / eventos / comandos expuestos.
@@ -21,7 +23,7 @@ Puebla el `{workflow.sdd}` con los **contratos que se sostienen SIN haber decidi
 
 ## Cuándo invocarlo
 
-- BDD (`FW-04`) completo y hay que aterrizar los contratos técnicos externos.
+- El doc `bdd` está completo y hay que aterrizar los contratos técnicos externos.
 - Se descubrió un contrato adicional que hay que exponer.
 
 ## Procedimiento
@@ -31,7 +33,7 @@ Puebla el `{workflow.sdd}` con los **contratos que se sostienen SIN haber decidi
 - `config.yaml` → `phase_rules.sdd`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `{workflow.bdd}` con SC-XXX + happy path + borde.
+- `{workflow.bdd}` con escenarios completos (happy path + borde).
 - `{workflow.definition}` con CAs.
 
 ### Paso 2 — Cargar template
@@ -41,7 +43,7 @@ Puebla el `{workflow.sdd}` con los **contratos que se sostienen SIN haber decidi
 
 Reglas duras:
 - **Contratos que se sostienen SIN decidir tecnología.** Si necesitás elegir librería para definirlo, es Design.
-- Tabla de códigos/errores expuestos por la interfaz — cada uno mapea a un SC-XXX de error.
+- Tabla de códigos/errores expuestos por la interfaz — cada uno mapea a un escenario de error del doc `bdd`.
 - NFRs medibles (latencia, throughput) cuando apliquen — con unidad y target.
 - **Bifurcaciones técnicas → Regla 3b**: si hay 2+ opciones de contrato (ej: query param vs body, REST vs GraphQL), **pausar**, presentar opciones al usuario, invocar `/fremi-story-adr`, referenciar el ADR.
 
@@ -55,11 +57,11 @@ Reglas duras:
 
 ## Validaciones
 
-- Cada SC-XXX de BDD debe tener contrato SDD asociado (endpoint/schema/error).
-- Todos los códigos de error expuestos tienen semántica clara y mapean a SC-XXX de error.
+- Cada escenario del doc `bdd` debe tener contrato SDD asociado (endpoint/schema/error).
+- Todos los códigos de error expuestos tienen semántica clara y mapean a un escenario de error.
 - NFRs con unidad + target (no "rápido"; sí "p95 < 500ms").
 - Sin refs a librerías internas específicas (Puppeteer, Zod, etc.).
-- Si hubo bifurcación técnica → ADR-XXX registrado y referenciado.
+- Si hubo bifurcación técnica → ADR registrado y referenciado.
 
 ## Anti-patrones
 

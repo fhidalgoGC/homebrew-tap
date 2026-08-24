@@ -1,0 +1,425 @@
+schema: framework-reverse-skill-workflow
+schema_version: 1
+skill: reverse-product
+skill_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — SKILL REVERSE-PRODUCT (/fremi-reverse-product)
+#
+# Fuente de verdad ÚNICA de la secuencia de ejecución del skill reverse-product.
+# Este skill reconstruye la capa producto completa (7 docs) a partir de features,
+# stories existentes, stack del proyecto y conversación guiada con el usuario.
+#
+# Es el caso más ambicioso de reverse-engineering: infiere estrategia y
+# motivación desde artifacts operativos. Modo --interactive fuertemente
+# recomendado. Riesgo alto de racionalización post-hoc (R28).
+#
+# Este archivo declara:
+#   - qué docs reconstruye (reconstructs[])
+#   - las 7 fases del skill (phases[])
+#   - modo de ejecución y opciones de transparencia (R26)
+#   - precondiciones duras que abortan (R25)
+#   - stop events que requieren input del usuario (R27)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT CONTEXT — qué artifact orquesta este skill reverse
+# ---------------------------------------------------------------------------
+artifact_ref:
+  artifact: product
+  artifact_applies: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  note: >
+    El skill reverse reconstruye la capa producto completa. Las reglas del
+    artifact product aplican al OUTPUT — el PROCESO está gobernado por R25-R32.
+    R26 es especialmente crítico aquí: --transparent fuertemente recomendado
+    por riesgo alto de racionalización post-hoc.
+
+# ---------------------------------------------------------------------------
+# DOCS RECONSTRUIDOS (reconstructs)
+# ---------------------------------------------------------------------------
+reconstructs:
+  - id: iniciativas
+    filename: iniciativas.md
+    scope: product/
+    mandatory: always
+    source: user-input-round-2 + feature-grouping
+    confidence_factor: low-medium
+    gap: "Retroactivas — interpretación post-hoc; revisar con stakeholders"
+    note: >
+      Las iniciativas reflejan hipótesis de negocio SAFe. Si no existían
+      formalmente al arrancar, son reconstrucciones conjeturales.
+
+  - id: ideas
+    filename: ideas.md
+    scope: product/
+    mandatory: always
+    source: user-input-round-3
+    confidence_factor: low
+    gap: "Ideas descartadas — casi imposibles de reconstruir sin memoria del equipo"
+
+  - id: planteamiento
+    filename: planteamiento.md
+    scope: product/
+    mandatory: always
+    source: user-input-round-4 + code-structure
+    confidence_factor: medium
+
+  - id: definition
+    filename: definition.md
+    scope: product/
+    mandatory: always
+    source: user-input-round-1 + features-capabilities-aggregation
+    confidence_factor: medium-high
+    gap: "KPIs medibles — preguntar al usuario (R27)"
+
+  - id: strategies
+    filename: strategies.md
+    scope: product/
+    mandatory: always
+    source: package-json + iac-files + user-input-round-5
+    confidence_factor: medium
+    note: Marcar la estrategia actual como Elegida; enumerar alternativas con input del usuario.
+
+  - id: decisions
+    filename: decisions.md
+    scope: product/
+    mandatory: always
+    source: stack-inference + global-adr-candidates + user-input
+    confidence_factor: medium
+    note: >
+      ADRs retroactivos: marcar con discovered_during_reverse: true.
+      RIESGO: pueden ser ADRs ficticios (decisión de facto, no de derecho — R28).
+
+  - id: plan
+    filename: plan.md
+    scope: product/
+    mandatory: always
+    source: features-enumeration + stories-status
+    confidence_factor: high
+    note: Roadmap con features existentes + estado (Cerradas/En curso/Planeadas).
+
+# ---------------------------------------------------------------------------
+# PHASES — secuencia de ejecución (7 fases)
+# ---------------------------------------------------------------------------
+phases:
+  - id: load_config
+    order: 0
+    label: "Fase 0 — Cargar configuración"
+    actions:
+      - read: ~/.fremi/framework/settings/methodology.core.yaml
+      - read: ~/.fremi/framework/settings/config.reverse.core.yaml
+    aborts_on_failure: true
+
+  - id: identify
+    order: 1
+    label: "Fase 1 — Inventario de features y estado de la capa producto"
+    actions:
+      - scan_features_folder:
+          path: docs/works/features/
+          extract: [titles, descriptions, in-scope-capabilities, story-count, story-status]
+      - check_product_folder_state:
+          path: docs/works/product/
+          detect: [which-docs-exist, which-are-empty, which-have-real-content]
+    stop_events:
+      - no_features_found    # sin features no hay material para reconstruir
+    produces: inventory_report
+
+  - id: scan
+    order: 2
+    label: "Fase 2 — Escanear artifacts técnicos sobrevivientes"
+    sources:
+      stack:
+        - package_json_dependencies
+        - serverless_yml_or_cdk_or_terraform
+        - tsconfig_or_build_config
+      docs:
+        - README_md_root
+        - CLAUDE_md
+        - existing_product_docs    # los que ya existen aunque incompletos
+      global_adrs:
+        - product_decisions_md     # si existe
+        - feature_scope_adrs       # ADRs en features que aplican globalmente
+    produces: scan_report
+
+  - id: guided_questions
+    order: 3
+    label: "Fase 3 — Preguntas dirigidas al usuario (5 rondas, R27)"
+    rule: R27
+    mode:
+      interactive: pausa entre rondas, muestra inferencias parciales antes de preguntar
+      non_interactive: acumula todas las preguntas y las hace juntas al final del scan
+    rounds:
+      - id: round_1_definition
+        produces_for: definition.md
+        questions:
+          - "¿Qué hace este producto en 3-5 líneas? (para quién, cómo se diferencia)"
+          - "¿Quiénes son los usuarios primarios y secundarios?"
+          - "¿Qué KPIs medibles definen el éxito del producto?"
+          - "¿Qué restricciones globales aplican (regulatorias, técnicas, de negocio)?"
+
+      - id: round_2_initiatives
+        produces_for: iniciativas.md
+        questions:
+          - "Agrupá las features en 1-3 iniciativas estratégicas (hipótesis de negocio SAFe)."
+          - "Para cada iniciativa: hipótesis, métricas leading/lagging, escala esperada."
+        note: Ofrecer al usuario la agrupación sugerida por el skill y pedir confirmación/ajuste.
+
+      - id: round_3_ideas
+        produces_for: ideas.md
+        questions:
+          - "¿Qué approaches se descartaron al arrancar? (Brainstorm retroactivo)"
+          - "Para cada idea descartada: pros, contras, motivo de descarte."
+        note: >
+          Resultado de baja confianza — el equipo puede no recordar. Aceptar
+          respuesta parcial o vacía con warning.
+
+      - id: round_4_planteamiento
+        produces_for: planteamiento.md
+        questions:
+          - "¿Cuál fue el approach elegido y por qué?"
+          - "¿Cuáles fueron las restricciones que guiaron el approach?"
+
+      - id: round_5_strategies
+        produces_for: strategies.md
+        questions:
+          - "¿Qué stack se eligió y por qué? ¿Había alternativas consideradas?"
+          - "Complementar con inferencia del stack actual (package.json / IaC)."
+        note: El skill muestra el stack inferido y pide al usuario confirmar/corregir.
+    gap_handling: accept_TBD_if_user_cannot_answer   # NUNCA inventar (R27)
+
+  - id: reconstruct_docs
+    order: 4
+    label: "Fase 4 — Reconstruir los 7 docs con las respuestas + scan"
+    rule: R27
+    sequence:
+      - iniciativas.md    # de Ronda 2
+      - ideas.md          # de Ronda 3
+      - planteamiento.md  # de Ronda 4
+      - definition.md     # de Ronda 1 + capacidades de features
+      - strategies.md     # de Ronda 5 + stack inferido
+      - decisions.md      # ADRs retroactivos del stack + globales
+      - plan.md           # roadmap de features con estado
+    content_note:
+      decisions_md: >
+        Cada ADR retroactivo lleva: fecha del primer commit relacionado,
+        sección "Decisión de facto — formalizada retroactivamente",
+        y en modo --transparent: discovered_during_reverse: true.
+    stop_events:
+      - rationale_not_provided     # usuario no puede dar motivación de decisión estratégica
+      - initiative_grouping_conflict  # el usuario ve el agrupado y lo rechaza sin alternativa
+
+  - id: apply_lineage
+    order: 5
+    label: "Fase 5 — Timestamps + linaje (Regla 17 + R30)"
+    rules: [R17, R30]
+    actions:
+      - infer_created_date:       "primer commit en el repo (raíz del proyecto)"
+      - set_version:              "0.1.0 para todos (living docs — la capa producto evoluciona)"
+      - changelogs_retroactivos:  "si --from-git-history: entries retroactivas por commit raíz"
+      - ancestor:                 "iniciativas.md es raíz (sin ancestor externo)"
+      - apply_mode:
+          transparent: add reverse_engineered block    # default — especialmente importante en producto
+          stealth:     omit reverse_engineered block   # fuertemente desaconsejado para producto
+    fallback_no_git: >
+      Si .git ausente: usar fecha actual con reverse_engineered_confidence: 0.3
+      para todos los docs.
+
+  - id: close_lineage
+    order: 6
+    label: "Fase 6 — Reporte final (no hay padre externo que bumpear)"
+    rules: [R17, R30]
+    note: >
+      La capa producto es la capa raíz del framework — no hay padre externo.
+      Los docs living de producto se versionan entre sí (plan.md bumpea cuando
+      la lista de features cambia). No se bumpea ningún doc externo.
+    actions:
+      - verify_all_7_docs_produced: true
+      - emit_final_report
+
+# ---------------------------------------------------------------------------
+# MODE OPTIONS — transparencia (R26)
+# ---------------------------------------------------------------------------
+mode_options:
+  default: transparent
+  options: [transparent, stealth]
+  recommendation: >
+    Para reverse-product, --transparent es fuertemente recomendado. La capa
+    producto refleja intención estratégica — su origen inferido es información
+    crítica para auditorías, retrospectivas y decisiones futuras.
+
+  transparent:
+    description: >
+      Default (R26) — especialmente crítico en producto. Los docs llevan:
+        reverse_engineered: true
+        reverse_engineered_at: YYYY-MM-DD
+        reverse_engineered_source: features+stories+git+user-input
+        reverse_engineered_confidence: 0.0-1.0
+    when_to_use: siempre en producto salvo excepción documentada
+
+  stealth:
+    description: >
+      Override explícito. Los docs quedan indistinguibles del flow forward.
+      RIESGO: un ADR de producto stealth puede confundir revisores futuros
+      sobre si la decisión fue real o ficticia.
+    when_to_use: sólo con justificación por ADR a nivel proyecto (R26) — desaconsejado
+    flag: --stealth
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el skill si fallan (R25)
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-product` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: Corré `fremi install` antes de invocar el skill.
+
+  - id: work_merged_or_in_production
+    rule: R25
+    check: >
+      Existen 3+ features en producción o desarrollo formal. El producto no
+      está arrancando ahora — si está arrancando, usar el flow normal.
+    abort_message: >
+      Para un producto que está arrancando, usar el flow normal:
+      `/fremi-product-iniciativas` → ideas → planteamiento → etc.
+
+  - id: features_exist
+    rule: R25
+    check: >
+      Existe al menos 1 feature en `docs/works/features/`. Sin features,
+      no hay material para reconstruir la capa producto.
+    abort_message: No hay features. Crear features con `/fremi-feature` primero.
+
+  - id: layer_identifiable
+    rule: R25
+    check: Se puede identificar claramente que el trabajo es del dominio producto.
+
+  - id: methodology_present
+    check: ~/.fremi/framework/settings/methodology.core.yaml existe y parsea.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el skill para pedir input (R27)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: rationale_not_provided
+    phase: guided_questions
+    rule: R27
+    trigger: El usuario no puede dar motivación para una decisión estratégica clave.
+    behavior: >
+      Marcar el campo como TBD con nota "Motivación no recuperable — decisión de facto".
+      Continuar con el resto.
+
+  - id: initiative_grouping_conflict
+    phase: guided_questions
+    rule: R27
+    trigger: El usuario rechaza el agrupado de features propuesto pero no ofrece alternativa.
+    behavior: >
+      Mostrar la agrupación sugerida + preguntar: "¿Cómo agruparías estas
+      features?". Si el usuario no puede responder → usar el agrupado del skill
+      con low confidence y advertir.
+
+  - id: ideas_not_recoverable
+    phase: guided_questions
+    rule: R27
+    trigger: El usuario no recuerda alternativas descartadas.
+    behavior: >
+      Generar `ideas.md` con sección "Ideas identificadas: ninguna recuperable
+      retroactivamente" + nota explicativa. No inventar ideas.
+
+  - id: adr_rationale_missing
+    phase: reconstruct_docs
+    rule: R27
+    trigger: ADR de stack inferido sin motivación (ej: sólo se usó Node.js, sin comparación real).
+    behavior: >
+      Marcar el ADR con "Decisión de facto — formalizada retroactivamente.
+      Rationale: TBD". Advertir en el reporte.
+
+  - id: global_adr_scope_ambiguous
+    phase: reconstruct_docs
+    rule: R20
+    trigger: ADR que podría ser de scope feature o de scope producto.
+    behavior: Preguntar al usuario si aplica globalmente o sólo a una feature.
+
+  - id: git_history_missing
+    phase: apply_lineage
+    rule: R30
+    trigger: No se encuentra .git.
+    behavior: >
+      Pedir fechas manuales o usar fecha actual con
+      reverse_engineered_confidence: 0.3 para todos los docs.
+
+  - id: post_hoc_risk_warning
+    phase: reconstruct_docs
+    rule: R28
+    trigger: Siempre — se emite al inicio de la fase de reconstrucción.
+    behavior: >
+      Emitir advertencia obligatoria: "ATENCIÓN — reverse-product tiene riesgo
+      alto de racionalización post-hoc. Las iniciativas y el planteamiento
+      reconstruidos pueden no reflejar la motivación estratégica original.
+      Se recomienda --transparent y validación con stakeholders."
+    mandatory: true   # esta advertencia SIEMPRE se emite, no es condicional
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondiciones de reverse: trabajo pre-existente, framework instalado, 3+ features."
+  - id: R26
+    reason: "Frontmatter transparent por default — especialmente importante en producto."
+  - id: R27
+    reason: >
+      5 rondas de preguntas dirigidas. La capa producto depende fuertemente del
+      input del usuario — la inferencia sola es insuficiente. Nunca inventar.
+  - id: R28
+    reason: >
+      Riesgo alto de racionalización post-hoc. Advertencia obligatoria.
+      Iniciativas y planteamiento deben ser validados por stakeholders.
+  - id: R30
+    reason: "Regla 17 con timestamps inferidos. No hay padre externo que bumpear."
+  - id: R31
+    reason: "Reverse NO para producto que está arrancando ahora."
+  - id: R32
+    reason: "Monitorear ratio reverse/forward."
+  - id: R17
+    reason: "Frontmatter versionado. iniciativas.md es raíz (sin ancestor externo)."
+  - id: R4
+    reason: "Discovery antes de formalización — aquí se invierte el orden; declarar explícitamente."
+  - id: R3b
+    reason: "Bifurcaciones estratégicas inferidas del stack → ADR con discovered_during_reverse: true."
+  - id: R20
+    reason: "ADRs de scope producto vs feature: aclarar scope con el usuario."
+  - id: R24
+    reason: "Framework instalado (precondición dura)."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - product_layer_reconstructed: "7 docs + paths"
+    - mode_used:                   "transparent | stealth"
+    - docs_produced:               "lista con versión y confidence por doc"
+    - features_consolidated:       "N features registradas en plan.md"
+    - adr_resolutions:             "ADRs retroactivos + discovered_during_reverse flag"
+    - gaps_declared:               "lista de gaps (rationale TBD, ideas no recuperables, etc.)"
+    - confidence_global:           "valor 0.0-1.0 promedio ponderado"
+    - post_hoc_risk_declaration:   "advertencia obligatoria sobre iniciativas reconstruidas"
+    - next_action:                 "revisar con stakeholders + correr /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  narrative:        ./flow.md
+  skill_doc:        ./SKILL.md
+  applies:          ./rules/applies.yaml
+  reverse_flow:     ~/.fremi/framework/reverse-engineering/flow.md
+  artifact_ref:     ~/.fremi/framework/artifacts/product/workflow.yaml
+  reverse_config:   ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_index:      ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  forward_skill:    ~/.fremi/framework/artifacts/product/SKILL.md

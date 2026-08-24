@@ -1,27 +1,29 @@
 ---
 name: fremi-story-adr
-description: Agrega un ADR (Architecture Decision Record) al `docs/works/features/FT-XX/user-stories/HU-YY/decisions.md` — nivel STORY. Para ADRs locales a UNA story (delta que se merge al FT-XX/decisions.md living al cerrar la story). Numeración global (ADR-XXX). Delta doc. Para ADRs de feature usar `/fremi-feature-adr`. Para ADRs de producto usar `/fremi-product-adr`. La Regla 17 (versionado + linaje) gobierna el merge al cerrar.
+description: Agrega un ADR (Architecture Decision Record) al `decisions.md` de la carpeta story — nivel STORY. Para ADRs locales a UNA story (delta que se merge al decisions.md de la feature al cerrar la story). Numeración global al proyecto. Delta doc. Para ADRs de feature usar `/fremi-feature-adr`. Para ADRs de producto usar `/fremi-product-adr`. La Regla 17 (versionado + linaje) gobierna el merge al cerrar.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, ADR, CA, SC, TC, task) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos y tokens `{workflow.<step>}`. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-story-adr — Agregar ADR local a una story
 
-Agrega un nuevo Architecture Decision Record al archivo `docs/works/features/{FT-XX}_<slug>/user-stories/{HU-YY}_<slug>/decisions.md`. Es el **delta** de ADRs tomados DURANTE una story concreta.
+Agrega un nuevo Architecture Decision Record al archivo `decisions.md` dentro de la carpeta story (`docs/works/features/{feature_folder}/user-stories/{story_folder}/decisions.md`). Es el **delta** de ADRs tomados DURANTE una story concreta.
 
 **Cuándo usar `/fremi-story-adr`**: la decisión se toma dentro de una story y aplica a esa story (aunque después puede promoverse a feature/producto si trasciende). Si al momento de decidir ya sabés que aplica a más stories → usar `/fremi-feature-adr` directo. Si es transversal al producto → `/fremi-product-adr`.
 
-**Merge al cerrar** (Regla 17): al firmar `{workflow.closure}` de la story, los ADRs de `HU-YY/decisions.md` se mergean al `FT-XX/decisions.md` living, y bumpea MINOR por cada ADR nuevo (o MAJOR si algún ADR reemplaza uno anterior).
+**Merge al cerrar** (Regla 17): al firmar `{workflow.closure}` de la story, los ADRs de `decisions.md` de la story se mergean al `decisions.md` de la feature (living), y bumpea MINOR por cada ADR nuevo (o MAJOR si algún ADR reemplaza uno anterior).
 
-**Numeración global** al proyecto — se calcula tomando `max(ADR-XXX) + 1` sobre TODOS los decisions.md del proyecto.
+**Numeración global** al proyecto — se calcula tomando `max(<adr-id>) + 1` sobre TODOS los decisions.md del proyecto.
 
 > **Importante:** este skill lee `identifiers.adr` del JSON. NO hardcodea el prefijo `ADR` ni el padding `{number:03d}` — todo viene del archivo de configuración.
 
 ## Sintaxis
 
 ```
-/fremi-story-adr <FT-XX/HU-YY> [título]
+/fremi-story-adr <FEATURE_ID/STORY_ID> [título]
 ```
 
-- `<FT-XX/HU-YY>`: ID compuesto de feature+story padre (obligatorio, ej: `FT-01/HU-02`).
+- `<FEATURE_ID/STORY_ID>`: ID compuesto de feature+story padre (obligatorio, ej. con defaults: `FT-01/HU-02`). El formato de cada ID sale de `identifiers.feature.id_format` e `identifiers.story.id_format`.
 - `título` (opcional): título corto del ADR. Si falta, preguntárselo al usuario.
 
 ## Cuándo invocarlo
@@ -37,7 +39,7 @@ Este skill suele invocarse como **paso final** del patrón definido en **Regla 3
 1. Durante la redacción de un artefacto (típicamente `{workflow.sdd}`, `{workflow.design}` o algo a nivel feature/producto), la IA detecta una bifurcación técnica con 2+ caminos viables.
 2. La IA **pausa**, propone las opciones al usuario en el chat (con pros/contras), y **espera la decisión**.
 3. Cuando el usuario elige, la IA invoca `/fremi-story-adr` con el contenido ya casi listo (contexto + alternativas + decisión) — sólo confirma campos antes de anexar.
-4. La IA referencia el ID asignado desde el artefacto donde nació la decisión (`aplica <adr-id>` en una línea del FW-05/FW-06).
+4. La IA referencia el ID asignado desde el artefacto donde nació la decisión (`aplica <adr-id>` en una línea del doc `sdd` o `design`).
 
 Si el usuario invoca `/fremi-story-adr` directamente para registrar una decisión ya conversada, también vale.
 
@@ -56,7 +58,7 @@ Si el JSON no parsea → abortar.
 ### Paso 1 — Determinar destino
 
 - Si `scope` es `product` o está omitido → archivo destino = `adr_cfg.location_default`.
-- Si `scope` es un `FEATURE_ID` (ej: `FT-03`):
+- Si `scope` es un `FEATURE_ID` (ej. con defaults: `FT-03`):
   - Buscar `feature_folder` en `{paths.features_dir}` matcheando `feat_cfg.folder_regex` + el ID.
   - Archivo destino = `adr_cfg.location_feature` con `{feature_folder}` reemplazado.
   - Si el archivo no existe en esa feature, crearlo.
@@ -70,7 +72,7 @@ Si el JSON no parsea → abortar.
    - Cada `{feature_folder}/decisions.md` existente bajo `paths.features_dir`.
 2. Extraer todos los IDs que matcheen `adr_cfg.regex` (default: `^ADR-\d{3}$`).
 3. Próximo número = max(existentes) + 1. Si no hay → 1.
-4. Construir el `id` aplicando `adr_cfg.id_format` (default: `{prefix}-{number:03d}` → `ADR-001`).
+4. Construir el `id` aplicando `adr_cfg.id_format` (por default: `{prefix}-{number:03d}` → `ADR-001`; el prefijo y padding vienen del JSON).
 5. **No reciclar** IDs de ADRs reemplazados.
 
 ### Paso 3 — Recolectar info

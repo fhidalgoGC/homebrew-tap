@@ -1,0 +1,307 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: story
+pipeline_kind: forward
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE STORY (/fremi-pipeline-story)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline story.
+# El pipeline es un RUNNER — no redefine steps; ENVUELVE el ciclo COMPLETO
+# del workflow del artifact story (14 steps: desde explore hasta closure
+# firmado, incluyendo implementación autónoma task-por-task con TDD real).
+#
+# Diferencia clave: `/fremi-story` (manual) = step por step, vos decidís
+# el ritmo. `/fremi-pipeline-story` (este archivo) = todos los steps
+# end-to-end, la IA avanza sola hasta cerrar la story. Ambos producen el
+# mismo resultado; cambia el ritmo.
+#
+# Este archivo declara:
+#   - qué steps del artifact ejecuta el pipeline (todos)
+#   - qué preflight ejecuta antes del primer step
+#   - modo de ejecución (auto | interactive) y su semántica
+#   - precondiciones duras que abortan el pipeline
+#   - stop events específicos (cuándo pausa — 12 casos que cubren
+#     planificación, apply autónomo, verify, closure)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición de cada step (produces / template / etc.) — vive en
+#     `~/.fremi/framework/artifacts/story/workflow.yaml`
+#   - qué agente ejecuta cada step → `config.core.yaml` (agent_matrix)
+#   - la elección del usuario → `config.user.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT SUBSET — qué steps del artifact ejecuta y cuáles NO
+# ---------------------------------------------------------------------------
+artifact_ref:
+  workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  config: ~/.fremi/framework/artifacts/story/config.user.yaml
+
+executes_steps:
+  - explore        # condicional (R16)
+  - definition
+  - proposal       # condicional (R16)
+  - scope
+  - bdd
+  - sdd
+  - design
+  - tdd
+  - plan
+  - apply          # implementación TDD task-por-task (Regla 2 + Regla 7)
+  - checkwork      # living durante apply — actualización single-writer (Regla 13)
+  - verify         # corrida final de suite completa
+  - closure-check  # auditoría antes de firmar
+  - closure        # firma final del ciclo (Regla 11) + bump de la feature (Regla 17)
+
+skips_steps: []    # el pipeline story ENVUELVE todos los steps del artifact
+
+skip_reason: >
+  No aplica — el pipeline story abarca el ciclo COMPLETO de la story tal
+  como está declarado en `artifacts/story/workflow.yaml`. La diferencia con
+  invocar `/fremi-story` + sub-skills manualmente es que el pipeline corre
+  la cadena entera sin pausar entre steps (salvo stop events reales), incluye
+  la implementación autónoma task-por-task con TDD real (Regla 7 — test rojo
+  primero) y firma el closure al terminar.
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — andamiaje inicial antes del primer step
+# ---------------------------------------------------------------------------
+preflight:
+  - id: scaffold
+    order: -1
+    skill: /fremi-story
+    purpose: >
+      Determinar próximo HU-XX local a la feature, crear folder de story,
+      instanciar templates iniciales (9 obligatorios + condicionales si
+      aplican), capturar `ancestor.version_at_creation` desde
+      `feature/definition.md`, y actualizar lista "User stories planeadas"
+      en el `definition.md` de la feature.
+    aborts_pipeline_on_failure: true
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: auto
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      Cada sub-skill escribe su doc entero sin pausar, y el pipeline arranca
+      el siguiente sin preguntar. Pausa sólo ante stop events reales.
+    sub_skills_run_in: auto
+
+  interactive:
+    description: >
+      Sub-skills siguen corriendo en `auto` (no validan sección por sección).
+      El PIPELINE pausa ENTRE steps — al terminar cada FW-XX reporta lo
+      generado y pregunta si continúa al siguiente.
+    sub_skills_run_in: auto
+    checkpoint_between_steps: true
+
+  hard_rule: >
+    Dentro del pipeline los sub-skills NUNCA reactivan modo interactivo —
+    corren siempre `auto`. Para validación por sección, invocar el skill
+    suelto (ej: `/fremi-story-sdd FT-03/HU-05 --mode interactive`).
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-story` es symlink válido Y `CLAUDE.md` referencia
+      `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+      No auto-instalar.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/artifacts/story/config.user.yaml` existen y parsean.
+
+  - id: layer_active
+    check: "config.user.yaml → active: true"
+
+  - id: feature_exists
+    rule: R1
+    check: >
+      Feature `{FEATURE_ID}` existe en `docs/works/features/` con
+      `definition.md` de contenido real (no template vacío).
+
+  - id: feature_versioned
+    rule: R17
+    check: "Feature `definition.md` tiene frontmatter con `version`."
+    on_failure: avisar y proponer migrarla antes.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: conditional_ambiguous
+    triggers_before: [explore, proposal]
+    rule: R16
+    behavior: >
+      Autoevalúa `explore_when` / `proposal_when` de config.user.yaml.
+      Pausa y pregunta cuando la información inicial es ambigua para
+      inferir con confianza.
+
+  - id: technical_bifurcation
+    triggers_during: [sdd, design]
+    rule: R3b
+    behavior: >
+      Aparecen 2+ approaches viables. Presenta opciones (pros/contras),
+      espera decisión del usuario, registra `ADR-XXX` vía
+      `/fremi-story-adr` (delta local). Sigue el artefacto donde nació.
+
+  - id: sync_back
+    triggers_during: [scope, bdd, sdd, apply]
+    rule: R12
+    behavior: >
+      Contenido detectado pertenece a la feature o al producto (capacidad
+      nueva, restricción transversal, término global). Pausa, presenta la
+      divergencia, pregunta si actualizar arriba antes de continuar.
+
+  - id: ca_ambiguous
+    triggers_during: [definition]
+    behavior: >
+      Un CA no puede mapearse luego a un escenario BDD observable —
+      pausar y pedir clarificación al usuario.
+
+  - id: rnf_missing
+    triggers_during: [sdd]
+    behavior: >
+      La spec exige RNFs medibles (latencia, throughput, tamaños). Si no
+      se conocen del contexto, pedir 1-2 valores tentativos.
+
+  - id: tech_outside_stack
+    triggers_during: [design]
+    rule: R3b
+    behavior: >
+      El stack global de `product/strategies.md` no cubre la elección
+      específica — subir a Regla 3b + registrar ADR.
+
+  - id: plan_zero_tasks
+    triggers_during: [plan]
+    rule: R7b
+    behavior: >
+      El diseño no permite descomponer en tareas atómicas con criterios
+      de completitud. Pedir al usuario que aclare unidades de trabajo.
+
+  - id: test_failing_persistent
+    triggers_during: [apply]
+    rule: R7
+    behavior: >
+      Un test rojo no vuelve a verde después de N intentos de fix
+      (config: apply.max_retry_per_task). Pausa: puede indicar spec
+      ambigua, design gap o test mal armado — no seguir fixeando a ciegas.
+
+  - id: unplanned_scope_discovered
+    triggers_during: [apply]
+    rule: R6
+    behavior: >
+      La implementación revela contrato o comportamiento no cubierto en
+      SDD/design. Pausa — vuelve a `sdd` o `design` para actualizar antes
+      de improvisar (la spec dirige el diseño, no al revés).
+
+  - id: bug_found_during_apply
+    triggers_during: [apply]
+    rule: R8
+    behavior: >
+      Se detecta un bug pre-existente ortogonal a la story. Invoca
+      `/fremi-story-bug` (test rojo primero) sin romper el flujo — la
+      story propia continúa con sus tasks.
+
+  - id: verify_failing
+    triggers_after: [verify]
+    behavior: >
+      La corrida final de suite reporta fallas. Pausa antes de
+      `closure-check` — hay que volver a `apply` para fixear, no seguir
+      a firma con verde falso.
+
+  - id: closure_check_critical
+    triggers_after: [closure-check]
+    rule: R11
+    behavior: >
+      `closure-check` reporta CRITICAL (matriz de trazabilidad incompleta,
+      CAs sin evidencia, DoD no cumplido). Bloquea `closure` hasta
+      resolver.
+
+  - id: parent_version_conflict
+    triggers_before: [closure]
+    rule: R17
+    behavior: >
+      `feature/definition.md` cambió su versión desde
+      `ancestor.version_at_creation`. Presenta el diff y pregunta si el
+      cambio de padre afecta el closure (puede requerir reprocesar CAs).
+
+anti_patterns:
+  - "Confirmar wording de cada CA / SC / TC"
+  - "Preguntar cuántas tasks poner en el plan"
+  - "Preguntar si un test cubre un CA específico — se mapea y listo"
+  - "Pedir feedback tras cada FW-XX completado"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R1
+    reason: "No avanzar sin feature `definition.md`."
+  - id: R2
+    reason: "Durante `apply`, cada task es SDD+TDD antes de código (no hay atajos)."
+  - id: R3b
+    reason: "Toda bifurcación técnica produce ADR antes de continuar."
+  - id: R6
+    reason: "Cadena BDD → SDD → Design se respeta estrictamente; ida y vuelta si `apply` descubre gaps."
+  - id: R7
+    reason: "Durante `apply`, test rojo primero — nunca escribir código sin test fallando."
+  - id: R7b
+    reason: "El plan producido tiene tasks con criterios verificables."
+  - id: R8
+    reason: "Bug descubierto durante apply → test rojo primero + `/fremi-story-bug`."
+  - id: R11
+    reason: "`closure-check` sin CRITICAL antes de firmar el closure."
+  - id: R12
+    reason: "Sync-back activo durante scope/bdd/sdd/apply — no dejar divergencias hacia feature/producto."
+  - id: R13
+    reason: "`checkwork` es living, single-writer — el pipeline serializa la escritura desde el main."
+  - id: R16
+    reason: "Conditionals FW-00/FW-02 evaluados; si aplican → se crean."
+  - id: R17
+    reason: "Todos los docs llevan frontmatter versionado + ancestor.version_at_creation; closure bumpea feature."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - story_created:          "FT-XX/HU-YY_<slug> + path completo"
+    - docs_produced:          "lista con versión de cada doc (11 docs FW-00..FW-10)"
+    - conditional_docs:       "explore y proposal — creado/omitido + justificación"
+    - adr_resolutions:        "ADRs generados con scope (story/feature/producto)"
+    - sync_back_events:       "qué se actualizó en feature/producto"
+    - ancestor_version:       "versión del feature/definition.md al crear la story"
+    - implementation:         "tasks totales / cerradas / abiertas + resumen de commits"
+    - verify_result:          "PASS | PASS_WITH_WARNINGS | FAIL + output resumido"
+    - closure_check_result:   "CRITICAL / WARNING / SUGGESTION counts"
+    - parent_bump:            "feature/definition.md — versión antes → después (Regla 17)"
+    - stop_events_recorded:   "preguntas hechas + respuestas del usuario"
+    - next_action:            "story cerrada — proponer siguiente HU-YY, feature closure, o fin"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:       ./PIPELINE.md
+  narrative:        ./flow.md
+  artifact_flow:    ~/.fremi/framework/artifacts/story/flow.md
+  artifact_config:  ~/.fremi/framework/artifacts/story/config.user.yaml
+  rules_index:      ~/.fremi/framework/rules/workflow.md
+  parent_pipeline:  ../feature/PIPELINE.md
+  child_of:         /fremi-pipeline-feature (via --first-story)

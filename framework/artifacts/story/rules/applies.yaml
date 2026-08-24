@@ -1,0 +1,350 @@
+schema: framework-layer-rules-applies
+schema_version: 3
+layer: story
+since: 2026-08-10
+# v3 (2026-08-10): agrega sección `parallel_allowed_skills` con las reglas que
+#                  aplican al invocar skills transversales (adr, task, bug,
+#                  checkwork ad-hoc, enabler) fuera del DAG principal.
+# v2 (2026-08-10): las reglas domain-específicas de story se movieron a este mismo
+#                  folder. Ahora `applies.yaml` referencia mayormente rutas LOCALES
+#                  para las reglas del dominio + rutas GLOBALES sólo para las
+#                  cross-artifact. Elimina la carga de reglas irrelevantes al domain.
+
+# ===========================================================================
+# APPLIES — reglas que aplican durante la ejecución de la story.
+#
+# Este archivo NO contiene el texto de las reglas — sólo POINTERS.
+#
+# CRITERIO DE UBICACIÓN:
+#   - Reglas DOMAIN-específicas de story → viven en este mismo folder
+#     (`~/.fremi/framework/artifacts/story/rules/*.md`).
+#   - Reglas CROSS-domain (que aplican a más de un artifact) → viven en
+#     `~/.fremi/framework/rules/*.md`.
+#
+# El orquestador carga SÓLO los archivos referenciados acá cuando corre una
+# story — no toda la carpeta global de rules. Así se aísla el dominio.
+#
+# ESTRUCTURA:
+#   - transversal            → cargadas SIEMPRE durante todo el workflow
+#   - per_step               → cargadas al ejecutar el step específico del DAG
+#   - parallel_allowed_skills → cargadas al invocar skills transversales que
+#                              corren fuera del DAG principal (ver `../workflow.yaml
+#                              → parallel_allowed`)
+#
+# Nota: si una regla aparece en `transversal` Y en un `per_step`/`parallel_allowed_skills`,
+# el orquestador dedupplica (una sola carga por sesión) — repetir la referencia es
+# válido y sirve para hacer explícito el énfasis contextual.
+#
+# Los IDs de step deben existir en `../workflow.yaml → steps[].id`.
+# Los skills de `parallel_allowed_skills` deben existir en `../workflow.yaml → parallel_allowed[].skill`.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TRANSVERSAL — reglas activas durante todo el workflow story.
+# ---------------------------------------------------------------------------
+transversal:
+
+  # ---------- GLOBAL (cross-domain) ----------
+  - rules_file: ~/.fremi/framework/rules/hierarchy.md
+    rules: [R1]
+    scope: global
+    note: >
+      No saltar etapas. Validar precondiciones (workflow.yaml → requires_complete)
+      antes de invocar cada step. Sin insumos → avisar al usuario y proponer
+      crear los docs previos.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter obligatorio + bump del padre + rastreo ancestral.
+      Aplican a TODO doc creado/editado durante el workflow.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      R10: docs son fuente de verdad — si el código diverge, actualizar spec + ADR.
+      R12: sync-back bidireccional — si trabajando en la story se descubre algo
+      que pertenece a feature/producto, actualizar la capa superior PRIMERO.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      R3: toda decisión técnica genera ADR.
+      R3b: bifurcación → pausar → opciones al usuario → decidir → ADR → continuar.
+      R20: elegir scope correcto (producto/feature/story) para el ADR.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/bug-fix-and-refactor.md
+    rules: [R8, R9]
+    scope: global
+    note: >
+      R8: bug fix requiere test rojo primero (aplicable si aparece bug durante la story).
+      R9: refactor no cambia comportamiento (aplicable en cualquier step de apply).
+
+# ---------------------------------------------------------------------------
+# PER-STEP — reglas específicas de un step del workflow.
+# ---------------------------------------------------------------------------
+per_step:
+
+  explore:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/conditional-docs.md
+      rules: [R16]
+      scope: story
+      note: >
+        Explore es condicional. Evaluar `conditional_rules.explore_when`
+        en config.user.yaml — sólo crear el doc si aplica al menos UN criterio.
+
+  definition:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/definition-format.md
+      rules: [R5]
+      scope: story
+      note: >
+        Formato obligatorio: `As a / I want / So that` + `Criterios de aceptación`.
+
+  proposal:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/conditional-docs.md
+      rules: [R16]
+      scope: story
+      note: >
+        Proposal es condicional. Evaluar `conditional_rules.proposal_when`
+        en config.user.yaml.
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Bloque Decisions del proposal típicamente dispara ADRs. Aplicar
+        pausa → opciones → usuario decide antes de anclar la decisión.
+
+  scope:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bdd-sdd-design.md
+      rules: [R6.1]
+      scope: story
+      note: >
+        Scope antes que BDD — listas explícitas In-scope / Out-of-scope /
+        Dependencias. Sin scope los escenarios BDD se expanden sin control.
+
+  bdd:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bdd-sdd-design.md
+      rules: [R6.2]
+      scope: story
+      note: >
+        BDD contiene "qué observable" en Given/When/Then. NO incluye
+        firmas, tipos ni códigos HTTP (eso es SDD). Si no se puede
+        formular como GWT → volver a definition.
+
+  sdd:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bdd-sdd-design.md
+      rules: [R6.3]
+      scope: story
+      note: >
+        SDD contiene "qué contractual" — fronteras que se sostienen sin
+        haber decidido tecnología. NO incluye librerías/wrappers/capas
+        internas (eso es Design).
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Bifurcaciones típicas en SDD: protocolo (REST/GraphQL/gRPC),
+        schemas, códigos de error, modo de delivery. Cada una → ADR.
+
+  design:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bdd-sdd-design.md
+      rules: [R6.4]
+      scope: story
+      note: >
+        Design satisface el contrato SDD, NO lo redefine. Contiene
+        tecnologías elegidas, componentes internos, wrappers, patrones,
+        estructura de archivos.
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Design es la capa con MÁS bifurcaciones. Cada elección de
+        librería/pattern/storage → ADR.
+
+  tdd:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/tdd.md
+      rules: [R7]
+      scope: story
+      note: >
+        Mapear cada test case a un escenario del step `bdd` y a cláusulas
+        del step `sdd`. El doc `tdd` define qué se verifica; el ciclo
+        rojo-verde-refactor se aplica en apply. IDs de test case y escenarios
+        BDD son configurables — ver `methodology.core.yaml → identifiers.*`.
+
+  plan:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/tdd.md
+      rules: [R7b]
+      scope: story
+      note: >
+        El doc `plan` es una lista de tareas atómicas con criterios
+        verificables. Cada task tiene ID (formato configurable en methodology),
+        objetivo, mapeo a `sdd`/`bdd`/`tdd`, DoD (comando/test), estado.
+        Sin DoD verificable → la task no puede marcarse [x].
+
+  apply:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/tdd.md
+      rules: [R2, R7]
+      scope: story
+      note: >
+        R2: no escribir código sin SDD+TDD existentes.
+        R7: ciclo rojo (test falla) → verde (código pasa) → refactor.
+
+  checkwork:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/checkwork.md
+      rules: [R13]
+      scope: story
+      note: >
+        Doc LIVING — actualizar al arrancar/cerrar cada task. Single-writer
+        (el main serializa aunque las tasks corran en subagentes). Refleja
+        el estado real, no una foto vieja.
+
+  verify:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/closure.md
+      rules: [R11]
+      scope: story
+      note: >
+        Precondición: checkwork 100% + todas las tasks en [x]. Verify
+        corre suite completa contra el estado final. Su verdict va en
+        sección "Última corrida de verify" del checkwork.
+
+  closure-check:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/closure.md
+      rules: [R11]
+      scope: story
+      note: >
+        Auditoría de matriz de trazabilidad CA → SC → SDD → test → código
+        antes del sign-off. Sin issues CRITICAL → recién se puede firmar.
+
+  closure:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/closure.md
+      rules: [R11]
+      scope: story
+      note: >
+        Firma final. Matriz de trazabilidad completa + DoD checklist +
+        evidencia (PR/commits) + fecha. Sin closure firmado la story
+        sigue abierta.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Bump del feature padre según `parent_bump_triggers.story_closes`.
+        Registra `version_at_closure` en el frontmatter del closure. La
+        operación es obligatoria antes de firmar.
+
+# ---------------------------------------------------------------------------
+# PARALLEL_ALLOWED_SKILLS — reglas al invocar skills transversales (fuera del DAG).
+# Estos skills se disparan bajo demanda durante toda la story y tienen sus
+# propias reglas aplicables independientes del step en curso.
+# ---------------------------------------------------------------------------
+parallel_allowed_skills:
+
+  /fremi-story-task:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/tdd.md
+      rules: [R7b]
+      scope: story
+      note: >
+        Cada task debe declarar ID (formato configurable en methodology),
+        objetivo, mapeo a los docs `sdd`/`bdd`/`tdd`, criterios verificables
+        de completitud, y estado. Sin DoD verificable → task inválida.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Agregar/refinar task bumpea PATCH del doc `plan` (living-doc).
+        Registrar entry en changelog del plan.
+
+  /fremi-story-checkwork:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/checkwork.md
+      rules: [R13]
+      scope: story
+      note: >
+        Actualizar checkwork al arrancar/cerrar cada task. Single-writer.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Bumpea PATCH/MINOR del checkwork (living). Registrar changelog entry.
+
+  /fremi-story-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Toda decisión técnica registrada como ADR. Elegir scope correcto
+        (story delta que mergea al feature al cerrar). Numeración global —
+        formato configurable en methodology.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar ADR story-scope se bumpea el doc `decisions.md` de la
+        story (delta). Al cerrar la story, el delta se mergea al
+        `decisions.md` de la feature y bumpea el feature.
+
+  /fremi-story-bug:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bug-fix-and-refactor.md
+      rules: [R8]
+      scope: global
+      note: >
+        Bug fix requiere test rojo de reproducción PRIMERO, después el fix.
+        Registrar el bug en la carpeta `bugs/` de la story (filename pattern
+        configurable en methodology → `layers.bug.filename_pattern`).
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bugs.md
+      rules: [R15]
+      scope: global
+      note: >
+        Bugs son artefactos opcionales; se crean bajo demanda. Bugs abiertos
+        bloquean parcialmente el closure de la story (Regla 11 story).
+    - rules_file: ~/.fremi/framework/rules/sync-back.md
+      rules: [R10]
+      scope: global
+      note: >
+        Si el fix revela cambio de spec → actualizar el spec + ADR.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Bug fix cierra con bump del feature (según parent_bump_triggers.bug_closes).
+
+  # Skill de enabler invocado con scope story.
+  # Patrón de invocación: "/fremi-enabler <nombre> --story <feature-id>/<story-id>"
+  # donde los formatos de feature-id y story-id salen de methodology.core.yaml.
+  /fremi-enabler:
+    - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+      rules: [R15]
+      scope: global
+      note: >
+        Enablers son artefactos opcionales que habilitan capacidad técnica.
+        Cuando el scope es story, viven en la carpeta `enablers/` de la
+        story (ver `methodology.core.yaml → layers.enabler.story_scoped_dir`).
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Bifurcaciones técnicas en el step `design` del enabler disparan ADRs.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Enabler tiene su propio doc `closure`; al cerrar bumpea al padre
+        (story) según parent_bump_triggers.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`) con fallback al template del
+# framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/story/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/story/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/story/config.user.yaml  # FALLBACK / template inicial
+  domain_rules_dir: ~/.fremi/framework/artifacts/story/rules/     # reglas domain-específicas
+  global_rules_dir: ~/.fremi/framework/rules/                     # reglas cross-domain
+  rules_index: ~/.fremi/framework/rules/workflow.md

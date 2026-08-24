@@ -1,0 +1,344 @@
+schema: framework-reverse-skill-workflow
+schema_version: 1
+skill: reverse-feature
+skill_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — SKILL REVERSE-FEATURE (/fremi-reverse-feature)
+#
+# Fuente de verdad ÚNICA de la secuencia de ejecución del skill reverse-feature.
+# Este skill reconstruye los docs de una feature (definition.md y opcionalmente
+# decisions.md) a partir de stories existentes, código legacy y ADRs locales.
+#
+# Este archivo declara:
+#   - qué docs reconstruye (reconstructs[])
+#   - las 7 fases del skill (phases[])
+#   - modo de ejecución y opciones de transparencia (R26)
+#   - precondiciones duras que abortan (R25)
+#   - stop events que requieren input del usuario (R27)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT CONTEXT — qué artifact orquesta este skill reverse
+# ---------------------------------------------------------------------------
+artifact_ref:
+  artifact: feature
+  artifact_applies: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
+  note: >
+    El skill reverse reconstruye los docs del artifact feature. Las reglas
+    del artifact aplican al OUTPUT — el PROCESO está gobernado por R25-R32.
+
+# ---------------------------------------------------------------------------
+# DOCS RECONSTRUIDOS (reconstructs)
+# ---------------------------------------------------------------------------
+reconstructs:
+  - id: feature_definition
+    filename: definition.md
+    scope: FT-XX/
+    mandatory: always
+    source: stories-definition-scope-sdd + code-structure + user-input
+    confidence_factor: medium-high
+    gaps:
+      - "Iniciativa conectada (init-XXX) — no inferible del código (R27)"
+      - "Métricas de éxito de feature — preguntar al usuario (R27)"
+
+  - id: feature_decisions
+    filename: decisions.md
+    scope: FT-XX/
+    mandatory: conditional   # sólo si existen ADRs locales de la feature
+    source: story-delta-decisions + local-adr-candidates
+    confidence_factor: medium
+    gap: "Rationale de ADRs — no siempre inferible del código (R27)"
+
+# ---------------------------------------------------------------------------
+# PHASES — secuencia de ejecución (7 fases)
+# ---------------------------------------------------------------------------
+phases:
+  - id: load_config
+    order: 0
+    label: "Fase 0 — Cargar configuración"
+    actions:
+      - read: ~/.fremi/framework/settings/methodology.core.yaml
+      - read: ~/.fremi/framework/settings/config.reverse.core.yaml
+    aborts_on_failure: true
+
+  - id: identify
+    order: 1
+    label: "Fase 1 — Identificar la feature"
+    actions:
+      - verify_feature_folder_exists:  "docs/works/features/{FT-XX}_<slug>/"
+      - check_definition_state:        "¿existe definition.md? ¿está vacío?"
+    stop_events:
+      - feature_folder_absent          # abortar — usar /fremi-feature normal
+    produces: []
+
+  - id: scan
+    order: 2
+    label: "Fase 2 — Escanear artifacts sobrevivientes"
+    sources:
+      stories:
+        - enumerate_HU_folders
+        - extract_from_each:
+            - definition_title_and_as_a
+            - scope_in_scope_capabilities
+            - sdd_contracts_and_apis
+            - technical_terms
+            - referenced_decisions
+      code:
+        - module_paths_related_to_feature
+        - common_libs_and_patterns
+      adr_local:
+        - FT-XX_decisions_md              # si existe
+        - HU_YY_decisions_delta_mds       # ADRs de story-scope
+    produces: scan_report
+
+  - id: evaluate_conditionals
+    order: 3
+    label: "Fase 3 — Evaluar si decisions.md aplica"
+    rule: R3b
+    actions:
+      - detect_adr_candidates:
+          threshold: 1_or_more_adr_found
+          decision: generate_decisions_md | omit
+      - check_adr_scope_promotion:
+          rule: R20
+          action: suggest_sync_to_product_if_global_decision
+
+  - id: reconstruct_docs
+    order: 4
+    label: "Fase 4 — Reconstruir docs + preguntas dirigidas (Regla 27)"
+    rule: R27
+    sequence:
+      - definition.md     # siempre; pausar para iniciativa + métricas
+      - decisions.md      # condicional — sólo si hay ADRs
+    content_mapping:
+      definition_md:
+        title:                    "del slug + títulos agregados de stories"
+        description:              "agregación de FW-01 de cada story"
+        connected_initiative:     "PREGUNTAR al usuario — no inferible (R27)"
+        contribution_to_metrics:  "PREGUNTAR al usuario (R27)"
+        capability_dependencies:  "de product/definition.md referenciadas"
+        scope:                    "agregación de in-scope de FW-03 de stories"
+        out_of_scope:             "agregación de out-of-scope de stories"
+        success_criteria:         "agregación de CAs de stories — REFINAR con usuario"
+        user_stories_list:        "enumerar HU-YY con estado (Planeada/En curso/Cerrada)"
+        linked_decisions:         "ADRs referenciados en las stories"
+        local_glossary:           "términos en 2+ stories no en glosario de producto"
+      decisions_md:
+        adr_entries:              "consolidación de ADRs locales con changelog retroactivo"
+        rationale:                "PREGUNTAR al usuario si no está en commits/PRs (R27)"
+    gap_handling: ask_user | mark_TBD
+    stop_events:
+      - initiative_unknown
+      - metrics_not_definable
+      - adr_rationale_missing
+      - stories_insufficient_for_inference   # muy pocas stories → poco material
+      - transversal_capability_detected      # R12 — subir a producto
+
+  - id: apply_lineage
+    order: 5
+    label: "Fase 5 — Timestamps + linaje (Regla 17 + R30)"
+    rules: [R17, R30]
+    actions:
+      - infer_created_date:          "primer commit de código relacionado con la feature"
+      - set_version:                 "0.1.0 (living doc — definition.md evoluciona)"
+      - set_ancestor_version:        "versión de product/plan.md al momento inferido (si existe)"
+      - apply_mode:
+          transparent: add reverse_engineered block to frontmatter   # default (R26)
+          stealth:     omit reverse_engineered block                 # override explícito
+    fallback_no_git: >
+      Si .git ausente: usar fecha actual con reverse_engineered_confidence: 0.3
+
+  - id: close_lineage
+    order: 6
+    label: "Fase 6 — Bumpear padre + reporte (Regla 17 + R30)"
+    rules: [R17, R30]
+    actions:
+      - bump_product_plan_if_feature_unregistered: >
+          Si la feature no está en product/plan.md → agregarla + MINOR bump
+          (sólo si la capa producto existe).
+      - verify_feature_in_product_plan: true
+      - emit_final_report
+
+# ---------------------------------------------------------------------------
+# MODE OPTIONS — transparencia (R26)
+# ---------------------------------------------------------------------------
+mode_options:
+  default: transparent
+  options: [transparent, stealth]
+
+  transparent:
+    description: >
+      Default (R26). Los docs llevan bloque de frontmatter:
+        reverse_engineered: true
+        reverse_engineered_at: YYYY-MM-DD
+        reverse_engineered_source: stories+code+git
+        reverse_engineered_confidence: 0.0-1.0
+
+  stealth:
+    description: >
+      Override explícito. Los docs quedan indistinguibles del flow forward.
+    when_to_use: sólo con justificación por ADR a nivel proyecto (R26)
+    flag: --stealth
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el skill si fallan (R25)
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-feature` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: Corré `fremi install` antes de invocar el skill.
+
+  - id: work_merged_or_in_production
+    rule: R25
+    check: >
+      El trabajo de la feature está mergeado a main o en producción. No para
+      features en curso que siguen cambiando — usar el flow normal.
+    abort_message: >
+      Reverse sólo aplica a trabajo pre-existente y estable. Si la feature
+      está en desarrollo activo, usar /fremi-feature normal.
+
+  - id: feature_folder_exists
+    rule: R25
+    check: >
+      Existe el folder `docs/works/features/{FT-XX}_<slug>/`.
+      Si no existe → no hay feature que reconstruir (usar /fremi-feature).
+    abort_message: >
+      El folder de la feature no existe. Para crear una feature nueva,
+      usar `/fremi-feature`.
+
+  - id: layer_identifiable
+    rule: R25
+    check: >
+      Se puede identificar claramente que el trabajo pertenece a esta feature
+      (no es ambigüedad de qué feature cubre el código legacy).
+
+  - id: methodology_present
+    check: ~/.fremi/framework/settings/methodology.core.yaml existe y parsea.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el skill para pedir input (R27)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: initiative_unknown
+    phase: reconstruct_docs
+    rule: R27
+    trigger: No se puede inferir a qué iniciativa estratégica pertenece la feature.
+    behavior: >
+      Preguntar al usuario: "¿A qué iniciativa (init-XXX) pertenece
+      esta feature?". Marcar sin vincular + warning si no lo sabe.
+
+  - id: metrics_not_definable
+    phase: reconstruct_docs
+    rule: R27
+    trigger: >
+      No hay suficiente información para definir métricas de éxito de la feature
+      (CAs de stories son de código, no de negocio).
+    behavior: >
+      Preguntar al usuario: "¿Cuáles son los KPIs o criterios de éxito
+      de esta feature a nivel de negocio?". Marcar TBD si no hay respuesta.
+
+  - id: adr_rationale_missing
+    phase: reconstruct_docs
+    rule: R27
+    trigger: ADR local detectado sin motivación en commits ni PRs.
+    behavior: >
+      Preguntar al usuario la motivación. Si no recuerda → registrar ADR con
+      discovered_during_reverse: true y "Rationale: TBD".
+
+  - id: stories_insufficient_for_inference
+    phase: reconstruct_docs
+    rule: R27
+    trigger: <2 stories con docs FW-XX útiles para inferir el definition.md.
+    behavior: >
+      Advertir al usuario de baja confianza. Recomendar correr
+      `/fremi-reverse-story` primero para las stories sin docs.
+
+  - id: transversal_capability_detected
+    phase: reconstruct_docs
+    rule: R12
+    trigger: Capacidad detectada en scope que aplica a 2+ features o al producto.
+    behavior: >
+      Pausar. Presentar al usuario: "Esta capacidad [X] podría pertenecer al
+      producto. ¿Subirla a product/definition.md?". Esperar decisión antes
+      de continuar.
+
+  - id: adr_scope_promotion_suggested
+    phase: evaluate_conditionals
+    rule: R20
+    trigger: ADR local cuya decisión trasciende la feature (aplica globalmente).
+    behavior: >
+      Sugerir al usuario promover el ADR a product/decisions.md scope.
+      Esperar confirmación.
+
+  - id: git_history_missing
+    phase: apply_lineage
+    rule: R30
+    trigger: No se encuentra .git.
+    behavior: >
+      Pedir fechas manuales o usar fecha actual con
+      reverse_engineered_confidence: 0.3.
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondiciones de reverse: trabajo pre-existente, framework instalado."
+  - id: R26
+    reason: "Frontmatter transparent por default."
+  - id: R27
+    reason: "Preguntas dirigidas para gaps no-inferibles. Nunca inventar."
+  - id: R28
+    reason: "El output es base; reportar gaps para revisión humana."
+  - id: R30
+    reason: "Regla 17 con timestamps inferidos + bump de product/plan si aplica."
+  - id: R31
+    reason: "Reverse NO para features nuevas ni en desarrollo activo."
+  - id: R32
+    reason: "Monitorear ratio reverse/forward."
+  - id: R17
+    reason: "Frontmatter versionado + ancestor."
+  - id: R12
+    reason: "Sync-back: capacidades transversales → proponer subir a producto."
+  - id: R3b
+    reason: "Bifurcaciones en ADRs → discovered_during_reverse: true."
+  - id: R20
+    reason: "ADRs de scope feature: evaluar si deben promoverse a producto."
+  - id: R24
+    reason: "Framework instalado (precondición dura)."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - feature_reconstructed:   "FT-XX_<slug> + path completo"
+    - mode_used:               "transparent | stealth"
+    - docs_produced:           "lista con versión, ancestor y confidence"
+    - decisions_doc:           "generado | omitido + justificación"
+    - stories_consolidated:    "N cerradas + N en curso"
+    - parent_bumped:           "product/plan.md: vX.Y.Z → vX.Y+1.Z (si aplica)"
+    - adr_resolutions:         "ADRs reconstruidos + scope + discovered_during_reverse flag"
+    - gaps_declared:           "lista de gaps para revisión humana"
+    - confidence_global:       "valor 0.0-1.0"
+    - next_action:             "revisar iniciativa/métricas + /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  narrative:        ./flow.md
+  skill_doc:        ./SKILL.md
+  applies:          ./rules/applies.yaml
+  reverse_flow:     ~/.fremi/framework/reverse-engineering/flow.md
+  artifact_ref:     ~/.fremi/framework/artifacts/feature/workflow.yaml
+  reverse_config:   ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_index:      ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  forward_skill:    ~/.fremi/framework/artifacts/feature/SKILL.md

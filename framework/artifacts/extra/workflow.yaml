@@ -1,0 +1,117 @@
+schema: framework-layer-workflow
+schema_version: 1
+layer: extra
+since: 2026-08-10
+
+# ===========================================================================
+# WORKFLOW — capa EXTRA
+#
+# Fuente de verdad ÚNICA del modo de operación de la capa EXTRA.
+# El orquestador (/fremi-extra) y cualquier pipeline leen este archivo para
+# saber:
+#   - qué steps existen (aquí: sólo el scaffold — sin DAG lineal)
+#   - qué doc produce el step
+#   - qué skill invocar
+#   - qué puede correr en paralelo
+#
+# DIFERENCIA CON STORY/FEATURE: la capa EXTRA no tiene DAG lineal de steps.
+# Cada archivo de extra es cohesivo y autónomo — no hay "step 1 → step 2".
+# El `steps[]` declara un único step de scaffold; el relleno del contenido
+# es edición manual del usuario (Regla 14 — NO se automatiza).
+#
+# Este archivo NO contiene:
+#   - qué agente ejecuta el step (main/subagent/agent) → config.core.yaml
+#   - la elección del usuario para agentes o modo → config.user.yaml
+#   - reglas globales que aplican al ejecutar el step → rules/applies.yaml
+#
+# Docs referenciados vía tokens simbólicos que se resuelven desde
+# `~/.fremi/framework/settings/methodology.core.yaml` (layers.extra.*).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEPS — único step de la capa EXTRA
+#
+# Extra NO tiene cadena de docs ni secuencia lineal. El único step
+# invocable es el scaffold: calcula el próximo número de archivo extra,
+# valida el slug, y crea el archivo con el template canónico.
+#
+# El CONTENIDO del archivo lo llena el usuario manualmente — eso NO es
+# un step invocable (viola Regla 14 si el trabajo es spec-driven, y
+# requiere contexto humano que la IA no puede inferir).
+#
+# Ver Regla 18 en `~/.fremi/framework/rules/framework-mechanics.md`:
+# "Cada step debe apuntar a un skill real invocable. Los pasos que ejecuta
+# el usuario a mano viven en `procedure_manual`, NO en `flow.sequence`."
+# ---------------------------------------------------------------------------
+steps:
+
+  - id: scaffold
+    order: 0
+    skill: /fremi-extra
+    phase: create
+    produces: "archivo extra (snapshot)"
+    doc_type: snapshot
+    required: always
+    requires_complete: []                   # no precondición — extra es autónomo
+    consumes:
+      - "slug proporcionado por el usuario"
+      - "methodology.core.yaml → layers.extra.filename_pattern (para calcular el número)"
+    can_run_with: []                        # scaffold es atómico, sin concurrencia
+    template: references/EX-NN-template.md
+    versioning: >
+      snapshot con ancestor.id = project, ancestor.version_at_creation = project@version
+      leído de `.fremi/settings/config.user.yaml` (Regla 17).
+    reason: >
+      El único step automatizable de extra es el scaffold: calcular el
+      próximo número de archivo, validar slug, confirmar con el usuario
+      que el trabajo no es spec-driven (Regla 14), y escribir el template.
+      El relleno del contenido es manual y no tiene skill — va en
+      `procedure_manual`.
+
+# ---------------------------------------------------------------------------
+# PARALLEL ALLOWED — skills transversales invocables durante un archivo extra
+#
+# Extra puede concurrir con ADRs de producto o de feature cuando el
+# trabajo de extra dispara una decisión técnica (Regla 3b).
+# ---------------------------------------------------------------------------
+parallel_allowed:
+  - skill: /fremi-product-adr
+    when: >
+      El trabajo de extra genera una decisión que aplica a todo el
+      producto (Regla 3b + Regla 20 — scope producto).
+    writes_to: "doc `decisions` de producto"
+    side_effects:
+      - "Bumpea MINOR del doc `decisions` de producto (Regla 17)"
+
+  - skill: /fremi-feature-adr
+    when: >
+      El trabajo de extra genera una decisión que aplica sólo a
+      una feature concreta (Regla 3b + Regla 20 — scope feature).
+    writes_to: "doc `decisions` de la feature"
+    invocation_note: "IDs concretos según methodology.core.yaml → identifiers.feature"
+    side_effects:
+      - "Bumpea MINOR del doc `decisions` de la feature (Regla 17)"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# Resolución de paths:
+#   - `config.core.yaml`, `workflow.yaml`, `rules/applies.yaml` viven SÓLO en el
+#     framework (`~/.fremi/framework/artifacts/<capa>/`) — el usuario NO los edita.
+#   - `config.user.yaml` es user-editable: runtime lee del PROYECTO
+#     (`<project>/.fremi/settings/<capa>/config.user.yaml`). Si no existe,
+#     fallback al TEMPLATE del framework
+#     (`~/.fremi/framework/artifacts/<capa>/config.user.yaml`).
+#   - `fremi install` copia el template del framework al proyecto en la
+#     instalación inicial.
+# ---------------------------------------------------------------------------
+references:
+  agent_matrix: ~/.fremi/framework/artifacts/extra/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/extra/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/extra/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/extra/rules/applies.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-extra

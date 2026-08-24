@@ -3,6 +3,8 @@ name: fremi-product-planteamiento
 description: Puebla `docs/works/product/planteamiento.md` con el framing del problema + el approach ELEGIDO entre las ideas exploradas. Doc living. Cierra el discovery. Es el puente al `definition.md` formal.
 ---
 
+> **Nota sobre identificadores:** los prefijos concretos (iniciativa, feature, story) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
 # /fremi-product-planteamiento — Discovery: framing + approach elegido
 
 Crea o actualiza `docs/works/product/planteamiento.md` con:

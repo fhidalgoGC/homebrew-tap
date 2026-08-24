@@ -1,34 +1,37 @@
 ---
 name: fremi-pipeline-feature
-description: Pipeline de auto-ejecución de la capa FEATURE. Crea la feature (folder + definition.md), aplica sync-back a producto si corresponde, bumpea el plan padre según Regla 17, y opcionalmente arranca la primera story vía /fremi-pipeline-story. Corre sin pausar entre pasos salvo bifurcaciones Regla 3b, sync-back requerido, o precondiciones ausentes. Alternativa manual: `/fremi-feature <nombre>` (sólo crea; el usuario decide qué hacer después).
+description: Pipeline de auto-ejecución que ENVUELVE el ciclo completo de la capa FEATURE (2 steps del artifact — definition + lifecycle end-to-end). Crea la feature (folder + definition.md + sync-back a producto + bump del plan padre), y luego encadena /fremi-pipeline-story por cada entrada de user_stories_seed[] hasta cerrar todas las stories planeadas. Bugs feature-scope, enablers y ADRs se manejan como stop events durante el lifecycle. Alternativa manual: `/fremi-feature <nombre>` (sólo crea el definition; el usuario decide qué hacer después story por story).
 ---
 
 # /fremi-pipeline-feature — Pipeline capa FEATURE
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/artifacts/feature/config.user.yaml → flow.sequence`](../../artifacts/feature/config.user.yaml), con extensiones para sync-back automático a producto (Regla 12) y bump del plan padre (Regla 17).
+Corre en modo **automático** la secuencia COMPLETA declarada en [`~/.fremi/framework/artifacts/feature/workflow.yaml`](../../artifacts/feature/workflow.yaml) — los 2 steps del artifact (`definition` + `lifecycle`) end-to-end.
 
-**Fuente de verdad de la secuencia:** `config.feature.yaml`. Si un step cambia allí, este pipeline se adapta.
+**Fuente de verdad de la secuencia:** `artifacts/feature/workflow.yaml`. Si un step cambia allí, este pipeline se adapta.
+
+**Alcance del pipeline:** **envelope completo** — abarca los 2 steps del artifact feature:
+- **Definition** (step 0) — crear folder + `definition.md` + sync-back a producto (R12) + bump del plan padre (R17).
+- **Lifecycle** (step 1) — loop sobre `user_stories_seed[]` encadenando `/fremi-pipeline-story` por cada seed hasta cerrar todas las stories planeadas. Bugs feature-scope, enablers y ADRs se manejan como stop events transversales.
+
+**Diferencia con `/fremi-feature` manual:** manual = crea sólo el definition, vos decidís cada story después; pipeline = crea la feature + cierra todas las stories del seed automáticamente. Ambos producen la feature; cambia el ritmo y el alcance.
 
 ## Sintaxis
 
 ```
-/fremi-pipeline-feature <nombre-descriptivo> [--first-story <nombre-story>] [--mode interactive|auto]
+/fremi-pipeline-feature <nombre-descriptivo> [--mode interactive|auto]
 ```
 
 - `<nombre-descriptivo>`: título de la feature en lenguaje natural. Se convierte a slug según `slug.transforms` del `methodology.core.yaml`.
-- `--first-story <nombre-story>` *(opcional)*: si se pasa, tras crear la feature el pipeline **encadena** `/fremi-pipeline-story <FEATURE_ID> <nombre-story>` para arrancar la primera user story. Sin este flag el pipeline termina en la feature y devuelve control.
-- `--mode` *(opcional)*: overridea el `execution_mode.pipeline_default` de `config.feature.yaml`. Si se usa junto a `--first-story`, el modo se **hereda** al sub-pipeline de story.
+- `--mode` *(opcional)*: overridea el `execution_mode.pipeline_default` de `config.user.yaml`. El modo se hereda a los sub-pipelines de story encadenados durante lifecycle.
 
 ## Modo de ejecución
 
-- **`auto`** *(default para pipelines)*: la IA arma el `definition.md` completo, aplica sync-back si detecta divergencias claras, bumpea el `plan.md` sin preguntar y — si se pasó `--first-story` — encadena directo al `/fremi-pipeline-story` sin pausa. Pausa sólo ante stop events reales.
-- **`interactive`**: el sub-skill `/fremi-feature` **sigue corriendo en `auto`** (arma el `definition.md` entero de una), pero el pipeline pausa **entre steps** — típicamente después de crear la feature y antes de arrancar el sub-pipeline de story si se pasó `--first-story`. Con `--first-story` + `--mode interactive`, el modo se hereda al sub-pipeline de story: pausará entre cada FW-XX de esa story también.
+- **`auto`** *(default para pipelines)*: la IA arma el `definition.md` completo, aplica sync-back si detecta divergencias claras, bumpea el `plan.md` sin preguntar, y arranca a encadenar `/fremi-pipeline-story` por cada seed sin pausa entre stories. Pausa sólo ante stop events reales.
+- **`interactive`**: los sub-skills y sub-pipelines siguen en `auto`, pero el pipeline feature pausa **entre steps** — típicamente después de crear el `definition.md` y **entre cada story del seed** durante lifecycle. Útil para revisar cada story antes de arrancar la próxima.
 
-**Regla dura**: dentro del pipeline el sub-skill `/fremi-feature` nunca reactiva modo interactivo — corre siempre `auto`. Si el usuario quiere validación por sección dentro del `definition.md`, debe salirse del pipeline e invocar `/fremi-feature <nombre> --mode interactive` directo.
+**Regla dura**: dentro del pipeline los sub-pipelines/sub-skills NUNCA reactivan modo interactivo — corren siempre `auto`. Si querés validación por sección dentro de un doc específico, salite del pipeline e invocá el skill suelto.
 
-Como la capa feature tiene 1 solo doc obligatorio, la diferencia entre `auto` e `interactive` sólo se nota cuando se usa `--first-story` (que agrega checkpoints entre feature y story).
-
-Consultar `config.feature.yaml → execution_mode` para el default.
+Consultar `config.user.yaml → execution_mode` para el default.
 
 ## Cuándo invocarlo
 
@@ -128,6 +131,6 @@ Al terminar, la IA reporta:
 
 - Config operativa: [`~/.fremi/framework/artifacts/feature/config.user.yaml`](../../artifacts/feature/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 3b, 12, 17, 20.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.feature.md`](../../flows/flow.feature.md)
+- Flujo descriptivo: [`~/.fremi/framework/artifacts/feature/flow.md`](../../artifacts/feature/flow.md)
 - Skill manual: [`/fremi-feature`](../../artifacts/feature/SKILL.md)
 - Pipeline encadenable: [`/fremi-pipeline-story`](pipeline.story.md)

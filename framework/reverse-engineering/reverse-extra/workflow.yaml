@@ -1,0 +1,355 @@
+schema: framework-reverse-skill-workflow
+schema_version: 1
+skill: reverse-extra
+skill_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — REVERSE SKILL: EXTRA (/fremi-reverse-extra)
+#
+# Fuente de verdad ÚNICA de la secuencia de reconstrucción del skill
+# reverse-extra. Reconstruye 1 archivo EX-NN ({extra.filename}) a partir de
+# trabajo de tooling / scripts / IaC / metodología ya aplicado sin haberse
+# registrado como EX-NN.
+#
+# Nota: extra/ no tiene skills de forward — reverse-extra ES la única forma
+# programática de crear un EX-NN (config.extra.yaml → flow.sequence: []).
+# No existe pipeline de reverse para extra — se invoca este skill directamente.
+#
+# Este archivo declara:
+#   - qué doc reconstruye (reconstructs) — 1 solo archivo
+#   - fases de ejecución (5 fases — extra es doc único como bug)
+#   - mode_options: transparent | stealth (R26)
+#   - precondiciones duras (R25 + R14 validation)
+#   - stop events (R27 gaps + R14 cohesión + condiciones específicas)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición de formato del doc → SKILL.md
+#   - la elección del usuario → config.user.yaml
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# RECONSTRUCTS — 1 archivo (doc único, igual que reverse-bug)
+# ---------------------------------------------------------------------------
+reconstructs:
+  - id: extra_doc
+    doc_token: "{extra.filename}"     # EX-NN_<slug>.md por default
+    kind: snapshot
+    description: >
+      Doc extra completo: what-was-done, why-not-feature-story-task,
+      concrete-changes, validation, linkages (condicional), notes-learnings
+      (condicional). Un archivo por concepto cohesivo.
+    r14_mandatory_section: why-not-feature-story-task
+    r14_note: >
+      La sección why-not-feature-story-task es crítica (R14). Debe justificar
+      por qué el trabajo genuinamente está fuera del flujo lineal.
+      Si el trabajo era spec-driven → este skill no aplica.
+
+# ---------------------------------------------------------------------------
+# SCOPE — extra es siempre global al proyecto
+# ---------------------------------------------------------------------------
+scope_options: [global]
+scope_resolution: >
+  Extra no tiene scope variable — siempre vive en docs/works/extra/.
+  Numeración global (EX-NN, numeración secuencial de todos los extra del proyecto).
+  No confundir con enabler (que sí tiene scopes global/feature/story).
+
+# ---------------------------------------------------------------------------
+# MODE OPTIONS — R26 (transparent default)
+# ---------------------------------------------------------------------------
+mode_options: [transparent, stealth]
+default: transparent
+
+transparent:
+  description: >
+    Frontmatter incluye bloque reverse_engineered:* (R26 default).
+    Recomendado: el trabajo extra en producción sin EX-NN es deuda técnica;
+    la trazabilidad de cuándo/qué se hizo es información de auditoría valiosa.
+
+stealth:
+  description: >
+    El bloque reverse_engineered.* se omite; el doc queda indistinguible
+    del flow forward. Disponible como override EXPLÍCITO del usuario.
+    Requiere ADR a nivel proyecto para cambiar el default.
+
+# ---------------------------------------------------------------------------
+# PHASES — 5 fases (extra es doc único; no bump iterativo como enabler)
+# ---------------------------------------------------------------------------
+phases:
+  - id: discovery
+    order: 1
+    label: "Fase 1 — Descubrimiento"
+    purpose: >
+      Identificar los commits y archivos del trabajo extra a documentar.
+      Validar cohesión: ¿es un concepto cohesivo o múltiples conceptos mezclados?
+    sources_primary:
+      - "git log <archivos> --oneline → commits, fechas, mensajes, autores"
+      - "git diff <base_commit>..<HEAD> -- <archivos> → qué se cambió"
+    sources_secondary:
+      - "Archivos afectados: config / script / doc / test / build"
+      - "PR descriptions o notas del usuario"
+    cohesion_check: >
+      ANTES de arrancar: verificar que el conjunto de commits/archivos representa
+      un concepto cohesivo. Si mezcla conceptos distintos → stop event cohesion_mixed
+      (sugerir múltiples EX-NN, no forzar uno solo).
+    aborts_on_failure: false
+
+  - id: inference
+    order: 2
+    label: "Fase 2 — Inferencia"
+    purpose: >
+      Mapear commits y archivos → secciones del EX-NN.
+      Validar que el trabajo genuinamente es fuera-del-flujo (R14).
+    mappings:
+      - source: "Mensajes de commits + descripción del usuario"
+        target: "what-was-done: resumen ejecutivo (2-5 líneas)"
+      - source: "Tipo de archivos cambiados (config/scripts/docs/tooling/IaC)"
+        target: "why-not-feature-story-task: justificación de por qué no es feature/story/enabler"
+      - source: "git diff acumulado — archivos + cambios específicos"
+        target: "concrete-changes: lista de archivos con qué cambió en cada uno"
+      - source: "Tests que pasaron / comandos de build con exit 0 en commits"
+        target: "validation: comandos que verifican que el cambio funciona"
+      - source: "ADRs referenciados en commits o PR; stories tocadas indirectamente"
+        target: "linkages: ADRs relacionados + stories/features (condicional)"
+      - source: "Comentarios en commits, PR discussions"
+        target: "notes-learnings: gotchas descubiertos (condicional)"
+    r14_validation: >
+      Al inferir why-not-feature-story-task, verificar activamente que el trabajo
+      no era spec-driven. Señales de alerta:
+        - El trabajo habilitó una capacidad futura → puede ser enabler (R15).
+        - El trabajo cambió comportamiento user-facing → puede ser story/feature.
+        - Es solo refactor sin cambio de comportamiento → OK como extra (R9).
+        - Es tooling, build, metodología, scripts → OK como extra (R14).
+      Si hay duda → stop event r14_boundary_ambiguous.
+
+  - id: directed_questions
+    order: 3
+    label: "Fase 3 — Preguntas dirigidas (R27)"
+    purpose: >
+      Pedir al usuario los gaps no inferibles de los commits. NUNCA inventar.
+    gaps_requiring_questions:
+      - "¿Qué concepto cohesivo representa este trabajo? (si no está claro del log)"
+      - "¿Qué commits o PRs son parte del trabajo? (SHA o rango)"
+      - "¿Por qué no es feature/story/enabler? (si los commits no lo dejan claro)"
+      - "¿Hay gotchas o learnings del trabajo que no están en los commits?"
+    cohesion_question: >
+      Si el trabajo mezcla múltiples conceptos → preguntar al usuario si prefiere
+      un EX-NN por concepto (recomendado) o uno solo que los agrupe con justificación.
+    anti_patterns:
+      - "Inventar la justificación why-not-feature-story-task"
+      - "Forzar un solo EX-NN cuando los commits mezclan conceptos no relacionados"
+      - "Asumir que todo refactor es extra — verificar R9 vs R14"
+
+  - id: timestamps_lineage
+    order: 4
+    label: "Fase 4 — Timestamps + linaje (R30)"
+    purpose: >
+      Inferir fechas del trabajo via git para frontmatter (R17 via R30).
+      Extra no tiene padre estructural — ancestor es global.
+    git_commands:
+      - "git log --format='%ai' -- <archivos> | tail -1   # created (primer commit)"
+      - "git log -1 --format='%ai' -- <archivos>          # last_updated (último commit)"
+    ancestor_note: >
+      Los EX-NN son snapshots con ancestor.id: global y
+      ancestor.version_at_creation: null (sin padre estructural que versionar).
+      No disparan bumps de padre (a diferencia de story/feature/enabler).
+    fallback_no_git: >
+      Si no hay .git: pedir al usuario las fechas manualmente o usar "hoy"
+      con reverse_engineered_confidence: 0.3. No asumir defaults silenciosos.
+
+  - id: write_doc
+    order: 5
+    label: "Fase 5 — Escritura (R26 + R14)"
+    purpose: >
+      Escribir el EX-NN aplicando templates canónicos y frontmatter.
+      R14 activa: la sección why-not-feature-story-task es crítica.
+    r14_write_rule: >
+      La sección why-not-feature-story-task DEBE contener una justificación
+      sustantiva de por qué el trabajo está fuera del flujo lineal. No aceptar
+      "porque se hizo así" — debe mencionar R14 implícitamente:
+        ej: "Refactor sin cambio de comportamiento (R9); no habilita
+        capacidad futura ni tiene criterios de aceptación user-facing."
+    mode_effect:
+      transparent: "Frontmatter incluye reverse_engineered: true + campos de trazabilidad."
+      stealth: "Sin bloque reverse_engineered.*; indistinguible del flow forward."
+    doc_version: "v1.0.0 snapshot"
+    no_parent_bump: true
+    no_parent_bump_reason: >
+      Extra no tiene padre estructural (ancestor.id: global).
+      ancestor.version_at_creation: null, ancestor.version_at_closure: null.
+      No se disparan bumps de padre — a diferencia de story/feature/enabler/bug.
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el skill si fallan (R25)
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-extra` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: "Corré `fremi install` antes de invocar el skill. No auto-instalar."
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` existe y parsea.
+      `config.extra.yaml` del proyecto existe.
+
+  - id: work_is_merged
+    rule: R25
+    check: >
+      El trabajo (tooling/scripts/IaC/refactor) está mergeado a main o en
+      una versión confirmada. Trabajo en curso → usar el flujo forward
+      directamente (documentar mientras se hace el trabajo).
+    abort_message: >
+      El trabajo no está mergeado. Documentarlo mientras se hace (EX-NN forward).
+      Reverse-extra es para trabajo ya aplicado sin registro.
+
+  - id: work_identifiable
+    check: >
+      Existen commits identificables o archivos afectados para el trabajo.
+      Si no hay evidencia git → no hay qué reconstruir. Abortar.
+    abort_message: >
+      No se identificaron commits ni archivos del trabajo.
+      Proporcionar SHA de commits o paths de archivos afectados.
+
+  - id: r14_boundary_check
+    rule: R14
+    check: >
+      Validación previa al arranque: el trabajo parece genuinamente fuera
+      del flujo lineal. Si es claramente una feature/story/enabler →
+      sugerir el skill correcto y no arrancar este.
+    on_failure: >
+      Abortar con mensaje: "Este trabajo parece ser [feature/story/enabler].
+      Usar /fremi-reverse-[tipo] en su lugar. Si realmente es extra →
+      pasar --force-extra para confirmar y continuar."
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el skill (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: cohesion_mixed
+    triggers_during: [discovery, inference]
+    rule: R14
+    behavior: >
+      Los commits/archivos mezclan múltiples conceptos no relacionados.
+      Presentar al usuario los grupos detectados y preguntar:
+        a) Crear un EX-NN por concepto (recomendado).
+        b) Un solo EX-NN con justificación de agrupación.
+      Si elige (a) → ejecutar el skill varias veces; reportarlo.
+
+  - id: r14_boundary_ambiguous
+    triggers_during: [inference]
+    rule: R14
+    behavior: >
+      El trabajo tiene señales de habilitar capacidad futura (→ enabler)
+      o de tener comportamiento user-facing (→ story/feature).
+      Presentar al usuario la ambigüedad con criterios de distinción
+      y pedir que confirme: ¿es extra, enabler, o story?
+
+  - id: concept_not_clear
+    triggers_during: [directed_questions]
+    rule: R27
+    behavior: >
+      Los commits no revelan el concepto cohesivo del trabajo. Preguntar al
+      usuario: "¿Qué concepto representa este trabajo? (ej: 'migración a Node 24',
+      'mejoras al generador Postman', 'refactor de naming de endpoints')"
+
+  - id: git_history_missing
+    triggers_during: [timestamps_lineage]
+    rule: R30
+    behavior: >
+      No hay .git o los commits no son identificables. Pedir al usuario
+      fechas manuales o confirmar usar "hoy" con confidence: 0.3.
+
+  - id: validation_commands_missing
+    triggers_during: [inference, write_doc]
+    behavior: >
+      No se pueden inferir comandos de validación del trabajo.
+      Preguntar al usuario: "¿Cómo verificás que este cambio funciona?
+      (ej: `npm run build`, `terraform plan`, `yarn lint`)"
+
+  - id: r14_force_extra_needed
+    triggers_during: [discovery]
+    rule: R14
+    behavior: >
+      El trabajo parece ser feature/story/enabler pero el usuario usó
+      reverse-extra de todas formas. Alertar claramente y preguntar si
+      confirma --force-extra o si prefiere el skill correcto.
+
+anti_patterns:
+  - "Forzar un EX-NN que mezcla conceptos no relacionados — crear múltiples"
+  - "Usar reverse-extra para trabajo spec-driven (feature/story/enabler)"
+  - "Inventar la justificación why-not-feature-story-task"
+  - "Usar reverse-extra rutinariamente — documentar mientras se hace el trabajo"
+  - "Omitir la sección why-not-feature-story-task — es crítica para R14"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: trabajo mergeado antes de reverse."
+  - id: R26
+    reason: "Default transparent: frontmatter con reverse_engineered:* por defecto."
+  - id: R27
+    reason: "Preguntas dirigidas para gaps no inferibles: concepto, justificación R14."
+  - id: R28
+    reason: "Reverse produce base — justificación why-not-feature-story-task requiere revisión."
+  - id: R30
+    reason: "R17 aplica con timestamps inferidos. Extra no dispara bump de padres."
+  - id: R31
+    reason: "No se usa para trabajo en curso — documentar mientras se hace."
+  - id: R32
+    reason: "Ratio reverse/forward señala salud del framework."
+  - id: R17
+    reason: "Frontmatter versionado. Extra: ancestor.id: global, version_at_creation: null."
+  - id: R14
+    reason: >
+      CRÍTICA PARA ESTE SKILL. Extra sólo aplica a trabajo genuinamente fuera
+      del flujo lineal. La sección why-not-feature-story-task es obligatoria.
+      Anti-patrón: usar extra/ como excusa para saltar el flujo.
+  - id: R9
+    reason: >
+      Refactor sin cambio de comportamiento es un caso típico de extra (R14).
+      R9 confirma que el refactor no cambia comportamiento — importante para
+      justificar por qué no es feature/story.
+  - id: R3b
+    reason: "Si el trabajo implicó decisiones técnicas con bifurcaciones → ADR retroactivo."
+  - id: R24
+    reason: "Framework instalado antes de correr cualquier skill reverse."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - extra_reconstructed: "EX-NN_<slug>.md + path completo"
+    - concept:             "título del concepto documentado"
+    - commits:             "SHA(s) o rango + N archivos afectados"
+    - confidence:          "valor global de la corrida"
+    - gaps_declared:       "concepto, justificación, validation — resueltos o TBD (R27)"
+    - adr_related:         "ADRs referenciados o sugeridos con scope (R3b)"
+    - parent_bumped:       "N/A — extra no tiene padre estructural"
+    - mode_used:           "transparent (default) | stealth (override explícito)"
+    - review_recommendation: >
+        "Validar que el trabajo genuinamente es fuera-del-flujo (R14).
+         Si hay señales de que era enabler/story → considerar migrar el doc. (R28)"
+    - cohesion_note:       "si se detectó cohesión mixta → reportar qué EX-NN adicionales se recomiendan"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  skill_doc:          ./SKILL.md
+  narrative:          ./flow.md
+  applies_rules:      ./rules/applies.yaml
+  stop_events_doc:    ./rules/stop-events.md
+  reverse_flow:       ~/.fremi/framework/reverse-engineering/flow.md
+  rules_reverse:      ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rule_r14:           ~/.fremi/framework/artifacts/extra/rules/extra-doc.md
+  reverse_config:     ~/.fremi/framework/settings/config.reverse.core.yaml
+  artifact_extra:     ~/.fremi/framework/artifacts/extra/
+  rules_index:        ~/.fremi/framework/rules/workflow.md

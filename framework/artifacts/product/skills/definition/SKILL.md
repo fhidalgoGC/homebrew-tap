@@ -3,6 +3,8 @@ name: fremi-product-definition
 description: Puebla `docs/works/product/definition.md` — la definición FORMAL del producto (in-scope, capacidades, usuarios, glosario, criterios de éxito medibles, restricciones globales). Doc living. Primer paso de formalización, después del planteamiento cerrado.
 ---
 
+> **Nota sobre identificadores:** los prefijos concretos (iniciativa, feature, story) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
 # /fremi-product-definition — Formalización: qué producto construimos
 
 Crea o actualiza `docs/works/product/definition.md` — la definición **formal** del producto: alcance global, capacidades, usuarios primarios/secundarios, criterios de éxito medibles, restricciones globales, glosario.
@@ -50,7 +52,7 @@ Estructura obligatoria:
 5. **Criterios de éxito medibles** — cómo se sabe que el producto funciona (KPIs, métricas de negocio).
 6. **Restricciones globales** — regulatorias, técnicas, de negocio (aplican a TODAS las features).
 7. **Glosario** — términos del dominio que se usan en features/stories.
-8. **Referencias** — iniciativas conectadas (init-XXX), planteamiento (approach elegido).
+8. **Referencias** — iniciativas conectadas, planteamiento (approach elegido).
 
 ### Paso 4 — Versionado (Regla 17)
 

@@ -1,7 +1,9 @@
 ---
 name: fremi-story-proposal
-description: Crea o actualiza el doc de proposal (fase `proposal`) de una story — típicamente `{workflow.proposal}`. Puente entre definition y scope detallado. Declara intent + approach elegido (con opciones si hubo bifurcación) + decisions ancladas a ADRs + impact + risk + rollout. Genérico — filename se resuelve por config, no hardcoded. Usar cuando la story amerita proposal según `config.yaml → conditional_rules.proposal_when` (contrato externo nuevo, bifurcación técnica, 3+ archivos, cambio user-facing, riesgo de rollback).
+description: Crea o actualiza el doc `proposal` de una story (`{workflow.proposal}`). Puente entre definition y scope detallado. Declara intent + approach elegido (con opciones si hubo bifurcación) + decisions ancladas a ADRs + impact + risk + rollout. Genérico — filename se resuelve por config, no hardcoded. Usar cuando la story amerita proposal según `config.yaml → conditional_rules.proposal_when` (contrato externo nuevo, bifurcación técnica, 3+ archivos, cambio user-facing, riesgo de rollback).
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, ADR, criterios de aceptación) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-story-proposal — Proposal técnica (fase proposal de una story)
 
@@ -91,9 +93,9 @@ Sin ADR, ninguna decision debe quedar registrada en el proposal.
 2. Aplicar `phase_rules.proposal` como checklist:
    - Estructura fija: Intent, Scope (resumen), Approach, Decisions, Known Limitations, Impact, Acceptance Criteria, Rollout, Risk.
    - Approach expone opciones si hubo bifurcación.
-   - Cada Decision ancla a un ADR-XXX.
+   - Cada Decision ancla a un ADR registrado (ID según `identifiers.adr`).
    - Impact lista archivos con delta LOC.
-   - Acceptance Criteria referencia los CA-XXX de definition (no los redefine).
+   - Acceptance Criteria referencia los criterios de aceptación del doc `definition` (no los redefine).
 
 ### Paso 5 — Calcular Impact real
 
@@ -123,16 +125,16 @@ Marcar en `{workflow.checkwork}` (o el filename resuelto) que el proposal fue cr
 ## Validaciones
 
 - `{workflow.definition}` debe existir con contenido real. Si no → abortar (Regla 1).
-- Cada Decision debe tener un ADR-XXX referenciado. Si el ADR no existe, invocar `/fremi-story-adr` primero.
-- La sección Acceptance Criteria referencia CA-XXX existentes del definition — validar los IDs.
+- Cada Decision debe tener un ADR referenciado (ID según `identifiers.adr`). Si el ADR no existe, invocar `/fremi-story-adr` primero.
+- La sección Acceptance Criteria referencia criterios de aceptación existentes del doc `definition` — validar los IDs.
 - No sobreescribir contenido existente sin confirmación explícita.
 
 ---
 
 ## Anti-patrones
 
-- ❌ Escribir Decisions sin ADR anclado ("Decidimos usar Puppeteer" sin ADR-XXX) — viola Regla 3.
-- ❌ Repetir criterios de aceptación de definition en vez de referenciar los CA-XXX.
+- ❌ Escribir Decisions sin ADR anclado ("Decidimos usar Puppeteer" sin ADR registrado) — viola Regla 3.
+- ❌ Repetir criterios de aceptación de definition en vez de referenciar sus IDs.
 - ❌ Meter detalle de scope in/out en el proposal — eso va en `{workflow.scope}`.
 - ❌ Meter firmas de funciones internas o pseudocódigo — eso va en `{workflow.design}`.
 - ❌ Elegir approach silenciosamente cuando hubo bifurcación — Regla 3b obliga a pausar y preguntar.

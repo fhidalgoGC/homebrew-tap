@@ -1,0 +1,404 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: reverse-product
+pipeline_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE REVERSE-PRODUCT (/fremi-pipeline-reverse-product)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline
+# reverse-product — el más ambicioso del framework de reverse-engineering.
+# Reconstruye los 7 docs de la capa producto Y encadena
+# `/fremi-pipeline-reverse-feature` por cada FT-XX existente.
+#
+# RIESGO DECLARADO: alto — potencial de racionalización post-hoc al inferir
+# iniciativas de negocio y planteamiento estratégico desde artifacts operativos.
+# Modo `interactive` es FUERTEMENTE RECOMENDADO (default).
+#
+# Este archivo declara:
+#   - qué skill de reverse orquesta y qué docs produce (7 de producto)
+#   - preflight: advertencia obligatoria + precondiciones duras (R25)
+#   - fases de ejecución (7 docs producto → features → reporte)
+#   - stop events específicos del nivel producto (iniciativas, criterios, glosario)
+#   - reglas activas (todas R25-R32 + R4 + R12)
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición del flujo canónico de reverse → vive en
+#     `~/.fremi/framework/reverse-engineering/flow.md`
+#   - la lógica de inferencia de cada doc de producto → vive en
+#     `~/.fremi/framework/reverse-engineering/reverse-product/SKILL.md`
+#   - la config operativa de defaults → `~/.fremi/framework/settings/config.reverse.core.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# REVERSE SKILL REF — skill de reverse que este pipeline orquesta
+# ---------------------------------------------------------------------------
+reverse_skill_ref:
+  skill: /fremi-reverse-product
+  skill_path: ~/.fremi/framework/reverse-engineering/reverse-product/SKILL.md
+  config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  declared_risk: high     # config.reverse.core.yaml → skills[fremi-reverse-product].risk: high
+
+sub_pipeline_ref:
+  pipeline: /fremi-pipeline-reverse-feature
+  pipeline_path: ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md
+  invoked_for: each discovered feature (unless --skip-features)
+
+# Docs reconstruidos en la fase de producto (antes de features)
+docs_produced_product_layer:
+  - iniciativas      # discovery — iniciativas retroactivas (riesgo alto de racionalización)
+  - ideas            # discovery — ideas descartadas (sólo si hay branches/commits evidentes)
+  - planteamiento    # discovery — framing del problema + approach elegido
+  - definition       # formalización — producto formal + capacidades + glosario
+  - strategies       # formalización — estrategias técnicas inferidas del stack
+  - decisions        # formalización — ADRs globales retroactivos
+  - plan             # formalización — roadmap living con features actuales marcadas [x]
+
+# Docs reconstruidos por feature (vía sub-pipeline)
+docs_produced_feature_layer:
+  - all_feature_docs  # FT-XX/definition.md + decisions.md + stories (delegado)
+
+# ---------------------------------------------------------------------------
+# REVERSE PHASES — secuencia de la corrida
+# ---------------------------------------------------------------------------
+executes_steps:
+  - show_risk_warning    # Fase -1 — Advertencia obligatoria antes de arrancar
+  - identify             # Fase 0 — Descubrimiento producto: inventario de features + docs + README
+  - reconstruct_discovery    # Fases 1-3 — iniciativas + ideas + planteamiento
+  - reconstruct_formalization  # Fases 4-7 — definition + strategies + decisions + plan
+  - reconstruct_features  # Fase 8 — Sub-pipeline reverse-feature por cada FT-XX
+  - report_aggregate      # Fase 9 — Reporte global + gaps críticos + revisión humana obligatoria
+
+phase_detail:
+  show_risk_warning:
+    behavior: >
+      Antes de cualquier escaneo, mostrar al usuario la advertencia de riesgo
+      alto (racionalización post-hoc). En interactive: bloquear hasta respuesta.
+      En auto: mostrar pero no bloquear. Siempre mostrar.
+    warning_text: >
+      REVERSE-PRODUCT es de RIESGO ALTO. La IA va a inferir INICIATIVAS de
+      negocio, IDEAS descartadas y DEFINITION del producto desde código y
+      features. Riesgo: puede racionalizar decisiones que nunca se tomaron
+      formalmente. Recomendación: correr en --mode interactive, revisar cada
+      doc, consultar al usuario original del producto por las iniciativas
+      reales antes de aceptar las inferidas.
+    options: ["Continuar", "No continuar", "Necesito el usuario original del producto primero"]
+    auto_behavior: muestra advertencia sin bloquear
+
+  identify:
+    sources:
+      - "docs/works/features/*"         # features + stories existentes
+      - "docs/works/product/*"          # docs de producto existentes (estado actual)
+      - README_md                        # descripción del producto
+      - package_json                     # stack tecnológico
+      - serverless_yml_or_iac           # infra declarada
+      - git_log_root                    # evolución del proyecto
+    produces_in_memory:
+      - feature_list              # FT-XX descubiertos
+      - product_capabilities      # capacidades agregadas de features
+      - stack_choices             # tecnologías elegidas (de package.json + IaC)
+      - existing_product_docs     # cuáles docs de producto ya existen
+
+  reconstruct_discovery:
+    consumes: [identify]
+    docs: [iniciativas, ideas, planteamiento]
+    skill: /fremi-reverse-product
+    applies_rules: [R4, R26, R27, R30]
+    gaps_checked:
+      - initiative_rationale      # porqué de cada iniciativa — preguntar obligatoriamente
+      - discarded_ideas           # sólo inferible de branches abandonados / commits revertidos
+      - success_criteria_measurable  # métricas leading/lagging — pedir al usuario
+      - strategic_constraints     # restricciones de negocio no-inferibles del código
+    interactive_behavior: >
+      Pausa después de cada doc de discovery — muestra el doc generado y pide
+      confirmación antes de continuar. ESPECIALMENTE recomendado para
+      iniciativas: presentar las iniciativas inferidas y preguntar al usuario
+      original del producto si reflejan la realidad estratégica.
+    risk_note: >
+      iniciativas.md es el doc de mayor riesgo de racionalización post-hoc.
+      La IA propone iniciativas basadas en las features, pero el rationale de
+      negocio no se puede inferir. Siempre preguntar antes de continuar.
+
+  reconstruct_formalization:
+    consumes: [identify, reconstruct_discovery]
+    docs: [definition, strategies, decisions, plan]
+    skill: /fremi-reverse-product
+    applies_rules: [R26, R27, R30]
+    gaps_checked:
+      - glossary_terms            # términos del dominio — preguntar definiciones formales
+      - rnfs_global               # RNFs a nivel producto — pedir valores
+      - adr_motivation_global     # rationale de decisiones técnicas transversales
+    doc_detail:
+      decisions:
+        note: >
+          ADRs reconstruidos son de hecho, no de derecho. El código muestra la
+          decisión; no necesariamente hubo comparación formal. Marcar cada ADR
+          con `reverse_engineered: true` + nota "Decisión de facto al arrancar".
+      strategies:
+        note: >
+          Presentar la estrategia actual como "Elegida" y mencionar alternativas
+          sólo si el git history muestra experimentación real.
+      plan:
+        note: >
+          Features actuales marcadas como completadas. Roadmap futuro: dejar
+          vacío o con TBD — reverse no puede inferir dirección futura del producto.
+
+  reconstruct_features:
+    consumes: [identify, reconstruct_formalization]
+    sub_pipeline: /fremi-pipeline-reverse-feature
+    mode: sequential            # una feature a la vez
+    applies_to: each feature in feature_list
+    options_forwarded: [--mode, --stealth, --from-git-history, --skip-stories, --only-stories]
+    skip_condition: "--skip-features flag was passed"
+    filter_condition: "--only-features FT-01,FT-02 restricts which features are processed"
+
+  report_aggregate:
+    rule: R28
+    required_output:
+      - product_reconstructed        # paths de los 7 docs
+      - features_chained             # lista con confidence individual
+      - initiatives_inferred         # cuántas + cuáles requieren rationale del usuario original
+      - global_adrs_retroactive      # cantidad + títulos
+      - confidence_product           # separado del confidence de features
+      - critical_gaps                # iniciativas sin rationale, planteamiento incompleto, criterios sin métricas
+      - human_review_mandatory       # áreas específicas con prioridad alta
+      - recommendation               # convocar al usuario original del producto para TBDs
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — verificación antes de show_risk_warning
+# ---------------------------------------------------------------------------
+preflight:
+  - id: verify_preconditions
+    order: -1
+    purpose: >
+      Verificar R25 + R24 antes de cualquier escaneo. Verificar que existe
+      al menos una feature (en `docs/works/features/` o código identificable) —
+      sin features no hay materia prima para reconstruir producto.
+    aborts_pipeline_on_failure: true
+
+  - id: check_product_state
+    order: -2
+    purpose: >
+      Verificar qué docs de producto ya existen en `docs/works/product/` —
+      para no sobreescribir docs existentes con contenido real sin advertir.
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: interactive
+  recommended_mode: interactive
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      Cada fase corre sin pausar (excepto stop events reales).
+      La advertencia de riesgo se muestra pero no bloquea. NO recomendado
+      para producto — el riesgo de racionalización post-hoc es alto.
+    phase_pauses: false
+    risk_note: >
+      En auto el pipeline puede producir iniciativas y planteamientos que
+      suenan coherentes pero no reflejan la historia real del negocio.
+      Usar interactive siempre que sea posible.
+
+  interactive:
+    description: >
+      El pipeline pausa ENTRE cada doc de producto (7 pausas) y ENTRE
+      cada feature encadenada. Muestra el doc generado, resume qué infirió
+      y qué quedan como TBD, y pide confirmación antes de continuar.
+      FUERTEMENTE RECOMENDADO para producto.
+    phase_pauses: true
+    checkpoint_between_docs: true
+    checkpoint_between_features: true
+    checkpoint_at_discovery_to_formalization: true
+
+  hard_rule: >
+    Las features se procesan de forma SECUENCIAL (un writer a la vez).
+    No correr sub-pipelines de feature en paralelo — riesgo de conflictos.
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-product` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/settings/config.reverse.core.yaml` existen y parsean.
+
+  - id: work_in_production
+    rule: R25
+    check: >
+      Existe trabajo real en producción (al menos una feature mergeada a main
+      o código de features en producción identificable).
+    abort_message: >
+      Sin trabajo en producción no hay materia prima para reverse-product.
+      Usar el flow forward (`/fremi-product-iniciativas` → ...) para arrancar.
+
+  - id: features_exist
+    check: >
+      Existe al menos una feature en `docs/works/features/` o código de
+      features identificable en `src/`. Sin features → abortar.
+    abort_message: >
+      Sin features no hay materia prima para reconstruir la capa producto.
+      Reverse-product requiere al menos 1 feature existente.
+
+  - id: reverse_config_active
+    check: "config.reverse.core.yaml → active: true"
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: initiative_rationale_required
+    triggers_during: [reconstruct_discovery]
+    rule: R27
+    behavior: >
+      PAUSA OBLIGATORIA: las iniciativas inferidas por la IA necesitan
+      validación del usuario original del producto. Mostrar las iniciativas
+      propuestas y preguntar si reflejan la estrategia real. Si el usuario
+      original no está disponible → marcar como `rationale: TBD — requiere
+      usuario original del producto`.
+
+  - id: discarded_ideas_not_inferrable
+    triggers_during: [reconstruct_discovery]
+    behavior: >
+      No se detectan branches abandonados ni commits revertidos claros.
+      La sección `ideas.md` queda vacía con warning: "No se detectaron ideas
+      descartadas — puede haberlas o no; requiere entrevista con el equipo
+      original." Preguntar si el usuario recuerda ideas que se descartaron.
+
+  - id: success_criteria_not_measurable
+    triggers_during: [reconstruct_formalization]
+    rule: R27
+    behavior: >
+      Los criterios de éxito del producto no son derivables del código.
+      Pausar y pedir métricas leading/lagging al usuario o dejar TBD.
+
+  - id: strategic_bifurcation_inferred
+    triggers_during: [reconstruct_formalization]
+    rule: R3b
+    behavior: >
+      El stack elegido refleja una decisión estratégica con alternativas
+      viables. Registrar ADRs globales retroactivos marcados
+      `discovered_during_reverse: true`. Preguntar el rationale real.
+
+  - id: glossary_terms_need_definitions
+    triggers_during: [reconstruct_formalization]
+    rule: R27
+    behavior: >
+      Se detectan términos de dominio en el código (nombres de funciones,
+      tipos, constantes) que requieren definición formal para el glosario.
+      Preguntar al usuario las definiciones — no inventarlas.
+
+  - id: initiatives_contradictory
+    triggers_during: [reconstruct_discovery]
+    behavior: >
+      Features distintas apuntan a iniciativas que se pisan o contradicen.
+      Pausar y pedir al usuario que clarifique las iniciativas reales antes
+      de continuar con las stories.
+
+  - id: feature_vs_product_boundary
+    triggers_during: [reconstruct_features]
+    rule: R12
+    behavior: >
+      Al procesar una feature se detectan capacidades que el pipeline de
+      producto ya registró diferente. Pausar y reconciliar antes de continuar
+      (sync-back descendente — Regla 12 hacia abajo).
+
+  - id: low_confidence_product
+    triggers_during: [reconstruct_discovery, reconstruct_formalization]
+    behavior: >
+      El confidence del producto como capa (separado del de features) cae
+      bajo el umbral. Pausar y notificar — los docs se marcarán
+      `needs_review: true` con prioridad alta.
+
+  - id: reverse_ratio_exceeded
+    triggers_after: [report_aggregate]
+    rule: R32
+    behavior: >
+      El ratio reverse/forward del proyecto superó el umbral crítico.
+      Notificar (no bloquear) — señal de que el framework no está siendo
+      respetado consistentemente.
+
+  - id: stealth_product_override
+    triggers_before: [reconstruct_discovery]
+    rule: R26
+    behavior: >
+      Se pasó `--stealth` en reverse-product. ADVERTENCIA ESPECIAL: modo
+      stealth en producto oculta que las iniciativas estratégicas fueron
+      inferidas post-hoc. Fuertemente desaconsejado. Requerir confirmación
+      explícita del usuario Y que exista ADR que justifique la decisión.
+
+anti_patterns:
+  - "Inventar iniciativas que 'justifiquen' el producto ya construido"
+  - "Registrar ADRs como si hubiera habido comparación formal cuando el stack se usó por default"
+  - "Usar --stealth para producto — la trazabilidad histórica de estrategia importa"
+  - "Correr en --mode auto para producto — usar interactive siempre que sea posible"
+  - "Firmar docs de producto sin validar con el usuario original / stakeholders"
+  - "Inferir ideas descartadas sin evidencia real (branches, commits revertidos)"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: trabajo en producción."
+  - id: R26
+    reason: "Default transparent — ESPECIALMENTE importante para producto."
+  - id: R27
+    reason: "Gaps no-inferibles → preguntar obligatoriamente, especialmente iniciativas."
+  - id: R28
+    reason: "Reverse-product SIEMPRE requiere revisión humana profunda."
+  - id: R30
+    reason: "Regla 17 aplica retroactivamente: timestamps inferidos de git."
+  - id: R31
+    reason: "Si el proyecto está arrancando ahora → usar flow forward, no reverse."
+  - id: R32
+    reason: "Reportar ratio reverse/forward como señal de salud del framework."
+  - id: R17
+    reason: "Versionado retroactivo con timestamps inferidos + linaje."
+  - id: R4
+    reason: "Respetar orden discovery → formalización al reconstruir producto."
+  - id: R12
+    reason: "Sync-back descendente: restricciones globales propagadas a features."
+  - id: R3b
+    reason: "ADRs retroactivos globales por decisiones técnicas estratégicas."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - product_reconstructed:      "paths de los 7 docs de producto"
+    - features_chained:           "lista con FT-XX + confidence individual"
+    - initiatives_inferred:       "cantidad + cuáles requieren rationale del usuario original"
+    - global_adrs_retroactive:    "cantidad + títulos (marcados discovered_during_reverse)"
+    - confidence_product:         "separado del confidence agregado de features (producto suele ser más bajo)"
+    - critical_gaps:              "iniciativas sin rationale, planteamiento incompleto, criterios sin métricas"
+    - human_review_mandatory:     "áreas específicas — iniciativas, planteamiento, criterios, glosario"
+    - mode_used:                  "transparent | stealth (con nota fuerte si stealth)"
+    - recommendation:             "convocar al usuario original del producto para completar TBDs"
+    - next_actions:               "validar iniciativas con stakeholders, completar TBDs, /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:           ./PIPELINE.md
+  narrative:            ./flow.md
+  reverse_skill:        ~/.fremi/framework/reverse-engineering/reverse-product/SKILL.md
+  sub_pipeline:         ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md
+  reverse_flow:         ~/.fremi/framework/reverse-engineering/flow.md
+  reverse_config:       ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_reverse:        ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rules_index:          ~/.fremi/framework/rules/workflow.md

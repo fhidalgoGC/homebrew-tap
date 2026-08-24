@@ -1,0 +1,372 @@
+schema: framework-layer-workflow
+schema_version: 1
+layer: story
+since: 2026-08-10
+
+# ===========================================================================
+# WORKFLOW — capa STORY
+#
+# Fuente de verdad ÚNICA de la secuencia canónica de la story.
+# El orquestador (/fremi-story) y su pipeline leen este archivo para saber:
+#   - qué steps existen
+#   - qué doc produce cada uno
+#   - qué template usar
+#   - qué precondiciones tiene (DAG)
+#   - qué consume del padre/steps previos
+#   - qué skill invocar
+#   - qué steps pueden correr en paralelo (can_run_with)
+#   - qué versionado aplica al doc que produce
+#
+# Este archivo NO contiene:
+#   - qué agente ejecuta cada step (main/subagent/agent) → config.core.yaml
+#   - la elección del usuario para agentes o modo → config.user.yaml
+#   - reglas globales que aplican al ejecutar cada step → rules/applies.yaml
+#
+# Docs referenciados vía tokens `{workflow.<id>}` — resuelven a filename real
+# desde `~/.fremi/framework/settings/methodology.core.yaml` (paths.story.files_in_order).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEPS — secuencia canónica de la story
+#
+# Cada step declara:
+#   - id: nombre corto, único (usado como key en config.core/user.yaml)
+#   - order: posición en la secuencia (para render y sorting)
+#   - skill: skill invocable que ejecuta el step
+#   - phase: nombre lógico de la fase (para agrupar métricas)
+#   - produces: doc que resulta (token `{workflow.<id>}` o "N/A" si no produce doc)
+#   - doc_type: snapshot | living | none
+#   - required: always | conditional
+#   - condition_ref: (sólo si required=conditional) nombre de la regla en config.user.yaml
+#   - requires_complete: precondiciones duras (DAG). Steps previos que deben estar cerrados.
+#   - consumes: qué información se lee de los predecesores (para razonar contexto)
+#   - can_run_with: skills transversales que pueden concurrir mientras corre este step
+#   - template: path al template canónico (relativo al skill dueño)
+#   - versioning: nota sobre el schema de versionado del doc producido
+#   - reason: por qué existe la precondición
+# ---------------------------------------------------------------------------
+steps:
+
+  - id: explore
+    order: 0
+    skill: /fremi-story-explore
+    phase: explore
+    produces: "{workflow.explore}"
+    doc_type: snapshot
+    required: conditional
+    condition_ref: explore_when
+    requires_complete: [feature/definition.md]
+    consumes:
+      - "feature/definition.md — contexto y capabilities de la feature"
+      - "product/definition.md — restricciones y glosario globales"
+    can_run_with: []
+    template: skills/explore/references/{workflow.explore}-template.md
+    versioning: "snapshot con ancestor.version_at_creation = feature/definition@version"
+    reason: >
+      Primer step de la story. Requiere que la feature padre exista con
+      definition real (Regla 1). Es condicional (Regla 16).
+
+  - id: definition
+    order: 1
+    skill: /fremi-story-definition
+    phase: definition
+    produces: "{workflow.definition}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [feature/definition.md, "explore (si aplicó)"]
+    consumes:
+      - "explore — hallazgos que reencuadran el problema"
+      - "feature/definition.md — capacidades y user_stories_seed"
+    can_run_with: []
+    template: references/{workflow.definition}-template.md
+    versioning: "snapshot con ancestor.version_at_creation = feature/definition@version"
+    reason: >
+      Bloquea hasta que la feature exista y — si el explore aplicó — hasta
+      que esté firmado. Sin insumos no se puede escribir el As a / I want
+      / So that con CAs (Regla 5).
+
+  - id: proposal
+    order: 2
+    skill: /fremi-story-proposal
+    phase: proposal
+    produces: "{workflow.proposal}"
+    doc_type: snapshot
+    required: conditional
+    condition_ref: proposal_when
+    requires_complete: [definition]
+    consumes:
+      - "definition — CAs para armar intent + approach"
+    can_run_with: [/fremi-story-adr]
+    template: skills/proposal/references/{workflow.proposal}-template.md
+    versioning: "snapshot"
+    reason: >
+      El proposal contiene bloque Decisions — cada bifurcación (Regla 3b)
+      dispara un ADR. El ADR puede escribirse en paralelo con el resto del
+      proposal, pero ambos requieren la definition completa.
+
+  - id: scope
+    order: 3
+    skill: /fremi-story-scope
+    phase: scope
+    produces: "{workflow.scope}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [definition]
+    consumes:
+      - "definition — CAs para acotar in/out-of-scope"
+      - "proposal (si aplicó) — impact + rollout limitan el scope"
+    can_run_with: []
+    template: references/{workflow.scope}-template.md
+    versioning: "snapshot"
+    reason: >
+      Scope acota la story a partir de los CAs. Sin definition no se puede
+      acotar; sin proposal (si aplica) queda ambigua la frontera. Aplica
+      Regla 6.1 (scope antes de BDD).
+
+  - id: bdd
+    order: 4
+    skill: /fremi-story-bdd
+    phase: bdd
+    produces: "{workflow.bdd}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [scope]
+    consumes:
+      - "definition — criterios de aceptación que se traducen a escenarios"
+      - "scope — in-scope define qué escenarios cubrir"
+    can_run_with: []
+    template: references/{workflow.bdd}-template.md
+    versioning: "snapshot"
+    reason: >
+      Sin scope explícito los escenarios se expanden sin control (Regla 6.1).
+      Escenarios paralelizables internamente (ver config.core.yaml → internal_items).
+
+  - id: sdd
+    order: 5
+    skill: /fremi-story-sdd
+    phase: sdd
+    produces: "{workflow.sdd}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [bdd]
+    consumes:
+      - "bdd — SCs para derivar contratos externos"
+      - "scope — dependencias que fijan integraciones"
+    can_run_with: [/fremi-story-adr]
+    template: references/{workflow.sdd}-template.md
+    versioning: "snapshot"
+    reason: >
+      Sin BDD no hay contrato externo (Regla 6.2). Bifurcaciones concurren
+      con ADRs (Regla 3b).
+
+  - id: design
+    order: 6
+    skill: /fremi-story-design
+    phase: design
+    produces: "{workflow.design}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [sdd]
+    consumes:
+      - "sdd — contratos que el design debe satisfacer"
+      - "product/strategies.md — stack global aplicable"
+      - "product/decisions.md — ADRs de producto que restringen tech"
+    can_run_with: [/fremi-story-adr]
+    template: references/{workflow.design}-template.md
+    versioning: "snapshot"
+    reason: >
+      Design satisface el contrato SDD, no lo redefine (Regla 6.4).
+      Componentes internos paralelizables (ver internal_items).
+
+  - id: tdd
+    order: 7
+    skill: /fremi-story-tdd
+    phase: tdd
+    produces: "{workflow.tdd}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [sdd, design]
+    consumes:
+      - "bdd — escenarios para mapear test cases"
+      - "sdd — cláusulas y errores para mapear test cases"
+      - "design — decisiones técnicas para elegir unit/integration/e2e"
+    can_run_with: []
+    template: references/{workflow.tdd}-template.md
+    versioning: "snapshot"
+    reason: >
+      Sin SDD y Design cerrados no se puede plantear cobertura.
+
+  - id: plan
+    order: 8
+    skill: /fremi-story-plan
+    phase: tasks
+    produces: "{workflow.plan}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [tdd]
+    consumes:
+      - "design — estructura de archivos para descomponer tasks"
+      - "tdd — TCs a cubrir por task"
+    can_run_with: [/fremi-story-task]
+    template: references/{workflow.plan}-template.md
+    versioning: "snapshot"
+    reason: >
+      Sin design (qué archivos) ni TDD (qué tests) no hay unidad de trabajo.
+      Aplica Regla 7b (tareas con criterios verificables).
+
+  - id: apply
+    order: 9
+    skill: null                 # apply es fase de ejecución sin doc dedicado — usa /fremi-story-task + /fremi-story-checkwork
+    phase: apply
+    produces: N/A
+    doc_type: none
+    required: always
+    requires_complete: [plan]
+    consumes:
+      - "plan — cola de tasks a ejecutar (respetando depends_on)"
+      - "tdd — TCs a implementar (Regla 7 rojo primero)"
+      - "design — estructura de archivos donde escribir código"
+    can_run_with:
+      - /fremi-story-task
+      - /fremi-story-checkwork
+      - /fremi-story-adr
+      - /fremi-story-bug
+      - /fremi-enabler
+    template: null
+    versioning: "N/A — apply no produce doc; mueve tasks del plan y actualiza checkwork"
+    reason: >
+      Sin plan no hay lista de tasks para ejecutar. Aplica Regla 2 (no
+      código sin SDD+TDD) + Regla 7 (test rojo primero).
+
+  - id: checkwork
+    order: 10
+    skill: /fremi-story-checkwork
+    phase: apply
+    produces: "{workflow.checkwork}"
+    doc_type: living
+    required: always
+    requires_complete: [plan]
+    consumes:
+      - "plan — tasks para reflejar estado en vivo"
+    can_run_with: []
+    template: references/{workflow.checkwork}-template.md
+    versioning: "living — bumpea PATCH/MINOR según movimientos de task; single-writer"
+    reason: >
+      Doc LIVING con actualización single-writer (Regla 13). Aunque las
+      tasks corran en subagentes, la escritura del checkwork la serializa
+      el main.
+
+  - id: verify
+    order: 11
+    skill: /fremi-story-verify
+    phase: verify
+    produces: "N/A — writes_to checkwork sección verify"
+    doc_type: none
+    required: always
+    requires_complete: ["checkwork al 100%", "todas las tasks del plan en [x]"]
+    consumes:
+      - "checkwork — evidencia de tasks cerradas y CAs cubiertos"
+      - "config.testing.test_runner / type_checker / coverage — comandos a correr"
+    can_run_with: []
+    template: null
+    versioning: "N/A — resultado va en sección 'Última corrida de verify' del checkwork"
+    reason: >
+      Verify corre suite completa contra el estado final. Compite por
+      tooling → no admite concurrencia.
+
+  - id: closure-check
+    order: 12
+    skill: /fremi-story-closure-check
+    phase: closure
+    produces: "reporte inline de gaps"
+    doc_type: none
+    required: always
+    requires_complete: [verify]
+    consumes:
+      - "verify verdict (PASS o PASS WITH WARNINGS)"
+      - "docs completos desde `definition` hasta `plan` para armar matriz de trazabilidad"
+    can_run_with: []
+    template: null
+    versioning: "N/A"
+    reason: >
+      Auditoría antes de firmar. Requiere verify pasado. Sin CRITICAL —
+      recién se firma el closure.
+
+  - id: closure
+    order: 13
+    skill: /fremi-story-closure
+    phase: closure
+    produces: "{workflow.closure}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [verify, closure-check]
+    consumes:
+      - "closure-check sin issues CRITICAL"
+      - "feature/definition.md — versión actual del padre para bumpear"
+      - "docs completos desde `definition` hasta `plan` — matriz de trazabilidad final"
+    can_run_with: []
+    template: references/{workflow.closure}-template.md
+    versioning: "snapshot con ancestor.version_at_closure = feature/definition@nueva-versión post-bump (Regla 17)"
+    side_effects:
+      - "Bumpea la feature padre según parent_bump_triggers.story_closes (Regla 17)"
+    reason: >
+      Precondiciones duras: verify PASS + closure-check sin CRITICAL
+      (Regla 11).
+
+# ---------------------------------------------------------------------------
+# PARALLEL ALLOWED — transversales que pueden invocarse durante TODA la story
+# (fuera del DAG de steps). No aparecen en `steps[]` porque no tienen orden
+# fijo — se disparan cuando el trabajo los amerita.
+# ---------------------------------------------------------------------------
+parallel_allowed:
+  - skill: /fremi-story-task
+    when: "agregar/refinar tasks en el doc `plan`"
+    writes_to: "{workflow.plan}"
+    side_effects: ["Bumpea PATCH del plan"]
+
+  - skill: /fremi-story-checkwork
+    when: "arrancar/cerrar tasks o refrescar estado"
+    writes_to: "{workflow.checkwork}"
+    side_effects: ["Bumpea PATCH/MINOR del checkwork (living)"]
+
+  - skill: /fremi-story-adr
+    when: "aparece decisión técnica local a la story (Regla 3b)"
+    writes_to: "story-folder/decisions.md"
+    side_effects: ["Delta que se merge al `decisions.md` de la feature al cerrar (Regla 17)"]
+
+  - skill: /fremi-story-bug
+    when: "bug local descubierto durante la story"
+    writes_to: "story-folder/bugs/<bug-filename>"
+    filename_source: "methodology.core.yaml → layers.bug.filename_pattern"
+    side_effects: ["Aplica Regla 8 (test rojo primero)"]
+
+  - skill: "/fremi-enabler --story <feature-id>/<story-id>"
+    invocation_note: "IDs concretos según methodology.core.yaml → identifiers.feature/story"
+    when: "trabajo técnico habilitador local a la story"
+    writes_to: "story-folder/enablers/<enabler-folder>/"
+    filename_source: "methodology.core.yaml → layers.enabler.story_scoped_dir"
+    side_effects: []
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# Resolución de paths:
+#   - `config.core.yaml`, `workflow.yaml`, `rules/applies.yaml` viven SÓLO en el
+#     framework (`~/.fremi/framework/artifacts/<capa>/`) — el usuario NO los edita.
+#   - `config.user.yaml` es user-editable: runtime lee del PROYECTO
+#     (`<project>/.fremi/settings/<capa>/config.user.yaml`). Si no existe,
+#     fallback al TEMPLATE del framework
+#     (`~/.fremi/framework/artifacts/<capa>/config.user.yaml`).
+#   - `fremi install` copia el template del framework al proyecto en la
+#     instalación inicial.
+# ---------------------------------------------------------------------------
+references:
+  agent_matrix: ~/.fremi/framework/artifacts/story/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/story/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/story/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/story/rules/applies.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-story

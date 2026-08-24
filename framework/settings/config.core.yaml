@@ -200,8 +200,8 @@ layers:
     config: ~/.fremi/framework/settings/config.reverse.core.yaml
     active: true
     orchestrator_skill: null   # reverse no tiene orquestador único — 6 skills + 4 pipelines
-    rules: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32 específicas de reverse
-    flow: ~/.fremi/framework/flows/flow.reverse.md
+    rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md   # Reglas 25-32 específicas de reverse
+    flow: ~/.fremi/framework/reverse-engineering/flow.md
     skills_dir: ~/.fremi/framework/reverse-engineering/
     pipelines:
       - ~/.fremi/framework/pipelines/reverse-product/PIPELINE.md

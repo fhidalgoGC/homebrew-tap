@@ -1,150 +1,123 @@
 schema: framework-layer-user-config
-schema_version: 4
+schema_version: 6
 layer: enabler
-since: 2026-07-13
+since: 2026-08-10
+# v6 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO user choices: active, execution_mode,
+#                  step_agents (elección de agente por step), conditional_rules.
+# v5 (2026-07-13): esquema previo con docs[], flow.sequence[], scopes[], numbering, references.
 
-# ---------------------------------------------------------------------------
-# Configuración USER-EDITABLE de la capa ENABLER.
-# Vive junto al skill orquestador (~/.fremi/framework/artifacts/enabler/) porque el
-# usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
+# ===========================================================================
+# CONFIG.USER — capa ENABLER
 #
-# 4 docs livianos: definition → design → plan → closure.
-# Puede vivir en 3 scopes: global / feature / story.
+# ÚNICO archivo user-editable de esta capa. Cambiá acá para adaptar la
+# ejecución del workflow a tu proyecto sin tocar la estructura del framework.
+#
 # ---------------------------------------------------------------------------
+# UBICACIÓN Y RESOLUCIÓN EN RUNTIME (importante)
+#
+# Este archivo dentro del framework
+# (`~/.fremi/framework/artifacts/enabler/config.user.yaml`) es un TEMPLATE.
+# Al correr `fremi install` en un proyecto, se copia a:
+#     <project>/.fremi/settings/enabler/config.user.yaml
+#
+# El orquestador resuelve así en runtime:
+#   1. Lee `<project>/.fremi/settings/enabler/config.user.yaml` (versión del proyecto).
+#   2. Si no existe → fallback a `~/.fremi/framework/artifacts/enabler/config.user.yaml` (este template).
+#
+# Editar este archivo del framework cambia el DEFAULT que reciben proyectos
+# NUEVOS al instalar. Proyectos ya instalados usan su propio copy en
+# `.fremi/settings/enabler/`.
+# ---------------------------------------------------------------------------
+#
+# Este archivo NO contiene:
+#   - la secuencia canónica del workflow → `workflow.yaml`
+#   - las agent options estructuralmente válidas → `config.core.yaml`
+#   - las reglas globales aplicables → `rules/applies.yaml`
+# ===========================================================================
 
 active: true
 
 # ---------------------------------------------------------------------------
+# Execution mode — override opcional del default global (settings/config.core.yaml)
+#
+# - `default`: modo por default para skills sueltos de esta capa cuando el
+#   usuario no pasa `--mode` en la invocación.
+# - `pipeline_default`: modo por default cuando se invoca /fremi-pipeline-enabler.
+#
+# Comentar/omitir todo este bloque para heredar del master.
+# ---------------------------------------------------------------------------
+execution_mode:
+  # Modo default para skills sueltos de esta capa (`/fremi-enabler-*`).
+  # interactive → pausa DENTRO del skill validando cada sección con el usuario.
+  # auto        → escribe el doc entero de un tirón.
+  default: interactive
+
+  # Modo default para el pipeline (`/fremi-pipeline-enabler`).
+  # interactive → pausa ENTRE STEPS (los skills internos SIEMPRE corren en auto).
+  # auto        → corre toda la cadena sin pausa (pausa sólo por stop events).
+  pipeline_default: auto
+
+  notes: >
+    Enabler tiene 4 docs (cadena liviana): definition → design → plan → closure.
+    Todos son snapshot; el apply es fase de ejecución sin doc dedicado.
+
+    - Skill suelto en `interactive`: la IA propone cada criterio técnico, cada
+      elección de librería/stack, cada task con su DoD, antes de escribirlos
+      — y espera OK del usuario.
+    - Skill suelto en `auto`: llena el doc entero solo; pausa sólo ante
+      Regla 3b (bifurcación técnica), Regla 12 (sync-back), precondición
+      ausente o info insuficiente.
+    - Pipeline en `auto`: los 4 docs (+ apply) se completan sin pausa entre
+      steps y sin pausa dentro de cada step. Sólo se detiene por stop events
+      reales (bifurcaciones, padre ausente, colisión de ID).
+    - Pipeline en `interactive`: los skills internos siguen escribiendo cada
+      doc completo (auto), pero la IA se detiene ENTRE cada step terminado
+      y pregunta si continúa al siguiente. NUNCA reactiva el modo interactivo
+      dentro de un sub-skill.
+
+# ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Snapshot de los defaults del core (framework/artifacts/enabler/config.core.yaml).
-# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
-# Elegir un tipo fuera de las opciones válidas es un error de configuración.
+# Cada valor debe estar en `config.core.yaml → agent_matrix[<step>].options`.
+# Si el usuario elige un valor fuera de las opciones válidas → error de
+# configuración (el step no se ejecuta hasta corregirlo).
 #
-# Tipos: main | subagent | agent (ver header de story/config.core.yaml).
+# Los steps sin entry acá heredan `agent_matrix[<step>].default` del core.
+#
+# Tipos: main | subagent | agent (ver `config.core.yaml` header para detalle).
 # ---------------------------------------------------------------------------
 step_agents:
-  {enabler.definition}: main       # core options: [main]                  (no overridable)
-  {enabler.design}: main           # core options: [main, subagent, agent]
-  {enabler.plan}: main             # core options: [main, subagent]
-  apply: subagent              # core options: [main, subagent, agent]
-  {enabler.closure}: main          # core options: [main]                  (no overridable)
+  definition: main             # options: [main]                  (no overridable)
+  design: main                 # options: [main, subagent, agent]
+  plan: main                   # options: [main, subagent]
+  apply: subagent              # options: [main, subagent, agent]
+  closure: main                # options: [main]                  (no overridable, single-writer)
 
 # ---------------------------------------------------------------------------
-# Docs de la capa (4 docs, todos snapshot)
+# Reglas condicionales locales — enabler no tiene steps condicionales.
+#
+# A diferencia de story (que tiene `explore` y `proposal` condicionales),
+# el enabler no tiene docs opcionales — su cadena de 4 docs es siempre
+# obligatoria. El criterio de cuándo CREAR un enabler (Regla 15) se evalúa
+# ANTES de invocar el orquestador, no dentro del workflow.
 # ---------------------------------------------------------------------------
-docs:
-  - name: definition
-    file: {enabler.definition}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-enabler
-    phase: definition
-
-  - name: design
-    file: {enabler.design}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-enabler
-    phase: design
-
-  - name: plan
-    file: {enabler.plan}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-enabler
-    phase: tasks
-
-  - name: closure
-    file: {enabler.closure}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-enabler
-    phase: closure
-
-# ---------------------------------------------------------------------------
-# Scopes admitidos
-# ---------------------------------------------------------------------------
-scopes:
-  global:
-    location: docs/works/enablers/{en_folder}/
-    invocation: "/fremi-enabler <nombre>"
-    when: "Enabler transversal — no pertenece a una sola feature/story"
-
-  feature:
-    location: docs/works/features/{feature_folder}/enablers/{en_folder}/
-    invocation: "/fremi-enabler <nombre> --feature FT-XX"
-    when: "Enabler local a UNA feature"
-
-  story:
-    location: docs/works/features/{feature_folder}/user-stories/{story_folder}/enablers/{en_folder}/
-    invocation: "/fremi-enabler <nombre> --story FT-XX/HU-YY"
-    when: "Enabler local a UNA story"
-
-# Numeración EN-XX global al proyecto (evita colisiones entre scopes).
-numbering: global
-
 conditional_rules: {}
 
 # ---------------------------------------------------------------------------
-# FLOW — secuencia canónica del enabler. Cada step es un skill invocable.
-# ---------------------------------------------------------------------------
-flow:
-  sequence:
-    - step: 1
-      skill: /fremi-enabler
-      action: create-scaffold
-      preconditions:
-        - "Padre existe según scope (product / feature / story)"
-      produces:
-        - {enabler.definition} (esqueleto)
-        - {enabler.design} (esqueleto)
-        - {enabler.plan} (esqueleto)
-        - {enabler.closure} (esqueleto)
-
-    - step: 2
-      skill: /fremi-enabler-definition
-      preconditions:
-        - "scaffold del enabler creado"
-      produces: {enabler.definition} poblado
-
-    - step: 3
-      skill: /fremi-enabler-design
-      preconditions:
-        - "{enabler.definition} con contenido real"
-      produces: {enabler.design} poblado
-      side_effects: ["ADRs generados si hubo bifurcaciones (Regla 3b)"]
-
-    - step: 4
-      skill: /fremi-enabler-plan
-      preconditions:
-        - "{enabler.design} con estructura de archivos"
-      produces: {enabler.plan} con task-XXX
-
-    - step: 5
-      skill: /fremi-enabler-closure
-      preconditions:
-        - "Todas las tasks de EN-03 en [x]"
-        - "Criterios técnicos de EN-01 verificados"
-      produces: {enabler.closure} firmado
-      side_effects:
-        - "Bumpea el padre según parent_bump_triggers.enabler_closes (Regla 17)"
-
-  # NOTA: la TOPOLOGÍA de paralelismo vive en
-  # `~/.fremi/framework/artifacts/enabler/config.core.yaml` — es estructura del framework,
-  # no configuración de usuario. Este archivo (settings) sólo tiene el flag
-  # on/off (ver config.yaml master → parallelism.enabled).
-
-  parallel_allowed:
-    - skill: /fremi-product-adr / /fremi-feature-adr / /fremi-story-adr
-      when: "aparece decisión técnica en EN-02 (Regla 3b)"
-      scope_of_adr: "según scope del enabler"
-
-# ---------------------------------------------------------------------------
 # Referencias cruzadas
+#
+# `self` incluye ambas ubicaciones para explicitar dónde termina el archivo
+# post-install y dónde vive el template.
 # ---------------------------------------------------------------------------
 references:
+  self:
+    runtime: .fremi/settings/enabler/config.user.yaml               # PROYECTO (donde se lee en runtime)
+    framework_template: ~/.fremi/framework/artifacts/enabler/config.user.yaml  # ESTE archivo (template)
+  workflow: ~/.fremi/framework/artifacts/enabler/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/enabler/config.core.yaml
+  applied_rules: ~/.fremi/framework/artifacts/enabler/rules/applies.yaml
   master_config: ~/.fremi/framework/settings/config.core.yaml
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
-  rules: ~/.fremi/framework/rules/workflow.md
+  rules_index: ~/.fremi/framework/rules/workflow.md
   orchestrator_skill: /fremi-enabler

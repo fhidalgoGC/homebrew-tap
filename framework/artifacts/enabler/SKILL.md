@@ -10,21 +10,23 @@ Crea el folder de un enabler con los **4 docs en plantilla** (cadena liviana: de
 > **Importante:** este skill NO tiene prefijos hardcoded. Lee `identifiers.enabler`, `identifiers.enabler_doc` y `identifiers.enabler_doc.items[]` del JSON.
 >
 > **Regla 17 — Living Versioning**: los 4 docs del enabler son **snapshot**. Al crear cada uno, el skill:
-> 1. Captura la versión actual del padre (product/plan.md si global; FT-XX/definition.md si feature-scoped; FT-XX/HU-YY/{workflow.definition} si story-scoped).
+> 1. Captura la versión actual del padre: `product/plan.md` si scope global; doc `definition` de la feature si scope feature; doc `definition` de la story si scope story. Filenames reales de `methodology.core.yaml → layers.*.files_in_order[]`.
 > 2. Inyecta el frontmatter con `version: 1.0.0`, `doc_type: snapshot`, `ancestor.id` y `ancestor.version_at_creation`.
 > 3. Al firmar `{enabler.closure}`, verifica bump del padre (según `config.yaml → versioning.parent_bump_triggers.enabler_closes`) y rellena `ancestor.version_at_closure`.
 
 ## Sintaxis
 
 ```
-/fremi-enabler <nombre-descriptivo>                          # global (default)
-/fremi-enabler <nombre-descriptivo> --feature <FT-XX>        # dentro de feature
-/fremi-enabler <nombre-descriptivo> --story <FT-XX/HU-YY>    # dentro de story
+/fremi-enabler <nombre-descriptivo>                                      # global (default)
+/fremi-enabler <nombre-descriptivo> --feature <feature-id>               # dentro de feature
+/fremi-enabler <nombre-descriptivo> --story <feature-id>/<story-id>      # dentro de story
 ```
 
+Ej. con la convención por default: `--feature FT-01`, `--story FT-01/HU-02`. Los formatos reales de `feature-id` y `story-id` salen de `methodology.core.yaml → identifiers.feature` e `identifiers.story`.
+
 - `<nombre-descriptivo>`: texto libre. Se normaliza a kebab-case según `slug.transforms`.
-- `--feature <FT-XX>`: ID de feature padre o slug completo. El enabler queda dentro de esa feature.
-- `--story <FT-XX/HU-YY>`: feature + story padre. El enabler queda dentro de esa story.
+- `--feature <feature-id>`: ID de feature padre o slug completo. El enabler queda dentro de esa feature.
+- `--story <feature-id>/<story-id>`: feature + story padre. El enabler queda dentro de esa story.
 
 Sin flag → enabler **global** (en `docs/works/enablers/`).
 
@@ -66,27 +68,27 @@ Si el JSON no existe o no parsea → abortar y avisar al usuario.
 Según los flags recibidos:
 
 - **Sin flag** → placement = `global`. Ubicación = `paths.enablers_dir_global`.
-- **`--feature FT-XX`** → placement = `feature`.
-  1. Buscar carpeta en `paths.features_dir` que empiece por `FT-XX` y matchee `feat_cfg.folder_regex`.
+- **`--feature <feature-id>`** → placement = `feature`.
+  1. Buscar carpeta en `paths.features_dir` que empiece por `<feature-id>` y matchee `feat_cfg.folder_regex`.
   2. Si no existe → avisar y proponer `/fremi-feature` primero. No avanzar.
   3. Ubicación = `paths.features_dir/{feature_folder}/{paths.enablers_subdir}`.
-- **`--story FT-XX/HU-YY`** → placement = `story`.
+- **`--story <feature-id>/<story-id>`** → placement = `story`.
   1. Resolver feature padre (igual que arriba).
-  2. Buscar story dentro de `{feature_folder}/{paths.user_stories_subdir}/` que empiece por `HU-YY` y matchee `story_cfg.folder_regex`.
+  2. Buscar story dentro de `{feature_folder}/{paths.user_stories_subdir}/` que empiece por `<story-id>` y matchee `story_cfg.folder_regex`.
   3. Si no existe → avisar y proponer `/fremi-story` primero. No avanzar.
   4. Ubicación = `paths.features_dir/{feature_folder}/{paths.user_stories_subdir}/{story_folder}/{paths.enablers_subdir}`.
 
 ### Paso 2 — Determinar el ID de enabler (numeración GLOBAL)
 
-> Aunque el enabler puede vivir en 3 ubicaciones, la numeración `EN-XX` es **global al proyecto** para evitar colisiones al referenciar.
+> Aunque el enabler puede vivir en 3 ubicaciones, la numeración del ID es **global al proyecto** para evitar colisiones al referenciar. El formato del ID se resuelve de `methodology.core.yaml → identifiers.enabler.id_format`.
 
 1. Buscar **en las 3 ubicaciones** carpetas que matcheen `en_cfg.folder_regex`:
-   - `docs/works/enablers/EN-XX_*`
-   - `docs/works/features/*/enablers/EN-XX_*`
-   - `docs/works/features/*/user-stories/*/enablers/EN-XX_*`
+   - directorio global de enablers del proyecto (`paths.enablers_dir_global`)
+   - `paths.features_dir/*/enablers/` (enablers de feature)
+   - `paths.features_dir/*/user-stories/*/enablers/` (enablers de story)
 2. Extraer el número de cada ID existente (parsear según `en_cfg.id_format`).
 3. Próximo número = max(existentes) + 1. Si no hay → 1.
-4. Construir el `id` aplicando `en_cfg.id_format`.
+4. Construir el `id` aplicando `en_cfg.id_format` (ej. con la convención por default: `EN-02`).
 5. No reciclar IDs de enablers eliminados.
 
 ### Paso 3 — Normalizar el slug
@@ -101,15 +103,15 @@ Crear los 4 archivos listados en `en_doc_cfg.items[]`. Para cada item:
 
 1. Cargar `references/{filename_sin_md}-template.md` (ej: para item `definition` → `references/{enabler.definition}-template.md`).
 2. Reemplazar los placeholders:
-   - `{enabler_id}` → ej `EN-02`.
+   - `{enabler_id}` → ID del enabler según `en_cfg.id_format` (ej. `EN-02` con la convención por default).
    - `{slug}` → slug normalizado.
-   - `{feature_id}`, `{story_id}` → si placement = feature/story.
+   - `{feature_id}`, `{story_id}` → si placement = feature/story (formatos de `feat_cfg` / `story_cfg`).
    - `<...>` → con la info que el usuario ya proveyó, o como TODOs.
 3. Escribir el archivo en la carpeta del enabler.
 
-Estructura resultante (placement global):
+Estructura resultante (placement global). Los paths concretos salen de `methodology.core.yaml`:
 ```
-docs/works/enablers/
+<paths.enablers_dir_global>/
 └── {en_id}_{slug}/
     ├── {enabler.definition}   (qué habilita y por qué)
     ├── {enabler.design}       (cómo se construye)
@@ -117,10 +119,10 @@ docs/works/enablers/
     └── {enabler.closure}      (sign-off al cierre)
 ```
 
-Estructura resultante (placement feature):
+Estructura resultante (placement feature). Ej. con la convención por default `<feature-folder>` = `FT-01_<slug>`:
 ```
-docs/works/features/{FT-XX}_<slug>/
-└── enablers/
+<paths.features_dir>/<feature-folder>/
+└── <paths.enablers_subdir>/
     └── {en_id}_{slug}/
         ├── {enabler.definition}
         ├── {enabler.design}
@@ -128,10 +130,10 @@ docs/works/features/{FT-XX}_<slug>/
         └── {enabler.closure}
 ```
 
-Estructura resultante (placement story):
+Estructura resultante (placement story). Ej. con la convención por default `<story-folder>` = `HU-01_<slug>`:
 ```
-docs/works/features/{FT-XX}_<slug>/user-stories/{HU-YY}_<slug>/
-└── enablers/
+<paths.features_dir>/<feature-folder>/<paths.user_stories_subdir>/<story-folder>/
+└── <paths.enablers_subdir>/
     └── {en_id}_{slug}/
         ├── {enabler.definition}
         ├── {enabler.design}
@@ -152,8 +154,8 @@ Durante la redacción de `{enabler.design}`, si aparece una decisión técnica c
 1. **NO elegir silenciosamente.** Pausar la redacción.
 2. Presentar al usuario **2-3 opciones** con pros/contras explícitos.
 3. Esperar la decisión.
-4. Invocar `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr` para registrar (en `product/decisions.md` o `FT-XX/decisions.md` si es local a feature).
-5. Continuar referenciando `ADR-XXX` desde `{enabler.design}`.
+4. Invocar `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr` para registrar el ADR en el scope correcto (según Regla 20 en `~/.fremi/framework/artifacts/story/rules/adr.md`).
+5. Continuar referenciando el ADR (número global configurable en methodology) desde `{enabler.design}`.
 
 ### Paso 6 — Validar sincronía (Regla 12)
 
@@ -173,8 +175,8 @@ Decir al usuario:
 | Concepto | Cuándo | Entrega valor user-facing | Estructura |
 |---|---|---|---|
 | `/fremi-feature` | Línea de trabajo grande del producto | Sí | `definition.md` + stories |
-| `/fremi-story` | Unidad mínima de valor dentro de feature | Sí | 9 docs FW-01..FW-10 |
-| `/fremi-enabler` | Trabajo técnico que habilita capacidad futura | **No** | 4 docs EN-01..EN-04 |
+| `/fremi-story` | Unidad mínima de valor dentro de feature | Sí | 9+ docs del workflow de story |
+| `/fremi-enabler` | Trabajo técnico que habilita capacidad futura | **No** | 4 docs (cadena liviana) |
 | `EX-NN` en `extra/` | Tooling, scripts, refactor sin habilitar nada nuevo | No | 1 archivo |
 
 Test rápido: ¿qué pasa si NO hago este trabajo?

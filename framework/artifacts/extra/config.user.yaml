@@ -1,32 +1,120 @@
-# config.extra.user.yaml
-# --------------------------------------------------------------
-# Per-project overrides for the EXTRA layer. Trabajo fuera del flujo
-# principal (tooling, scripts, IaC, refactor de utilidades — Regla 14).
-#
-# The framework defaults (structural — file layout, sections,
-# templates, anti-patterns) live in config.extra.core.yaml. Only
-# knobs you're likely to tune per-project are exposed here.
-#
-# Master switch:
-#   active: true  -> the extra flow is available in this project
-#   active: false -> `/fremi-extra` and related tooling stay dormant
-# --------------------------------------------------------------
+schema: framework-layer-user-config
+schema_version: 6
+layer: extra
+since: 2026-08-10
+# v6 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO user choices: active, execution_mode,
+#                  step_agents (elección de agente por step), conditional_rules.
+# v1 (2026-07-13): esquema original con conditional_rules solamente.
 
-schema: fremi-extra-user
-schema_version: 1
+# ===========================================================================
+# CONFIG.USER — capa EXTRA
+#
+# ÚNICO archivo user-editable de esta capa. Cambiá acá para adaptar la
+# ejecución del workflow a tu proyecto sin tocar la estructura del framework.
+#
+# ---------------------------------------------------------------------------
+# UBICACIÓN Y RESOLUCIÓN EN RUNTIME (importante)
+#
+# Este archivo dentro del framework
+# (`~/.fremi/framework/artifacts/extra/config.user.yaml`) es un TEMPLATE.
+# Al correr `fremi install` en un proyecto, se copia a:
+#     <project>/.fremi/settings/extra/config.user.yaml
+#
+# El orquestador resuelve así en runtime:
+#   1. Lee `<project>/.fremi/settings/extra/config.user.yaml` (versión del proyecto).
+#   2. Si no existe → fallback a `~/.fremi/framework/artifacts/extra/config.user.yaml` (este template).
+#
+# Editar este archivo del framework cambia el DEFAULT que reciben proyectos
+# NUEVOS al instalar. Proyectos ya instalados usan su propio copy en
+# `.fremi/settings/extra/`.
+# ---------------------------------------------------------------------------
+#
+# Este archivo NO contiene:
+#   - la secuencia canónica del workflow → `workflow.yaml`
+#   - las agent options estructuralmente válidas → `config.core.yaml`
+#   - las reglas globales aplicables → `rules/applies.yaml`
+# ===========================================================================
+
 active: true
 
-# --------------------------------------------------------------
-# Conditional-rule toggles — expand or shrink the set of
-# conditions that make optional sections MANDATORY on your
-# project. Values here are additive on top of the core rules.
-# --------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Execution mode — override opcional del default global (settings/config.core.yaml)
+#
+# - `default`: modo por default cuando el usuario invoca `/fremi-extra`.
+#
+# Comentar/omitir todo este bloque para heredar del master.
+# ---------------------------------------------------------------------------
+execution_mode:
+  # Modo default para el skill scaffold (`/fremi-extra`).
+  # interactive → el skill hace la pregunta de clasificación Regla 14 y
+  #               confirma el slug antes de crear el archivo.
+  # auto        → el skill crea directamente sin pausas (usar sólo en pipelines
+  #               donde la clasificación ya se validó antes de invocar).
+  default: interactive
+
+  notes: >
+    Extra tiene un único step automatizable (scaffold) y el resto es
+    edición manual. En `interactive`, el skill pausa para la pregunta de
+    clasificación Regla 14 (¿es realmente trabajo fuera del flujo?).
+    En `auto` sólo pausa ante colisión de slug o framework no instalado.
+
+# ---------------------------------------------------------------------------
+# Step agents — elección del tipo de agente por step.
+#
+# Cada valor debe estar en `config.core.yaml → agent_matrix[<step>].options`.
+# Los steps sin entry acá heredan `agent_matrix[<step>].default` del core.
+#
+# Tipos: main | subagent | agent (ver `config.core.yaml` header para detalle).
+# ---------------------------------------------------------------------------
+step_agents:
+  scaffold: main             # options: [main]   (no overridable — ver config.core.yaml)
+
+# ---------------------------------------------------------------------------
+# Reglas condicionales locales — cuándo las secciones opcionales del
+# archivo extra son OBLIGATORIAS en este proyecto.
+#
+# Las secciones del archivo extra se declaran en `workflow.yaml` (y los
+# detalles narrativos en `rules/extra-doc.md`). Acá sólo se exponen
+# los knobs que el usuario puede ajustar por proyecto.
+# ---------------------------------------------------------------------------
 conditional_rules:
+
   extra_linkages_when:
+    description: >
+      Sección `linkages` del archivo extra — obligatoria cuando el
+      trabajo referencia ADRs, stories u otros archivos extra relacionados.
+    obligatory_if_any:
+      - "El trabajo de extra cambió/mejoró un ADR existente."
+      - "El trabajo de extra habilitó/afectó stories ya cerradas o en progreso."
+      - "El trabajo de extra se relaciona con un archivo extra anterior."
     additional_obligatory_if_any: []
-    # Example — always force `linkages` when your project cross-links
-    # to Jira tickets:
-    # - "El extra referencia un ticket externo (Jira, Linear, etc.)."
+    # Ejemplo — forzar `linkages` siempre cuando el proyecto cross-linkea tickets:
+    # - "El trabajo referencia un ticket externo (Jira, Linear, etc.)."
 
   extra_notes_when:
+    description: >
+      Sección `notes-learnings` del archivo extra — obligatoria cuando
+      durante el trabajo surgen aprendizajes reusables o gotchas no obvios.
+    obligatory_if_any:
+      - "Se descubrió un gotcha o edge case durante el trabajo."
+      - "Se estableció una convención informal que otros deberían saber."
     additional_obligatory_if_any: []
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `self` incluye ambas ubicaciones para explicitar dónde termina el archivo
+# post-install y dónde vive el template.
+# ---------------------------------------------------------------------------
+references:
+  self:
+    runtime: .fremi/settings/extra/config.user.yaml               # PROYECTO (donde se lee en runtime)
+    framework_template: ~/.fremi/framework/artifacts/extra/config.user.yaml  # ESTE archivo (template)
+  workflow: ~/.fremi/framework/artifacts/extra/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/extra/config.core.yaml
+  applied_rules: ~/.fremi/framework/artifacts/extra/rules/applies.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-extra

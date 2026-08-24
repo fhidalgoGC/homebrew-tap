@@ -1,0 +1,281 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: feature
+pipeline_kind: forward
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE FEATURE (/fremi-pipeline-feature)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline feature.
+# El pipeline es un RUNNER — no redefine steps; ENVUELVE el ciclo COMPLETO
+# del workflow del artifact feature (2 steps: definition + lifecycle).
+# Lifecycle = loop sobre user_stories_seed[] encadenando /fremi-pipeline-story
+# por cada seed hasta cerrar todas las stories planeadas.
+#
+# Diferencia clave: `/fremi-feature` (manual) = sólo crea el definition.md,
+# vos decidís cada story después. `/fremi-pipeline-feature` (este archivo) =
+# crea la feature + cierra todas las stories del seed end-to-end.
+#
+# Este archivo declara:
+#   - qué steps del artifact workflow ejecuta el pipeline (envelope completo)
+#   - qué preflight ejecuta antes del primer step
+#   - modo de ejecución (auto | interactive) y su semántica
+#   - precondiciones duras que abortan el pipeline
+#   - stop events específicos (cuándo pausa)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición de cada step (produces / template / etc.) — vive en
+#     `~/.fremi/framework/artifacts/feature/workflow.yaml`
+#   - qué agente ejecuta cada step → `config.core.yaml` (agent_matrix)
+#   - la elección del usuario → `config.user.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT ENVELOPE — qué steps del artifact ejecuta (todos)
+# ---------------------------------------------------------------------------
+artifact_ref:
+  workflow: ~/.fremi/framework/artifacts/feature/workflow.yaml
+  config: ~/.fremi/framework/artifacts/feature/config.user.yaml
+
+executes_steps:
+  - definition     # creación del definition.md + sync-back a producto + bump del plan padre
+  - lifecycle      # loop: encadena /fremi-pipeline-story por cada seed en user_stories_seed[]
+                   # hasta cerrar todas las stories planeadas. Maneja bugs/enablers/ADRs
+                   # que surjan como stop events transversales.
+
+skips_steps: []    # el pipeline feature ENVUELVE todos los steps del artifact
+
+skip_reason: >
+  No aplica — el pipeline feature abarca el ciclo COMPLETO de la feature tal
+  como está declarado en `artifacts/feature/workflow.yaml`. La diferencia con
+  invocar `/fremi-feature` + skills manualmente es que el pipeline crea la
+  feature, arranca automáticamente cada user story listada en
+  `user_stories_seed[]` encadenando `/fremi-pipeline-story`, y maneja bugs
+  transversales y enablers como stop events durante el lifecycle. El
+  lifecycle termina cuando todas las stories seed están cerradas.
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — andamiaje inicial antes del primer step
+# ---------------------------------------------------------------------------
+preflight:
+  - id: scaffold
+    order: -1
+    skill: /fremi-feature
+    purpose: >
+      Determinar próximo ID de feature en el proyecto (según
+      methodology.core.yaml → identifiers.feature), crear folder de feature,
+      instanciar template de definition.md con frontmatter y secciones vacías,
+      y capturar `ancestor.version_at_creation` desde `product/plan.md`.
+    aborts_pipeline_on_failure: true
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: auto
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      La IA crea el definition.md completo, aplica sync-back si detecta
+      divergencias claras, bumpea el plan.md sin preguntar, y arranca a
+      encadenar /fremi-pipeline-story por cada seed de user_stories_seed[]
+      sin pausa entre stories. Pausa sólo ante stop events reales.
+    sub_skills_run_in: auto
+
+  interactive:
+    description: >
+      Los sub-skills y sub-pipelines siguen corriendo en `auto`. El PIPELINE
+      feature pausa entre steps — después de crear el definition.md y entre
+      cada story del seed durante lifecycle. Útil para revisar cada story
+      antes de arrancar la próxima.
+    sub_skills_run_in: auto
+    checkpoint_between_steps: true
+
+  hard_rule: >
+    Dentro del pipeline los sub-pipelines/sub-skills NUNCA reactivan modo
+    interactivo — corren siempre `auto`. Para validación por sección de un
+    doc específico, salirse del pipeline e invocar el skill suelto.
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-story` es symlink válido Y `CLAUDE.md` referencia
+      `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+      No auto-instalar.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/artifacts/feature/config.user.yaml` existen y parsean.
+
+  - id: layer_active
+    check: "config.feature.yaml → active: true"
+
+  - id: product_definition_exists
+    rule: R1
+    check: >
+      `docs/works/product/definition.md` existe con contenido real
+      (no template vacío).
+    abort_message: >
+      Falta `product/definition.md` — corré `/fremi-pipeline-product` primero.
+
+  - id: product_plan_exists
+    rule: R1
+    check: >
+      `docs/works/product/plan.md` existe con contenido real
+      (aunque tenga 0 features listadas).
+    abort_message: >
+      Falta `product/plan.md` — corré `/fremi-pipeline-product` primero.
+
+  - id: product_plan_versioned
+    rule: R17
+    check: "product/plan.md tiene frontmatter con `version`."
+    on_failure: avisar y proponer migrarla antes.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: sync_back_producto
+    triggers_during: [definition]
+    rule: R12
+    behavior: >
+      El pipeline detecta que la feature introduce una capacidad, restricción
+      o término que NO está en product/definition.md y parece transversal.
+      Presenta al usuario el gap y propone: (a) actualizar product/definition.md
+      antes de continuar, o (b) marcar como específico de la feature y proceder.
+      Espera decisión.
+
+  - id: technical_bifurcation
+    triggers_during: [definition]
+    rule: R3b
+    behavior: >
+      El contexto implica 2+ approaches viables para satisfacer la feature
+      (ej: generar reporte = PDF vs HTML vs API JSON). Presenta opciones,
+      espera decisión, registra `ADR-XXX` en el scope apropiado (producto o
+      feature) vía /fremi-product-adr o /fremi-feature-adr según Regla 20.
+
+  - id: feature_collision
+    triggers_during: [definition]
+    behavior: >
+      El slug o la funcionalidad matchea una feature ya presente en el plan.
+      Preguntar si el usuario quiere: (a) usar la feature existente, (b) crear
+      con slug alternativo, (c) marcar la anterior como reemplazada.
+
+  - id: plan_prioridad_desconocida
+    triggers_during: [definition]
+    behavior: >
+      El plan.md no menciona la feature ni permite deducir prioridad.
+      El pipeline puede agregarla igual, pero necesita saber prioridad
+      tentativa (alta/media/baja) para la entry del roadmap.
+
+  # --- Stop events durante lifecycle (post-definition) --------------------
+  - id: user_stories_seed_empty
+    triggers_during: [lifecycle]
+    behavior: >
+      El `definition.md` no lista user_stories_seed[] o quedó vacío. El
+      lifecycle no tiene qué encadenar. Preguntar al usuario si (a) proveer
+      los nombres de las stories iniciales para arrancar, (b) terminar el
+      pipeline en definition (lifecycle diferido — se arrancan stories
+      manualmente después).
+
+  - id: sub_pipeline_story_aborted
+    triggers_during: [lifecycle]
+    behavior: >
+      Una corrida de `/fremi-pipeline-story` chained aborta (ej: precondición
+      dura, verify FAIL persistente). El feature pipeline pausa: no arranca
+      la siguiente story automáticamente hasta que el usuario resuelva.
+
+  - id: feature_bug_transversal
+    triggers_during: [lifecycle]
+    rule: R8
+    behavior: >
+      Se detecta un bug que afecta a múltiples stories o toca partes de la
+      feature no ligadas a una story específica. Invocar `/fremi-feature-bug`
+      (test rojo primero) sin romper el lifecycle — cerrar el bug antes de
+      arrancar la próxima story.
+
+  - id: feature_enabler_needed
+    triggers_during: [lifecycle]
+    behavior: >
+      Aparece un enabler feature-scope (infraestructura, tooling compartido
+      entre stories). Invocar `/fremi-enabler --feature <FT-XX>` antes de
+      seguir con las stories que dependen del enabler.
+
+  - id: feature_adr_needed
+    triggers_during: [lifecycle]
+    rule: R3b
+    behavior: >
+      Aparece una decisión técnica que afecta a la feature entera (no
+      resolvible a nivel story). Invocar `/fremi-feature-adr` y actualizar
+      `feature/decisions.md` antes de continuar.
+
+  - id: lifecycle_scope_creep
+    triggers_during: [lifecycle]
+    rule: R12
+    behavior: >
+      Durante el lifecycle aparece una capacidad claramente global que
+      pertenece a producto (nueva restricción transversal, capability
+      no prevista). Sync-back a `product/definition.md` antes de seguir.
+
+anti_patterns:
+  - "Confirmar el orden exacto de capacidades listadas"
+  - "Preguntar por wording del título"
+  - "Preguntar si se hace el bump de plan.md — es obligatorio (R17), se hace sin preguntar"
+  - "Pausar entre stories durante lifecycle — se encadenan sin preguntar (usar --mode interactive para checkpoint por story)"
+  - "Volver a preguntar precondiciones ya validadas en el preflight"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R1
+    reason: "No avanzar sin product/definition.md + product/plan.md."
+  - id: R3b
+    reason: "Toda bifurcación produce ADR antes de continuar."
+  - id: R8
+    reason: "Bug feature-scope descubierto durante lifecycle → test rojo primero."
+  - id: R12
+    reason: "Sync-back activo durante definition Y lifecycle — no dejar divergencias hacia producto."
+  - id: R17
+    reason: "Bump del plan.md padre + captura ancestor.version_at_creation en definition; cada story chained bumpea la feature al closure."
+  - id: R20
+    reason: "ADRs al scope correcto: transversales → producto; locales → feature; story-scoped → story."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - feature_created:        "ID + slug + path completo"
+    - definition_version:     "versión inicial del definition.md + ancestor.version_at_creation (versión del plan.md al crear)"
+    - plan_bump:              "versión anterior del plan.md → versión nueva"
+    - sync_back_events:       "qué se actualizó en producto (si hubo)"
+    - adr_resolutions:        "ADRs registrados durante el pipeline (con scope: producto/feature/story)"
+    - stories_processed:      "lista de user_stories_seed[] con su outcome (closed / aborted / skipped) + link al reporte de cada pipeline-story"
+    - feature_bumps:          "bumps del feature/definition.md acumulados por cada story cerrada (Regla 17)"
+    - bugs_and_enablers:      "bugs feature-scope y enablers creados durante lifecycle"
+    - stop_events_recorded:   "preguntas hechas + respuestas del usuario"
+    - next_action:            "todas las stories seed cerradas — proponer nueva story, feature closure manual (si aplica), o volver a producto"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:       ./PIPELINE.md
+  narrative:        ./flow.md
+  artifact_flow:    ~/.fremi/framework/artifacts/feature/flow.md
+  artifact_config:  ~/.fremi/framework/artifacts/feature/config.user.yaml
+  rules_index:      ~/.fremi/framework/rules/workflow.md
+  parent_pipeline:  ../product/PIPELINE.md
+  child_pipeline:   ../story/PIPELINE.md

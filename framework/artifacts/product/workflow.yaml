@@ -1,0 +1,224 @@
+schema: framework-layer-workflow
+schema_version: 1
+layer: product
+since: 2026-08-10
+
+# ===========================================================================
+# WORKFLOW — capa PRODUCT
+#
+# Fuente de verdad ÚNICA de la secuencia canónica del producto.
+# El orquestador (/fremi-product) y su pipeline leen este archivo para saber:
+#   - qué steps existen
+#   - qué doc produce cada uno
+#   - qué template usar
+#   - qué precondiciones tiene (DAG)
+#   - qué consume del padre/steps previos
+#   - qué skill invocar
+#   - qué steps pueden correr en paralelo (can_run_with)
+#   - qué versionado aplica al doc que produce
+#
+# Este archivo NO contiene:
+#   - qué agente ejecuta cada step (main/subagent/agent) → config.core.yaml
+#   - la elección del usuario para agentes o modo → config.user.yaml
+#   - reglas globales que aplican al ejecutar cada step → rules/applies.yaml
+#
+# Product es SINGLETON (no hay múltiples productos por proyecto) y sus docs
+# son todos LIVING (crecen durante toda la vida del proyecto).
+#
+# Docs referenciados por nombre conceptual del step — resolución a filename
+# real desde `~/.fremi/framework/settings/methodology.core.yaml`
+# (layers.product.stages_order[].files[]).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEPS — secuencia canónica del producto
+#
+# Cada step declara:
+#   - id: nombre corto, único (usado como key en config.core/user.yaml)
+#   - order: posición en la secuencia (para render y sorting)
+#   - skill: skill invocable que ejecuta el step
+#   - phase: nombre lógico de la fase (para agrupar métricas)
+#   - produces: doc que resulta (nombre literal del archivo; product usa filenames
+#               fijos sin prefijo de workflow-doc — ver methodology.core.yaml)
+#   - doc_type: living (todos los docs de product son living)
+#   - required: always (product no tiene steps condicionales)
+#   - requires_complete: precondiciones duras (DAG). Steps previos que deben existir.
+#   - consumes: qué información se lee de los predecesores (para razonar contexto)
+#   - can_run_with: skills transversales que pueden concurrir mientras corre este step
+#   - template: null (product no tiene templates enriquecidos por ahora)
+#   - versioning: nota sobre el schema de versionado del doc producido
+#   - reason: por qué existe la precondición
+# ---------------------------------------------------------------------------
+steps:
+
+  - id: iniciativas
+    order: 0
+    skill: /fremi-product-iniciativas
+    phase: discovery
+    produces: iniciativas.md
+    doc_type: living
+    required: always
+    requires_complete: []
+    consumes:
+      - "descripción libre del producto (input inicial del usuario)"
+    can_run_with: []
+    template: null
+    versioning: "living — bumpea MINOR al agregar una iniciativa nueva; MAJOR si se re-scoped el producto"
+    reason: >
+      Raíz del discovery. No tiene dependencia previa — sólo necesita
+      la descripción inicial del producto que aporta el usuario.
+      Aplica Regla 4 (discovery antes de formalización).
+
+  - id: ideas
+    order: 1
+    skill: /fremi-product-ideas
+    phase: discovery
+    produces: ideas.md
+    doc_type: living
+    required: always
+    requires_complete: [iniciativas]
+    consumes:
+      - "iniciativas.md — iniciativas aceptadas para brainstorm de enfoques"
+    can_run_with: []
+    template: null
+    versioning: "living — bumpea MINOR al agregar ideas por iniciativa nueva; PATCH para refinamientos"
+    reason: >
+      Sin iniciativas declaradas no hay contra qué proponer ideas.
+      El brainstorm de enfoques informa al planteamiento.
+      Aplica Regla 4 (discovery encadena secuencialmente).
+
+  - id: planteamiento
+    order: 2
+    skill: /fremi-product-planteamiento
+    phase: discovery
+    produces: planteamiento.md
+    doc_type: living
+    required: always
+    requires_complete: [ideas]
+    consumes:
+      - "ideas.md — enfoques a evaluar y elegir approach"
+      - "iniciativas.md — para conectar approach con hipótesis de negocio"
+    can_run_with: [/fremi-product-adr]
+    template: null
+    versioning: "living — bumpea MAJOR si cambia el approach elegido; MINOR para ajustes de framing"
+    reason: >
+      El planteamiento elige el approach entre las ideas. Las bifurcaciones
+      de approach disparan ADRs globales (Regla 3b) que pueden escribirse
+      en paralelo.
+
+  - id: definition
+    order: 3
+    skill: /fremi-product-definition
+    phase: formalizacion
+    produces: definition.md
+    doc_type: living
+    required: always
+    requires_complete: [planteamiento]
+    consumes:
+      - "planteamiento.md — approach elegido y framing del problema"
+      - "iniciativas.md — capacidades que respaldan cada elemento in-scope"
+    can_run_with: [/fremi-product-adr]
+    template: null
+    versioning: "living — bumpea MAJOR si cambia in-scope; MINOR para capacidades o usuarios nuevos; PATCH para clarificaciones"
+    reason: >
+      Regla 4 — no se puede formalizar sin discovery cerrado
+      (iniciativas + ideas + planteamiento). Definition cascadea a TODAS
+      las features: su calidad pesa sobre todo el proyecto.
+
+  - id: strategies
+    order: 4
+    skill: /fremi-product-strategies
+    phase: formalizacion
+    produces: strategies.md
+    doc_type: living
+    required: always
+    requires_complete: [definition]
+    consumes:
+      - "definition.md — capacidades in-scope + NFRs para comparar estrategias"
+    can_run_with: [/fremi-product-adr]
+    template: null
+    versioning: "living — bumpea MAJOR si cambia la estrategia elegida; MINOR para opciones nuevas evaluadas; PATCH para actualizaciones de análisis"
+    reason: >
+      Sin definition no hay contra qué comparar estrategias técnicas.
+      La elección del stack cascadea a todo el proyecto → Regla 3b
+      dispara ADRs en paralelo.
+
+  - id: decisions
+    order: 5
+    skill: /fremi-product-adr
+    phase: formalizacion
+    produces: decisions.md
+    doc_type: living
+    required: always
+    requires_complete: []
+    consumes:
+      - "contexto de la decisión (variable — puede venir de cualquier fase)"
+    can_run_with: []
+    template: null
+    versioning: "living ACUMULATIVO — bumpea MINOR al agregar un ADR nuevo; MAJOR si un ADR reemplaza otro previo (breaking change de decisión)"
+    single_writer: true
+    reason: >
+      Las decisiones técnicas globales son TRANSVERSALES — pueden aparecer
+      en cualquier momento del ciclo de vida del producto (desde planteamiento
+      hasta plan). El step `decisions` está en el DAG en la posición 5 para
+      representar que los ADRs de strategies suelen ser los primeros formales;
+      pero la skill `/fremi-product-adr` puede invocarse en cualquier momento
+      vía `parallel_allowed`. La numeración de ADRs es global al proyecto y
+      requiere single-writer para evitar colisiones.
+
+  - id: plan
+    order: 6
+    skill: /fremi-product-plan
+    phase: formalizacion
+    produces: plan.md
+    doc_type: living
+    required: always
+    requires_complete: [definition, strategies]
+    consumes:
+      - "definition.md — capacidades in-scope para descomponer en features"
+      - "strategies.md — estrategia elegida para priorizar features"
+    can_run_with: []
+    template: null
+    versioning: "living ACUMULATIVO — bumpea MINOR al agregar/mover features; MAJOR si cambia el approach de priorización; PATCH para ajustes de descripción"
+    single_writer: true
+    reason: >
+      Requiere definition (qué producto) + strategies (con qué stack).
+      El roadmap es la conexión entre el producto formalizado y la capa
+      feature. Single-writer porque el roadmap tiene ordering global.
+
+# ---------------------------------------------------------------------------
+# PARALLEL ALLOWED — transversales que pueden invocarse durante TODO el
+# ciclo de vida del producto (fuera del DAG de steps). No aparecen en
+# `steps[]` con posición fija porque se disparan cuando el trabajo los amerita.
+# ---------------------------------------------------------------------------
+parallel_allowed:
+  - skill: /fremi-product-adr
+    when: "aparece decisión técnica global durante cualquier fase (Regla 3b)"
+    writes_to: decisions.md
+    side_effects:
+      - "Bumpea MINOR del decisions.md (living)"
+      - "Numeración de ADR global al proyecto — serializar para evitar colisiones"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# Resolución de paths:
+#   - `config.core.yaml`, `workflow.yaml`, `rules/applies.yaml` viven SÓLO en el
+#     framework (`~/.fremi/framework/artifacts/<capa>/`) — el usuario NO los edita.
+#   - `config.user.yaml` es user-editable: runtime lee del PROYECTO
+#     (`<project>/.fremi/settings/<capa>/config.user.yaml`). Si no existe,
+#     fallback al TEMPLATE del framework
+#     (`~/.fremi/framework/artifacts/<capa>/config.user.yaml`).
+#   - `fremi install` copia el template del framework al proyecto en la
+#     instalación inicial.
+# ---------------------------------------------------------------------------
+references:
+  agent_matrix: ~/.fremi/framework/artifacts/product/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/product/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/product/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-product

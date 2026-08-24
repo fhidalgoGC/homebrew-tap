@@ -1,0 +1,194 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: product
+pipeline_kind: forward
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE PRODUCT (/fremi-pipeline-product)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline product.
+# El pipeline es un RUNNER — no redefine steps; invoca la secuencia completa
+# del artifact product (iniciativas → plan) de un tirón.
+#
+# Este archivo declara:
+#   - qué steps del artifact workflow ejecuta el pipeline (envelope completo)
+#   - modo de ejecución (auto | interactive) y su semántica
+#   - precondiciones duras que abortan el pipeline
+#   - stop events específicos (cuándo pausa)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición de cada step (produces / template / etc.) — vive en
+#     `~/.fremi/framework/artifacts/product/workflow.yaml`
+#   - qué agente ejecuta cada step → `config.core.yaml` (agent_matrix)
+#   - la elección del usuario → `config.user.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT SUBSET — qué steps del artifact ejecuta y cuáles NO
+# ---------------------------------------------------------------------------
+artifact_ref:
+  workflow: ~/.fremi/framework/artifacts/product/workflow.yaml
+  config: ~/.fremi/framework/artifacts/product/config.user.yaml
+
+executes_steps:
+  - iniciativas
+  - ideas
+  - planteamiento
+  - definition
+  - strategies
+  - decisions     # ADRs que surgen de strategies — transversal, registra cuando aparece
+  - plan
+
+skips_steps: []   # el pipeline product corre la cadena completa de la capa
+
+skip_reason: >
+  No aplica — el pipeline product abarca todos los steps declarados en
+  artifacts/product/workflow.yaml. No hay steps de implementación separados
+  como en la capa story.
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — andamiaje inicial antes del primer step
+# ---------------------------------------------------------------------------
+preflight:
+  - id: validate_input
+    order: -1
+    skill: null
+    purpose: >
+      Evaluar la descripción libre del producto que aporta el usuario.
+      Si la descripción no permite formular ni una iniciativa hipotética
+      (problema, usuarios, resultado esperado no inferibles) → preguntar
+      3 datos mínimos antes de arrancar el primer step.
+      No crear ningún archivo en preflight — sólo validar input.
+    aborts_pipeline_on_failure: false   # pausa, no aborta; recoge la info y sigue
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: auto
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      La IA compone iniciativas → ideas → planteamiento → definition →
+      strategies → plan sin pausas. Cada sub-skill escribe su doc entero
+      de un tirón y el pipeline arranca el siguiente sin preguntar.
+      Pausa sólo ante stop events reales.
+    sub_skills_run_in: auto
+
+  interactive:
+    description: >
+      Sub-skills siguen corriendo en `auto` (escriben el doc completo de una).
+      El PIPELINE pausa ENTRE steps — al terminar cada doc reporta lo
+      generado y pregunta si continúa al siguiente.
+    sub_skills_run_in: auto
+    checkpoint_between_steps: true
+
+  hard_rule: >
+    Dentro del pipeline los sub-skills NUNCA reactivan modo interactivo —
+    corren siempre `auto`. Para validación por sección, invocar el skill
+    suelto (ej: `/fremi-product-iniciativas --mode interactive`).
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-story` es symlink válido Y `CLAUDE.md` referencia
+      `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+      No auto-instalar.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/settings/config.core.yaml` +
+      `~/.fremi/framework/artifacts/product/config.user.yaml` existen y parsean.
+
+  - id: layer_active
+    check: "config.product.yaml → active: true"
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: iniciativas_sin_hipotesis
+    triggers_during: [iniciativas]
+    behavior: >
+      La descripción inicial no permite formular ni una `init-XXX`.
+      Preguntar al usuario 3 datos mínimos: problema, usuarios,
+      resultado esperado. Luego continuar.
+
+  - id: bifurcacion_planteamiento
+    triggers_during: [planteamiento]
+    rule: R3b
+    behavior: >
+      Aparecen 2+ approaches viables para el problema principal.
+      Presentar opciones (pros/contras), esperar decisión del usuario,
+      registrar como decisión de planteamiento (no ADR — el planteamiento
+      es discovery, no arquitectura). Continuar con el approach elegido.
+
+  - id: bifurcacion_strategies
+    triggers_during: [strategies]
+    rule: R3b
+    behavior: >
+      Aparecen 2+ stacks/arquitecturas viables con trade-offs no-triviales.
+      Presentar opciones (pros/contras), esperar decisión del usuario,
+      registrar `ADR-XXX` en `product/decisions.md` vía `/fremi-product-adr`
+      ANTES de continuar al plan.
+
+  - id: criterios_exito_faltantes
+    triggers_during: [definition]
+    behavior: >
+      La formalización requiere criterios de éxito medibles y no hay datos
+      suficientes en el contexto. Preguntar al usuario qué métrica define
+      éxito (adopción, revenue, tiempo, calidad — 1-2 métricas).
+
+anti_patterns:
+  - "Confirmar cada nombre de iniciativa o cada capacidad in-scope"
+  - "Preguntar el orden de items en ideas.md"
+  - "Preguntar si un enfoque cubre una iniciativa específica"
+  - "Pedir feedback tras cada doc completado"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R4
+    reason: "Discovery (iniciativas → ideas → planteamiento) antes de formalización (definition → strategies → plan)."
+  - id: R3b
+    reason: "Toda bifurcación técnica o de approach produce ADR o decisión registrada antes de continuar."
+  - id: R12
+    reason: "No aplica sync-back externo (producto es la capa raíz); sí valida coherencia interna: capacidades en definition respaldadas por iniciativas aceptadas."
+  - id: R17
+    reason: "Todos los docs llevan frontmatter versionado (living, v0.1.0 inicial) + entry en Changelog con origen: /fremi-pipeline-product."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - docs_produced:          "lista de archivos creados + versión inicial de cada uno"
+    - iniciativas_declaradas: "IDs + títulos de las init-XXX generadas"
+    - estrategia_elegida:     "nombre de la estrategia técnica + ADR-XXX de referencia (si hubo)"
+    - features_en_plan:       "cuántas features quedaron listadas en plan.md (puede ser 0)"
+    - adr_resolutions:        "ADRs registrados durante el pipeline (lista)"
+    - stop_events_recorded:   "preguntas hechas + respuestas del usuario"
+    - next_action:            "por default: /fremi-pipeline-feature <slug-primera-feature> si el plan tiene features; si no, /fremi-product-plan para agregarlas"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:       ./PIPELINE.md
+  narrative:        ./flow.md
+  artifact_flow:    ~/.fremi/framework/artifacts/product/flow.md
+  artifact_config:  ~/.fremi/framework/artifacts/product/config.user.yaml
+  rules_index:      ~/.fremi/framework/rules/workflow.md
+  child_pipeline:   ../feature/PIPELINE.md

@@ -1,0 +1,78 @@
+schema: framework-reverse-skill-rules-applies
+schema_version: 1
+skill: fremi-reverse-product
+since: 2026-08-11
+mode: reverse
+
+# ===========================================================================
+# APPLIES — reglas que el skill reverse-product enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  note: >
+    El skill reverse reconstruye la capa producto completa (iniciativas, ideas,
+    planteamiento, definition, strategies, decisions, plan). Las reglas del
+    artifact aplican al RESULTADO — pero se completan con reverse-specific
+    rules (R25-R32) que gobiernan la reconstrucción.
+
+# ---------------------------------------------------------------------------
+# Rules específicas del skill reverse
+# ---------------------------------------------------------------------------
+skill_rules:
+  - rules_file: ~/.fremi/framework/reverse-engineering/reverse-product/rules/stop-events.md
+    scope: reverse-skill
+    note: >
+      Stop events específicos de este skill reverse: cuándo pausa para pedir
+      input (Regla 27 — rationale de iniciativas, planteamiento, ADRs de stack,
+      métricas de éxito), cuándo emite la advertencia obligatoria de riesgo alto
+      de racionalización post-hoc, y qué precondiciones abortan (Regla 25).
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+    rules: [R25, R26, R27, R28, R29, R30, R31, R32]
+    scope: global
+    note: >
+      Régimen completo de reverse. R26 (transparent default — especialmente
+      recomendado para producto por riesgo alto de racionalización post-hoc),
+      R27 (preguntas dirigidas para gaps — especialmente rationale de iniciativas
+      y planteamiento), R28 (no reemplaza revisión humana — revisión profunda
+      obligatoria para producto), R30 (R17 sí aplica con timestamps inferidos).
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr reverse.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      R17 aplica en reverse (R30). Frontmatter con timestamps inferidos del
+      git history. Para producto (capa raíz) no hay padre externo que bumpear —
+      los docs living de producto se versionan entre sí (plan.md bumpea cuando
+      la feature lista arranca).
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      ADRs retroactivos globales reconstruidos deben respetar R3/R3b/R20.
+      Motivación de ADR es gap no-inferible → pausa (R27) para pedir contexto
+      al usuario. Bifurcaciones estratégicas (elección de stack) → ADR con
+      discovered_during_reverse: true.
+
+references:
+  artifact_applies: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  reverse_rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  reverse_config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  reverse_flow: ~/.fremi/framework/reverse-engineering/flow.md
+  skill_doc: ~/.fremi/framework/reverse-engineering/reverse-product/SKILL.md

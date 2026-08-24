@@ -1,7 +1,9 @@
 ---
 name: fremi-story-task
-description: Agrega una nueva tarea al plan.md de una user story. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
+description: Agrega una nueva tarea al doc `plan` de una user story. Lee la nomenclatura desde ~/.fremi/framework/settings/methodology.core.yaml (NO usa prefijos hardcoded). Usar cuando el usuario descompone una story en pasos.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, task, workflow doc) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /task — Agregar tarea al plan de una story
 
@@ -15,7 +17,7 @@ Agrega una tarea al archivo de plan de una user story, respetando la Regla 7b (c
 /task <FEATURE_ID>_<STORY_ID> [título]
 ```
 
-- `<FEATURE_ID>_<STORY_ID>`: referencia compuesta de la story padre (ej: `FT-03_HU-02`). Los formatos se derivan de `identifiers.feature.id_format` e `identifiers.story.id_format`.
+- `<FEATURE_ID>_<STORY_ID>`: referencia compuesta de la story padre (ej. con defaults: `FT-03_HU-02`). Los formatos se derivan de `identifiers.feature.id_format` e `identifiers.story.id_format`.
 - `título` (opcional): título corto de la tarea. Si falta, preguntárselo.
 
 Si la referencia falta y hay **una sola story con tareas en progreso**, asumir esa. Si hay ambigüedad, preguntar.
@@ -58,7 +60,7 @@ Si el JSON no parsea → abortar.
 
 Preguntar al usuario (o inferir de la conversación):
 1. **Objetivo** (1-2 líneas).
-2. **Mapeo:** ¿qué contrato SDD implementa? ¿qué SC-XXX cubre? ¿qué decisión de Design materializa? ¿qué TC-XXX testea?
+2. **Mapeo:** ¿qué contrato SDD implementa? ¿qué escenario BDD cubre? ¿qué decisión de Design materializa? ¿qué test case del TDD plan verifica?
 3. **Criterios de detección de completitud** (Regla 7b). Idealmente:
    - Comando que retorna exit 0.
    - Test específico que pasa.
@@ -92,7 +94,7 @@ Si la tarea revela algo que pertenece a capa superior → señalarlo y proponer 
 
 Decir al usuario:
 - ID asignado (formato del JSON, default `task-XXX`).
-- Referencia completa según `task_cfg.compound_id_format` (default: `{feature_id}_{story_id}_{id}`, ej: `FT-03_HU-02_task-001`).
+- Referencia completa según `task_cfg.compound_id_format` (ej. con defaults: `FT-03_HU-02_task-001` — el formato sale del JSON).
 - Si hubo sync-back: qué se actualizó arriba.
 - Recordatorio: usar este ID para marcar progreso en el plan (`[ ]` → `[/]` → `[x]`) y para referenciar en commits/PRs.
 

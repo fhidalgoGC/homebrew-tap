@@ -3,6 +3,8 @@ name: fremi-product-strategies
 description: Puebla `docs/works/product/strategies.md` — 2-3 estrategias técnicas/arquitectónicas globales (stack, arquitectura, patterns) con pros/contras. Doc living. Cada estrategia elegida dispara ADRs. Es el paso entre `definition.md` y `plan.md`: define CÓMO se va a construir el producto a alto nivel.
 ---
 
+> **Nota sobre identificadores:** los prefijos concretos (iniciativa, feature, story, ADR) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
 # /fremi-product-strategies — Formalización: estrategias técnicas
 
 Crea o actualiza `docs/works/product/strategies.md` — evalúa **2-3 estrategias** técnicas globales para construir el producto. Cada estrategia expone: stack, arquitectura, patterns, pros y contras.

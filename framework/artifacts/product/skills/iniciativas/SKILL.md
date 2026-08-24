@@ -1,11 +1,13 @@
 ---
 name: fremi-product-iniciativas
-description: Puebla o extiende `docs/works/product/iniciativas.md` con hipótesis de negocio SAFe (init-XXX). Doc living. Es el primer doc de discovery — sin iniciativas no hay razón estratégica de qué construir. Cada iniciativa es un "todo macro" que justifica meses/quarters y contiene múltiples features.
+description: Puebla o extiende `docs/works/product/iniciativas.md` con hipótesis de negocio SAFe. Doc living. Es el primer doc de discovery — sin iniciativas no hay razón estratégica de qué construir. Cada iniciativa es un "todo macro" que justifica meses/quarters y contiene múltiples features.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (iniciativa, feature, story) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-product-iniciativas — Discovery: iniciativas del producto
 
-Crea o extiende `docs/works/product/iniciativas.md` con **iniciativas** (`init-XXX`) — hipótesis de negocio SAFe/Lean Business Case que justifican el producto entero.
+Crea o extiende `docs/works/product/iniciativas.md` con **iniciativas** — hipótesis de negocio SAFe/Lean Business Case que justifican el producto entero.
 
 **Rol del doc**: qué queremos lograr a nivel estratégico. **No** es una feature ni un objetivo pequeño — es una hipótesis grande de negocio.
 
@@ -34,7 +36,7 @@ Crea o extiende `docs/works/product/iniciativas.md` con **iniciativas** (`init-X
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.core.yaml` → `identifiers.iniciativa` (init-XXX + regex + padding).
+- `methodology.core.yaml` → `identifiers.iniciativa` (prefijo, regex y padding de iniciativas).
 - `config.yaml` → `phase_rules.definition` (aplica también para iniciativas dado su rol de "por qué").
 
 ### Paso 1 — Precondiciones
@@ -45,14 +47,14 @@ Crea o extiende `docs/works/product/iniciativas.md` con **iniciativas** (`init-X
 
 ### Paso 3 — Poblar
 
-Cada iniciativa nueva `init-XXX`:
+Cada iniciativa nueva:
 - Hipótesis (`Creemos que ... si hacemos ... vamos a lograr ... medido por ...`).
 - Métricas de éxito (leading + lagging).
 - Beneficiarios (usuarios / negocio).
 - Escala (meses/quarters, no días).
 - Estado (En descubrimiento / Aceptada / Kill / Pivot).
 
-**No reciclar init-XXX**: iniciativas descartadas se marcan `Estado: Kill` con motivo, y quedan como rastro.
+**No reciclar IDs de iniciativas**: iniciativas descartadas se marcan `Estado: Kill` con motivo, y quedan como rastro.
 
 ### Paso 4 — Versionado (Regla 17)
 
@@ -64,11 +66,11 @@ Doc **living**:
 - Actualizar `last_updated` + agregar entry al `## Changelog` al pie.
 
 ### Paso 5 — Reportar
-- ID asignado (`init-001`, `init-002`, ...).
+- ID asignado (formato según `methodology.core.yaml → identifiers.iniciativa`).
 - Sugerir próximo paso: `/fremi-product-ideas` para brainstorm de enfoques.
 
 ## Validaciones
-- Cada init-XXX tiene hipótesis + métricas + escala.
+- Cada iniciativa tiene hipótesis + métricas + escala.
 - Sin TBDs — si no se puede formular la hipótesis, la iniciativa no está lista.
 - No colisión de IDs.
 

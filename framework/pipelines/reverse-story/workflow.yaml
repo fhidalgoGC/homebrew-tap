@@ -1,0 +1,335 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: reverse-story
+pipeline_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE REVERSE-STORY (/fremi-pipeline-reverse-story)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline
+# reverse-story. El pipeline es un RUNNER de reconstrucción — no corre el
+# flow forward; ejecuta las 6 fases canónicas de reverse-engineering (ver
+# `~/.fremi/framework/reverse-engineering/flow.md`) sobre UNA story.
+#
+# Este archivo declara:
+#   - qué skill de reverse orquesta y qué docs produce
+#   - preflight: verificación de precondiciones duras (R25)
+#   - modo de ejecución (auto | interactive) y su semántica
+#   - precondiciones duras que abortan el pipeline
+#   - stop events específicos de reverse (gaps, confidence baja, etc.)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición del flujo canónico de reverse → vive en
+#     `~/.fremi/framework/reverse-engineering/flow.md`
+#   - la lógica de inferencia por doc → vive en
+#     `~/.fremi/framework/reverse-engineering/reverse-story/SKILL.md`
+#   - la config operativa de defaults → `~/.fremi/framework/settings/config.reverse.core.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# REVERSE SKILL REF — skill de reverse que este pipeline orquesta
+# ---------------------------------------------------------------------------
+reverse_skill_ref:
+  skill: /fremi-reverse-story
+  skill_path: ~/.fremi/framework/reverse-engineering/reverse-story/SKILL.md
+  config: ~/.fremi/framework/settings/config.reverse.core.yaml
+
+# Docs reconstruidos por la corrida (11 docs de story)
+docs_produced:
+  - explore          # condicional (evalúa commit history)
+  - definition       # FW-01 — siempre
+  - proposal         # condicional (evalúa contrato nuevo + archivos afectados)
+  - scope            # FW-03 — siempre
+  - bdd              # FW-04 — SCs derivados de tests
+  - sdd              # FW-05 — contratos + errores + RNFs
+  - design           # FW-06 — tech inferido de package.json + patterns
+  - tdd              # FW-07 — TC-XXX = tests existentes
+  - plan             # FW-08 — task-XXX = commits, todos [x]
+  - checkwork        # FW-09 — 100% (código ya en prod)
+  - closure          # FW-10 — firmado, matriz de trazabilidad reconstruida
+
+# ---------------------------------------------------------------------------
+# REVERSE PHASES — las 6 fases canónicas (fuente: reverse-engineering/flow.md)
+# ---------------------------------------------------------------------------
+executes_steps:
+  - identify         # Fase 1 — Descubrimiento: escanear código + tests + commits + docs sueltos
+  - scan             # Fase 2 — Inferencia: mapear artifacts → docs del flow
+  - evaluate         # Fase 3 — Preguntas dirigidas (R27): gaps no-inferibles
+  - reconstruct      # Fase 4 + 5 — Timestamps + linaje (R30) + escritura de docs (R26)
+  - report_gaps      # Fase 6a — Reporte de gaps al usuario (R27 + R28)
+  - close_lineage    # Fase 6b — Bump padres (R17 + R30)
+
+phase_detail:
+  identify:
+    sources: [src_code, test_files, git_log, package_json, docs_loose]
+    produces_in_memory: [code_inventory, test_blocks, commit_list]
+
+  scan:
+    consumes: [identify]
+    maps:
+      describe_it_blocks: bdd_scenarios
+      zod_schemas_ts_interfaces: sdd_contracts
+      http_status_codes: sdd_error_table
+      package_json_deps: design_tech
+      file_structure: design_components
+      git_commits: plan_tasks
+      test_enumerations: tdd_plan
+
+  evaluate:
+    rule: R27
+    gaps_checked:
+      - so_that_definition    # negocio no inferible — preguntar o marcar TBD
+      - initiative_link       # init-XXX no inferible — preguntar o dejar sin vincular
+      - adr_motivation        # código muestra decisión, no el porqué
+      - cas_without_test      # CA obvio sin test — gap real o CA fantasma?
+      - rnfs_measurable       # latencia, throughput, tamaños — pedir valores
+    interactive_behavior: pausa y pregunta ahora
+    auto_behavior: acumula preguntas y las hace al final de la fase
+
+  reconstruct:
+    consumes: [identify, scan, evaluate]
+    applies_rules: [R26, R30]
+    default_mode: transparent
+    frontmatter_added_transparent:
+      - reverse_engineered: true
+      - reverse_engineered_at: "{run_date}"
+      - reverse_engineered_source: "{sources_scanned}"
+      - reverse_engineered_confidence: "{confidence_score}"
+    doc_versions:
+      snapshots: "1.0.0"        # definition, scope, bdd, sdd, design, tdd, plan, closure
+      living: "0.1.0"           # checkwork (v0.1.0 living a 100%)
+
+  report_gaps:
+    rule: R28
+    required_output:
+      - gaps_declared           # todos los TBDs y warnings por doc
+      - areas_for_human_review  # So that, SC-XXX vs negocio, ADRs retroactivos
+
+  close_lineage:
+    rule: R17
+    bump_targets:
+      - "feature/spec.md"        # si aplica parent_bump_triggers.story_closes
+      - "feature/decisions.md"   # si aplica
+      - "feature/definition.md"  # MINOR bump si story agregó requirements
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — verificación antes de la fase 1
+# ---------------------------------------------------------------------------
+preflight:
+  - id: verify_preconditions
+    order: -1
+    purpose: >
+      Verificar las precondiciones duras de la Regla 25 + framework instalado
+      (Regla 24) antes de tocar cualquier archivo. Si falla cualquier check →
+      abortar con mensaje claro e instrucción de remediación.
+    aborts_pipeline_on_failure: true
+
+  - id: determine_story_scope
+    order: -2
+    purpose: >
+      Identificar `{FEATURE_ID}/{HU_ID}`, resolver el path de código existente
+      (`src/functions/<lambda>/` o equivalente) y confirmar que NO existe ya
+      la carpeta de story — si existe → abortar (no sobreescribir).
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: interactive
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      Cada fase corre sin pausar. Pausa sólo ante stop events reales
+      (gaps no-inferibles, confidence baja, bifurcaciones técnicas).
+      En modo auto los gaps del `evaluate` se acumulan y preguntan todos juntos
+      al final de la fase, no uno a uno.
+    phase_pauses: false
+
+  interactive:
+    description: >
+      El pipeline pausa ENTRE fases — al terminar cada una reporta qué
+      infirió y pregunta si continúa a la siguiente. Recomendado para
+      stories con múltiples CAs o gaps de negocio esperados.
+    phase_pauses: true
+    checkpoint_between_phases: true
+
+  hard_rule: >
+    Las fases siempre corren en `auto` internamente (no validan sección por
+    sección). Para inferencia interactiva detallada de un doc específico,
+    invocar el skill suelto: `/fremi-reverse-story FT-XX HU-YY`.
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-story` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+      No auto-instalar.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/settings/config.reverse.core.yaml` existen y parsean.
+
+  - id: work_in_production
+    rule: R25
+    check: >
+      El código correspondiente a la story está mergeado a main (o en branch
+      de release confirmado). Si el código está en un branch experimental que
+      sigue cambiando → abortar y sugerir esperar a merge.
+    abort_message: >
+      Reverse-engineering es para trabajo pre-existente y estable (Regla 25).
+      Este código aún está en curso — usar el flow forward.
+
+  - id: feature_exists
+    rule: R1
+    check: >
+      Feature `{FEATURE_ID}` existe en `docs/works/features/` con al menos
+      un `definition.md` real o reverse-engineerado previamente.
+    abort_message: >
+      La feature padre debe existir. Correr `/fremi-pipeline-reverse-feature`
+      primero si la feature tampoco tiene docs.
+
+  - id: code_identifiable
+    check: >
+      Existe código identificable de la story: `src/functions/<lambda>/` o
+      equivalente señalado por el usuario.
+    abort_message: >
+      No se puede encontrar el código de la story. Indicar el path explícitamente.
+
+  - id: story_not_already_exists
+    check: >
+      La carpeta `{FEATURE_ID}/user-stories/{HU_ID}_*/` NO existe con docs
+      FW-XX reales. Si existe → no sobreescribir, abortar.
+
+  - id: reverse_config_active
+    check: "config.reverse.core.yaml → active: true"
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: gap_non_inferrable
+    triggers_during: [evaluate]
+    rule: R27
+    behavior: >
+      Un gap no-inferible aparece (So that, iniciativa, motivación ADR, RNFs,
+      CAs sin test). En interactive: preguntar ahora. En auto: acumular para
+      preguntar al final de la fase. NUNCA inventar — preguntar o marcar TBD.
+
+  - id: technical_bifurcation_inferred
+    triggers_during: [scan, reconstruct]
+    rule: R3b
+    behavior: >
+      El código muestra que se eligió una librería/pattern entre alternativas
+      viables. Proponer registrar ADR retroactivo marcado
+      `discovered_during_reverse: true`. Preguntar al usuario si esa fue la
+      decisión real o accidental antes de registrarlo.
+
+  - id: ca_test_contradiction
+    triggers_during: [scan]
+    behavior: >
+      Un test asume comportamiento X y el schema exige comportamiento Y.
+      Pausar y pedir criterio al usuario para resolver la contradicción antes
+      de construir los SCs de BDD.
+
+  - id: git_history_absent
+    triggers_before: [reconstruct]
+    behavior: >
+      Se usó `--from-git-history` pero `.git` está ausente o el path no tiene
+      commits. Preguntar si continuar con `confidence: 0.3` (todo fechado
+      a hoy) o abortar la corrida.
+
+  - id: low_confidence
+    triggers_during: [reconstruct]
+    behavior: >
+      El score de confidence calculado cae bajo el umbral
+      `config.reverse.core.yaml → min_threshold` (default 0.5). Pausar y
+      avisar al usuario — los docs se marcarán `needs_review: true`. Pedir
+      confirmación para continuar.
+
+  - id: reverse_ratio_exceeded
+    triggers_after: [close_lineage]
+    rule: R32
+    behavior: >
+      El ratio reverse/forward del proyecto superó el umbral configurado.
+      Notificar (no bloquear) — señal de que el flow forward no está siendo
+      respetado en este proyecto.
+
+  - id: stealth_without_adr
+    triggers_before: [reconstruct]
+    rule: R26
+    behavior: >
+      Se pasó `--stealth` sin que exista un ADR que lo justifique a nivel
+      proyecto en `config.reverse.core.yaml → default_mode: stealth`. Mostrar
+      advertencia y confirmar decisión explícita del usuario antes de continuar.
+
+anti_patterns:
+  - "Inventar el So that cuando no se puede inferir del código"
+  - "Marcar confidence: 1.0 en docs reverse-engineered"
+  - "Ocultar gaps al usuario — declararlos siempre"
+  - "Preguntar por cada CA/SC individualmente — agrupar gaps y preguntar de una vez"
+  - "Correr reverse sobre código que sigue cambiando (no mergeado)"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: trabajo mergeado/en producción."
+  - id: R26
+    reason: "Default transparent — cada doc lleva frontmatter reverse_engineered:*."
+  - id: R27
+    reason: "Gaps no-inferibles → preguntar al usuario, nunca inventar."
+  - id: R28
+    reason: "Reverse no reemplaza revisión humana — reportar áreas a revisar."
+  - id: R30
+    reason: "Regla 17 aplica retroactivamente: timestamps inferidos de git history."
+  - id: R31
+    reason: "Si el código sigue en curso → abortar. Reverse es para trabajo pre-existente."
+  - id: R32
+    reason: "Reportar ratio reverse/forward como señal de salud del framework."
+  - id: R17
+    reason: "Bumpear padres al firmar closure inferido (igual que flow forward)."
+  - id: R3b
+    reason: "Bifurcaciones técnicas descubiertas → ADR retroactivo antes de cerrar."
+  - id: R1
+    reason: "Feature padre debe existir con definition.md real."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - story_reconstructed:      "FT-XX/HU-YY_<slug> + path completo"
+    - docs_produced:            "lista con versión, ancestor, modo (transparent/stealth)"
+    - confidence_global:        "valor 0.0-1.0 (promedio ponderado por fase)"
+    - mode_used:                "transparent (default) | stealth (con nota de override explícito)"
+    - gaps_declared:            "items sin resolver + fallback aplicado (TBD marcado)"
+    - bifurcations_discovered:  "ADRs retroactivos generados + scope (story/feature)"
+    - parents_bumped:           "qué versión subieron feature/spec, feature/decisions, feature/definition"
+    - rule8_status:             "N/A para story — Regla 29 aplica sólo a bugs"
+    - human_review_areas:       "So that, SC-XXX vs negocio, ADRs retroactivos, Key Invariants TBD"
+    - next_actions:             "revisar gaps, vincular iniciativa, revisar SC-XXX, correr /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:           ./PIPELINE.md
+  narrative:            ./flow.md
+  reverse_skill:        ~/.fremi/framework/reverse-engineering/reverse-story/SKILL.md
+  reverse_flow:         ~/.fremi/framework/reverse-engineering/flow.md
+  reverse_config:       ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_reverse:        ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rules_index:          ~/.fremi/framework/rules/workflow.md
+  parent_pipeline:      ../reverse-feature/PIPELINE.md

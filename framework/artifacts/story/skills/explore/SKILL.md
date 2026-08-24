@@ -1,7 +1,9 @@
 ---
 name: fremi-story-explore
-description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — típicamente `{workflow.explore}`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.core.yaml` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
+description: Crea o actualiza el doc de investigación previa (fase `explore`) de una story — `{workflow.explore}`. Genérico — resuelve filename cruzando `~/.fremi/framework/settings/methodology.core.yaml` con el `name: "explore"` del workflow declarado en `config.yaml`. Usar cuando el usuario quiere arrancar la story con una investigación del terreno antes de escribir la definition. También sirve para actualizar el explore si aparecen hallazgos nuevos durante la exploración.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-story-explore — Investigación previa (fase explore de una story)
 
@@ -17,8 +19,8 @@ Su objetivo es **mapear el terreno técnico** antes de decidir cómo resolver la
 /fremi-story-explore <FEATURE_ID> <STORY_ID>
 ```
 
-- `<FEATURE_ID>`: ID de la feature padre (ej: `FT-01`).
-- `<STORY_ID>`: ID de la story dentro de la feature (ej: `HU-03`).
+- `<FEATURE_ID>`: ID de la feature padre (ej. con defaults: `FT-01` — el formato sale de `identifiers.feature.id_format`).
+- `<STORY_ID>`: ID de la story dentro de la feature (ej. con defaults: `HU-03` — el formato sale de `identifiers.story.id_format`).
 
 Si el usuario invoca `/fremi-story-explore` sin args pero está claro el contexto (ej: acaba de crear una story con `/fremi-story`), asumir esa story.
 

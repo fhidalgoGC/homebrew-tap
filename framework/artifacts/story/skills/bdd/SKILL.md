@@ -1,11 +1,13 @@
 ---
 name: fremi-story-bdd
-description: Puebla o actualiza el `{workflow.bdd}` de una story con escenarios Given/When/Then numerados SC-XXX. Doc snapshot. Cubre lo OBSERVABLE por el usuario. Sin firmas, sin códigos HTTP, sin librerías (eso es SDD). Precondiciones: definition + scope listos.
+description: Puebla o actualiza el doc `bdd` de una story con escenarios Given/When/Then. Doc snapshot. Cubre lo OBSERVABLE por el usuario. Sin firmas, sin códigos HTTP, sin librerías (eso es SDD). Precondiciones: definition + scope listos.
 ---
 
-# /fremi-story-bdd — Poblar FW-04 (escenarios BDD Given/When/Then)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, ADR, CA, SC, TC, task) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
-Puebla el `{workflow.bdd}` con escenarios Gherkin (`Scenario:`) numerados `SC-XXX`. Cada escenario captura lo **observable** por el usuario.
+# /fremi-story-bdd — Poblar el doc `bdd` (escenarios BDD Given/When/Then)
+
+Puebla el doc `bdd` (`{workflow.bdd}`) con escenarios Gherkin (`Scenario:`) numerados con el ID de escenario (por default `SC-XXX` — el prefijo y formato salen de `identifiers.scenario` del JSON). Cada escenario captura lo **observable** por el usuario.
 
 **Rol del doc**: qué OBSERVA el usuario ante cada acción. NO contiene contratos técnicos.
 
@@ -18,12 +20,12 @@ Puebla el `{workflow.bdd}` con escenarios Gherkin (`Scenario:`) numerados `SC-XX
 ## Cuándo invocarlo
 
 - Definition + scope listos y hay que capturar el comportamiento esperado.
-- Se descubrió un caso de borde que amerita nuevo SC-XXX.
+- Se descubrió un caso de borde que amerita un nuevo escenario.
 
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.core.yaml` → `identifiers.scenario` (SC-XXX), `identifiers.workflow_doc.items[name=bdd-userstories]`.
+- `methodology.core.yaml` → `identifiers.scenario` (prefijo + formato del ID de escenario), `identifiers.workflow_doc.items[name=bdd-userstories]`.
 - `config.yaml` → `phase_rules.bdd`.
 
 ### Paso 1 — Validar padre y precondiciones
@@ -34,9 +36,9 @@ Puebla el `{workflow.bdd}` con escenarios Gherkin (`Scenario:`) numerados `SC-XX
 - `references/{workflow.bdd}-template.md`.
 
 ### Paso 3 — Poblar aplicando `phase_rules.bdd`
-- Cada escenario en formato `Given / When / Then` con ID `SC-XXX` (según `identifiers.scenario.regex`).
+- Cada escenario en formato `Given / When / Then` con ID de escenario (según `identifiers.scenario.regex`).
 - **Cubrir happy path + al menos 1 caso de borde/error**.
-- Cada SC-XXX referencia al menos un `CA-XXX` que cubre.
+- Cada escenario referencia al menos un criterio de aceptación que cubre.
 - **Sin firmas, tipos ni tecnología** — sólo comportamiento observable.
 - Si un escenario requiere referirse a códigos HTTP o schemas → **mover a `{workflow.sdd}`**.
 
@@ -51,7 +53,7 @@ Puebla el `{workflow.bdd}` con escenarios Gherkin (`Scenario:`) numerados `SC-XX
 ## Validaciones
 
 - Al menos 1 SC feliz + 1 SC borde.
-- Cada CA-XXX de `FW-01` cubierto por al menos 1 SC-XXX.
+- Cada criterio de aceptación del doc `definition` cubierto por al menos un escenario.
 - Formato Given/When/Then estricto en cada scenario.
 - Sin refs a tech (endpoints, códigos HTTP, código real).
 
@@ -59,8 +61,8 @@ Puebla el `{workflow.bdd}` con escenarios Gherkin (`Scenario:`) numerados `SC-XX
 
 - ❌ "El sistema devuelve 200" — eso es SDD.
 - ❌ "Given el handler recibe X" — el "handler" es interno. Mejor: "Given el usuario envía Y".
-- ❌ Scenarios sin ID SC-XXX (no se pueden referenciar desde closure).
-- ❌ Un solo SC (feliz) — falta cobertura de borde.
+- ❌ Escenarios sin ID (no se pueden referenciar desde el doc `closure`).
+- ❌ Un solo escenario (feliz) — falta cobertura de borde.
 
 ## Referencias
 

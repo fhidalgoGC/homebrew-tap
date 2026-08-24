@@ -1,0 +1,239 @@
+schema: framework-layer-rules-applies
+schema_version: 1
+layer: feature
+since: 2026-08-10
+
+# ===========================================================================
+# APPLIES — reglas que aplican durante la ejecución de la feature.
+#
+# Este archivo NO contiene el texto de las reglas — sólo POINTERS.
+#
+# CRITERIO DE UBICACIÓN:
+#   - Reglas DOMAIN-específicas de feature → viven en este mismo folder
+#     (`~/.fremi/framework/artifacts/feature/rules/*.md`).
+#   - Reglas CROSS-domain (que aplican a más de un artifact) → viven en
+#     `~/.fremi/framework/rules/*.md`.
+#
+# Feature usa mayormente rules cross-domain. La única regla condicional
+# domain-específica (`feature_decisions_when`) es configuración de usuario
+# y vive en `config.user.yaml → conditional_rules`, NO acá como regla .md.
+#
+# El orquestador carga SÓLO los archivos referenciados acá cuando corre una
+# feature — no toda la carpeta global de rules. Así se aísla el dominio.
+#
+# ESTRUCTURA:
+#   - transversal             → cargadas SIEMPRE durante todo el workflow
+#   - per_step                → cargadas al ejecutar el step específico del DAG
+#   - parallel_allowed_skills → cargadas al invocar skills transversales que
+#                               corren fuera del DAG principal (ver workflow.yaml
+#                               → parallel_allowed)
+#
+# Nota: si una regla aparece en `transversal` Y en un `per_step`/
+# `parallel_allowed_skills`, el orquestador dedupplica (una sola carga por
+# sesión) — repetir la referencia es válido y sirve para hacer explícito el
+# énfasis contextual.
+#
+# Los IDs de step deben existir en `../workflow.yaml → steps[].id`.
+# Los skills de `parallel_allowed_skills` deben existir en
+# `../workflow.yaml → parallel_allowed[].skill`.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TRANSVERSAL — reglas activas durante todo el workflow feature.
+# ---------------------------------------------------------------------------
+transversal:
+
+  # ---------- GLOBAL (cross-domain) ----------
+  - rules_file: ~/.fremi/framework/rules/hierarchy.md
+    rules: [R1]
+    scope: global
+    note: >
+      No saltar etapas. Validar que la capa producto está lista
+      (product/definition.md + product/plan.md) antes de crear la feature.
+      Sin insumos → avisar al usuario y proponer completar los docs de producto.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter obligatorio + bump del padre + rastreo ancestral.
+      Aplican a TODO doc creado/editado durante el workflow feature:
+      el doc `definition` (living), el doc `decisions` (living, condicional)
+      y los docs de cualquier story/bug/enabler que cierren bajo esta feature.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      R10: docs son fuente de verdad — si el código diverge del doc `definition`
+      o del doc `decisions`, actualizar el doc + ADR.
+      R12: sync-back bidireccional — si trabajando en la feature se descubre
+      algo que pertenece al producto (restricción transversal, iniciativa nueva,
+      ADR global), actualizar la capa producto PRIMERO.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      R3: toda decisión técnica local a la feature genera un ADR en el
+      doc `decisions` de la feature.
+      R3b: bifurcación → pausar → opciones al usuario → decidir → ADR → continuar.
+      R20: elegir scope correcto (feature vs producto) para el ADR; si aplica
+      a más de una feature → promover al scope producto.
+
+# ---------------------------------------------------------------------------
+# PER-STEP — reglas específicas de un step del workflow.
+# ---------------------------------------------------------------------------
+per_step:
+
+  definition:
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Frontmatter obligatorio al crear el doc `definition`: version 0.1.0,
+        created/last_updated, doc_type: living, ancestor.id: product,
+        ancestor.version_at_creation = product/plan@version al momento de crear.
+        Al terminar: bumpear MINOR en product/plan.md + registrar changelog entry.
+
+    - rules_file: ~/.fremi/framework/rules/sync-back.md
+      rules: [R12]
+      scope: global
+      note: >
+        Al terminar el doc `definition`, verificar que las capacidades,
+        restricciones transversales y términos técnicos estén en los docs
+        de producto (in-scope, restricciones, glosario). Si falta algo →
+        pausar, actualizar producto, luego continuar.
+
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Si durante la creación del doc `definition` aparece una bifurcación
+        técnica (ej: enfoque de la feature, dependency sobre una librería),
+        aplicar Regla 3b: pausar, presentar opciones, esperar decisión
+        del usuario, crear ADR en el scope correcto, continuar.
+
+  lifecycle:
+    - rules_file: ~/.fremi/framework/rules/sync-back.md
+      rules: [R12]
+      scope: global
+      note: >
+        Durante lifecycle, mantener sync-back activo: cualquier hallazgo en
+        stories o bugs que afecte el doc `definition` de la feature o los
+        docs de producto debe sincronizarse hacia arriba PRIMERO.
+
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bugs.md
+      rules: [R15]
+      scope: global
+      note: >
+        Lifecycle admite artefactos opcionales bajo la feature: bugs de
+        feature-scope (/fremi-feature-bug) y enablers de feature-scope
+        (/fremi-enabler --feature). Se crean bajo demanda, no son obligatorios.
+
+# ---------------------------------------------------------------------------
+# PARALLEL_ALLOWED_SKILLS — reglas al invocar skills transversales (fuera del DAG).
+# Estos skills se disparan bajo demanda durante toda la feature y tienen sus
+# propias reglas aplicables independientes del step en curso.
+# ---------------------------------------------------------------------------
+parallel_allowed_skills:
+
+  /fremi-feature-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Toda decisión técnica local a la feature registrada como ADR en el
+        doc `decisions` de la feature. Elegir scope correcto (feature vs
+        producto). Numeración de ADR es global al proyecto — formato
+        configurable en methodology.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar un ADR al doc `decisions` de la feature se bumpea MINOR
+        de ese doc (living). Si el doc `decisions` no existe, crearlo con
+        frontmatter completo + ancestor = doc `definition`@version actual.
+
+  /fremi-feature-bug:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bug-fix-and-refactor.md
+      rules: [R8]
+      scope: global
+      note: >
+        Bug de feature-scope requiere test rojo de reproducción PRIMERO,
+        después el fix. Registrar el bug en la carpeta `bugs/` de la feature
+        (filename pattern configurable en methodology → layers.bug.filename_pattern).
+
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/bugs.md
+      rules: [R15]
+      scope: global
+      note: >
+        Bugs de feature-scope son artefactos opcionales; se crean sólo cuando
+        el bug es transversal a varias stories o afecta el contrato de la feature
+        sin trazarse a una sola story.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Bug de feature-scope cerrado bumpea el doc `definition` de la feature
+        según parent_bump_triggers.bug_closes (Regla 17).
+
+  /fremi-story:
+    - rules_file: ~/.fremi/framework/rules/hierarchy.md
+      rules: [R1]
+      scope: global
+      note: >
+        Precondición antes de crear una story: el doc `definition` de la
+        feature debe existir con contenido real. Sin definition no se
+        puede escribir el "As a / I want / So that" con CAs coherentes.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al cerrar una story, bumpear el doc `definition` de la feature
+        según parent_bump_triggers.story_closes. El ancestor.version_at_creation
+        de la story apunta al doc `definition`@version al momento de crear.
+
+  "/fremi-enabler --feature":
+    - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+      rules: [R15]
+      scope: global
+      note: >
+        Enabler de feature-scope es artefacto opcional. Se crea sólo cuando
+        el trabajo técnico habilitador aplica exclusivamente a esta feature
+        (no es global ni está trazado a una story específica).
+
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Bifurcaciones técnicas en el step `design` del enabler disparan
+        ADRs en el scope correcto (feature o producto según el alcance
+        de la decisión).
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Enabler de feature-scope tiene su propio doc `closure`; al cerrar
+        bumpea al padre (feature) según parent_bump_triggers.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`) con fallback al template del
+# framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/feature/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/feature/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/feature/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/feature/config.user.yaml  # FALLBACK / template inicial
+  domain_rules_dir: ~/.fremi/framework/artifacts/feature/rules/     # reglas domain-específicas (vacío por ahora)
+  global_rules_dir: ~/.fremi/framework/rules/                       # reglas cross-domain
+  rules_index: ~/.fremi/framework/rules/workflow.md

@@ -1,0 +1,374 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: reverse-enabler
+pipeline_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE REVERSE-ENABLER (/fremi-pipeline-reverse-enabler)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline
+# reverse-enabler. Reconstruye los 4 docs canónicos de un enabler
+# (EN-01_definition, EN-02_design, EN-03_plan, EN-04_closure) a partir de
+# IaC, packages instalados, scripts de setup y git history.
+#
+# Scope configurable: global / feature / story (default: global).
+#
+# Este archivo declara:
+#   - qué skill de reverse orquesta y qué docs produce (4 docs de enabler)
+#   - preflight: verificación de precondiciones duras (R25 + R15)
+#   - fases de ejecución (descubrimiento → 4 docs → bump padre → reporte)
+#   - stop events específicos del nivel enabler
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición del flujo canónico de reverse → vive en
+#     `~/.fremi/framework/reverse-engineering/flow.md`
+#   - la lógica de inferencia de cada doc de enabler → vive en
+#     `~/.fremi/framework/reverse-engineering/reverse-enabler/SKILL.md`
+#   - la config operativa de defaults → `~/.fremi/framework/settings/config.reverse.core.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# REVERSE SKILL REF — skill de reverse que este pipeline orquesta
+# ---------------------------------------------------------------------------
+reverse_skill_ref:
+  skill: /fremi-reverse-enabler
+  skill_path: ~/.fremi/framework/reverse-engineering/reverse-enabler/SKILL.md
+  config: ~/.fremi/framework/settings/config.reverse.core.yaml
+
+# Scope del enabler (pasado como parámetro en la invocación)
+scope_options: [global, feature, story]
+default_scope: global
+
+# Docs reconstruidos por la corrida (4 docs de enabler)
+docs_produced:
+  - definition       # EN-01 — qué habilita + vinculaciones + criterios técnicos
+  - design           # EN-02 — decisiones técnicas + ADRs + estructura IaC
+  - plan             # EN-03 — tasks-T-XXX inferidos de commits (todos [x])
+  - closure          # EN-04 — sign-off + qué quedó habilitado + evidencia
+
+# ---------------------------------------------------------------------------
+# REVERSE PHASES — secuencia de la corrida
+# ---------------------------------------------------------------------------
+executes_steps:
+  - identify         # Fase 0 — Descubrimiento: IaC + deps + scripts + git log
+  - scan             # Fase 1 — Inferencia: mapear artifacts → 4 docs del enabler
+  - evaluate         # Fase 2 — Preguntas dirigidas (R27): scope, vinculaciones, rationale ADRs
+  - reconstruct      # Fases 3+4 — Escritura de docs + timestamps + linaje (R26, R30)
+  - report_gaps      # Fase 5a — Reporte de gaps al usuario (R27 + R28)
+  - close_lineage    # Fase 5b — Bump padre según scope (R17 + R30)
+
+phase_detail:
+  identify:
+    sources:
+      - iac_files           # serverless.yml, CDK, terraform, Dockerfile, .github/workflows/*
+      - package_json_deps   # dependencies específicas del enabler
+      - scripts_folder      # scripts/ — comandos de setup, seed, deploy
+      - git_log_enabler     # commits del setup inicial del enabler
+      - docs_sueltos        # README de setup, docs de provisioning
+    produces_in_memory:
+      - iac_resources       # recursos declarados (Lambda layers, DBs, buckets, IAM)
+      - installed_libs      # libs específicas del enabler
+      - setup_commands      # scripts de setup identificados
+      - commit_list         # commits del enabler (para task-T-XXX)
+
+  scan:
+    consumes: [identify]
+    maps:
+      iac_resources: definition_what_it_enables
+      installed_libs: design_tech
+      iac_structure_paths: design_structure
+      ts_wrappers_in_src_lib: design_signatures
+      git_commits: plan_tasks         # uno por commit significativo, todos [x]
+      iac_diff_plus_packages: closure_evidence
+    note: >
+      EN-02 (design) puede revelar bifurcaciones históricas (Node 24 vs 20,
+      CDK vs Serverless Framework). Si hay evidencia de comparación real →
+      proponer ADR retroactivo. Si no hay evidencia → no inventar comparación.
+
+  evaluate:
+    rule: R27
+    gaps_checked:
+      - scope_ambiguity           # enabler afecta varias features → preguntar global o feature-específico
+      - linked_features_stories   # qué features/stories habilita — preguntar o inferir de mentions
+      - adr_motivation            # rationale de decisiones técnicas del enabler
+      - en_number_assignment      # calcular próximo EN-XX global en el proyecto
+      - bug_infra_origin          # si el enabler nació como fix de un bug de infra → marcar Regla 29
+    interactive_behavior: pausa y pregunta cada gap
+    auto_behavior: acumula y pregunta al final de la fase
+
+  reconstruct:
+    consumes: [identify, scan, evaluate]
+    applies_rules: [R26, R30]
+    default_mode: transparent
+    frontmatter_added_transparent:
+      - reverse_engineered: true
+      - reverse_engineered_at: "{run_date}"
+      - reverse_engineered_source: "{iac_sources_scanned}"
+      - reverse_engineered_confidence: "{confidence_score}"
+    doc_versions:
+      all_four_docs: "1.0.0"     # todos son snapshots (enabler ya montado = cerrado)
+    doc_detail:
+      plan:
+        note: >
+          Todas las tasks-T-XXX marcadas [x] — el enabler ya está montado.
+          Criterios verificables: comandos CLI que confirman estado actual
+          (ej: `aws lambda get-layer-version`, `psql <db> -c "select 1"`).
+      closure:
+        note: >
+          Sign-off con fecha del último commit del setup (con --from-git-history)
+          o fecha actual. Evidencia: PR/commits + comandos con exit 0.
+
+  report_gaps:
+    rule: R28
+    required_output:
+      - gaps_declared             # vinculaciones no confirmadas, rationale de ADRs TBD
+      - areas_for_human_review    # motivación del enabler, decisiones técnicas históricas
+
+  close_lineage:
+    rule: R17
+    bump_targets_by_scope:
+      global: "product/plan.md"               # MINOR bump
+      feature: "FT-XX/definition.md"          # MINOR bump
+      story: "{story_folder}/FW-01_definition.md"  # PATCH bump
+    bump_condition: "parent_bump_triggers.enabler_closes"
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — verificación antes de la fase identify
+# ---------------------------------------------------------------------------
+preflight:
+  - id: verify_preconditions
+    order: -1
+    purpose: >
+      Verificar las precondiciones duras de R25 + R24 antes de tocar
+      cualquier archivo. Si falla → abortar con mensaje claro.
+    aborts_pipeline_on_failure: true
+
+  - id: resolve_scope_and_parent
+    order: -2
+    purpose: >
+      Determinar el scope del enabler (global / feature / story), calcular
+      el path de destino y verificar que el padre existe cuando scope != global.
+      Calcular el próximo EN-XX global al proyecto (buscar en todos los scopes).
+
+  - id: identify_iac_artifacts
+    order: -3
+    purpose: >
+      Verificar que al menos UN artifact identificable existe: IaC file
+      cambiado, package instalado, layer creado, script de tooling, o
+      workflow CI/CD agregado. Sin artifacts identificables → abortar.
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: interactive
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      Cada fase corre sin pausar. Pausa sólo ante stop events reales
+      (scope ambiguo, vinculaciones no claras, conflictos de numeración).
+      En modo auto los gaps del `evaluate` se acumulan y preguntan todos
+      juntos al final de la fase.
+    phase_pauses: false
+
+  interactive:
+    description: >
+      El pipeline pausa ENTRE fases — al terminar `identify` muestra el
+      inventario, al terminar `reconstruct_definition` muestra el EN-01 y
+      pregunta si continúa. Útil cuando el enabler es complejo (IaC extenso,
+      múltiples vinculaciones).
+    phase_pauses: true
+    checkpoint_between_phases: true
+
+  hard_rule: >
+    Enablers individuales se corren en modo de escritura única. No correr
+    múltiples enablers en paralelo si comparten scope padre (riesgo de
+    conflictos en numeración EN-XX y bump del mismo padre).
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-enabler` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/settings/config.reverse.core.yaml` existen y parsean.
+
+  - id: work_in_production
+    rule: R25
+    check: >
+      La infra/tooling del enabler está en producción o mergeada a main —
+      no experimental en curso.
+    abort_message: >
+      Reverse-engineering es para trabajo pre-existente (Regla 25).
+      Esta infra aún está en curso — usar el flow forward de enabler.
+
+  - id: iac_artifacts_exist
+    check: >
+      Al menos UN artifact del enabler es identificable: IaC file, package
+      instalado, layer creado, script de tooling, o workflow CI/CD.
+    abort_message: >
+      No se pueden encontrar artifacts del enabler. Indicar paths explícitos
+      o describir qué infra/tooling implementa el enabler.
+
+  - id: parent_exists_if_not_global
+    check: >
+      Cuando scope != global: el padre (feature o story) existe con al menos
+      un archivo de contenido real (o reverse-engineerado previamente).
+    abort_message: >
+      El padre del enabler no existe. Reconstruir primero el padre o usar
+      `--scope global`.
+
+  - id: enabler_not_already_exists
+    check: >
+      La carpeta `EN-XX_<nombre>/` del enabler NO existe ya con docs EN-01..04
+      reales. Si existe → no sobreescribir, abortar o usar `--dry-run`.
+
+  - id: reverse_config_active
+    check: "config.reverse.core.yaml → active: true"
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: scope_ambiguous
+    triggers_during: [evaluate]
+    behavior: >
+      El enabler afecta varias features y no está claro si es global o
+      feature-específico. Preguntar al usuario. Recomendación: cuando hay
+      duda, scope global.
+
+  - id: en_number_conflict
+    triggers_during: [evaluate]
+    rule: R17
+    behavior: >
+      Se descubren múltiples enablers sin numeración (ej: al auditar el
+      proyecto entero). Serializar la numeración: pedir al usuario el orden
+      de asignación de EN-XX antes de continuar.
+
+  - id: linked_features_not_clear
+    triggers_during: [evaluate]
+    rule: R27
+    behavior: >
+      No está claro qué features/stories dependen de este enabler — el
+      `EN-01_definition.md` debe declarar vinculaciones. Preguntar al usuario
+      o dejar con warning "vinculaciones pendientes de validación".
+
+  - id: adr_retroactive_inferred
+    triggers_during: [scan, reconstruct]
+    rule: R3b
+    behavior: >
+      El IaC o package.json revela que se tomó una decisión técnica con
+      alternativas viables (ej: Node 24 vs 20, CDK vs Serverless Framework).
+      Proponer ADR retroactivo marcado `discovered_during_reverse: true`.
+      Preguntar rationale al usuario antes de registrarlo.
+
+  - id: enabler_from_bug_fix
+    triggers_during: [evaluate]
+    rule: R29
+    behavior: >
+      El enabler nació como fix de un bug de infra (commit message contiene
+      "fix:", el setup nació de un incidente). Marcar Regla 29 en el reporte
+      (test rojo no reconstruible retroactivamente) + sugerir
+      `/fremi-reverse-bug` si el bug no está registrado.
+
+  - id: iac_only_describes_final_state
+    triggers_during: [scan]
+    behavior: >
+      El IaC describe el estado final pero no las alternativas consideradas.
+      Advertir al usuario que el `EN-02_design.md` puede estar incompleto —
+      las bifurcaciones históricas no son inferibles del IaC actual.
+
+  - id: git_history_absent
+    triggers_before: [reconstruct]
+    behavior: >
+      Se usó `--from-git-history` pero `.git` está ausente o el path del
+      enabler no tiene commits identificables. Preguntar si continuar con
+      `confidence: 0.3` o abortar.
+
+  - id: low_confidence
+    triggers_during: [reconstruct]
+    behavior: >
+      El score de confidence cae bajo el umbral configurado. Pausar y avisar
+      al usuario — los docs se marcarán `needs_review: true`.
+
+  - id: stealth_without_adr
+    triggers_before: [reconstruct]
+    rule: R26
+    behavior: >
+      Se pasó `--stealth` sin ADR de justificación. Mostrar advertencia y
+      confirmar decisión explícita del usuario antes de continuar.
+
+anti_patterns:
+  - "Inventar alternativas técnicas sin evidencia de comparación real en el git history"
+  - "Inferir vinculaciones con features/stories 'porque parece' — validar con el usuario"
+  - "Firmar EN-04 sin verificar que la capacidad realmente funciona (correr los criterios)"
+  - "Asignar scope feature cuando el enabler claramente afecta a varias features"
+  - "Marcar confidence: 1.0 en docs reverse-engineered"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: infra/tooling en producción."
+  - id: R26
+    reason: "Default transparent — cada doc lleva frontmatter reverse_engineered:*."
+  - id: R27
+    reason: "Gaps no-inferibles → preguntar al usuario, nunca inventar."
+  - id: R28
+    reason: "Reverse no reemplaza revisión humana — reportar áreas a revisar."
+  - id: R30
+    reason: "Regla 17 aplica retroactivamente: timestamps inferidos de git history."
+  - id: R31
+    reason: "Si la infra sigue en curso → abortar. Reverse sólo para trabajo pre-existente."
+  - id: R32
+    reason: "Reportar ratio reverse/forward al terminar."
+  - id: R17
+    reason: "Bumpear padre al cerrar enabler (igual que flow forward, según scope)."
+  - id: R15
+    reason: "Enabler canónico — R25 confirma que reverse es la vía formal de alineación."
+  - id: R3b
+    reason: "ADRs retroactivos por decisiones técnicas del enabler con alternativas viables."
+  - id: R29
+    reason: "Si el enabler nació de un bug de infra → marcar test rojo no reconstruible."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - enabler_reconstructed:      "EN-XX_<slug> + scope + path completo"
+    - docs_produced:              "los 4 EN-01..EN-04 con versión + reverse_engineered:*"
+    - confidence:                 "valor 0.0-1.0 de la corrida"
+    - linked_features_stories:    "qué habilita este enabler (validado por usuario)"
+    - adrs_retroactive:           "técnicos inferidos + scope + discovered_during_reverse:true"
+    - parents_bumped:             "qué versión subió el padre según scope"
+    - rule8_status:               "N/A para enabler — Regla 29 aplica sólo si nació de bug de infra"
+    - human_review_areas:         "motivación del enabler, rationale de decisiones técnicas, vinculaciones"
+    - mode_used:                  "transparent | stealth"
+    - next_actions:               "validar vinculaciones, revisar ADRs retroactivos, correr criterios verificables"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:           ./PIPELINE.md
+  narrative:            ./flow.md
+  reverse_skill:        ~/.fremi/framework/reverse-engineering/reverse-enabler/SKILL.md
+  reverse_flow:         ~/.fremi/framework/reverse-engineering/flow.md
+  reverse_config:       ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_reverse:        ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rules_index:          ~/.fremi/framework/rules/workflow.md

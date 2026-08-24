@@ -1,0 +1,392 @@
+schema: framework-reverse-skill-workflow
+schema_version: 1
+skill: reverse-story
+skill_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — SKILL REVERSE-STORY (/fremi-reverse-story)
+#
+# Fuente de verdad ÚNICA de la secuencia de ejecución del skill reverse-story.
+# Este skill reconstruye la cadena completa de una user story (todos los docs
+# del flow, desde explore hasta closure) a partir de código, tests, commits y
+# docs sueltos ya existentes.
+#
+# Este archivo declara:
+#   - qué docs reconstruye (reconstructs[])
+#   - las 7 fases del skill (phases[]) con lo que cada una produce
+#   - modo de ejecución y opciones de transparencia (R26)
+#   - precondiciones duras que abortan (R25)
+#   - stop events que requieren input del usuario (R27)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# ARTIFACT CONTEXT — qué artifact orquesta este skill reverse
+# ---------------------------------------------------------------------------
+artifact_ref:
+  artifact: story
+  artifact_workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  artifact_config:   ~/.fremi/framework/artifacts/story/config.user.yaml
+  note: >
+    El skill reverse reconstruye el resultado completo del artifact story.
+    Las reglas del artifact aplican al OUTPUT — el PROCESO está gobernado
+    por R25-R32 (reglas de reverse).
+
+# ---------------------------------------------------------------------------
+# DOCS RECONSTRUIDOS (reconstructs)
+# ---------------------------------------------------------------------------
+reconstructs:
+  - id: explore
+    doc_token: "{workflow.explore}"
+    mandatory: conditional  # Regla 16 — solo si commit history sugiere iteración
+    source: git-history
+    confidence_factor: medium
+    note: Generado sólo si git log sugiere investigación o iteración previa.
+
+  - id: definition
+    doc_token: "{workflow.definition}"
+    mandatory: always
+    source: git-log + PR-title + user-input
+    confidence_factor: medium-high
+    gap: "So that — no inferible del código; preguntar al usuario (R27)"
+
+  - id: proposal
+    doc_token: "{workflow.proposal}"
+    mandatory: conditional  # Regla 16 — sólo si introduce contrato externo nuevo o afecta 3+ archivos
+    source: code-structure + user-input
+    confidence_factor: medium
+
+  - id: scope
+    doc_token: "{workflow.scope}"
+    mandatory: always
+    source: code-exports + test-skips + TODO-comments
+    confidence_factor: high
+
+  - id: bdd
+    doc_token: "{workflow.bdd}"
+    mandatory: always
+    source: test-describe-it-blocks
+    confidence_factor: high
+    note: SCs reflejan implementación, no necesariamente la especificación de negocio (R28).
+
+  - id: sdd
+    doc_token: "{workflow.sdd}"
+    mandatory: always
+    source: handler-routes + zod-schemas + ts-interfaces + http-status-codes
+    confidence_factor: high
+
+  - id: design
+    doc_token: "{workflow.design}"
+    mandatory: always
+    source: package-json + folder-structure + internal-layers
+    confidence_factor: high
+    gap: "Key Invariants — preguntar al usuario (R27)"
+
+  - id: tdd
+    doc_token: "{workflow.tdd}"
+    mandatory: always
+    source: test-files
+    confidence_factor: high
+    note: Todos los TC-XXX marcados [x] (ya pasan). Regla 7 NO aplica retroactivamente.
+
+  - id: plan
+    doc_token: "{workflow.plan}"
+    mandatory: always
+    source: git-commits + files-created
+    confidence_factor: medium-high
+
+  - id: checkwork
+    doc_token: "{workflow.checkwork}"
+    mandatory: always
+    doc_type: living
+    initial_version: "0.1.0"
+    source: derived-from-plan
+    note: Progreso al 100% — el código ya existe.
+
+  - id: closure
+    doc_token: "{workflow.closure}"
+    mandatory: always
+    source: derived-from-all-docs
+    note: Firmado con fecha actual o del último commit relacionado (--from-git-history).
+
+# ---------------------------------------------------------------------------
+# PHASES — secuencia de ejecución (7 fases)
+# ---------------------------------------------------------------------------
+phases:
+  - id: load_config
+    order: 0
+    label: "Fase 0 — Cargar configuración"
+    actions:
+      - read: ~/.fremi/framework/settings/methodology.core.yaml
+      - read: ~/.fremi/framework/artifacts/story/config.user.yaml
+      - read: ~/.fremi/framework/settings/config.reverse.core.yaml
+    aborts_on_failure: true
+
+  - id: identify
+    order: 1
+    label: "Fase 1 — Identificar el trabajo huérfano"
+    actions:
+      - confirm_story_folder_absent      # abortar si FT-XX/HU-YY ya existe
+      - ask_user_if_unclear:
+          - source_code_paths
+          - test_file_paths
+          - git_commit_range
+          - loose_docs
+    stop_events:
+      - story_already_exists
+    produces: []  # sólo confirma contexto
+
+  - id: scan
+    order: 2
+    label: "Fase 2 — Escanear artifacts sobrevivientes"
+    actions:
+      - scan_code:     [exports, types, public-functions, endpoints]
+      - scan_tests:    [describe-it-blocks, assertions, test-types]
+      - scan_git:      [git log --follow --oneline, first-commit-date, last-commit-date, commit-messages]
+      - scan_docs:     [README.md, JSDoc, inline-comments]
+    produces:
+      - scan_report    # input para la fase de inferencia
+
+  - id: evaluate_conditionals
+    order: 3
+    label: "Fase 3 — Evaluar condicionales (Regla 16)"
+    rule: R16
+    actions:
+      - evaluate_explore_when:
+          signal: git-history-suggests-iteration
+          decision: generate | omit
+      - evaluate_proposal_when:
+          signals: [new-external-contract, visible-behavior-change, touches-3-plus-files]
+          decision: generate | omit
+
+  - id: reconstruct_docs
+    order: 4
+    label: "Fase 4 — Reconstruir docs + preguntas dirigidas (Regla 27)"
+    rule: R27
+    sequence:
+      - "{workflow.explore}"         # si condicional aplica
+      - "{workflow.definition}"      # siempre; pausa para So that si no inferible
+      - "{workflow.proposal}"        # si condicional aplica
+      - "{workflow.scope}"
+      - "{workflow.bdd}"
+      - "{workflow.sdd}"
+      - "{workflow.design}"          # pausa para Key Invariants si no inferibles
+      - "{workflow.tdd}"
+      - "{workflow.plan}"
+      - "{workflow.checkwork}"
+      - "{workflow.closure}"
+    gap_handling: ask_user | mark_TBD   # NUNCA inventar (R27)
+    stop_events:
+      - so_that_not_inferrable        # pedir al usuario
+      - initiative_unknown            # pedir init-XXX al usuario
+      - adr_rationale_missing         # pedir motivación al usuario
+      - rnf_values_missing            # pedir latencia/throughput al usuario
+      - ca_without_test_detected      # pedir confirmación: gap o CA fantasma
+
+  - id: apply_lineage
+    order: 5
+    label: "Fase 5 — Timestamps + linaje (Regla 17 + R30)"
+    rules: [R17, R30]
+    actions:
+      - infer_created_date:          "git log --diff-filter=A --follow --format=%ai -- <file> | tail -1"
+      - infer_last_updated_date:     "git log -1 --format=%ai -- <file>"
+      - set_ancestor_version:        "versión actual de FT-XX/definition.md"
+      - set_version:                 "1.0.0 (snapshots) | 0.1.0 (checkwork)"
+      - apply_mode:
+          transparent: add reverse_engineered block to frontmatter   # default (R26)
+          stealth:     omit reverse_engineered block                 # override explícito
+    fallback_no_git: >
+      Si .git ausente: pedir fechas manuales al usuario, o usar fecha actual
+      con reverse_engineered_confidence: 0.3
+
+  - id: close_lineage
+    order: 6
+    label: "Fase 6 — Bumpear padre + reporte (Regla 17 + R30)"
+    rules: [R17, R30]
+    actions:
+      - bump_feature_definition:     "parent_bump_triggers.story_closes — MINOR si story agrega requirements"
+      - add_changelog_entry:         "[origen: HU-YY] en FT-XX/definition.md"
+      - fill_ancestor_version_at_closure_in_closure_doc: true
+      - emit_final_report
+
+# ---------------------------------------------------------------------------
+# MODE OPTIONS — transparencia (R26)
+# ---------------------------------------------------------------------------
+mode_options:
+  default: transparent
+  options: [transparent, stealth]
+
+  transparent:
+    description: >
+      Default (R26). Los docs llevan bloque de frontmatter:
+        reverse_engineered: true
+        reverse_engineered_at: YYYY-MM-DD
+        reverse_engineered_source: git-history+tests
+        reverse_engineered_confidence: 0.0-1.0
+    when_to_use: siempre, salvo decisión explícita de proyecto (con ADR)
+
+  stealth:
+    description: >
+      Override explícito. Los docs quedan indistinguibles del flow forward.
+      /fremi-sync-check NO puede detectar que son reverse-engineered.
+    when_to_use: sólo con justificación por ADR a nivel proyecto (R26)
+    flag: --stealth
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el skill si fallan (R25)
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-story` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: Corré `fremi install` antes de invocar el skill. No auto-instalar.
+
+  - id: work_merged_or_in_production
+    rule: R25
+    check: >
+      El trabajo está mergeado a main (o en un branch de release confirmado).
+      Trabajo experimental que sigue cambiando → usar el flow forward.
+    abort_message: >
+      Reverse sólo aplica a trabajo pre-existente y estable. Si el trabajo
+      está en curso, usar el flow normal (/fremi-story + sub-skills).
+
+  - id: layer_identifiable
+    rule: R25
+    check: La feature FT-XX existe con `definition.md` de contenido real.
+    abort_message: Crear o reconstruir primero el `FT-XX/definition.md` de la feature.
+
+  - id: story_folder_absent
+    check: >
+      NO debe existir ya la carpeta `FT-XX/user-stories/HU-YY_*/` con docs
+      del flow. Si existe → no hay nada que reconstruir.
+    abort_message: La story ya tiene docs. Usar /fremi-sync-check para auditar.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` existe y parsea.
+      Necesario para resolver tokens {workflow.*}.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el skill para pedir input (R27)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: so_that_not_inferrable
+    phase: reconstruct_docs
+    rule: R27
+    trigger: No hay PR title, README ni commits que expliquen el beneficio de negocio.
+    behavior: >
+      Preguntar al usuario: "¿Cuál es el beneficio de negocio / usuario
+      de este trabajo? (completar: 'So that <beneficio>')".
+      Alternativa: dejar TBD con nota de gap si el usuario no puede responder ahora.
+
+  - id: initiative_unknown
+    phase: reconstruct_docs
+    rule: R27
+    trigger: No se puede inferir a qué iniciativa estratégica pertenece el trabajo.
+    behavior: >
+      Preguntar al usuario: "¿A qué iniciativa (init-XXX) pertenece esta story?".
+      Marcar sin vincular + warning si el usuario no lo sabe.
+
+  - id: adr_rationale_missing
+    phase: reconstruct_docs
+    rule: R27
+    trigger: El código muestra una decisión técnica (elección de librería, pattern) pero no su motivación.
+    behavior: >
+      Preguntar al usuario la motivación del ADR. Si no recuerda → registrar
+      ADR con discovered_during_reverse: true y sección "Rationale: TBD".
+
+  - id: rnf_values_missing
+    phase: reconstruct_docs
+    rule: R27
+    trigger: La spec requiere RNFs medibles (latencia, throughput) no encontrados en tests ni docs.
+    behavior: Pedir al usuario 1-2 valores tentativos. Marcar TBD si no hay respuesta.
+
+  - id: ca_without_test_detected
+    phase: reconstruct_docs
+    rule: R27
+    trigger: Se detecta comportamiento en código sin cobertura de test.
+    behavior: >
+      Preguntar: "Este CA [X] no tiene test. ¿Es un gap real (falta test)
+      o un CA fantasma (el dev lo agregó pero el negocio no lo pidió)?".
+      Reportar la lista completa al usuario.
+
+  - id: git_history_missing
+    phase: apply_lineage
+    rule: R30
+    trigger: No se encuentra directorio .git en el repositorio.
+    behavior: >
+      Pedir al usuario que provea fechas manualmente, O setear todo a fecha
+      actual con reverse_engineered_confidence: 0.3.
+
+  - id: low_confidence
+    phase: apply_lineage
+    rule: R28
+    trigger: confidence global < 0.5 (muy pocos tests, sin git history, sin docs sueltos).
+    behavior: >
+      Advertir al usuario de la baja confianza. Recomendar revisión
+      profunda antes de firmar el closure.
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondiciones de reverse: trabajo pre-existente, framework instalado, capa identificable."
+  - id: R26
+    reason: "Frontmatter transparent por default; stealth sólo con override explícito."
+  - id: R27
+    reason: "Preguntas dirigidas para gaps no-inferibles. NUNCA inventar."
+  - id: R28
+    reason: "El output de reverse es base, no verdad final. Reportar gaps para revisión humana."
+  - id: R29
+    reason: "Regla 8 (test rojo primero) no es reconstruible retroactivamente. Declarar limitación."
+  - id: R30
+    reason: "Regla 17 sí aplica en reverse: timestamps inferidos de git, bump de padre al cerrar."
+  - id: R31
+    reason: "Reverse NO para trabajo nuevo ni trabajo en curso."
+  - id: R32
+    reason: "Monitorear ratio reverse/forward como señal de salud del framework."
+  - id: R17
+    reason: "Todos los docs llevan frontmatter versionado + ancestor.version_at_creation."
+  - id: R16
+    reason: "Evaluar condicionales explore y proposal antes de generar."
+  - id: R6
+    reason: "El output respeta la cadena BDD → SDD → Design en términos de dependencias."
+  - id: R3b
+    reason: "Bifurcaciones inferidas del código → ADR con discovered_during_reverse: true."
+  - id: R12
+    reason: "Sync-back activo: contenido que pertenece a la feature o producto → subir."
+  - id: R24
+    reason: "Framework instalado (precondición dura)."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - story_reconstructed:    "FT-XX/HU-YY_<slug> + path completo"
+    - mode_used:              "transparent | stealth"
+    - docs_produced:          "lista con versión, ancestor y confidence por doc"
+    - conditional_docs:       "explore y proposal — generado/omitido + justificación"
+    - parent_bumped:          "FT-XX/definition.md: vX.Y.Z → vX.Y+1.Z"
+    - adr_resolutions:        "ADRs retroactivos generados + discovered_during_reverse flag"
+    - gaps_declared:          "lista de gaps que requieren revisión humana (R27 + R28)"
+    - confidence_global:      "valor 0.0-1.0 promedio ponderado de la corrida"
+    - next_action:            "revisar warnings + /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  narrative:        ./flow.md
+  skill_doc:        ./SKILL.md
+  applies:          ./rules/applies.yaml
+  reverse_flow:     ~/.fremi/framework/reverse-engineering/flow.md
+  artifact_ref:     ~/.fremi/framework/artifacts/story/workflow.yaml
+  reverse_config:   ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_index:      ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  forward_skill:    ~/.fremi/framework/artifacts/story/SKILL.md

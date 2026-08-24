@@ -1,13 +1,15 @@
 ---
 name: fremi-story-plan
-description: Puebla la estructura inicial del `{workflow.plan}` de una story — el archivo del plan de ejecución con secciones para task-XXX. Doc snapshot como estructura, pero las entries `task-XXX` se agregan con `/fremi-story-task`. Este skill crea el esqueleto; `/fremi-story-task` puebla las tareas individuales.
+description: Puebla la estructura inicial del doc `plan` (`{workflow.plan}`) de una story — el archivo del plan de ejecución con secciones para tasks. Doc snapshot como estructura, pero las entries de task se agregan con `/fremi-story-task`. Este skill crea el esqueleto; `/fremi-story-task` puebla las tareas individuales.
 ---
 
-# /fremi-story-plan — Poblar FW-08 (estructura del plan de ejecución)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, task) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+# /fremi-story-plan — Poblar el doc `plan` (estructura del plan de ejecución)
 
 Puebla la **estructura inicial** del `{workflow.plan}`: resumen, secciones (Backlog / En curso / Cerradas), notas de orden y dependencias.
 
-**Rol del doc**: en qué **orden** se construye la story. Las `task-XXX` individuales se agregan con `/fremi-story-task`; este skill crea el archivo con esqueleto.
+**Rol del doc**: en qué **orden** se construye la story. Las tareas individuales (IDs derivados de `identifiers.task`) se agregan con `/fremi-story-task`; este skill crea el archivo con esqueleto.
 
 **Diferencia con `/fremi-story-task`**:
 - `/fremi-story-plan` — crea o refresca el archivo con estructura + descripción del orden.
@@ -46,7 +48,7 @@ Puebla la **estructura inicial** del `{workflow.plan}`: resumen, secciones (Back
 
 ### Paso 4 — Versionado (Regla 17)
 - Snapshot: `version: 1.0.0`, `ancestor.version_at_creation` = feature/definition.
-- Cada `/fremi-story-task` posterior bumpea el archivo → PATCH del snapshot (excepción, ver Regla 17: los snapshots normalmente no bumpean, pero `FW-08` es interfaz de `/fremi-story-task`).
+- Cada `/fremi-story-task` posterior bumpea el archivo → PATCH del snapshot (excepción, ver Regla 17: los snapshots normalmente no bumpean, pero el doc `plan` es interfaz de `/fremi-story-task`).
 
 ### Paso 5 — Escribir y reportar
 - Guardar el esqueleto.
@@ -55,7 +57,7 @@ Puebla la **estructura inicial** del `{workflow.plan}`: resumen, secciones (Back
 ## Validaciones
 
 - El archivo tiene las 3 secciones (Resumen, Backlog, Notas).
-- El resumen refleja el orden lógico basado en FW-06 (Design) + FW-07 (TDD).
+- El resumen refleja el orden lógico basado en el doc `design` + el doc `tdd`.
 
 ## Anti-patrones
 

@@ -1,11 +1,13 @@
 ---
 name: fremi-product-plan
-description: Puebla `docs/works/product/plan.md` — roadmap de features priorizado. Doc living. Cada entry es un `FT-XX_<slug>` con estado (planeada / en curso / cerrada) + dependencias + iniciativas que aborda. Se actualiza automáticamente al crear feature nueva (`/fremi-feature` bumpea MINOR) y al cerrar features (marca cerrada).
+description: Puebla `docs/works/product/plan.md` — roadmap de features priorizado. Doc living. Cada entry es una carpeta feature con estado (planeada / en curso / cerrada) + dependencias + iniciativas que aborda. Se actualiza automáticamente al crear feature nueva (`/fremi-feature` bumpea MINOR) y al cerrar features (marca cerrada).
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature folder, iniciativa) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-product-plan — Formalización: roadmap de features
 
-Crea o actualiza `docs/works/product/plan.md` — el **roadmap de features** del producto, priorizado. Cada entry es una feature (`FT-XX_<slug>`) con su estado, prioridad, dependencias y las iniciativas que aborda.
+Crea o actualiza `docs/works/product/plan.md` — el **roadmap de features** del producto, priorizado. Cada entry es una feature (carpeta feature) con su estado, prioridad, dependencias y las iniciativas que aborda.
 
 **Rol del doc**: qué features se construyen y en qué orden. Fuente de verdad del plan de trabajo.
 
@@ -50,14 +52,14 @@ Crea o actualiza `docs/works/product/plan.md` — el **roadmap de features** del
 
 Estructura obligatoria:
 1. **Resumen del roadmap** — 3-5 líneas del orden general.
-2. **Features activas** — tabla con `FT-XX_<slug>` | título | estado | prioridad | iniciativas que aborda | dependencias.
+2. **Features activas** — tabla con carpeta feature | título | estado | prioridad | iniciativas que aborda | dependencias.
 3. **Features cerradas** — histórico.
 4. **Features canceladas** — con motivo.
 5. **Dependencias entre features** — diagrama o listado.
 
 **Cada feature del plan referencia**:
-- Al menos 1 iniciativa (init-XXX) que aborda.
-- Su `FT-XX_<slug>/definition.md` (link).
+- Al menos 1 iniciativa que aborda.
+- Su `definition.md` de feature (link).
 - Su estado actual (Planeada / En curso / Cerrada / Cancelada).
 
 ### Paso 4 — Versionado (Regla 17)

@@ -1,13 +1,15 @@
 ---
 name: fremi-product-adr
-description: Agrega un ADR (Architecture Decision Record) al `docs/works/product/decisions.md` — nivel PRODUCTO. Para ADRs transversales al producto (afectan múltiples features o el stack global). Numeración global (ADR-XXX). Doc living. Para ADRs locales a una feature, usar `/fremi-feature-adr`. Para ADRs locales a una story, usar `/fremi-story-adr`.
+description: Agrega un ADR (Architecture Decision Record) al `docs/works/product/decisions.md` — nivel PRODUCTO. Para ADRs transversales al producto (afectan múltiples features o el stack global). Numeración global compartida entre todos los scopes. Doc living. Para ADRs locales a una feature, usar `/fremi-feature-adr`. Para ADRs locales a una story, usar `/fremi-story-adr`.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (ADR, feature, story) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-product-adr — Agregar ADR global de producto
 
 Agrega un nuevo Architecture Decision Record al archivo `docs/works/product/decisions.md`. Es para decisiones **transversales al producto** — que afectan a múltiples features o al stack global.
 
-**Numeración global** al proyecto (compartida con `feature-adr` y `story-adr`) — se calcula tomando `max(ADR-XXX) + 1` sobre TODOS los decisions.md del proyecto.
+**Numeración global** al proyecto (compartida con `feature-adr` y `story-adr`) — se calcula tomando el máximo ID existente + 1 sobre TODOS los decisions.md del proyecto.
 
 > **Importante:** este skill lee `identifiers.adr` del JSON. NO hardcodea el prefijo `ADR` ni el padding `{number:03d}` — todo viene del archivo de configuración.
 
@@ -33,7 +35,7 @@ Este skill suele invocarse como **paso final** del patrón definido en **Regla 3
 1. Durante la redacción de un artefacto (típicamente `{workflow.sdd}`, `{workflow.design}` o algo a nivel feature/producto), la IA detecta una bifurcación técnica con 2+ caminos viables.
 2. La IA **pausa**, propone las opciones al usuario en el chat (con pros/contras), y **espera la decisión**.
 3. Cuando el usuario elige, la IA invoca `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr` con el contenido ya casi listo (contexto + alternativas + decisión) — sólo confirma campos antes de anexar.
-4. La IA referencia el ID asignado desde el artefacto donde nació la decisión (`aplica <adr-id>` en una línea del FW-05/FW-06).
+4. La IA referencia el ID asignado desde el artefacto donde nació la decisión (`aplica <adr-id>` en una línea del doc `sdd` o `design`).
 
 Si el usuario invoca `/fremi-product-adr` / `/fremi-feature-adr` / `/fremi-story-adr` directamente para registrar una decisión ya conversada, también vale.
 
@@ -52,7 +54,7 @@ Si el JSON no parsea → abortar.
 ### Paso 1 — Determinar destino
 
 - Si `scope` es `product` o está omitido → archivo destino = `adr_cfg.location_default`.
-- Si `scope` es un `FEATURE_ID` (ej: `FT-03`):
+- Si `scope` es un `FEATURE_ID` (ej. con defaults: `FT-03`):
   - Buscar `feature_folder` en `{paths.features_dir}` matcheando `feat_cfg.folder_regex` + el ID.
   - Archivo destino = `adr_cfg.location_feature` con `{feature_folder}` reemplazado.
   - Si el archivo no existe en esa feature, crearlo.
@@ -66,7 +68,7 @@ Si el JSON no parsea → abortar.
    - Cada `{feature_folder}/decisions.md` existente bajo `paths.features_dir`.
 2. Extraer todos los IDs que matcheen `adr_cfg.regex` (default: `^ADR-\d{3}$`).
 3. Próximo número = max(existentes) + 1. Si no hay → 1.
-4. Construir el `id` aplicando `adr_cfg.id_format` (default: `{prefix}-{number:03d}` → `ADR-001`).
+4. Construir el `id` aplicando `adr_cfg.id_format` (ej. con defaults: `{prefix}-{number:03d}` → `ADR-001`). El prefijo y padding reales salen de `methodology.core.yaml`.
 5. **No reciclar** IDs de ADRs reemplazados.
 
 ### Paso 3 — Recolectar info

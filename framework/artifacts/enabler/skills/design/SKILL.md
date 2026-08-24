@@ -3,16 +3,18 @@ name: fremi-enabler-design
 description: Puebla o actualiza el `{enabler.design}` de un enabler — decisiones técnicas concretas (tecnologías, librerías, capas, infraestructura) + ADRs aplicables. Doc snapshot. Se invoca después de `/fremi-enabler-definition`.
 ---
 
-# /fremi-enabler-design — Poblar EN-02 (cómo se construye técnicamente)
+> **Nota sobre identificadores:** los prefijos concretos (carpeta enabler, IDs de feature/story, ADR) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos (`definition`, `design`, `plan`, `closure`) y conceptos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
-Puebla el `{enabler.design}` de un enabler con las **decisiones técnicas concretas** que satisfacen los criterios de EN-01.
+# /fremi-enabler-design — Poblar el doc `design` del enabler
+
+Puebla el `{enabler.design}` de un enabler con las **decisiones técnicas concretas** que satisfacen los criterios del step `definition`.
 
 **Rol del doc**: cómo se construye el enabler. Tecnologías elegidas, componentes internos, ADRs por bifurcación (Regla 3b).
 
 ## Sintaxis
 
 ```
-/fremi-enabler-design <EN-ID>
+/fremi-enabler-design <ENABLER_ID>
 ```
 
 ## Cuándo invocarlo
@@ -59,7 +61,7 @@ Puebla el `{enabler.design}` de un enabler con las **decisiones técnicas concre
 
 ## Anti-patrones
 - ❌ Elegir librería sin comparar → Regla 3b + ADR.
-- ❌ Design que contradice EN-01 (los criterios técnicos).
+- ❌ Design que contradice el step `definition` (los criterios técnicos).
 - ❌ Wrappers sin justificación real.
 
 ## Referencias

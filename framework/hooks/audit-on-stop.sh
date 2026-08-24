@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Hook: audit-on-stop
+# Hook: audit-on-stop — CROSS-DOMAIN
 # Tipo: Stop
 # Matcher: n/a (Stop no usa matcher — se ejecuta al final de cada respuesta)
+#
+# ────────────────────────────────────────────────────────────────────────────
+# Convención de identificadores:
+#   Resuelve filenames por capa desde methodology.core.yaml — NO hardcodea.
+#   Ver: .claude/rules/no-hardcoded-identifiers.md
+# ────────────────────────────────────────────────────────────────────────────
 #
 # Propósito:
 #   Auditoría ligera al terminar una sesión de trabajo. Reporta:
 #     1. Docs living sin changelog al pie.
 #     2. Docs snapshot cerrados sin ancestor.version_at_closure.
-#     3. Stories en implementación (`FW-09_checkwork.md` con % < 100).
+#     3. Stories en implementación (doc `checkwork` con % < 100).
 #     4. Warnings de Regla 17 fáciles de detectar.
 #
 #   NO corre `/sync-check` completo (eso es explícito). Sólo un chequeo
@@ -21,11 +27,30 @@
 
 set -uo pipefail
 
+# Cargar helper cross-domain de methodology
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=./_methodology.sh
+source "$SCRIPT_DIR/_methodology.sh"
+
 # --- Bail out si no hay estructura de works ---------------------------------
 [[ ! -d "docs/works" ]] && exit 0
 
 warnings=0
 outputs=()
+
+# Resolver dinámicamente los filenames de closure (story y enabler) y de
+# checkwork (story). Si methodology no está disponible, saltamos las
+# secciones que dependen de esos filenames.
+STORY_CHECKWORK=""
+STORY_CLOSURE=""
+ENABLER_CLOSURE=""
+if meth_load_layer story; then
+  STORY_CHECKWORK=$(meth_layer_file_by_name checkwork || true)
+  STORY_CLOSURE=$(meth_layer_file_by_name closure || true)
+fi
+if meth_load_layer enabler; then
+  ENABLER_CLOSURE=$(meth_layer_file_by_name closure || true)
+fi
 
 # --- 1. Docs living sin changelog -------------------------------------------
 while IFS= read -r f; do
@@ -49,17 +74,30 @@ while IFS= read -r f; do
     outputs+=("  - Closure firmado sin version_at_closure: $f")
     warnings=$((warnings+1))
   fi
-done < <(find docs/works -type f \( -name "FW-10_closure.md" -o -name "EN-04_closure.md" \) 2>/dev/null)
+done < <(
+  # Build find expression dinámicamente con los closures resueltos desde methodology
+  find_args=()
+  [[ -n "$STORY_CLOSURE" ]] && find_args+=(-name "$STORY_CLOSURE")
+  if [[ -n "$ENABLER_CLOSURE" ]]; then
+    [[ ${#find_args[@]} -gt 0 ]] && find_args+=(-o)
+    find_args+=(-name "$ENABLER_CLOSURE")
+  fi
+  if [[ ${#find_args[@]} -gt 0 ]]; then
+    find docs/works -type f \( "${find_args[@]}" \) 2>/dev/null
+  fi
+)
 
 # --- 3. Stories en implementación (checkwork < 100%) ------------------------
-while IFS= read -r f; do
-  [[ ! -f "$f" ]] && continue
-  # Buscar "% progreso" o similar; heurística simple: buscar líneas con "%"
-  PROGRESS=$(grep -oE "[0-9]+%" "$f" 2>/dev/null | head -1 || true)
-  if [[ -n "$PROGRESS" && "$PROGRESS" != "100%" ]]; then
-    outputs+=("  - Story en implementación ($PROGRESS): $(dirname "$f")")
-  fi
-done < <(find docs/works -name "FW-09_checkwork.md" -type f 2>/dev/null)
+if [[ -n "$STORY_CHECKWORK" ]]; then
+  while IFS= read -r f; do
+    [[ ! -f "$f" ]] && continue
+    # Buscar "% progreso" o similar; heurística simple: buscar líneas con "%"
+    PROGRESS=$(grep -oE "[0-9]+%" "$f" 2>/dev/null | head -1 || true)
+    if [[ -n "$PROGRESS" && "$PROGRESS" != "100%" ]]; then
+      outputs+=("  - Story en implementación ($PROGRESS): $(dirname "$f")")
+    fi
+  done < <(find docs/works -name "$STORY_CHECKWORK" -type f 2>/dev/null)
+fi
 
 # --- Reportar --------------------------------------------------------------
 if [[ ${#outputs[@]} -gt 0 ]]; then

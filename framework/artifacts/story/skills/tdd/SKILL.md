@@ -1,11 +1,13 @@
 ---
 name: fremi-story-tdd
-description: Puebla o actualiza el `{workflow.tdd}` de una story — plan de tests derivado de BDD/SDD/Design con IDs TC-XXX. Doc snapshot. Cada test referencia el SC-XXX (BDD) o cláusula SDD que verifica. Regla 7 aplica (test rojo primero) si config.testing.strict_tdd = true.
+description: Puebla o actualiza el doc `tdd` (`{workflow.tdd}`) de una story — plan de tests derivado de BDD/SDD/Design. Doc snapshot. Cada test referencia el escenario BDD o cláusula SDD que verifica. Regla 7 aplica (test rojo primero) si config.testing.strict_tdd = true.
 ---
 
-# /fremi-story-tdd — Poblar FW-07 (plan de tests TDD)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, test case, escenario) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
-Puebla el `{workflow.tdd}` con la lista planeada de tests `TC-XXX`, cada uno mapeado a un SC-XXX (BDD) o cláusula de SDD.
+# /fremi-story-tdd — Poblar el doc `tdd` (plan de tests TDD)
+
+Puebla el doc `tdd` (`{workflow.tdd}`) con la lista planeada de test cases (IDs según `identifiers.test_case`), cada uno mapeado a un escenario del doc `bdd` o cláusula del doc `sdd`.
 
 **Rol del doc**: cómo se **verifica** la story. Plan derivado — no introduce comportamiento nuevo.
 
@@ -23,13 +25,13 @@ Puebla el `{workflow.tdd}` con la lista planeada de tests `TC-XXX`, cada uno map
 ## Procedimiento
 
 ### Paso 0 — Cargar configuración
-- `methodology.core.yaml` → `identifiers.test_case` (TC-XXX), `identifiers.workflow_doc.items[name=tdd-plan]`.
+- `methodology.core.yaml` → `identifiers.test_case` (prefijo y formato del ID de test case), `identifiers.workflow_doc.items[name=tdd-plan]`.
 - `config.yaml` → `phase_rules.tdd`, `testing.strict_tdd`, `testing.unit.enabled`, `testing.e2e.enabled`, `testing.coverage.threshold`.
 
 ### Paso 1 — Validar padre y precondiciones
-- `{workflow.bdd}` con SC-XXX.
+- `{workflow.bdd}` con escenarios completos.
 - `{workflow.sdd}` con contratos.
-- `{workflow.design}` con Acceptance Test Mapping (forward) — cada R-XX ya sugiere TC-XXX.
+- `{workflow.design}` con Acceptance Test Mapping (forward) — cada requirement SDD ya sugiere un test case.
 - **Open Questions de Design cerradas** (Regla 17 dura del design).
 
 ### Paso 2 — Cargar template
@@ -37,10 +39,10 @@ Puebla el `{workflow.tdd}` con la lista planeada de tests `TC-XXX`, cada uno map
 
 ### Paso 3 — Poblar aplicando `phase_rules.tdd`
 
-- Cada test tiene ID TC-XXX + referencia a SC-XXX (BDD) o cláusula SDD.
+- Cada test tiene ID de test case (según `identifiers.test_case`) + referencia a escenario BDD o cláusula SDD.
 - **Regla 7 (rojo→verde→refactor)** activada si `strict_tdd: true`.
 - Plan cubre niveles según `testing.*.enabled` (unit / integration / e2e / coverage).
-- Cada TC-XXX declara: nombre, archivo esperado, framework, tipo (unit/integration/e2e), input, output esperado.
+- Cada test case declara: nombre, archivo esperado, framework, tipo (unit/integration/e2e), input, output esperado.
 - Import del Acceptance Test Mapping de `{workflow.design}` sección "Acceptance Test Mapping (forward)".
 
 ### Paso 4 — Versionado (Regla 17)
@@ -53,9 +55,9 @@ Puebla el `{workflow.tdd}` con la lista planeada de tests `TC-XXX`, cada uno map
 
 ## Validaciones
 
-- Cada SC-XXX de BDD tiene al menos 1 TC-XXX asociado.
-- Cada cláusula/requirement de SDD tiene al menos 1 TC-XXX.
-- Cada TC-XXX declara framework + archivo esperado.
+- Cada escenario del doc `bdd` tiene al menos 1 test case asociado.
+- Cada cláusula/requirement del doc `sdd` tiene al menos 1 test case.
+- Cada test case declara framework + archivo esperado.
 - Si `testing.coverage.enabled: true` → threshold declarado.
 
 ## Anti-patrones

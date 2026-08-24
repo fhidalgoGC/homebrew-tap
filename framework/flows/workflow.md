@@ -40,13 +40,13 @@ Cada capa (y cada scope) tiene su archivo `flow.*.md` con:
 
 | Capa / Scope | Archivo | Orquestador | Config operativa |
 |---|---|---|---|
-| **Producto** (discovery + formalización) | [`flow.product.md`](./flow.product.md) | `/fremi-product` | [`config.product.yaml`](../settings/config.product.yaml) |
-| **Feature** (línea de trabajo grande) | [`flow.feature.md`](./flow.feature.md) | `/fremi-feature` | [`config.feature.yaml`](../settings/config.feature.yaml) |
-| **Story** (unidad de valor — 11 docs) | [`flow.story.md`](./flow.story.md) | `/fremi-story` | [`config.story.yaml`](../settings/config.story.yaml) |
-| **Enabler** (trabajo habilitador) | [`flow.enabler.md`](./flow.enabler.md) | `/fremi-enabler` | [`config.enabler.yaml`](../settings/config.enabler.yaml) |
-| **Bug scope story** (bug local) | [`flow.bug.story.md`](./flow.bug.story.md) | `/fremi-story-bug` | [`config.bug.story.yaml`](../artifacts/story/skills/bug/config.core.yaml) |
-| **Bug scope feature** (bug transversal) | [`flow.bug.feature.md`](./flow.bug.feature.md) | `/fremi-feature-bug` | [`config.bug.feature.yaml`](../artifacts/feature/skills/bug/config.core.yaml) |
-| **Extra** (fuera del flujo — tooling) | [`flow.extra.md`](./flow.extra.md) | *(sin skill)* | [`config.extra.yaml`](../artifacts/extra/config.core.yaml) |
+| **Producto** (discovery + formalización) | [`artifacts/product/flow.md`](../artifacts/product/flow.md) | `/fremi-product` | [`config.user.yaml`](../artifacts/product/config.user.yaml) |
+| **Feature** (línea de trabajo grande) | [`artifacts/feature/flow.md`](../artifacts/feature/flow.md) | `/fremi-feature` | [`config.user.yaml`](../artifacts/feature/config.user.yaml) |
+| **Story** (unidad de valor — 11 docs) | [`artifacts/story/flow.md`](../artifacts/story/flow.md) | `/fremi-story` | [`config.user.yaml`](../artifacts/story/config.user.yaml) |
+| **Enabler** (trabajo habilitador) | [`artifacts/enabler/flow.md`](../artifacts/enabler/flow.md) | `/fremi-enabler` | [`config.user.yaml`](../artifacts/enabler/config.user.yaml) |
+| **Bug scope story** (bug local) | [`artifacts/story/skills/bug/flow.md`](../artifacts/story/skills/bug/flow.md) | `/fremi-story-bug` | [`bug/config.core.yaml`](../artifacts/story/skills/bug/config.core.yaml) |
+| **Bug scope feature** (bug transversal) | [`artifacts/feature/skills/bug/flow.md`](../artifacts/feature/skills/bug/flow.md) | `/fremi-feature-bug` | [`bug/config.core.yaml`](../artifacts/feature/skills/bug/config.core.yaml) |
+| **Extra** (fuera del flujo — tooling) | [`artifacts/extra/flow.md`](../artifacts/extra/flow.md) | *(sin skill)* | [`config.core.yaml`](../artifacts/extra/config.core.yaml) |
 
 ---
 

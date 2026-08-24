@@ -1,24 +1,48 @@
 schema: framework-layer-user-config
-schema_version: 5
+schema_version: 6
 layer: story
-since: 2026-07-13
+since: 2026-08-10
+# v6 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO user choices: active, execution_mode,
+#                  step_agents (elección de agente por step), conditional_rules.
+# v5 (2026-07-13): esquema previo consolidando docs[], flow.sequence[], etc.
 
-# ---------------------------------------------------------------------------
-# Configuración USER-EDITABLE de la capa STORY.
-# Vive junto al skill orquestador (~/.fremi/framework/artifacts/story/) porque el
-# usuario elige acá cómo trabajar. La ESTRUCTURA (topología, DAG, agent
-# options) vive en config.core.yaml — user NO edita eso.
+# ===========================================================================
+# CONFIG.USER — capa STORY
 #
-# Cadena de 11 docs FW-00..FW-10 (2 condicionales).
+# ÚNICO archivo user-editable de esta capa. Cambiá acá para adaptar la
+# ejecución del workflow a tu proyecto sin tocar la estructura del framework.
+#
 # ---------------------------------------------------------------------------
+# UBICACIÓN Y RESOLUCIÓN EN RUNTIME (importante)
+#
+# Este archivo dentro del framework
+# (`~/.fremi/framework/artifacts/story/config.user.yaml`) es un TEMPLATE.
+# Al correr `fremi install` en un proyecto, se copia a:
+#     <project>/.fremi/settings/story/config.user.yaml
+#
+# El orquestador resuelve así en runtime:
+#   1. Lee `<project>/.fremi/settings/story/config.user.yaml` (versión del proyecto).
+#   2. Si no existe → fallback a `~/.fremi/framework/artifacts/story/config.user.yaml` (este template).
+#
+# Editar este archivo del framework cambia el DEFAULT que reciben proyectos
+# NUEVOS al instalar. Proyectos ya instalados usan su propio copy en
+# `.fremi/settings/story/`.
+# ---------------------------------------------------------------------------
+#
+# Este archivo NO contiene:
+#   - la secuencia canónica del workflow → `workflow.yaml`
+#   - las agent options estructuralmente válidas → `config.core.yaml`
+#   - las reglas globales aplicables → `rules/applies.yaml`
+# ===========================================================================
 
 active: true
 
 # ---------------------------------------------------------------------------
-# Execution mode — override opcional del default global (config.yaml)
+# Execution mode — override opcional del default global (settings/config.core.yaml)
 #
-# - `default`: modo por default para skills de esta capa cuando el usuario
-#   no pasa `--mode` en la invocación.
+# - `default`: modo por default para skills sueltos de esta capa cuando el
+#   usuario no pasa `--mode` en la invocación.
 # - `pipeline_default`: modo por default cuando se invoca /fremi-pipeline-story.
 #
 # Comentar/omitir todo este bloque para heredar del master.
@@ -35,7 +59,7 @@ execution_mode:
   pipeline_default: auto
 
   notes: >
-    Stories tienen 9 docs obligatorios + 2 condicionales.
+    Stories tienen 9 docs obligatorios + 2 condicionales (workflow.yaml → steps).
 
     - Skill suelto en `interactive`: la IA propone cada CA, cada SC, cada
       contrato SDD, cada elección de tech, cada TC, cada task-XXX antes de
@@ -46,131 +70,48 @@ execution_mode:
       steps y sin pausa dentro de cada step. Sólo se detiene por stop
       events reales.
     - Pipeline en `interactive`: los skills internos siguen escribiendo cada
-      doc completo (auto), pero la IA se detiene ENTRE cada FW-XX terminado
+      doc completo (auto), pero la IA se detiene ENTRE cada step terminado
       y pregunta si continúa al siguiente. Es el pipeline con checkpoints
       por doc — NUNCA reactiva el modo interactivo dentro de un sub-skill.
 
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Snapshot de los defaults del core (framework/artifacts/story/config.core.yaml).
-# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
-# Elegir un valor fuera de las opciones válidas es un error de configuración
-# (el step no se ejecuta hasta corregirlo).
+# Cada valor debe estar en `config.core.yaml → agent_matrix[<step>].options`.
+# Si el usuario elige un valor fuera de las opciones válidas → error de
+# configuración (el step no se ejecuta hasta corregirlo).
 #
-# Tipos: main | subagent | agent (ver header de core).
+# Los steps sin entry acá heredan `agent_matrix[<step>].default` del core.
+#
+# Tipos: main | subagent | agent (ver `config.core.yaml` header para detalle).
 # ---------------------------------------------------------------------------
 step_agents:
-  {workflow.explore}: subagent            # core options: [main, subagent, agent]
-  {workflow.definition}: main             # core options: [main]                  (no overridable)
-  {workflow.proposal}: main               # core options: [main]                  (no overridable)
-  {workflow.scope}: main                  # core options: [main]                  (no overridable)
-  {workflow.bdd}: subagent                # core options: [main, subagent, agent]
-  {workflow.sdd}: main                    # core options: [main, subagent, agent]
-  {workflow.design}: main                 # core options: [main]                  (no overridable)
-  {workflow.tdd}: subagent                # core options: [main, subagent, agent]
-  {workflow.plan}: main                   # core options: [main, subagent]
-  {workflow.checkwork}: main              # core options: [main]                  (no overridable)
-  apply: subagent                    # core options: [main, subagent, agent]
-  verify: subagent                   # core options: [main, subagent, agent]
-  closure-check: subagent            # core options: [main, subagent, agent]
-  {workflow.closure}: main                # core options: [main]                  (no overridable)
+  explore: subagent            # options: [main, subagent, agent]
+  definition: main             # options: [main]                  (no overridable)
+  proposal: main               # options: [main]                  (no overridable)
+  scope: main                  # options: [main]                  (no overridable)
+  bdd: subagent                # options: [main, subagent, agent]
+  sdd: main                    # options: [main, subagent, agent]
+  design: main                 # options: [main]                  (no overridable)
+  tdd: subagent                # options: [main, subagent, agent]
+  plan: main                   # options: [main, subagent]
+  apply: subagent              # options: [main, subagent, agent]
+  checkwork: main              # options: [main]                  (no overridable, single-writer)
+  verify: subagent             # options: [main, subagent, agent]
+  closure-check: subagent      # options: [main, subagent, agent]
+  closure: main                # options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
-# Docs de la capa
-# ---------------------------------------------------------------------------
-docs:
-  - name: explore
-    file: {workflow.explore}
-    required: conditional
-    condition_ref: explore_when
-    doc_type: snapshot
-    skill: /fremi-story-explore
-    phase: explore
-
-  - name: definition
-    file: {workflow.definition}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-definition
-    phase: definition
-
-  - name: proposal
-    file: {workflow.proposal}
-    required: conditional
-    condition_ref: proposal_when
-    doc_type: snapshot
-    skill: /fremi-story-proposal
-    phase: proposal
-
-  - name: scope
-    file: {workflow.scope}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-scope
-    phase: scope
-
-  - name: bdd-userstories
-    file: {workflow.bdd}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-bdd
-    phase: bdd
-
-  - name: sdd-spec
-    file: {workflow.sdd}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-sdd
-    phase: sdd
-
-  - name: design
-    file: {workflow.design}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-design
-    phase: design
-
-  - name: tdd-plan
-    file: {workflow.tdd}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-tdd
-    phase: tdd
-
-  - name: plan
-    file: {workflow.plan}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-plan
-    phase: tasks
-
-  - name: checkwork
-    file: {workflow.checkwork}
-    required: always
-    doc_type: living
-    lifecycle: live
-    skill: /fremi-story-checkwork
-    phase: apply
-
-  - name: closure
-    file: {workflow.closure}
-    required: always
-    doc_type: snapshot
-    skill: /fremi-story-closure
-    phase: closure
-
-# Fase verify — no tiene doc dedicado; su reporte va dentro de checkwork
-verify_phase:
-  dedicated_doc: false
-  phase: verify
-  skill: /fremi-story-verify
-  writes_to: {workflow.checkwork} (sección "Última corrida de verify")
-
-# ---------------------------------------------------------------------------
-# Reglas condicionales locales
+# Reglas condicionales locales — cuándo aplican los steps `required: conditional`
+# declarados en `workflow.yaml`. El campo `condition_ref` del step apunta
+# acá por nombre.
+#
+# Al arrancar la story el orquestador presenta estos criterios al usuario y
+# le pregunta si aplica al menos UNO. Si sí → el step es obligatorio para
+# esta story. Si no → se omite (no se crea placeholder).
 # ---------------------------------------------------------------------------
 conditional_rules:
+
   explore_when:
     description: >
       `explore` es OBLIGATORIO cuando aplica al menos UNA de las siguientes;
@@ -201,130 +142,19 @@ conditional_rules:
     empty_placeholder_allowed: true
 
 # ---------------------------------------------------------------------------
-# FLOW — secuencia canónica de la story
-# ---------------------------------------------------------------------------
-flow:
-  sequence:
-    - step: 0
-      skill: /fremi-story-explore
-      condition: "config.story.conditional_rules.explore_when aplica"
-      preconditions:
-        - "feature/definition.md existe con contenido"
-      produces: {workflow.explore}
-      versioning: snapshot con ancestor.version_at_creation = feature/definition@version
-
-    - step: 1
-      skill: /fremi-story-definition
-      preconditions:
-        - "feature/definition.md existe"
-      produces: {workflow.definition}
-
-    - step: 2
-      skill: /fremi-story-proposal
-      condition: "config.story.conditional_rules.proposal_when aplica"
-      preconditions:
-        - "{workflow.definition} completo (con CAs)"
-      produces: {workflow.proposal}
-
-    - step: 3
-      skill: /fremi-story-scope
-      preconditions:
-        - "{workflow.definition} completo"
-      produces: {workflow.scope}
-
-    - step: 4
-      skill: /fremi-story-bdd
-      preconditions:
-        - "FW-01 + FW-03 completos"
-      produces: {workflow.bdd}
-
-    - step: 5
-      skill: /fremi-story-sdd
-      preconditions:
-        - "FW-04 con SC-XXX (happy + borde)"
-      produces: {workflow.sdd}
-
-    - step: 6
-      skill: /fremi-story-design
-      preconditions:
-        - "FW-05 con contratos completos"
-      produces: {workflow.design}
-
-    - step: 7
-      skill: /fremi-story-tdd
-      preconditions:
-        - "FW-06 completo, Open Questions cerradas"
-      produces: {workflow.tdd}
-
-    - step: 8
-      skill: /fremi-story-plan
-      preconditions:
-        - "FW-07 con TCs mapeados"
-      produces: {workflow.plan}
-
-    - step: 9
-      skill: /fremi-story-checkwork
-      preconditions:
-        - "FW-08 con al menos 1 task"
-      produces: {workflow.checkwork} (living durante implementación)
-
-    # Iteración: /fremi-story-task agrega tasks a FW-08 + /fremi-story-checkwork las mueve durante implementación
-
-    - step: 10
-      skill: /fremi-story-verify
-      preconditions:
-        - "{workflow.checkwork} en 100%"
-      writes_to: {workflow.checkwork} (sección verify)
-
-    - step: 11
-      skill: /fremi-story-closure-check
-      preconditions:
-        - "/fremi-story-verify PASS o PASS WITH WARNINGS"
-      produces: reporte de gaps antes del sign-off
-
-    - step: 12
-      skill: /fremi-story-closure
-      preconditions:
-        - "/fremi-story-closure-check sin CRITICAL"
-      produces: {workflow.closure} firmado
-      side_effects:
-        - "Bumpea la feature padre según parent_bump_triggers.story_closes (Regla 17)"
-
-  # NOTA: la TOPOLOGÍA de paralelismo (qué steps pueden concurrir, qué items
-  # internos son paralelizables, qué instancias pueden convivir) vive en
-  # `~/.fremi/framework/artifacts/story/config.core.yaml` — es estructura del framework,
-  # no configuración de usuario. Este archivo (settings) sólo tiene el flag
-  # on/off de paralelismo (ver config.yaml master → parallelism.enabled).
-
-  # Transversales — durante toda la story
-  parallel_allowed:
-    - skill: /fremi-story-task
-      when: "agregar/refinar task-XXX en FW-08"
-      writes_to: {workflow.plan}
-      side_effects: ["Bumpea PATCH del FW-08"]
-
-    - skill: /fremi-story-checkwork
-      when: "arrancar/cerrar task-XXX o refrescar estado"
-      writes_to: {workflow.checkwork}
-      side_effects: ["Bumpea PATCH/MINOR del FW-09 (living)"]
-
-    - skill: /fremi-story-adr
-      when: "aparece decisión técnica local a la story (Regla 3b)"
-      produces: entries en HU-YY/decisions.md (delta que se merge al FT-XX al cerrar)
-
-    - skill: /fremi-story-bug
-      when: "bug local descubierto durante la story"
-      produces: HU-YY/bugs/BG-XX_<slug>.md
-
-    - skill: /fremi-enabler --story FT-XX/HU-YY
-      when: "trabajo técnico habilitador local a la story"
-      produces: HU-YY/enablers/EN-XX_<slug>/
-
-# ---------------------------------------------------------------------------
 # Referencias cruzadas
+#
+# `self` incluye ambas ubicaciones para explicitar dónde termina el archivo
+# post-install y dónde vive el template.
 # ---------------------------------------------------------------------------
 references:
+  self:
+    runtime: .fremi/settings/story/config.user.yaml               # PROYECTO (donde se lee en runtime)
+    framework_template: ~/.fremi/framework/artifacts/story/config.user.yaml  # ESTE archivo (template)
+  workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/story/config.core.yaml
+  applied_rules: ~/.fremi/framework/artifacts/story/rules/applies.yaml
   master_config: ~/.fremi/framework/settings/config.core.yaml
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
-  rules: ~/.fremi/framework/rules/workflow.md
+  rules_index: ~/.fremi/framework/rules/workflow.md
   orchestrator_skill: /fremi-story

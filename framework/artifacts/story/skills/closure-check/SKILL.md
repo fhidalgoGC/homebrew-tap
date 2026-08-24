@@ -1,7 +1,9 @@
 ---
 name: fremi-story-closure-check
-description: Audita el cierre de una user story ({workflow.closure}) y reporta gaps de trazabilidad. Úsalo antes de firmar el closure de una story, cuando el usuario diga que terminó una story, o cuando pregunte si "ya está lista" / "está cerrada" / "está done". Verifica que cada criterio, escenario BDD, contrato SDD y test esté trazado a código real.
+description: Audita el cierre de una user story (doc `closure`) y reporta gaps de trazabilidad. Úsalo antes de firmar el closure de una story, cuando el usuario diga que terminó una story, o cuando pregunte si "ya está lista" / "está cerrada" / "está done". Verifica que cada criterio de aceptación, escenario BDD, contrato SDD y test esté trazado a código real.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, criterios, escenarios, test cases, tasks) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-story-closure-check — Auditoría de cierre de user story
 
@@ -29,7 +31,7 @@ Reporta:
 1. Leer `~/.fremi/framework/settings/methodology.core.yaml`.
 2. Leer `~/.fremi/framework/settings/config.core.yaml`.
 3. Extraer de `methodology.core.yaml`:
-   - `wf_items = identifiers.workflow_doc.items[]` — lista de los 11 docs (FW-00..FW-10) con sus `filename`, `role`, `principio`, `required` y `condition_ref`. Estos son los nombres a leer en el Paso 2.
+   - `wf_items = identifiers.workflow_doc.items[]` — lista de los docs de la story (por default 11: `explore`..`closure`) con sus `filename`, `role`, `principio`, `required` y `condition_ref`. Estos son los nombres a leer en el Paso 2.
    - `layers.story.files_in_order` + `layers.story.conditional_files` — orden canónico y qué archivos son opcionales.
    - `identifiers.criterion`, `identifiers.scenario`, `identifiers.test_case`, `identifiers.task` — para parsear IDs internos.
    - `identifiers.adr` — para buscar ADRs aplicables.
@@ -56,7 +58,7 @@ Iterar `wf_items` (del JSON) en orden y leer cada `item.filename` de la carpeta 
 |---|---|---|---|
 | `explore` | `{workflow.explore}` | Condicional | Si existe: hallazgos, alternativas listadas, decisiones que habilita/bloquea |
 | `definition` | `{workflow.definition}` | Siempre | Criterios de aceptación (IDs según `identifiers.criterion.regex`) |
-| `proposal` | `{workflow.proposal}` | Condicional | Si existe: Intent, Approach elegido, Decisions (referencias a ADR-XXX), Impact, Risk |
+| `proposal` | `{workflow.proposal}` | Condicional | Si existe: Intent, Approach elegido, Decisions (referencias a ADRs), Impact, Risk |
 | `scope` | `{workflow.scope}` | Siempre | Listas In-scope / Out-of-scope / dependencias |
 | `bdd-userstories` | `{workflow.bdd}` | Siempre | Escenarios Gherkin (`Scenario:` con IDs según `identifiers.scenario.regex`) |
 | `sdd-spec` | `{workflow.sdd}` | Siempre | Contratos externos (endpoints, schemas, códigos/errores expuestos) |
@@ -131,7 +133,7 @@ Por cada tarea `T-XXX` en `{workflow.plan}`:
 Antes de declarar la story DONE, verificar que **no haya divergencia silenciosa** con producto/feature:
 
 - Restricciones del `{workflow.scope}` que sean transversales y no estén en `product/definition.md` → gap.
-- Decisiones técnicas del `{workflow.design}` o tareas del `{workflow.plan}` que apliquen a más de una story y no tengan ADR en `product/decisions.md` o `FT-XX/decisions.md` → gap.
+- Decisiones técnicas del `{workflow.design}` o tareas del `{workflow.plan}` que apliquen a más de una story y no tengan ADR en `product/decisions.md` o en el doc `decisions` de la feature → gap.
 - Capacidades referenciadas en BDD/SDD que no estén declaradas en `product/definition.md` (In-scope) o `feature/definition.md` (Alcance) → gap.
 - Términos transversales sin glosario → gap menor.
 
@@ -153,11 +155,11 @@ Si no existe: reportar como gap principal y proponer un esqueleto.
 
 Consultar `config.yaml → versioning.parent_bump_triggers.story_closes` para saber qué padres deben haberse bumpeado al firmar. Auditar:
 
-1. **`FT-XX/definition.md` (o `FT-XX/spec.md` cuando exista como living)** — comparar la versión actual con la registrada en `ancestor.version_at_creation` del `{workflow.closure}`. Si la story:
+1. **Doc `definition` de la feature (o doc `spec` de la feature cuando exista como living)** — comparar la versión actual con la registrada en `ancestor.version_at_creation` del `{workflow.closure}`. Si la story:
    - Agregó requirements nuevos → esperado MINOR bump del living spec del padre.
    - Modificó requirements existentes → esperado MAJOR bump.
    - Sólo aclaró → esperado PATCH (o sin bump).
-2. **`FT-XX/decisions.md` (cuando exista como living)** — si la story tiene ADRs nuevos, esperar MINOR bump por cada ADR.
+2. **Doc `decisions` de la feature (cuando exista como living)** — si la story tiene ADRs nuevos, esperar MINOR bump por cada ADR.
 3. **Frontmatter del `{workflow.closure}`** — `ancestor.version_at_closure` debe estar rellenado con la versión final del padre.
 4. **Changelog del padre** — cada bump debe tener entry apuntando a esta story como origen.
 
@@ -189,7 +191,8 @@ Formato del reporte:
 ✅ Sincronía con capas superiores (Regla 12): N divergencias detectadas
 
 ### Gaps detectados
-1. Criterio CA-3 no aparece en la matriz de {workflow.closure}
+# (ejemplo — el ID concreto del criterio sale de identifiers.criterion en methodology.core.yaml)
+1. Criterio #3 no aparece en la matriz de {workflow.closure}
 2. Scenario "Usuario sube archivo corrupto" no tiene test asociado
 3. Contrato GET /reports/:id no encontrado en código
 4. {workflow.tdd} tiene 2 items sin marcar:

@@ -8,7 +8,7 @@ since: 2026-08-05
 # al framework).
 #
 # Reverse-engineering es una VÍA FORMAL de alineación — no procedimiento
-# excepcional. Ver Regla 25 en ~/.fremi/framework/rules/reverse.md.
+# excepcional. Ver Regla 25 en ~/.fremi/framework/reverse-engineering/rules/reverse.md.
 #
 # Este archivo declara:
 #   - Skills disponibles (6) y pipelines (4).
@@ -236,7 +236,7 @@ pipeline_exclusions:
     reason: "Un archivo — el skill directo alcanza."
 
 # ---------------------------------------------------------------------------
-# Fases del flujo reverse (declaradas — descritas en flow.reverse.md)
+# Fases del flujo reverse (declaradas — descritas en reverse-engineering/flow.md)
 # ---------------------------------------------------------------------------
 flow:
   phases:
@@ -407,8 +407,8 @@ references:
   master_config: ~/.fremi/framework/settings/config.core.yaml
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
   rules_forward: ~/.fremi/framework/rules/workflow.md
-  rules_reverse: ~/.fremi/framework/rules/reverse.md   # Reglas 25-32
-  flow: ~/.fremi/framework/flows/flow.reverse.md
+  rules_reverse: ~/.fremi/framework/reverse-engineering/rules/reverse.md   # Reglas 25-32
+  flow: ~/.fremi/framework/reverse-engineering/flow.md
   skills_dir: ~/.fremi/framework/reverse-engineering/
   pipelines_dir: ~/.fremi/framework/pipelines/
   hook_alignment: ~/.fremi/framework/hooks/check-reverse-alignment.sh

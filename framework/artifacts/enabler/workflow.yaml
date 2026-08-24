@@ -1,0 +1,214 @@
+schema: framework-layer-workflow
+schema_version: 1
+layer: enabler
+since: 2026-08-10
+
+# ===========================================================================
+# WORKFLOW — capa ENABLER
+#
+# Fuente de verdad ÚNICA de la secuencia canónica del enabler.
+# El orquestador (/fremi-enabler) y su pipeline leen este archivo para saber:
+#   - qué steps existen
+#   - qué doc produce cada uno
+#   - qué template usar
+#   - qué precondiciones tiene (DAG)
+#   - qué consume del padre/steps previos
+#   - qué skill invocar
+#   - qué steps pueden correr en paralelo (can_run_with)
+#   - qué versionado aplica al doc que produce
+#
+# Este archivo NO contiene:
+#   - qué agente ejecuta cada step (main/subagent/agent) → config.core.yaml
+#   - la elección del usuario para agentes o modo → config.user.yaml
+#   - reglas globales que aplican al ejecutar cada step → rules/applies.yaml
+#
+# MULTI-SCOPE: un enabler puede vivir en 3 scopes (global / feature / story).
+# El scope se declara al invocar el orquestador con --feature o --story.
+# El DAG es IDÉNTICO en los 3 scopes — sólo varía la ubicación física del
+# folder y cuál es el padre cuyos docs se leen como `requires_complete[0]`.
+# La resolución del padre concreto ocurre en runtime vía config.user.yaml y
+# methodology.core.yaml — no se ramifica el DAG acá.
+#
+# Docs referenciados vía tokens `{enabler.<id>}` — resuelven a filename real
+# desde `~/.fremi/framework/settings/methodology.core.yaml`
+# (layers.enabler.files_in_order[]).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# STEPS — secuencia canónica del enabler (cadena liviana de 4 docs)
+#
+# Cada step declara:
+#   - id: nombre corto, único (usado como key en config.core/user.yaml)
+#   - order: posición en la secuencia (para render y sorting)
+#   - skill: skill invocable que ejecuta el step
+#   - phase: nombre lógico de la fase (para agrupar métricas)
+#   - produces: doc que resulta (token `{enabler.<id>}` o "N/A")
+#   - doc_type: snapshot | living | none
+#   - required: always (enabler no tiene steps condicionales)
+#   - requires_complete: precondiciones duras (DAG). Padre + steps previos.
+#   - consumes: qué información se lee de los predecesores (para razonar contexto)
+#   - can_run_with: skills transversales que pueden concurrir mientras corre este step
+#   - template: path al template canónico (relativo al skill dueño)
+#   - versioning: nota sobre el schema de versionado del doc producido
+#   - reason: por qué existe la precondición
+# ---------------------------------------------------------------------------
+steps:
+
+  - id: definition
+    order: 0
+    skill: /fremi-enabler-definition
+    phase: definition
+    produces: "{enabler.definition}"
+    doc_type: snapshot
+    required: always
+    requires_complete:
+      - "padre existe según scope (product/definition.md | {feature.definition} | {story.definition})"
+    consumes:
+      - "doc `definition` del padre (según scope) — para vincular qué features/stories dependen del enabler"
+      - "product/definition.md — restricciones globales aplicables"
+    can_run_with: []
+    template: skills/definition/references/{enabler.definition}-template.md
+    versioning: "snapshot con ancestor.version_at_creation = padre@version al momento de crear"
+    reason: >
+      Primer doc de la cadena. Requiere el padre según scope declarado al
+      invocar (--global / --feature / --story). Sin padre no se puede
+      vincular el enabler a las features/stories que habilita (Regla 1).
+
+  - id: design
+    order: 1
+    skill: /fremi-enabler-design
+    phase: design
+    produces: "{enabler.design}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [definition]
+    consumes:
+      - "{enabler.definition} — qué habilita, criterios técnicos de aceptación"
+      - "product/decisions.md — ADRs globales que restringen tech"
+      - "product/strategies.md — stack global aplicable"
+    can_run_with:
+      - /fremi-product-adr
+      - /fremi-feature-adr
+      - /fremi-story-adr
+    template: skills/design/references/{enabler.design}-template.md
+    versioning: "snapshot"
+    reason: >
+      Sin el doc `definition` no hay contra qué diseñar. Bifurcaciones
+      técnicas durante el design disparan ADRs en el scope correcto
+      (Regla 3b) — pueden escribirse en paralelo con el resto del design.
+
+  - id: plan
+    order: 2
+    skill: /fremi-enabler-plan
+    phase: tasks
+    produces: "{enabler.plan}"
+    doc_type: snapshot
+    required: always
+    requires_complete: [design]
+    consumes:
+      - "{enabler.design} — decisiones técnicas + estructura para descomponer en tasks"
+    can_run_with: []
+    template: skills/plan/references/{enabler.plan}-template.md
+    versioning: "snapshot con tasks atómicas y criterios verificables (Regla 7b)"
+    reason: >
+      Sin design (elección de tech + estructura) no hay unidad de trabajo.
+      El plan descompone el design en tasks con criterios verificables
+      (Regla 7b). Aplica también Regla 18 (cada task es un step invocable).
+
+  - id: apply
+    order: 3
+    skill: null                 # apply es fase de ejecución sin doc dedicado — usa tasks del plan
+    phase: apply
+    produces: N/A
+    doc_type: none
+    required: always
+    requires_complete: [plan]
+    consumes:
+      - "{enabler.plan} — cola de tasks a ejecutar (respetando depends_on)"
+      - "{enabler.design} — decisiones para implementar cada task"
+    can_run_with:
+      - /fremi-product-adr
+      - /fremi-feature-adr
+      - /fremi-story-adr
+    template: null
+    versioning: "N/A — apply no produce doc; ejecuta tasks del plan"
+    reason: >
+      Sin plan no hay tasks para ejecutar. El orquestador serializa las
+      tasks respetando depends_on; bifurcaciones durante apply disparan
+      ADRs en el scope correcto (Regla 3b).
+
+  - id: closure
+    order: 4
+    skill: /fremi-enabler-closure
+    phase: closure
+    produces: "{enabler.closure}"
+    doc_type: snapshot
+    required: always
+    requires_complete:
+      - "todas las tasks del doc `plan` en [x]"
+      - "criterios técnicos del doc `definition` verificados"
+    consumes:
+      - "{enabler.plan} — evidencia de tasks cerradas"
+      - "{enabler.definition} — criterios técnicos a verificar en el sign-off"
+      - "padre (según scope) — versión actual para bumpear (Regla 17)"
+    can_run_with: []
+    template: skills/closure/references/{enabler.closure}-template.md
+    versioning: "snapshot con ancestor.version_at_closure = padre@nueva-versión post-bump (Regla 17)"
+    side_effects:
+      - "Bumpea el padre (product/plan.md, {feature.definition} o {story.definition}) según parent_bump_triggers.enabler_closes (Regla 17)"
+    reason: >
+      Precondiciones duras: 100% tasks del doc `plan` cerradas + criterios
+      técnicos del doc `definition` verificados. Firma final + bump del
+      padre. Sin doc `closure` firmado el enabler sigue abierto.
+
+# ---------------------------------------------------------------------------
+# PARALLEL ALLOWED — transversales que pueden invocarse durante TODO el
+# ciclo de vida del enabler (fuera del DAG de steps). No aparecen en
+# `steps[]` porque no tienen orden fijo — se disparan cuando el trabajo
+# los amerita.
+# ---------------------------------------------------------------------------
+parallel_allowed:
+
+  - skill: /fremi-product-adr
+    when: "decisión técnica del enabler que aplica a múltiples features / stack global (Regla 3b)"
+    writes_to: product/decisions.md
+    side_effects:
+      - "Bumpea MINOR de product/decisions.md (living)"
+      - "Numeración de ADR global al proyecto — serializar para evitar colisiones"
+
+  - skill: /fremi-feature-adr
+    when: "decisión técnica del enabler local a UNA feature (scope feature o story — Regla 3b)"
+    writes_to: "doc `decisions` de la feature padre"
+    filename_source: "methodology.core.yaml → layers.feature.decisions_filename"
+    side_effects:
+      - "Bumpea MINOR del doc `decisions` de la feature"
+
+  - skill: /fremi-story-adr
+    when: "decisión técnica del enabler local a UNA story (scope story — Regla 3b)"
+    writes_to: "doc `decisions` de la story padre"
+    side_effects:
+      - "Delta que se merge al doc `decisions` de la feature al cerrar la story (Regla 17)"
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# Resolución de paths:
+#   - `config.core.yaml`, `workflow.yaml`, `rules/applies.yaml` viven SÓLO en el
+#     framework (`~/.fremi/framework/artifacts/<capa>/`) — el usuario NO los edita.
+#   - `config.user.yaml` es user-editable: runtime lee del PROYECTO
+#     (`<project>/.fremi/settings/<capa>/config.user.yaml`). Si no existe,
+#     fallback al TEMPLATE del framework
+#     (`~/.fremi/framework/artifacts/<capa>/config.user.yaml`).
+#   - `fremi install` copia el template del framework al proyecto en la
+#     instalación inicial.
+# ---------------------------------------------------------------------------
+references:
+  agent_matrix: ~/.fremi/framework/artifacts/enabler/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/enabler/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/enabler/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/enabler/rules/applies.yaml
+  methodology: ~/.fremi/framework/settings/methodology.core.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml
+  rules_index: ~/.fremi/framework/rules/workflow.md
+  orchestrator_skill: /fremi-enabler

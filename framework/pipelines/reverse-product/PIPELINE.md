@@ -7,7 +7,7 @@ description: Pipeline de auto-ejecución de la VÍA REVERSE para la capa PRODUCT
 
 **⚠️ Este es el pipeline más ambicioso y de mayor riesgo del framework.** Reconstruye la capa producto entera a partir de features/stories existentes + código + docs sueltos. Riesgo declarado **alto** en `config.reverse.yaml → skills[fremi-reverse-product].risk: high` por potencial de racionalización post-hoc (inventar iniciativas que "justifiquen" el producto ya construido).
 
-**Fuente de verdad:** [`config.reverse.yaml`](../../settings/config.reverse.core.yaml) + [`flow.reverse.md`](../../flows/flow.reverse.md) + [`rules/reverse.md`](../../rules/reverse.md).
+**Fuente de verdad:** [`config.reverse.yaml`](../../settings/config.reverse.core.yaml) + [`reverse-engineering/flow.md`](../../reverse-engineering/flow.md) + [`rules/reverse.md`](../../reverse-engineering/rules/reverse.md).
 
 ## Sintaxis
 
@@ -121,7 +121,7 @@ docs/works/product/
 ## Referencias
 
 - [`config.reverse.yaml`](../../settings/config.reverse.core.yaml)
-- [`rules/reverse.md`](../../rules/reverse.md) — Regla 25-32.
-- [`flow.reverse.md`](../../flows/flow.reverse.md)
+- [`rules/reverse.md`](../../reverse-engineering/rules/reverse.md) — Regla 25-32.
+- [`reverse-engineering/flow.md`](../../reverse-engineering/flow.md)
 - Sub-pipeline: [`/fremi-pipeline-reverse-feature`](pipeline.reverse.feature.md)
 - Skill suelto: [`/fremi-reverse-product`](../../reverse-engineering/reverse-product/SKILL.md)

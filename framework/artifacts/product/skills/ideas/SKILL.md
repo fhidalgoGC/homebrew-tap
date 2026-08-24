@@ -3,6 +3,8 @@ name: fremi-product-ideas
 description: Puebla o extiende `docs/works/product/ideas.md` con brainstorm sin filtro de enfoques para las iniciativas declaradas. Doc living. Es el 2º paso de discovery. No se decide nada acá — sólo se abren opciones. La elección va en `/fremi-product-planteamiento`.
 ---
 
+> **Nota sobre identificadores:** los prefijos concretos (iniciativa, feature, story) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
 # /fremi-product-ideas — Discovery: brainstorm de enfoques
 
 Extiende `docs/works/product/ideas.md` con **ideas exploradas** — enfoques posibles para abordar las iniciativas de `iniciativas.md`. Brainstorm **sin filtro**.
@@ -33,7 +35,7 @@ Extiende `docs/works/product/ideas.md` con **ideas exploradas** — enfoques pos
 - `config.yaml` → `phase_rules.definition` (aplica también para ideas discovery).
 
 ### Paso 1 — Precondiciones (Regla 1)
-- `iniciativas.md` debe existir con contenido real (al menos 1 init-XXX Aceptada).
+- `iniciativas.md` debe existir con contenido real (al menos 1 iniciativa Aceptada).
 
 ### Paso 2 — Cargar template
 - `references/ideas-template.md`.
@@ -42,7 +44,7 @@ Extiende `docs/works/product/ideas.md` con **ideas exploradas** — enfoques pos
 
 Cada idea:
 - Descripción (2-4 líneas).
-- Iniciativas que aborda (referencia a init-XXX).
+- Iniciativas que aborda (referencia a la iniciativa).
 - Pros / Contras.
 - Riesgo estimado.
 - Estado (Abierta / Descartada / Elegida / Fusionada).
@@ -62,7 +64,7 @@ Doc **living**:
 - Sugerir `/fremi-product-planteamiento` cuando haya masa crítica (3-5 ideas) para elegir.
 
 ## Validaciones
-- Cada idea referencia al menos 1 init-XXX existente.
+- Cada idea referencia al menos 1 iniciativa existente.
 - Al menos 3-5 ideas antes de pasar a planteamiento (si sólo hay 1, falta divergencia).
 
 ## Anti-patrones

@@ -7,7 +7,7 @@ since: 2026-07-13
 # ---------------------------------------------------------------------------
 # Configuración operativa de BUG con scope FEATURE.
 # Un bug de este tipo vive DENTRO de una feature (transversal a stories).
-# Archivo único BG-XX_<slug>.md.
+# Archivo único (filename derivado de identifiers.bug.filename_format).
 #
 # Cuándo se usa: bug transversal a múltiples stories de la feature, o que
 # afecta el contrato de feature sin trazar limpio a UNA story específica.
@@ -22,17 +22,17 @@ single_file: true
 # ---------------------------------------------------------------------------
 location: docs/works/features/{feature_folder}/bugs/{filename}
 skill: /fremi-feature-bug
-invocation: "/fremi-feature-bug FT-XX <slug>"
-numbering: local_to_feature   # cada feature arranca desde BG-01 en su carpeta bugs/
+invocation: "/fremi-feature-bug <FEATURE_ID> <slug>"
+numbering: local_to_feature   # cada feature arranca desde el primer ID disponible en su carpeta bugs/
 
 when_to_use:
   - "El bug es transversal a varias stories de la feature (no encaja en una sola)."
-  - "El bug afecta el contrato/spec vivo de la feature (`FT-XX/spec.md` cuando exista) o su definition."
+  - "El bug afecta el contrato/spec vivo de la feature (doc `spec` cuando exista) o su definition."
   - "El bug se detectó DESPUÉS de que múltiples stories de la feature ya cerraron y no tiene sentido reabrir una específica."
 
 when_not_to_use:
   - "El bug encaja claramente en UNA story existente → usar `/fremi-story-bug` (`config.bug.story.yaml`)."
-  - "El bug es transversal a MÚLTIPLES features → NO es bug de feature. Escalar a story nueva de producto o `EX-NN`."
+  - "El bug es transversal a MÚLTIPLES features → NO es bug de feature. Escalar a story nueva de producto o a un extra global."
   - "Es un cambio de spec consciente → Regla 10 (actualizar spec + ADR)."
 
 # ---------------------------------------------------------------------------
@@ -96,12 +96,12 @@ flow:
   sequence:
     - step: 1
       skill: /fremi-feature-bug
-      action: registrar bug de feature (crear BG-XX_<slug>.md)
+      action: registrar bug de feature (crear archivo de bug con filename derivado de identifiers.bug.filename_format)
       preconditions:
-        - "Feature existe con FT-XX/definition.md (y FT-XX/spec.md si ya se implementó living-spec)"
+        - "Feature existe con doc definition (y doc spec si ya se implementó living-spec)"
         - "El comportamiento incorrecto contradice contratos declarados a nivel feature (no atribuible limpio a UNA story)"
-      produces: docs/works/features/{feature_folder}/bugs/BG-XX_<slug>.md
-      versioning: snapshot con ancestor.id = FT-XX, version_at_creation = feature@version
+      produces: docs/works/features/{feature_folder}/bugs/{filename}
+      versioning: snapshot con ancestor.id = {feature_id}, version_at_creation = feature@version
       agent:
         options: [main, subagent, agent]
         default: main

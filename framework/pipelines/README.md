@@ -156,9 +156,9 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 
 | Pipeline | Archivo | Capa | Corre |
 |---|---|---|---|
-| `/fremi-pipeline-product` | [`pipeline.product.md`](pipeline.product.md) | PRODUCTO | iniciativas → ideas → planteamiento → definition → strategies → plan |
-| `/fremi-pipeline-feature` | [`pipeline.feature.md`](pipeline.feature.md) | FEATURE | definition (+ decisions si aplica) |
-| `/fremi-pipeline-story` | [`pipeline.story.md`](pipeline.story.md) | STORY | FW-00..FW-08 (los 9 docs de planificación, no ejecuta código) |
+| `/fremi-pipeline-product` | [`product/PIPELINE.md`](product/PIPELINE.md) | PRODUCTO | Ciclo completo: iniciativas → ideas → planteamiento → definition → strategies → decisions → plan |
+| `/fremi-pipeline-feature` | [`feature/PIPELINE.md`](feature/PIPELINE.md) | FEATURE | Ciclo completo: definition + lifecycle (encadena `/fremi-pipeline-story` por cada seed) |
+| `/fremi-pipeline-story` | [`story/PIPELINE.md`](story/PIPELINE.md) | STORY | Ciclo completo (14 steps): FW-00..FW-08 + apply autónomo (TDD) + verify + closure-check + closure firmado |
 
 ### Reverse — vía de alineación de código pre-existente (Reglas 25-32)
 
@@ -172,8 +172,8 @@ Un pipeline **crea el andamio Y llena cada doc** de forma autónoma, invocando l
 **Bug y Extra reverse son 1 archivo** — sin pipeline propio; se invocan los skills sueltos: `/fremi-reverse-bug`, `/fremi-reverse-extra`.
 
 **Config operativa reverse:** [`../settings/config.reverse.core.yaml`](../settings/config.reverse.core.yaml).
-**Reglas específicas reverse:** [`../rules/reverse.md`](../rules/reverse.md).
-**Flow reverse:** [`../flows/flow.reverse.md`](../flows/flow.reverse.md).
+**Reglas específicas reverse:** [`../reverse-engineering/rules/reverse.md`](../reverse-engineering/rules/reverse.md).
+**Flow reverse:** [`../reverse-engineering/flow.md`](../reverse-engineering/flow.md).
 
 ---
 

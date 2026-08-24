@@ -1,0 +1,244 @@
+schema: framework-layer-rules-applies
+schema_version: 1
+layer: enabler
+since: 2026-08-10
+
+# ===========================================================================
+# APPLIES — reglas que aplican durante la ejecución del enabler.
+#
+# Este archivo NO contiene el texto de las reglas — sólo POINTERS.
+#
+# CRITERIO DE UBICACIÓN:
+#   - Reglas DOMAIN-específicas de enabler → viven en este mismo folder
+#     (`~/.fremi/framework/artifacts/enabler/rules/*.md`).
+#   - Reglas CROSS-domain (que aplican a más de un artifact) → viven en
+#     `~/.fremi/framework/rules/*.md`.
+#
+# El orquestador carga SÓLO los archivos referenciados acá cuando corre un
+# enabler — no toda la carpeta global de rules. Así se aísla el dominio.
+#
+# ESTRUCTURA:
+#   - transversal            → cargadas SIEMPRE durante todo el workflow
+#   - per_step               → cargadas al ejecutar el step específico del DAG
+#   - parallel_allowed_skills → cargadas al invocar skills transversales que
+#                              corren fuera del DAG principal (ver `../workflow.yaml
+#                              → parallel_allowed`)
+#
+# Nota: si una regla aparece en `transversal` Y en un `per_step`/`parallel_allowed_skills`,
+# el orquestador dedupplica (una sola carga por sesión) — repetir la referencia es
+# válido y sirve para hacer explícito el énfasis contextual.
+#
+# Los IDs de step deben existir en `../workflow.yaml → steps[].id`.
+# Los skills de `parallel_allowed_skills` deben existir en `../workflow.yaml → parallel_allowed[].skill`.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TRANSVERSAL — reglas activas durante todo el workflow enabler.
+# ---------------------------------------------------------------------------
+transversal:
+
+  # ---------- GLOBAL (cross-domain) ----------
+  - rules_file: ~/.fremi/framework/rules/hierarchy.md
+    rules: [R1]
+    scope: global
+    note: >
+      No saltar etapas. Validar que el padre según scope existe con contenido
+      real antes de crear el doc `definition` del enabler. Sin padre →
+      avisar al usuario y proponer completar primero el doc del padre.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter obligatorio + bump del padre + rastreo ancestral.
+      Aplican a TODO doc creado/editado durante el workflow enabler.
+      Los 4 docs son snapshot; al firmar el doc `closure`, bumpear el
+      padre según parent_bump_triggers.enabler_closes.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      R10: docs son fuente de verdad — si la implementación del enabler
+      diverge de lo especificado en el doc `design`, actualizar el doc + ADR.
+      R12: sync-back bidireccional — si durante el enabler se descubre algo
+      que pertenece a una capa superior (ej: capacidad transversal, ADR global),
+      actualizar la capa superior PRIMERO.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      R3: toda decisión técnica del enabler genera un ADR en el scope correcto.
+      R3b: bifurcación → pausar → opciones al usuario → decidir → ADR → continuar.
+      R20: elegir scope correcto (producto/feature/story) para el ADR; si la
+      decisión aplica más allá del scope del enabler → promover al scope superior.
+
+  # ---------- DOMAIN (enabler-específico) ----------
+  - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+    rules: [R15-enabler]
+    scope: enabler
+    note: >
+      Cuándo crear un enabler (criterios de activación), cuándo NO es enabler
+      (vs feature/story/extra), ubicación por scope, estructura de 4 docs,
+      procedimiento de cierre. Aplica durante todo el ciclo de vida del enabler.
+
+# ---------------------------------------------------------------------------
+# PER-STEP — reglas específicas de un step del workflow.
+# ---------------------------------------------------------------------------
+per_step:
+
+  definition:
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Frontmatter obligatorio al crear el doc `definition`: version 1.0.0,
+        created/last_updated, doc_type: snapshot, ancestor.id según scope del
+        enabler, ancestor.version_at_creation = padre@version al momento de crear.
+
+    - rules_file: ~/.fremi/framework/rules/sync-back.md
+      rules: [R12]
+      scope: global
+      note: >
+        Al escribir el doc `definition`, verificar que la capacidad que habilita
+        el enabler esté referenciada (o sea coherente) con la capa superior:
+        product/definition.md, doc `definition` de la feature, o doc `definition`
+        de la story. Si la capacidad habilitada tiene alcance más amplio que el
+        scope del enabler → sync-back primero.
+
+    - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+      rules: [R15-enabler]
+      scope: enabler
+      note: >
+        Verificar que el enabler cumple el criterio de activación antes de crear
+        el doc `definition`: ¿bloquea o degrada al menos una feature/story si no
+        se hace? Si no cumple → puede ser `extra/` (Regla 14) o feature/story.
+
+  design:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Design del enabler es la capa con MÁS bifurcaciones técnicas. Cada
+        elección de librería / IaC tool / capa / pattern dispara Regla 3b:
+        pausar, presentar 2-3 opciones, esperar decisión del usuario, crear
+        ADR en el scope correcto, continuar.
+
+    - rules_file: ~/.fremi/framework/rules/sync-back.md
+      rules: [R10]
+      scope: global
+      note: >
+        El doc `design` es la spec interna del enabler. Si durante apply el
+        código diverge del design → actualizar el doc `design` + ADR (R10).
+
+  plan:
+    - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+      rules: [R15-enabler]
+      scope: enabler
+      note: >
+        El doc `plan` es lista de tasks atómicas con criterios verificables (Regla
+        7b aplicada al enabler): cada task tiene objetivo, mapeo al doc `design`,
+        DoD verificable (comando/script/output), y estado. Identificador de task
+        configurable en methodology.core.yaml → identifiers.task.
+
+  apply:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Si durante apply aparece una bifurcación no prevista en el doc `design`
+        → pausar, actualizar el doc `design` (R10), crear ADR si corresponde, y
+        continuar. El subagente NO decide bifurcaciones.
+
+  closure:
+    - rules_file: ~/.fremi/framework/artifacts/enabler/rules/enabler-lifecycle.md
+      rules: [R15-enabler]
+      scope: enabler
+      note: >
+        Precondiciones duras del cierre: 100% tasks del doc `plan` en estado
+        completado + criterios técnicos del doc `definition` verificados. Sin
+        estas condiciones → el enabler no puede cerrarse.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Bump del padre según parent_bump_triggers.enabler_closes (Regla 17).
+        Registrar ancestor.version_at_closure en el frontmatter del doc `closure`.
+        La operación es obligatoria antes de firmar — el cierre sin bump del
+        padre es inválido.
+
+# ---------------------------------------------------------------------------
+# PARALLEL_ALLOWED_SKILLS — reglas al invocar skills transversales (fuera del DAG).
+# Estos skills se disparan bajo demanda durante todo el enabler y tienen sus
+# propias reglas aplicables independientes del step en curso.
+# ---------------------------------------------------------------------------
+parallel_allowed_skills:
+
+  /fremi-product-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Decisión técnica del enabler que aplica a múltiples features o al stack
+        global → ADR en product/decisions.md. Numeración de ADR global al
+        proyecto — formato configurable en methodology. Single-writer sobre
+        product/decisions.md para evitar colisiones de numeración.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar un ADR a product/decisions.md se bumpea MINOR (living).
+        Registrar changelog entry con origen = step del enabler donde nació.
+
+  /fremi-feature-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Decisión técnica del enabler local a UNA feature → ADR en el doc
+        `decisions` de la feature. Elegir scope correcto (R20): si la decisión
+        trasciende la feature → promover a product. Numeración global al proyecto.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar ADR al doc `decisions` de la feature se bumpea MINOR (living).
+        Si el doc no existe → crearlo con frontmatter completo antes de agregar.
+
+  /fremi-story-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Decisión técnica del enabler con scope story → ADR como delta en el doc
+        `decisions` de la story. Se mergea al doc `decisions` de la feature al
+        cerrar la story (Regla 17). Numeración global al proyecto.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        ADR de story-scope bumpea el doc `decisions` delta de la story.
+        Al cierre de la story, el delta se mergea + se bumpea el doc `decisions`
+        de la feature (Regla 17).
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`) con fallback al template del
+# framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/enabler/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/enabler/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/enabler/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/enabler/config.user.yaml  # FALLBACK / template inicial
+  domain_rules_dir: ~/.fremi/framework/artifacts/enabler/rules/     # reglas domain-específicas
+  global_rules_dir: ~/.fremi/framework/rules/                       # reglas cross-domain
+  rules_index: ~/.fremi/framework/rules/workflow.md

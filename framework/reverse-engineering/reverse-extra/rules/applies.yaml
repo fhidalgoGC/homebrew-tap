@@ -1,0 +1,79 @@
+schema: framework-reverse-skill-rules-applies
+schema_version: 1
+skill: fremi-reverse-extra
+since: 2026-08-11
+mode: reverse
+
+# ===========================================================================
+# APPLIES — reglas que el skill reverse-extra enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+#
+# Nota sobre extra vs otros artifacts:
+#   extra/ no tiene skills de forward — reverse-extra es la ÚNICA forma
+#   programática de crear un EX-NN (config.extra.yaml → flow.sequence: []).
+#   No hay pipeline de reverse para extra — se invoca el skill directamente.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/extra/rules/applies.yaml
+  note: >
+    El skill reverse reconstruye un doc del artifact extra. Las reglas del
+    artifact aplican al RESULTADO — pero se completan con reverse-specific
+    rules (R25-R32) que gobiernan la reconstrucción.
+
+# ---------------------------------------------------------------------------
+# Rules específicas del skill reverse
+# ---------------------------------------------------------------------------
+skill_rules:
+  - rules_file: ~/.fremi/framework/reverse-engineering/reverse-extra/rules/stop-events.md
+    scope: reverse-skill
+    note: >
+      Stop events específicos de este skill reverse: cohesión del trabajo a
+      documentar (múltiples conceptos → múltiples docs), validación de que el
+      trabajo genuinamente es extra (no feature/story/enabler — Regla 14),
+      numeración del próximo doc a asignar.
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+    rules: [R25, R26, R27, R28, R29, R30, R31, R32]
+    scope: global
+    note: >
+      Régimen completo de reverse. R26 (transparent default), R27 (preguntas
+      dirigidas para gaps — concepto cohesivo, validación de qué NO es el trabajo),
+      R28 (no reemplaza revisión humana), R29 (N/A para extra — Regla 8 aplica
+      sólo a bugs), R30 (R17 sí aplica con timestamps inferidos del git history).
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr reverse.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      R17 aplica en reverse (R30). Los docs extra son snapshots con
+      ancestor.id: global (sin padre estructural que bumpear). Timestamps
+      inferidos del git history del trabajo documentado.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      ADRs reconstruidos deben respetar R3/R3b/R20. Si el trabajo extra
+      implicó decisiones técnicas referenciales (ej: elección de tooling) →
+      sugerir ADR en el scope correcto (Regla 20).
+
+references:
+  artifact_applies: ~/.fremi/framework/artifacts/extra/rules/applies.yaml
+  reverse_rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  reverse_config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  reverse_flow: ~/.fremi/framework/reverse-engineering/flow.md
+  skill_doc: ~/.fremi/framework/reverse-engineering/reverse-extra/SKILL.md

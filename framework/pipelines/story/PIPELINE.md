@@ -1,15 +1,23 @@
 ---
 name: fremi-pipeline-story
-description: Pipeline de auto-ejecución de la capa STORY. Corre la cadena de planificación FW-00..FW-08 (los 9 docs previos a implementación) sin pausar entre pasos, salvo conditionals no-inferibles (Regla 16), bifurcaciones técnicas (Regla 3b), sync-back a feature/producto (Regla 12) o precondiciones ausentes. NO ejecuta código de producción — el pipeline termina en FW-08_plan.md listo para arrancar TDD. Alternativa manual: `/fremi-story <FT> <nombre>` (crea andamio) + invocar cada `/fremi-story-*` sub-skill uno por uno.
+description: Pipeline de auto-ejecución que ENVUELVE el ciclo completo de la capa STORY (14 steps del artifact — desde explore hasta closure firmado). Corre la cadena end-to-end incluyendo apply autónomo (TDD task por task), verify, closure-check y firma del closure. Pausa sólo ante stop events reales — conditionals no-inferibles (Regla 16), bifurcaciones técnicas (Regla 3b), sync-back a feature/producto (Regla 12), test failing persistente (R7), gaps detectados durante apply, closure-check con CRITICAL (Regla 11). Alternativa manual: `/fremi-story <FT> <nombre>` (crea andamio) + invocar cada `/fremi-story-*` sub-skill uno por uno paso a paso.
 ---
 
 # /fremi-pipeline-story — Pipeline capa STORY
 
-Corre en modo **automático** la secuencia declarada en [`~/.fremi/framework/artifacts/story/config.user.yaml → flow.sequence`](../../artifacts/story/config.user.yaml), desde `/fremi-story-explore` (si aplica) hasta `/fremi-story-plan` inclusive.
+Corre en modo **automático** la secuencia COMPLETA declarada en [`~/.fremi/framework/artifacts/story/workflow.yaml`](../../artifacts/story/workflow.yaml), desde `/fremi-story-explore` (si aplica) hasta el `closure` firmado.
 
-**Fuente de verdad de la secuencia:** `config.story.yaml`. Si un step cambia allí, este pipeline se adapta.
+**Fuente de verdad de la secuencia:** `artifacts/story/workflow.yaml` (14 steps). Si un step cambia allí, este pipeline se adapta.
 
-**Alcance del pipeline:** planificación completa (FW-00..FW-08). **NO** ejecuta código de producción (los steps 9-12 — `checkwork`, `verify`, `closure-check`, `closure` — pertenecen al ciclo de implementación, que corre task por task con TDD real y no se auto-orquesta en un pipeline). El pipeline termina dejando la story lista para que el usuario arranque a implementar tareas del `FW-08_plan.md` con `/fremi-story-task` + `/fremi-story-checkwork` en modo iterativo.
+**Alcance del pipeline:** **envelope completo** — abarca los 14 steps del artifact story:
+- **Planificación** (steps 0..8) — FW-00 a FW-08.
+- **Implementación** (step 9 — apply) — TDD real task por task (Regla 7 test rojo primero).
+- **Living checkwork** (step 10) — actualizado durante toda la implementación (Regla 13).
+- **Verify** (step 11) — corrida final de suite.
+- **Closure-check** (step 12) — auditoría antes de firmar (Regla 11).
+- **Closure** (step 13) — firma del FW-10 + bump de la feature padre (Regla 17).
+
+**Diferencia con `/fremi-story` manual:** manual = step por step, vos decidís cuándo avanzar; pipeline = todos los steps end-to-end, la IA avanza sola hasta cerrar la story. Ambos producen el mismo resultado final; cambia el ritmo.
 
 ## Sintaxis
 
@@ -25,7 +33,7 @@ Si falta cualquiera de los dos primeros → preguntar antes de arrancar.
 
 ## Modo de ejecución
 
-- **`auto`** *(default para pipelines)*: la IA llena los 9 docs de planificación (o los 11 si aplican los conditionals) de un tirón. Cada sub-skill interno escribe su doc entero sin pausar, y el pipeline arranca el siguiente sin preguntar. Pausa sólo ante stop events reales.
+- **`auto`** *(default para pipelines)*: la IA corre los 14 steps end-to-end. Cada sub-skill interno escribe su doc entero sin pausar, la implementación arranca sin preguntar cuando el plan está listo, y el pipeline firma el closure al final. Pausa sólo ante stop events reales.
 - **`interactive`**: cada sub-skill interno **sigue corriendo en `auto`** (escribe el FW-XX completo de un tirón, sin validar sección por sección), pero el pipeline pausa **entre steps** — al terminar cada FW-XX reporta lo generado y pregunta si continúa al siguiente. Es "el pipeline con checkpoints por doc": el usuario ve/edita cada FW-XX antes de que se arranque el próximo, sin bombardeo de preguntas dentro de cada sub-skill.
 
 **Regla dura**: dentro del pipeline los sub-skills nunca reactivan modo interactivo — corren siempre `auto`. Si el usuario quiere validación por sección dentro de un doc específico, debe salirse del pipeline e invocar el skill suelto (ej: `/fremi-story-sdd FT-03/HU-05 --mode interactive`).
@@ -41,7 +49,7 @@ Consultar `config.story.yaml → execution_mode` para los defaults. Sugerencia: 
 
 - La feature no existe → correr `/fremi-pipeline-feature <nombre>` primero.
 - El usuario está en modo exploratorio y quiere validar cada doc antes → usar `/fremi-story` + sub-skills manuales.
-- Se está trabajando la implementación (código) → usar `/fremi-story-task` + `/fremi-story-checkwork` iterativos; **este pipeline no ejecuta código**.
+- Sólo se quiere agregar una task a una story existente → usar `/fremi-story-task` directo.
 - Sólo se quiere una task nueva en una story existente → `/fremi-story-task`.
 
 ## Precondiciones duras (abortan el pipeline)
@@ -164,7 +172,7 @@ Al terminar, la IA reporta:
 
 - Config operativa: [`~/.fremi/framework/artifacts/story/config.user.yaml`](../../artifacts/story/config.user.yaml)
 - Reglas: [`~/.fremi/framework/rules/workflow.md`](../../rules/workflow.md) — Reglas 1, 2, 3b, 6, 7b, 12, 16, 17.
-- Flujo descriptivo: [`~/.fremi/framework/flows/flow.story.md`](../../flows/flow.story.md)
+- Flujo descriptivo: [`~/.fremi/framework/artifacts/story/flow.md`](../../artifacts/story/flow.md)
 - Orquestador manual: [`/fremi-story`](../../artifacts/story/SKILL.md)
 - Sub-skills: `~/.fremi/framework/artifacts/story/skills/`
 - Pipeline padre: [`/fremi-pipeline-feature`](pipeline.feature.md) (puede encadenar este pipeline con `--first-story`)

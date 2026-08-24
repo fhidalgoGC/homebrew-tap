@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Hook: check-reverse-alignment
+# Hook: check-reverse-alignment — CROSS-DOMAIN
 # Tipo: PostToolUse
 # Matcher (sugerido): { "tool_name": "Edit|Write", "file_path": "docs/works/**/*.md" }
+#
+# ────────────────────────────────────────────────────────────────────────────
+# Convención de identificadores:
+#   Resuelve filenames de closure desde methodology.core.yaml — NO hardcodea.
+#   Ver: .claude/rules/no-hardcoded-identifiers.md
+# ────────────────────────────────────────────────────────────────────────────
 #
 # Propósito:
 #   Valida coherencia de docs producidos por reverse-engineering (Reglas 25-32):
@@ -11,7 +17,7 @@
 #        `reverse_engineered_confidence`.
 #     2. Chequea que confidence >= 0.5 (min_threshold declarado en
 #        config.reverse.yaml). Bajo esto → sugiere marcar needs_review.
-#     3. Al firmar closure reverse (FW-10 o EN-04 con reverse_engineered:true),
+#     3. Al firmar closure reverse (story o enabler con reverse_engineered:true),
 #        recuerda al usuario aplicar parent_bump_triggers (Regla 30 = Regla 17).
 #     4. Reporta el ratio reverse/forward acumulado del proyecto (Regla 32) —
 #        warning si >15%, critical si >30%.
@@ -22,6 +28,11 @@
 # ============================================================================
 
 set -uo pipefail
+
+# Cargar helper cross-domain de methodology
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=./_methodology.sh
+source "$SCRIPT_DIR/_methodology.sh"
 
 PAYLOAD=""
 if [[ ! -t 0 ]]; then
@@ -57,7 +68,7 @@ done
 
 if [[ ${#missing[@]} -gt 0 ]]; then
   echo "⚠️  [check-reverse-alignment] $FILE_PATH — es reverse-engineered pero faltan campos: ${missing[*]}"
-  echo "   Ver Regla 26 en ~/.fremi/framework/rules/reverse.md."
+  echo "   Ver Regla 26 en ~/.fremi/framework/reverse-engineering/rules/reverse.md."
 fi
 
 # --- 3. Chequear confidence >= 0.5 ------------------------------------------
@@ -74,7 +85,8 @@ if [[ -n "$CONFIDENCE" ]]; then
 fi
 
 # --- 4. Si es closure firmado, recordar bump del padre ----------------------
-if [[ "$FILE_PATH" == *"FW-10_closure.md" || "$FILE_PATH" == *"EN-04_closure.md" ]]; then
+# Resolver dinámicamente el filename de closure de story y enabler.
+if meth_is_closure_file "$FILE_PATH"; then
   # Verificar si tiene sign-off (heurística: contiene la palabra "Sign-off" o "Firmado")
   if grep -qE "Sign-off|Firmado" "$FILE_PATH" 2>/dev/null; then
     echo "ℹ️  [check-reverse-alignment] $FILE_PATH — closure reverse firmado."

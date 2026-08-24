@@ -1,8 +1,10 @@
 # config.bug.story.user.yaml
 # --------------------------------------------------------------
 # Per-project overrides for BUGS scoped to a STORY. Bugs registered
-# via `/fremi-story-bug FT-XX/HU-YY <slug>` — one file per bug at
-# docs/works/features/{FT-XX}/user-stories/{HU-YY}/bugs/BG-XX_<slug>.md.
+# via `/fremi-story-bug {feature_id}/{story_id} <slug>` — one file per
+# bug at docs/works/features/{feature_folder}/user-stories/{story_folder}/bugs/.
+# Filename pattern resolved via identifiers.bug.filename_format in
+# methodology.core.yaml (default: {id}_{slug}.md).
 #
 # Structural defaults (sections, template, procedure) live in
 # config.bug.story.core.yaml. Only knobs you're likely to tune

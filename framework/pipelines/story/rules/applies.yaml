@@ -1,0 +1,79 @@
+schema: framework-pipeline-rules-applies
+schema_version: 1
+pipeline: story
+since: 2026-08-11
+
+# ===========================================================================
+# APPLIES — reglas que el pipeline enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+# El pipeline hereda las reglas del artifact que orquesta + suma las suyas
+# (stop events específicos declarados en stop-events.md).
+#
+# El pipeline story orquesta la planificación (steps explore..plan). Los steps
+# de implementación (checkwork, verify, closure-check, closure) son
+# post-pipeline y corren en modo iterativo manual.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/story/rules/applies.yaml
+  note: >
+    El pipeline invoca sub-skills del artifact story (steps explore..plan).
+    Todas las reglas que aplican al artifact story aplican también durante
+    la ejecución del pipeline para los steps cubiertos (0..8):
+    jerarquía (R1), no-código (R2), versioning (R17), sync-back (R10, R12),
+    ADRs (R3, R3b, R20), cadena BDD→SDD→Design (R6.*), TDD plan (R7b),
+    docs condicionales (R16).
+
+# ---------------------------------------------------------------------------
+# Rules específicas del pipeline
+# ---------------------------------------------------------------------------
+pipeline_rules:
+  - rules_file: ~/.fremi/framework/pipelines/story/rules/stop-events.md
+    scope: pipeline
+    note: >
+      Stop events: cuándo el pipeline PAUSA (conditionals ambiguos R16,
+      bifurcaciones R3b en SDD/Design, sync-back R12, CAs contradictorios,
+      RNFs medibles ausentes, tech no en product/strategies, plan sin tasks
+      derivables, precondiciones ausentes).
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr el pipeline.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Todos los docs creados llevan frontmatter versionado + ancestor.version_at_creation
+      = versión del feature/definition.md al momento de crear cada doc.
+      Bumps del padre son obligatorios (sin preguntar).
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      Bifurcaciones técnicas siempre disparan ADR + pausa (Regla 3b es stop
+      event). Para story: ADR local → story/decisions.md (delta que se mergea
+      al feature al cerrar). Scope según alcance de la decisión (Regla 20).
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      Sync-back automático activo. Divergencias entre contenido de la story y
+      las capas superiores (feature, producto) son stop events: el pipeline
+      pausa, presenta el gap y espera confirmación.
+
+references:
+  artifact_workflow: ~/.fremi/framework/artifacts/story/workflow.yaml
+  artifact_applies: ~/.fremi/framework/artifacts/story/rules/applies.yaml
+  pipeline_doc: ~/.fremi/framework/pipelines/story/PIPELINE.md

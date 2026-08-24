@@ -1,0 +1,205 @@
+schema: framework-layer-rules-applies
+schema_version: 1
+layer: product
+since: 2026-08-10
+
+# ===========================================================================
+# APPLIES — reglas que aplican durante la ejecución del workflow product.
+#
+# Este archivo NO contiene el texto de las reglas — sólo POINTERS.
+#
+# CRITERIO DE UBICACIÓN:
+#   - Reglas DOMAIN-específicas de product → viven en este mismo folder
+#     (`~/.fremi/framework/artifacts/product/rules/*.md`).
+#   - Reglas CROSS-domain (que aplican a más de un artifact) → viven en
+#     `~/.fremi/framework/rules/*.md`.
+#
+# El orquestador carga SÓLO los archivos referenciados acá cuando corre
+# el workflow product — no toda la carpeta global de rules. Así se aísla
+# el dominio y no se cargan reglas irrelevantes.
+#
+# ESTRUCTURA:
+#   - transversal             → cargadas SIEMPRE durante todo el workflow
+#   - per_step                → cargadas al ejecutar el step específico del DAG
+#   - parallel_allowed_skills → cargadas al invocar skills transversales que
+#                               corren fuera del DAG principal (ver
+#                               `../workflow.yaml → parallel_allowed`)
+#
+# Nota: si una regla aparece en `transversal` Y en `per_step`, el orquestador
+# deduplica (una sola carga por sesión) — repetir la referencia es válido y
+# sirve para hacer explícito el énfasis contextual.
+#
+# Los IDs de step deben existir en `../workflow.yaml → steps[].id`.
+# Los skills de `parallel_allowed_skills` deben existir en
+# `../workflow.yaml → parallel_allowed[].skill`.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TRANSVERSAL — reglas activas durante todo el workflow product.
+# ---------------------------------------------------------------------------
+transversal:
+
+  # ---------- GLOBAL (cross-domain) ----------
+  - rules_file: ~/.fremi/framework/rules/hierarchy.md
+    rules: [R1]
+    scope: global
+    note: >
+      No saltar etapas. Validar precondiciones (workflow.yaml → requires_complete)
+      antes de invocar cada step. Sin insumos → avisar al usuario y proponer
+      crear los docs previos.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter obligatorio + bump de los docs living + rastreo ancestral.
+      Aplican a TODO doc creado/editado durante el workflow. Los docs de
+      product son todos living: bumpear según reglas de bump (MAJOR/MINOR/PATCH)
+      declaradas en workflow.yaml por step.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10, R12]
+    scope: global
+    note: >
+      R10: docs son fuente de verdad — si el código/la realidad diverge,
+      actualizar el doc + ADR.
+      R12: sync-back bidireccional — si trabajando en product se descubre
+      algo que debería actualizar un doc de feature o story ya existente,
+      actualizar la capa inferior DESPUÉS de confirmar que aplica.
+      (Para product → feature/story el flujo es top-down, no sync-back;
+      sync-back ocurre cuando la inferioridad descubre algo que sube.)
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      R3: toda decisión técnica global genera ADR en decisions.md.
+      R3b: bifurcación → pausar → opciones al usuario → decidir → ADR → continuar.
+      R20: para product el scope correcto es siempre product (decisions.md);
+      si una decisión surgió en feature/story y aplica al producto → promover.
+
+# ---------------------------------------------------------------------------
+# PER-STEP — reglas específicas de un step del workflow.
+# ---------------------------------------------------------------------------
+per_step:
+
+  iniciativas:
+    - rules_file: ~/.fremi/framework/artifacts/product/rules/discovery.md
+      rules: [R4]
+      scope: product
+      note: >
+        Step raíz — R4 establece que todo el discovery debe preceder a la
+        formalización. En este step aplica en su rol de apertura: sin una
+        iniciativa real (no placeholder) no se puede arrancar el brainstorm
+        de ideas.
+
+  ideas:
+    - rules_file: ~/.fremi/framework/artifacts/product/rules/discovery.md
+      rules: [R4]
+      scope: product
+      note: >
+        Precondición: el doc `iniciativas` debe existir con al menos una
+        iniciativa con contenido. Sin iniciativas declaradas no hay contra
+        qué proponer ideas.
+
+  planteamiento:
+    - rules_file: ~/.fremi/framework/artifacts/product/rules/discovery.md
+      rules: [R4]
+      scope: product
+      note: >
+        Precondición: el doc `ideas` debe existir con al menos un enfoque
+        evaluado. El planteamiento elige entre ideas — sin ideas, la
+        elección es vacía.
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        El planteamiento es donde típicamente aparece la primera bifurcación
+        de approach (dos caminos viables). Aplicar pausa → opciones al usuario
+        → ADR antes de anclar el approach elegido.
+
+  definition:
+    - rules_file: ~/.fremi/framework/artifacts/product/rules/discovery.md
+      rules: [R4]
+      scope: product
+      note: >
+        Precondición principal de R4: el doc `planteamiento` debe existir
+        con approach elegido. No se puede formalizar sin discovery cerrado.
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Al formalizar in-scope y capacidades pueden aparecer bifurcaciones
+        (ej: incluir o no una capacidad, cómo definir un criterio de éxito
+        medible). Cada una → ADR.
+
+  strategies:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3b]
+      scope: global
+      note: >
+        Strategies es donde MÁS bifurcaciones técnicas aparecen a nivel
+        producto. La elección del stack cascadea a todo el proyecto —
+        pausar ante cada decisión significativa, presentar opciones al
+        usuario, registrar ADR.
+
+  decisions:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Step dedicado a ADRs globales. Cada ADR sigue el formato estándar
+        (R3) y nace de una bifurcación real (R3b). Numeración global al
+        proyecto (R20). Single-writer: evitar colisiones en la numeración.
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Agregar un ADR bumpea MINOR del decisions.md (living acumulativo).
+        Si un ADR reemplaza otro → MAJOR. Registrar entry en changelog.
+
+  plan:
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Plan es el doc que habilita la capa feature. Agregar/mover una
+        feature bumpea MINOR. Cambio de approach de priorización → MAJOR.
+        Single-writer: el roadmap tiene ordering global.
+
+# ---------------------------------------------------------------------------
+# PARALLEL_ALLOWED_SKILLS — reglas al invocar skills transversales (fuera del DAG).
+# ---------------------------------------------------------------------------
+parallel_allowed_skills:
+
+  /fremi-product-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Toda decisión técnica global registrada como ADR. Patrón obligatorio:
+        bifurcación → pausar → opciones al usuario → decidir → ADR (R3b).
+        Scope product (decisions.md). Numeración global al proyecto (R20).
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar ADR product-scope se bumpea el decisions.md (MINOR).
+        Si el ADR reemplaza otro → MAJOR. Registrar entry en changelog.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`) con fallback al template del
+# framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/product/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/product/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/product/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/product/config.user.yaml  # FALLBACK / template inicial
+  domain_rules_dir: ~/.fremi/framework/artifacts/product/rules/     # reglas domain-específicas
+  global_rules_dir: ~/.fremi/framework/rules/                       # reglas cross-domain
+  rules_index: ~/.fremi/framework/rules/workflow.md

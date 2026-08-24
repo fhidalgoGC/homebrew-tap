@@ -1,0 +1,402 @@
+schema: framework-reverse-skill-workflow
+schema_version: 1
+skill: reverse-bug
+skill_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — REVERSE SKILL: BUG (/fremi-reverse-bug)
+#
+# Fuente de verdad ÚNICA de la secuencia de reconstrucción del skill
+# reverse-bug. Reconstruye un doc de bug ({bug.filename}) a partir de un
+# fix ya aplicado en código (commits identificables en git log).
+#
+# ⚠️ REGLA 29 — PRIMERA CLASE EN ESTE SKILL ⚠️
+#   Regla 8 (test rojo primero) es INCONSTRUIBLE retroactivamente.
+#   Cuando el fix ya está mergeado y los tests pasan, NO existe forma de
+#   recrear el test rojo previo al fix. Este skill la declara explícitamente
+#   en la sección `reproduction-red-test` del doc generado y en el reporte
+#   final. No pretender que R8 se cumplió — marcar el gap de forma prominente.
+#
+# Este archivo declara:
+#   - qué doc reconstruye (reconstructs) — 1 solo archivo
+#   - fases de ejecución (5 fases — bug/extra son de doc único)
+#   - mode_options: transparent | stealth (R26)
+#   - precondiciones duras (R25)
+#   - stop events (R27 gaps + R29 + condiciones específicas del bug)
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición de formato del doc → SKILL.md
+#   - la elección del usuario → config.user.yaml
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# RECONSTRUCTS — 1 archivo (a diferencia de story/feature/enabler)
+# ---------------------------------------------------------------------------
+reconstructs:
+  - id: bug_doc
+    doc_token: "{bug.filename}"    # BG-XX_<slug>.md por default
+    kind: snapshot
+    description: >
+      Doc de bug completo: symptom, impact-severity, reproduction-red-test
+      (con declaración R29), root-cause, fix-applied, linkages, closure.
+    r29_mandatory_section: reproduction-red-test
+    r29_marker: >
+      La sección reproduction-red-test DEBE contener la declaración explícita
+      de que R8 (test rojo previo al fix) es inconstruible retroactivamente.
+      No omitir. No silenciar. Marcar como primer elemento de la sección.
+
+# ---------------------------------------------------------------------------
+# SCOPE — story-scoped o feature-scoped (R20)
+# ---------------------------------------------------------------------------
+scope_options: [story, feature]
+scope_resolution: >
+  Resolver de los archivos tocados por el fix (git diff --stat).
+  story-scoped → los archivos pertenecen a una sola story (FT-XX/HU-YY).
+  feature-scoped → los archivos cruzan múltiples stories de una feature (FT-XX).
+  Scope ambiguo → stop event scope_ambiguous (pausa, no aborta).
+
+# ---------------------------------------------------------------------------
+# MODE OPTIONS — R26 (transparent default)
+# ---------------------------------------------------------------------------
+mode_options: [transparent, stealth]
+default: transparent
+
+transparent:
+  description: >
+    Frontmatter incluye bloque reverse_engineered:* (R26 default).
+    Recomendado especialmente para bugs: la trazabilidad de cuándo/cómo
+    se fixeó un bug histórico es información de auditoría valiosa.
+
+stealth:
+  description: >
+    El bloque reverse_engineered.* se omite; el doc queda indistinguible
+    del flow forward. Disponible como override EXPLÍCITO del usuario.
+    Para bugs: considerar que stealth oculta el hecho de que R8 no se siguió.
+    Requiere ADR a nivel proyecto para cambiar el default.
+
+# ---------------------------------------------------------------------------
+# R29 — DECLARACIÓN PRIMERA CLASE (no footnote)
+# ---------------------------------------------------------------------------
+r29_protocol:
+  rule: R29
+  status: INCONSTRUIBLE_RETROACTIVAMENTE
+  description: >
+    Regla 8 exige escribir el test ROJO primero (que falla) y LUEGO el fix.
+    Una vez mergeado el fix, el código actual PASA el test. No hay forma de
+    recrear el estado "test falla, código sin fix". Este skill nunca pretende
+    que R8 se cumplió.
+  mandatory_actions:
+    - >
+      En la sección `reproduction-red-test` del doc generado, el PRIMER
+      elemento debe ser: "⚠️ R8 inconstruible retroactivamente — el fix ya
+      está aplicado; no existe test rojo previo."
+    - >
+      Sugerir (si el bug es reciente < 1 mes): agregar un test de regresión
+      que garantice que el bug no vuelva. El test de regresión se puede
+      escribir ahora (verifica el estado actual post-fix) aunque no sea el
+      test rojo original.
+    - >
+      Recomendar: `git log --oneline -p <archivo-del-fix>` para intentar
+      recuperar la versión pre-fix manualmente si el usuario necesita
+      reconstruir el estado roto para escribir el test rojo. Esfuerzo manual,
+      no automatizable.
+    - >
+      En el reporte final, incluir siempre la sección `r8_gap` con estado
+      DECLARED (nunca omitir).
+  in_report: true
+  in_doc_section: reproduction-red-test
+
+# ---------------------------------------------------------------------------
+# PHASES — 5 fases (bug/extra son doc único; no bump iterativo de 4 docs)
+# ---------------------------------------------------------------------------
+phases:
+  - id: discovery
+    order: 1
+    label: "Fase 1 — Descubrimiento"
+    purpose: >
+      Identificar los commits del fix y escanear sus artifacts: diff,
+      archivos tocados, tests agregados.
+    sources_primary:
+      - "git show <commits> --stat → archivos tocados, líneas cambiadas"
+      - "git diff <commit_pre>..<commit_fix> → qué se cambió"
+      - "Mensaje del commit → pistas de root-cause y síntoma"
+    sources_secondary:
+      - "Test files nuevos o modificados en el fix"
+      - "Issue tracker / PR description (si accesible)"
+    aborts_on_failure: false    # commits no identificables → stop event
+
+  - id: inference
+    order: 2
+    label: "Fase 2 — Inferencia"
+    purpose: >
+      Mapear el diff del fix → secciones del doc de bug.
+      Regla 29 aplica durante esta fase: la inferencia de reproduction-red-test
+      debe declarar R29 como primer elemento, no silenciarlo.
+    mappings:
+      - source: "Mensaje del commit + diff → qué se cambió"
+        target: "fix-applied: archivos + descripción del cambio + links a commits"
+      - source: "Inferencia del diff (qué estaba mal antes del fix)"
+        target: "root-cause: qué producía el bug (TBD si no inferible)"
+      - source: "Test files agregados/modificados en el fix"
+        target: "reproduction-red-test: el test que valida el fix (NO el test rojo previo)"
+      - source: "Archivos tocados → scope (story vs feature)"
+        target: "linkages: stories afectadas + ADRs vigentes"
+      - source: "Fecha del commit del fix"
+        target: "closure: fecha de cierre"
+    r29_inference_rule: >
+      Al mapear reproduction-red-test: identificar el test que se agregó con
+      el fix (valida estado post-fix). Declarar que es el test de validación
+      del fix, NO el test rojo original. R8 inconstruible → declarar.
+
+  - id: directed_questions
+    order: 3
+    label: "Fase 3 — Preguntas dirigidas (R27)"
+    purpose: >
+      Pedir al usuario los gaps no inferibles del diff. NUNCA inventar.
+    gaps_requiring_questions:
+      - "¿Qué síntoma observaba el usuario/sistema? (si el commit no lo describe)"
+      - "¿Cuál es el impacto/severidad? (Alto/Medio/Bajo + quién lo reportó)"
+      - "¿El root-cause inferido del diff es correcto? (confirmar con dev si posible)"
+      - "¿Hay CAs de la story afectada que este bug cubría pero sin test?"
+      - "¿Stories que tocan los mismos archivos y pueden haber sido afectadas?"
+    r29_mandatory_question: >
+      Aunque el usuario responda todas las preguntas, R29 NO se pregunta —
+      se declara. No preguntar al usuario si R8 aplica; siempre aplica y
+      siempre es inconstruible en un reverse-bug.
+    anti_patterns:
+      - "Inventar el síntoma 'porque el código parece'"
+      - "Inventar el root-cause sin confirmación del diff"
+      - "Silenciar R8/R29 — siempre se declara, nunca se omite"
+
+  - id: timestamps_lineage
+    order: 4
+    label: "Fase 4 — Timestamps + linaje (R30)"
+    purpose: >
+      Inferir fechas del fix via git para frontmatter (R17 via R30).
+    git_commands:
+      - "git log -1 --format='%ai' -- <fix-files>       # last_updated / closure date"
+      - "git log --format='%ai' -- <fix-files> | tail -1 # created (primer commit del fix)"
+      - "git blame -- <parent-doc> | grep '^version:'    # ancestor version"
+    fallback_no_git: >
+      Si no hay .git: pedir al usuario la fecha del fix manualmente.
+      Usar "hoy" con reverse_engineered_confidence: 0.3 como fallback extremo.
+    parent_version_logic: >
+      version_at_creation: versión de story/feature al momento del fix.
+      version_at_closure: versión de story/feature post-fix (puede ser la misma
+      si el fix no cambió el contrato).
+
+  - id: write_doc
+    order: 5
+    label: "Fase 5 — Escritura + R29 declarado + bump padre (R26 + R30)"
+    purpose: >
+      Escribir el doc de bug, aplicar frontmatter (R17), declarar R29 de forma
+      prominente en reproduction-red-test, y bumpear el padre.
+    r29_write_rule: >
+      La sección reproduction-red-test DEBE comenzar con:
+        "⚠️ REGLA 8 INCONSTRUIBLE RETROACTIVAMENTE
+         El fix ya está aplicado. No existe test rojo previo en el historial.
+         El test identificado en este registro valida el estado post-fix,
+         no reproduce el estado roto pre-fix.
+         Sugerencia: `git log --oneline -p <archivo>` para intentar recuperar
+         la versión pre-fix manualmente si se necesita el test rojo."
+    mode_effect:
+      transparent: "Frontmatter incluye reverse_engineered: true + campos de trazabilidad."
+      stealth: "Sin bloque reverse_engineered.*; indistinguible del flow forward."
+    bump_rules:
+      fix_respects_contract: "PATCH del padre (story o feature)"
+      fix_extends_contract:  "MINOR del padre"
+      fix_breaks_contract:   "MAJOR del padre + R10 + ADR requerido"
+    doc_version: "v1.0.0 snapshot"
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el skill si fallan (R25)
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-bug` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: "Corré `fremi install` antes de invocar el skill. No auto-instalar."
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` existe y parsea.
+      Config de bug (story o feature scope) existe.
+
+  - id: fix_is_merged
+    rule: R25
+    check: >
+      El fix está mergeado a main (o a un branch de release confirmado).
+      No aplica a bugs en curso, fixes aún no mergeados, o experimentos.
+    abort_message: >
+      El fix no está mergeado. Para bugs en curso usar /fremi-story-bug o
+      /fremi-feature-bug + Regla 8 (test rojo primero).
+
+  - id: fix_commits_identifiable
+    check: >
+      Existe al menos 1 commit identificable del fix en git log.
+      Si no hay .git o no hay commits → abortar, no se puede reconstruir.
+    abort_message: >
+      No se encontraron commits del fix. Sin historial git, el reverse-bug
+      no puede inferir el diff. Proporcionar SHA de commit o rango.
+
+  - id: r29_acknowledged
+    rule: R29
+    check: >
+      Precondición conceptual siempre cumplida: R29 SIEMPRE aplica a reverse-bug.
+      El skill nunca verifica si R8 se cumplió — asume que no se cumplió
+      (es el único caso en que se invoca reverse-bug).
+    note: >
+      Esta precondición NO aborta el skill — es una declaración de invariante:
+      reverse-bug implica R29. La declaración va en el doc, no en un check.
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el skill (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: r29_gap
+    triggers_during: [write_doc]
+    rule: R29
+    behavior: >
+      ⚠️ SIEMPRE ACTIVO EN REVERSE-BUG. Este stop event es informativo —
+      no detiene la ejecución, pero OBLIGA a incluir la declaración R29
+      en la sección reproduction-red-test del doc. Si la sección se escribió
+      sin la declaración → reescribir antes de continuar. No negociable.
+    severity: MANDATORY_DECLARATION
+
+  - id: scope_ambiguous
+    triggers_during: [discovery]
+    rule: R27
+    behavior: >
+      Los archivos del fix cruzan múltiples features o el scope
+      story/feature no es claro. Presentar al usuario los candidatos
+      y pedir elección antes de asignar la numeración.
+
+  - id: symptom_not_inferrable
+    triggers_during: [directed_questions]
+    rule: R27
+    behavior: >
+      El mensaje del commit y el diff no permiten describir el síntoma
+      observable que experimentaba el usuario/sistema. Preguntar al usuario:
+      "¿Qué se observaba antes del fix?"
+
+  - id: root_cause_not_inferrable
+    triggers_during: [inference]
+    rule: R27
+    behavior: >
+      El diff toca varios archivos y no es claro cuál era la causa raíz
+      (síntoma vs. síntoma-de-síntoma). Preguntar al dev si está disponible.
+      Si no → marcar root-cause como TBD con nota.
+
+  - id: severity_not_determinable
+    triggers_during: [directed_questions]
+    rule: R27
+    behavior: >
+      No hay información de monitoring/soporte para inferir severidad.
+      Preguntar al usuario: impacto (cuántos usuarios afectados, frecuencia,
+      si fue bloqueante). Sugerir basado en scope si el usuario no sabe.
+
+  - id: git_history_missing
+    triggers_during: [timestamps_lineage]
+    rule: R30
+    behavior: >
+      No hay .git o los commits del fix no son identificables por SHA.
+      Pedir al usuario fecha del fix manualmente. Usar confidence: 0.3
+      si se necesita continuar sin confirmar.
+
+  - id: contract_change_detected
+    triggers_during: [inference, write_doc]
+    rule: R10
+    behavior: >
+      El diff indica que el fix cambió el contrato (interfaz, respuesta, schema).
+      Esto requiere MAJOR bump del padre + ADR obligatorio (Regla 10 + R3b).
+      Pausar y presentar la bifurcación antes de registrar.
+
+  - id: regression_test_missing
+    triggers_during: [write_doc]
+    rule: R29
+    behavior: >
+      No se identificó ningún test agregado con el fix. Reportar al usuario:
+      no hay test de regresión que garantice que el bug no vuelva.
+      Recomendar agregar uno ahora (test del estado post-fix).
+
+anti_patterns:
+  - "Silenciar R29 / no declarar R8 en reproduction-red-test"
+  - "Inventar el test rojo previo — no existe, declararlo"
+  - "Inventar el síntoma o el root-cause sin confirmación"
+  - "Usar reverse-bug para bugs actuales no mergeados — usar /fremi-story-bug + R8"
+  - "Firmar el closure sin validar severidad con el equipo"
+  - "Marcar reverse_engineered_confidence: 1.0 — ese valor es para flow forward"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: fix mergeado/producción antes de reverse."
+  - id: R26
+    reason: "Default transparent: frontmatter con reverse_engineered:* por defecto."
+  - id: R27
+    reason: "Preguntas dirigidas para gaps no inferibles: síntoma, severidad, root-cause."
+  - id: R28
+    reason: "Reverse produce base — root-cause inferido del diff puede ser incorrecto."
+  - id: R29
+    reason: >
+      CRÍTICA PARA ESTE SKILL. R8 (test rojo primero) es inconstruible
+      retroactivamente. Declarar en el doc, reportar al usuario. No negociable.
+  - id: R30
+    reason: "R17 aplica con timestamps inferidos del fix. Bump de padre según impacto."
+  - id: R31
+    reason: "No se usa para bugs actuales → usar flow forward + R8."
+  - id: R32
+    reason: "Ratio reverse/forward señala salud del framework."
+  - id: R17
+    reason: "Frontmatter versionado + ancestor (story o feature según scope)."
+  - id: R8
+    reason: >
+      Referenciada explícitamente para declarar su inaplicabilidad (R29).
+      R8 se menciona en el doc para señalar el gap, no para indicar cumplimiento.
+  - id: R10
+    reason: "Si el fix cambió el contrato → MAJOR bump + ADR requerido."
+  - id: R3b
+    reason: "Si el fix implicó decisión técnica con opciones → ADR retroactivo."
+  - id: R24
+    reason: "Framework instalado antes de correr cualquier skill reverse."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - bug_reconstructed: "BG-XX_<slug>.md + path completo + scope (story|feature)"
+    - fix_commits:       "SHA(s) + N archivos tocados"
+    - r8_gap:           >
+        SIEMPRE PRESENTE. Status: DECLARED.
+        "R8 (test rojo previo) inconstruible retroactivamente (R29).
+         Acción recomendada: agregar test de regresión / git log --oneline -p."
+    - confidence:        "valor global de la corrida"
+    - gaps_declared:     "síntoma, root-cause, severidad — resueltos o TBD (R27)"
+    - parent_bumped:     "path del padre + vA.B.C → vA.B.D (PATCH/MINOR/MAJOR)"
+    - mode_used:         "transparent (default) | stealth (override explícito)"
+    - review_recommendation: "root-cause inferido del diff — validar con dev original (R28)"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  skill_doc:          ./SKILL.md
+  narrative:          ./flow.md
+  applies_rules:      ./rules/applies.yaml
+  stop_events_doc:    ./rules/stop-events.md
+  reverse_flow:       ~/.fremi/framework/reverse-engineering/flow.md
+  rules_reverse:      ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rule_r29:           ~/.fremi/framework/reverse-engineering/rules/reverse.md#regla-29
+  rule_r8:            ~/.fremi/framework/artifacts/story/rules/tdd.md
+  reverse_config:     ~/.fremi/framework/settings/config.reverse.core.yaml
+  forward_story_bug:  ~/.fremi/framework/artifacts/story/skills/bug/SKILL.md
+  forward_feat_bug:   ~/.fremi/framework/artifacts/feature/skills/bug/SKILL.md
+  rules_index:        ~/.fremi/framework/rules/workflow.md

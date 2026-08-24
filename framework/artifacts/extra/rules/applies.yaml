@@ -1,0 +1,161 @@
+schema: framework-layer-rules-applies
+schema_version: 1
+layer: extra
+since: 2026-08-10
+
+# ===========================================================================
+# APPLIES — reglas que aplican durante la ejecución de la capa EXTRA.
+#
+# Este archivo NO contiene el texto de las reglas — sólo POINTERS.
+#
+# CRITERIO DE UBICACIÓN:
+#   - Reglas DOMAIN-específicas de extra → viven en este mismo folder
+#     (`~/.fremi/framework/artifacts/extra/rules/*.md`).
+#   - Reglas CROSS-domain (que aplican a más de un artifact) → viven en
+#     `~/.fremi/framework/rules/*.md`.
+#
+# DIFERENCIA CON STORY/FEATURE: extra NO tiene cadena de steps con DAG.
+# Por tanto:
+#   - `per_step` contiene sólo el único step invocable (`scaffold`).
+#   - No hay `per_step` para relleno de secciones — eso es `procedure_manual`.
+#   - `parallel_allowed_skills` lista las skills transversales (ADRs) que
+#     pueden dispararse mientras se trabaja el contenido del archivo extra.
+#
+# El orquestador carga SÓLO los archivos referenciados acá cuando corre en
+# contexto extra — no toda la carpeta global de rules.
+#
+# ESTRUCTURA:
+#   - transversal            → cargadas SIEMPRE durante todo el workflow extra
+#   - per_step               → cargadas al ejecutar el único step del DAG (scaffold)
+#   - parallel_allowed_skills → cargadas al invocar skills transversales que
+#                              corren fuera del DAG principal (ADRs de producto/feature)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# TRANSVERSAL — reglas activas durante todo el workflow extra.
+# ---------------------------------------------------------------------------
+transversal:
+
+  # ---------- DOMAIN-SPECIFIC (extra) ----------
+  - rules_file: ~/.fremi/framework/artifacts/extra/rules/extra-doc.md
+    rules: [R14]
+    scope: extra
+    note: >
+      Clasificación del trabajo: cuándo es legítimo documentar en la carpeta
+      extra (no spec-driven, modifica el repo durablemente), estructura
+      obligatoria del archivo (4 secciones + 2 condicionales), numeración
+      global, anti-patrones, cuándo promover a story.
+
+  # ---------- GLOBAL (cross-domain) ----------
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      Frontmatter obligatorio en el archivo extra: versión, created,
+      last_updated, doc_type: snapshot, ancestor.id: project,
+      ancestor.version_at_creation = project@version.
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R10]
+    scope: global
+    note: >
+      R10: el archivo extra es fuente de verdad del trabajo realizado.
+      Si el código diverge de lo documentado en el archivo extra (ej: un
+      path cambió después de escribir el doc), actualizar el doc.
+      No aplica R12 (sync-back bidireccional de capas) porque extra no
+      tiene jerarquía hacia arriba que pueda requerir sync — va directo
+      al proyecto.
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: >
+      Verificar instalación del framework antes de invocar `/fremi-extra`.
+      Si el check falla → proponer `fremi install` y abortar.
+
+# ---------------------------------------------------------------------------
+# PER-STEP — reglas específicas del único step del workflow extra.
+# ---------------------------------------------------------------------------
+per_step:
+
+  scaffold:
+    - rules_file: ~/.fremi/framework/artifacts/extra/rules/extra-doc.md
+      rules: [R14]
+      scope: extra
+      note: >
+        Paso de clasificación obligatorio: antes de crear el archivo extra,
+        confirmar con el usuario que el trabajo no es spec-driven. Si el
+        usuario duda → sugerir el skill correcto (story, bug, enabler) y
+        abortar. Ver Paso 1 del procedimiento en el SKILL.md de `/fremi-extra`.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al crear el archivo extra, rellenar el frontmatter con versión 1.0.0,
+        doc_type: snapshot, created = hoy, ancestor.id = project,
+        ancestor.version_at_creation = project@version actual.
+
+    - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+      rules: [R18]
+      scope: global
+      note: >
+        El scaffold es el ÚNICO step del workflow de extra que tiene skill
+        invocable. El relleno de secciones es `procedure_manual` — no
+        crear steps de flujo para acciones manuales del usuario.
+
+# ---------------------------------------------------------------------------
+# PARALLEL_ALLOWED_SKILLS — reglas al invocar skills transversales (fuera del DAG).
+# Extra puede concurrir con ADRs cuando el trabajo dispara una decisión técnica.
+# ---------------------------------------------------------------------------
+parallel_allowed_skills:
+
+  /fremi-product-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Si durante el trabajo de extra aparece una decisión técnica que aplica
+        a múltiples features/capa producto → Regla 3b: pausar, presentar
+        opciones, esperar usuario, crear ADR en scope producto.
+        Numeración de ADR es global al proyecto — formato configurable en
+        methodology.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar un ADR a producto se bumpea MINOR del doc `decisions`
+        de producto (living).
+
+  /fremi-feature-adr:
+    - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+      rules: [R3, R3b, R20]
+      scope: global
+      note: >
+        Si la decisión técnica aplica sólo a UNA feature → crear ADR en
+        scope feature. Bifurcación → pausar → opciones → usuario decide.
+
+    - rules_file: ~/.fremi/framework/rules/versioning.md
+      rules: [R17]
+      scope: global
+      note: >
+        Al agregar un ADR al doc `decisions` de la feature se bumpea
+        MINOR de ese doc (living).
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`) con fallback al template del
+# framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/extra/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/extra/config.core.yaml
+  user_choices:
+    runtime: .fremi/settings/extra/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/extra/config.user.yaml  # FALLBACK / template inicial
+  domain_rules_dir: ~/.fremi/framework/artifacts/extra/rules/     # reglas domain-específicas
+  global_rules_dir: ~/.fremi/framework/rules/                     # reglas cross-domain
+  rules_index: ~/.fremi/framework/rules/workflow.md

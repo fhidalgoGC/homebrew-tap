@@ -1,0 +1,82 @@
+schema: framework-pipeline-rules-applies
+schema_version: 1
+pipeline: reverse-feature
+since: 2026-08-11
+mode: reverse
+
+# ===========================================================================
+# APPLIES — reglas que el pipeline reverse-feature enforcea durante su ejecución.
+#
+# Este archivo NO contiene texto de reglas — sólo POINTERS.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Rules del artifact orquestado (heredadas)
+# ---------------------------------------------------------------------------
+inherits:
+  artifact_applies: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
+  note: >
+    El pipeline reverse invoca skills que RECONSTRUYEN docs del artifact feature.
+    Las reglas del artifact aplican al RESULTADO — pero se completan con
+    reverse-specific rules (R25-R32) que gobiernan la reconstrucción.
+
+# ---------------------------------------------------------------------------
+# Rules específicas del pipeline reverse
+# ---------------------------------------------------------------------------
+pipeline_rules:
+  - rules_file: ~/.fremi/framework/pipelines/reverse-feature/rules/stop-events.md
+    scope: pipeline
+    note: >
+      Stop events reverse: cuándo pausa para pedir input (Regla 27 — gaps
+      no-inferibles), abortar (Regla 25 precondiciones), o sugerir sync-back
+      (Regla 12 — capacidades transversales detectadas en la feature).
+
+# ---------------------------------------------------------------------------
+# Rules cross-domain siempre activas
+# ---------------------------------------------------------------------------
+transversal:
+  - rules_file: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+    rules: [R25, R26, R27, R28, R29, R30, R31, R32]
+    scope: global
+    note: >
+      Régimen completo de reverse. R26 (transparent default), R27 (preguntas
+      dirigidas para gaps — iniciativa del producto, stories ambiguas, conflictos
+      entre stories), R28 (no reemplaza revisión humana), R30 (R17 sí aplica
+      con timestamps inferidos).
+
+  - rules_file: ~/.fremi/framework/rules/framework-mechanics.md
+    rules: [R24]
+    scope: global
+    note: R24 — framework debe estar instalado antes de correr reverse.
+
+  - rules_file: ~/.fremi/framework/rules/versioning.md
+    rules: [R17]
+    scope: global
+    note: >
+      R17 aplica en reverse (R30). Frontmatter con timestamps inferidos del
+      git history + parent bump obligatorio al firmar. Al reconstruir feature,
+      bumpear product/plan.md (nueva feature registrada) si la capa producto existe.
+
+  - rules_file: ~/.fremi/framework/artifacts/story/rules/adr.md
+    rules: [R3, R3b, R20]
+    scope: global
+    note: >
+      ADRs reconstruidos del scope feature deben respetar R3/R3b/R20.
+      Motivación de ADR es gap no-inferible → pausa (R27).
+      Si la decisión trasciende la feature → promover a product scope (R20).
+
+  - rules_file: ~/.fremi/framework/rules/sync-back.md
+    rules: [R12]
+    scope: global
+    note: >
+      R12 activo durante la reconstrucción de feature/definition.md. Si se detectan
+      capacidades transversales → pausar y sugerir sync-back a producto (Regla 12).
+      Si la capa producto no existe → sugerir correr /fremi-pipeline-reverse-product primero.
+
+references:
+  artifact_workflow: ~/.fremi/framework/artifacts/feature/workflow.yaml
+  artifact_applies: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
+  reverse_rules: ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  reverse_config: ~/.fremi/framework/settings/config.reverse.core.yaml
+  reverse_flow: ~/.fremi/framework/reverse-engineering/flow.md
+  pipeline_doc: ~/.fremi/framework/pipelines/reverse-feature/PIPELINE.md

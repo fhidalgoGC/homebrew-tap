@@ -1,21 +1,48 @@
 schema: framework-layer-user-config
-schema_version: 5
+schema_version: 6
 layer: feature
-since: 2026-07-13
+since: 2026-08-10
+# v6 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO user choices: active, execution_mode,
+#                  step_agents (elección de agente por step), conditional_rules.
+# v5 (2026-07-13): esquema previo con docs[], flow.sequence[], parallel_allowed[].
 
+# ===========================================================================
+# CONFIG.USER — capa FEATURE
+#
+# ÚNICO archivo user-editable de esta capa. Cambiá acá para adaptar la
+# ejecución del workflow a tu proyecto sin tocar la estructura del framework.
+#
 # ---------------------------------------------------------------------------
-# Configuración USER-EDITABLE de la capa FEATURE.
-# Vive junto al skill orquestador (~/.fremi/framework/artifacts/feature/) porque el
-# usuario elige acá cómo trabajar. La ESTRUCTURA vive en config.core.yaml.
+# UBICACIÓN Y RESOLUCIÓN EN RUNTIME (importante)
+#
+# Este archivo dentro del framework
+# (`~/.fremi/framework/artifacts/feature/config.user.yaml`) es un TEMPLATE.
+# Al correr `fremi install` en un proyecto, se copia a:
+#     <project>/.fremi/settings/feature/config.user.yaml
+#
+# El orquestador resuelve así en runtime:
+#   1. Lee `<project>/.fremi/settings/feature/config.user.yaml` (versión del proyecto).
+#   2. Si no existe → fallback a `~/.fremi/framework/artifacts/feature/config.user.yaml` (este template).
+#
+# Editar este archivo del framework cambia el DEFAULT que reciben proyectos
+# NUEVOS al instalar. Proyectos ya instalados usan su propio copy en
+# `.fremi/settings/feature/`.
 # ---------------------------------------------------------------------------
+#
+# Este archivo NO contiene:
+#   - la secuencia canónica del workflow → `workflow.yaml`
+#   - las agent options estructuralmente válidas → `config.core.yaml`
+#   - las reglas globales aplicables → `rules/applies.yaml`
+# ===========================================================================
 
 active: true
 
 # ---------------------------------------------------------------------------
-# Execution mode — override opcional del default global (config.yaml)
+# Execution mode — override opcional del default global (settings/config.core.yaml)
 #
-# - `default`: modo por default para skills de esta capa cuando el usuario
-#   no pasa `--mode` en la invocación.
+# - `default`: modo por default para skills sueltos de esta capa cuando el
+#   usuario no pasa `--mode` en la invocación.
 # - `pipeline_default`: modo por default cuando se invoca /fremi-pipeline-feature.
 #
 # Comentar/omitir todo este bloque para heredar del master.
@@ -32,14 +59,15 @@ execution_mode:
   pipeline_default: auto
 
   notes: >
-    Feature tiene 1 doc obligatorio (definition.md) + decisions.md condicional.
+    Feature tiene 1 doc obligatorio (doc `definition`) + doc `decisions`
+    condicional (ver conditional_rules.feature_decisions_when).
 
     - Skill suelto en `interactive`: la IA propone cada capacidad, cada línea
       in-scope, cada restricción, cada término del glosario antes de escribirlos.
-    - Skill suelto en `auto`: compone el definition.md completo; pausa sólo
+    - Skill suelto en `auto`: compone el doc `definition` completo; pausa sólo
       ante Regla 3b, Regla 12 (sync-back a producto) o colisión de slug.
-    - Pipeline en `auto`: crea definition + sync-back + bump del plan padre
-      sin pausas. Si `--first-story` está activo, encadena directo.
+    - Pipeline en `auto`: crea definition + sync-back + bump del doc `plan`
+      padre sin pausas. Si `--first-story` está activo, encadena directo.
     - Pipeline en `interactive`: los sub-skills internos corren en auto
       (crean el doc entero de una), pero la IA pausa ENTRE cada step del
       pipeline — típicamente después de crear la feature y antes de arrancar
@@ -48,101 +76,54 @@ execution_mode:
 # ---------------------------------------------------------------------------
 # Step agents — elección del tipo de agente por step.
 #
-# Snapshot de los defaults del core (framework/artifacts/feature/config.core.yaml).
-# Editable — cambiá cualquier valor a uno de los declarados en `# core options`.
-# Elegir un tipo fuera de las opciones válidas es un error de configuración.
+# Cada valor debe estar en `config.core.yaml → agent_matrix[<step>].options`.
+# Si el usuario elige un valor fuera de las opciones válidas → error de
+# configuración (el step no se ejecuta hasta corregirlo).
 #
-# Tipos: main | subagent | agent (ver header de story/config.core.yaml).
+# Los steps sin entry acá heredan `agent_matrix[<step>].default` del core.
+#
+# Tipos: main | subagent | agent (ver `config.core.yaml` header para detalle).
 # ---------------------------------------------------------------------------
 step_agents:
-  definition: main             # core options: [main, subagent, agent]
-  lifecycle: main              # core options: [main]                  (no overridable)
+  definition: main           # options: [main, subagent, agent]
+  lifecycle: main            # options: [main]                  (no overridable)
 
 # ---------------------------------------------------------------------------
-# Docs de la capa
-# ---------------------------------------------------------------------------
-docs:
-  - name: definition
-    file: definition.md
-    required: always
-    doc_type: living
-    skill: /fremi-feature
-    phase: definition
-
-  - name: decisions
-    file: decisions.md
-    required: conditional
-    condition_ref: feature_decisions_when
-    doc_type: living
-    skill: /fremi-feature-adr
-    phase: design
-    lifecycle: growing
-
-  # Futuros (Regla 17 — living specs):
-  # - name: spec
-  #   file: spec.md
-  #   required: conditional
-  #   doc_type: living
-  #   skill: /feature-spec-merge  # a crear
-  #   phase: sdd
-
-# ---------------------------------------------------------------------------
-# Reglas condicionales locales
+# Reglas condicionales locales — cuándo aplican los docs `required: conditional`
+# declarados en `workflow.yaml` / el doc `decisions` de la feature.
+#
+# El campo `condition_ref` del doc `decisions` apunta acá por nombre.
+#
+# Al arrancar la feature el orquestador puede evaluar estos criterios para
+# determinar si crear el doc `decisions` o no.
 # ---------------------------------------------------------------------------
 conditional_rules:
+
   feature_decisions_when:
     description: >
-      `decisions.md` de una feature es OBLIGATORIO cuando la feature tiene
-      ADRs LOCALES (que sólo aplican a esa feature). Opcional en caso contrario.
+      El doc `decisions` de una feature es OBLIGATORIO cuando la feature
+      tiene ADRs LOCALES (que sólo aplican a esa feature). Opcional en
+      caso contrario.
     obligatory_if_any:
-      - "Hay al menos un ADR aceptado que aplica sólo a esta feature (no transversal)."
+      - "Hay al menos un ADR aceptado que aplica sólo a esta feature (no transversal a producto)."
     optional_default: >
       Todos los ADRs de la feature son transversales al producto y viven en
-      `docs/works/product/decisions.md`.
-
-# ---------------------------------------------------------------------------
-# FLOW — secuencia de skills para crear/mantener una feature
-# ---------------------------------------------------------------------------
-flow:
-  sequence:
-    - step: 1
-      skill: /fremi-feature
-      preconditions:
-        - "product/plan.md contiene esta feature como planeada"
-        - "product/definition.md con capacidades in-scope"
-      produces: features/FT-XX_<slug>/definition.md
-      side_effects:
-        - "Bumpea MINOR en product/plan.md (Regla 17)"
-
-  # NOTA: la TOPOLOGÍA de paralelismo vive en
-  # `~/.fremi/framework/artifacts/feature/config.core.yaml` — es estructura del framework,
-  # no configuración de usuario. Este archivo (settings) sólo tiene el flag
-  # on/off (ver config.yaml master → parallelism.enabled).
-
-  # Transversales — corren durante la vida de la feature
-  parallel_allowed:
-    - skill: /fremi-feature-adr
-      when: "aparece decisión técnica local a la feature (Regla 3b)"
-      produces: entries en features/FT-XX/decisions.md
-      side_effects: ["Bumpea MINOR en FT-XX/decisions.md"]
-
-    - skill: /fremi-feature-bug
-      when: "bug transversal a varias stories, o afecta contrato de feature"
-      produces: features/FT-XX/bugs/BG-XX_<slug>.md
-
-    - skill: /fremi-story
-      when: "crear una story dentro de la feature"
-      produces: features/FT-XX/user-stories/HU-YY_<slug>/
-
-    - skill: /fremi-enabler --feature FT-XX
-      when: "trabajo técnico habilitador local a la feature"
-      produces: features/FT-XX/enablers/EN-XX_<slug>/
+      el doc `decisions` de producto.
 
 # ---------------------------------------------------------------------------
 # Referencias cruzadas
+#
+# `self` incluye ambas ubicaciones para explicitar dónde termina el archivo
+# post-install y dónde vive el template.
 # ---------------------------------------------------------------------------
 references:
+  self:
+    runtime: .fremi/settings/feature/config.user.yaml               # PROYECTO (donde se lee en runtime)
+    framework_template: ~/.fremi/framework/artifacts/feature/config.user.yaml  # ESTE archivo (template)
+  workflow: ~/.fremi/framework/artifacts/feature/workflow.yaml
+  agent_matrix: ~/.fremi/framework/artifacts/feature/config.core.yaml
+  applied_rules: ~/.fremi/framework/artifacts/feature/rules/applies.yaml
   master_config: ~/.fremi/framework/settings/config.core.yaml
   methodology: ~/.fremi/framework/settings/methodology.core.yaml
-  rules: ~/.fremi/framework/rules/workflow.md
+  rules_index: ~/.fremi/framework/rules/workflow.md
   orchestrator_skill: /fremi-feature

@@ -1,13 +1,15 @@
 ---
 name: fremi-story-definition
-description: Puebla o actualiza el `{workflow.definition}` de una story — problema/por qué en formato "As a / I want / So that" + criterios de aceptación CA-XXX. Doc snapshot. Se invoca cuando el usuario quiere formalizar/refinar la definition de una story existente, o cuando `/fremi-story` armó el esqueleto y hay que rellenarlo. Sin solución técnica — es negocio/usuario.
+description: Puebla o actualiza el doc `definition` (`{workflow.definition}`) de una story — problema/por qué en formato "As a / I want / So that" + criterios de aceptación. Doc snapshot. Se invoca cuando el usuario quiere formalizar/refinar la definition de una story existente, o cuando `/fremi-story` armó el esqueleto y hay que rellenarlo. Sin solución técnica — es negocio/usuario.
 ---
 
-# /fremi-story-definition — Poblar FW-01 (problema / por qué)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, criterios de aceptación) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
-Puebla el `{workflow.definition}` de una story con el formato canónico:
+# /fremi-story-definition — Poblar el doc `definition` (problema / por qué)
+
+Puebla el doc `definition` (`{workflow.definition}`) de una story con el formato canónico:
 - **As a** `<rol>` / **I want** `<acción>` / **So that** `<beneficio>`.
-- Criterios de aceptación `CA-XXX` observables.
+- Criterios de aceptación observables (prefijo y formato desde `identifiers.criterion`).
 
 **Rol del doc**: describe **qué se resuelve y para quién**. NO contiene solución técnica.
 
@@ -43,7 +45,7 @@ Puebla el `{workflow.definition}` de una story con el formato canónico:
 
 Reglas duras:
 - Formato obligatorio: `As a <rol> / I want <acción> / So that <beneficio>`.
-- Criterios `CA-XXX` numerados según `identifiers.criterion`.
+- Criterios de aceptación numerados según `identifiers.criterion`.
 - **Sin decisiones técnicas** — sólo negocio/usuario. Si hay "el handler retorna 200" → mover a `{workflow.sdd}`.
 - Cubrir happy path + al menos un caso de borde/error.
 
@@ -61,7 +63,7 @@ Reglas duras:
 ## Validaciones
 
 - Formato As a/I want/So that presente.
-- Al menos 1 CA-XXX.
+- Al menos 1 criterio de aceptación.
 - No hay TBDs (Regla 6).
 - Sin contenido técnico (endpoints, código HTTP, firmas).
 
@@ -69,7 +71,7 @@ Reglas duras:
 
 - ❌ Meter "el sistema retorna 200" o "el handler llama a X" — eso es SDD/Design.
 - ❌ Dos roles diferentes en la misma story (probablemente son 2 stories).
-- ❌ Reciclar CA-XXX borrado.
+- ❌ Reciclar IDs de criterios de aceptación ya borrados.
 - ❌ TBDs — la definition no está lista hasta cerrarlas.
 
 ## Referencias

@@ -1,7 +1,9 @@
 ---
 name: fremi-story-verify
-description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/settings/config.core.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); esta skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
+description: Ejecuta la fase `verify` de un artifact — corre test_runner, type_checker y coverage declarados en `~/.fremi/framework/settings/config.core.yaml`, emite verdict (PASS / PASS WITH WARNINGS / FAIL) y clasifica issues residuales (CRITICAL / WARNING / SUGGESTION). Gate obligatorio antes de firmar closure de story/enabler. NO ejecuta tests durante desarrollo (eso es Regla 7 TDD en cada task); este skill es la corrida FINAL antes del cierre. Genérico — lee todo del config.yaml, no hardcodea comandos.
 ---
+
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
 
 # /fremi-story-verify — Corrida final de verificación (fase verify)
 
@@ -126,7 +128,7 @@ Recolectar todos los hallazgos y clasificar según `phase_rules.verify`:
 
 ### Paso 5 — Escribir reporte
 
-El reporte va a la sección **"Última corrida de `verify`"** dentro de `{workflow.checkwork}` del artifact. **NO** se crea un `FW-XX_verify-report.md` dedicado (v3: `config.story.yaml → verify_phase.dedicated_doc = false`).
+El reporte va a la sección **"Última corrida de `verify`"** dentro de `{workflow.checkwork}` del artifact. **NO** se crea un doc de reporte dedicado (v3: `config.story.yaml → verify_phase.dedicated_doc = false`).
 
 **Regla 17 — Bump del checkwork (living)**: escribir el reporte de verify dispara **PATCH** en el `{workflow.checkwork}` (el reporte no cambia el contrato, sólo registra evidencia). Actualizar `last_updated` en frontmatter y agregar entry al changelog:
 ```
@@ -166,7 +168,7 @@ Si `{workflow.checkwork}` no existe (caso raro) → crearlo con el bloque como s
 - ❌ Marcar PASS cuando algún test falló ("es un edge case, no importa"). Si es aceptable, es WARNING con justificación; no PASS.
 - ❌ Correr `/fremi-story-verify` cuando el checkwork tiene tasks abiertas — no es una corrida intermedia.
 - ❌ Hardcodear comandos (ej: `npm test`) — leer siempre de `config.yaml → testing.*`.
-- ❌ Escribir un `FW-XX_verify-report.md` dedicado — el config declara `dedicated_doc: false`, el reporte va dentro de checkwork.
+- ❌ Crear un doc de reporte dedicado para verify — el config declara `dedicated_doc: false`, el reporte va dentro del doc `checkwork`.
 - ❌ Auto-aceptar WARNINGS sin justificación explícita del usuario.
 - ❌ Correr `/fremi-story-verify` para tests individuales durante desarrollo — usar `npm test <archivo>` directo.
 

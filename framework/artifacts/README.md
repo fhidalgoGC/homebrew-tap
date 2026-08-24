@@ -10,13 +10,15 @@
 
 ## Capas
 
-| Capa | Orquestador | Contenido | Cuándo |
+> **Nota sobre identificadores:** los prefijos mostrados (`FT-`, `HU-`, `FW-`, `EN-`, `EX-`) son la **convención por default**. Salen de `~/.fremi/framework/settings/methodology.core.yaml` y son configurables. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+| Capa | Orquestador | Contenido (ej. con defaults) | Cuándo |
 |---|---|---|---|
 | [`product/`](product/) | `/fremi-product` | 7 docs — iniciativas → ideas → planteamiento → definition → strategies → decisions → plan | Al arrancar el proyecto o al re-scoping del producto entero. |
-| [`feature/`](feature/) | `/fremi-feature <nombre>` | `FT-XX/definition.md` + `decisions.md` (opcional) | Al agregar una línea de trabajo grande dentro del producto. |
-| [`story/`](story/) | `/fremi-story <FT-XX> <nombre>` | Cadena `FW-00..FW-10` (11 docs) + `bugs/` + `decisions.md` | Unidad mínima de valor dentro de una feature. |
-| [`enabler/`](enabler/) | `/fremi-enabler <nombre> --scope <global\|feature\|story>` | Cadena `EN-01..EN-04` (4 docs) | Trabajo técnico que habilita capacidad futura sin entregar valor user-facing directo. |
-| [`extra/`](extra/) | `/fremi-extra <slug>` | Archivo único `EX-NN_<slug>.md` | Trabajo fuera del flujo (Regla 14) — tooling, refactor sin cambio de comportamiento, mejoras a metodología. |
+| [`feature/`](feature/) | `/fremi-feature <nombre>` | `<feature-folder>/definition.md` + `decisions.md` (opcional) | Al agregar una línea de trabajo grande dentro del producto. |
+| [`story/`](story/) | `/fremi-story <feature-id> <nombre>` | Cadena de 11 docs del workflow story (por default `FW-00..FW-10`) + `bugs/` + `decisions.md` | Unidad mínima de valor dentro de una feature. |
+| [`enabler/`](enabler/) | `/fremi-enabler <nombre> --scope <global\|feature\|story>` | Cadena de 4 docs (por default `EN-01..EN-04`) | Trabajo técnico que habilita capacidad futura sin entregar valor user-facing directo. |
+| [`extra/`](extra/) | `/fremi-extra <slug>` | Un archivo por concepto en `docs/works/extra/` (por default `EX-NN_<slug>.md`) | Trabajo fuera del flujo (Regla 14) — tooling, refactor sin cambio de comportamiento, mejoras a metodología. |
 
 ---
 

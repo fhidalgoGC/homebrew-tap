@@ -44,6 +44,34 @@ V_CREATION=$(echo "$FRONTMATTER" | grep -A5 "^ancestor:" | grep "version_at_crea
 [[ -z "$A_ID" || "$A_ID" == "product" && "$V_CREATION" == "null" ]] && exit 0
 [[ -z "$V_CREATION" || "$V_CREATION" == "null" || "$V_CREATION" == "<"* ]] && exit 0
 
+# --- Cargar helper cross-domain y resolver prefijos ------------------------
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=./_methodology.sh
+source "$SCRIPT_DIR/_methodology.sh"
+
+# Extraer los prefijos de feature y story desde methodology (default: FT/HU).
+METHODOLOGY="$HOME/.fremi/framework/settings/methodology.core.yaml"
+FEATURE_PREFIX=$(awk '
+  /^  feature:/ { in_feature=1; next }
+  in_feature && /^  [a-z]/ && !/^  feature:/ { in_feature=0 }
+  in_feature && /^    prefix:/ { sub(/.*prefix:[[:space:]]*/, ""); gsub(/["\047]/, ""); print; exit }
+' "$METHODOLOGY" 2>/dev/null | xargs)
+STORY_PREFIX=$(awk '
+  /^  story:/ { in_story=1; next }
+  in_story && /^  [a-z]/ && !/^  story:/ { in_story=0 }
+  in_story && /^    prefix:/ { sub(/.*prefix:[[:space:]]*/, ""); gsub(/["\047]/, ""); print; exit }
+' "$METHODOLOGY" 2>/dev/null | xargs)
+# Fallback si el awk no encontró el prefix (los archivos podrían usar
+# `identifiers.<layer>.prefix` en vez de `layers.<layer>.prefix`):
+[[ -z "$FEATURE_PREFIX" ]] && FEATURE_PREFIX="FT"
+[[ -z "$STORY_PREFIX" ]] && STORY_PREFIX="HU"
+
+# Resolver el filename del "definition" de story
+STORY_DEFINITION=""
+if meth_load_layer story; then
+  STORY_DEFINITION=$(meth_layer_file_by_name definition)
+fi
+
 # --- Localizar archivo del padre según ancestor.id --------------------------
 PARENT_FILE=""
 case "$A_ID" in
@@ -51,18 +79,18 @@ case "$A_ID" in
     # Raíces de producto no tienen padre real
     exit 0
     ;;
-  FT-*)
+  "${FEATURE_PREFIX}-"*)
     # Buscar la feature en docs/works/features/
     PARENT_FILE=$(find docs/works/features -maxdepth 2 -name "definition.md" -path "*${A_ID}*" 2>/dev/null | head -1)
     ;;
-  HU-*)
-    # Buscar la story — necesitamos el ID compuesto (padre = FT-XX/HU-YY)
-    # Usar el path del archivo actual para inferir la feature
-    if [[ "$FILE_PATH" == *"user-stories/"* ]]; then
+  "${STORY_PREFIX}-"*)
+    # Buscar la story — el padre es el definition de la story misma.
+    # Usar el path del archivo actual para inferir la feature.
+    if [[ "$FILE_PATH" == *"user-stories/"* && -n "$STORY_DEFINITION" ]]; then
       STORY_DIR=$(dirname "$FILE_PATH")
       # Si estamos dentro de la story misma, definition es en el mismo dir
       if [[ "$(basename "$STORY_DIR")" == "$A_ID"* ]]; then
-        PARENT_FILE="$STORY_DIR/FW-01_definition.md"
+        PARENT_FILE="$STORY_DIR/$STORY_DEFINITION"
       fi
     fi
     ;;

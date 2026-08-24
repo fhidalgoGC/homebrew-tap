@@ -1,0 +1,328 @@
+schema: framework-pipeline-workflow
+schema_version: 1
+pipeline: reverse-feature
+pipeline_kind: reverse
+since: 2026-08-11
+
+# ===========================================================================
+# WORKFLOW — PIPELINE REVERSE-FEATURE (/fremi-pipeline-reverse-feature)
+#
+# Fuente de verdad ÚNICA de la SECUENCIA DE ORQUESTACIÓN del pipeline
+# reverse-feature. Reconstruye el `FT-XX/definition.md` (y opcionalmente
+# `FT-XX/decisions.md`), luego encadena `/fremi-pipeline-reverse-story`
+# por cada story descubierta bajo la feature.
+#
+# Este archivo declara:
+#   - qué skill de reverse orquesta y qué docs produce
+#   - preflight: verificación de precondiciones duras (R25)
+#   - fases de ejecución (descubrimiento → feature → stories → bump → reporte)
+#   - stop events específicos del nivel feature
+#   - reglas activas durante la ejecución
+#   - forma del reporte final
+#
+# Este archivo NO contiene:
+#   - la definición del flujo canónico de reverse → vive en
+#     `~/.fremi/framework/reverse-engineering/flow.md`
+#   - la lógica de inferencia de cada doc de feature → vive en
+#     `~/.fremi/framework/reverse-engineering/reverse-feature/SKILL.md`
+#   - la config operativa de defaults → `~/.fremi/framework/settings/config.reverse.core.yaml`
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# REVERSE SKILL REF — skill de reverse que este pipeline orquesta
+# ---------------------------------------------------------------------------
+reverse_skill_ref:
+  skill: /fremi-reverse-feature
+  skill_path: ~/.fremi/framework/reverse-engineering/reverse-feature/SKILL.md
+  config: ~/.fremi/framework/settings/config.reverse.core.yaml
+
+sub_pipeline_ref:
+  pipeline: /fremi-pipeline-reverse-story
+  pipeline_path: ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md
+  invoked_for: each discovered story under the feature
+
+# Docs reconstruidos en la fase de feature (antes de stories)
+docs_produced_feature_layer:
+  - definition       # FT-XX/definition.md — siempre
+  - decisions        # FT-XX/decisions.md — condicional (si hay ADRs de feature)
+
+# Docs reconstruidos por story (via sub-pipeline)
+docs_produced_story_layer:
+  - all_story_docs   # FW-00..FW-10 por cada HU descubierta (delegado a reverse-story)
+
+# ---------------------------------------------------------------------------
+# REVERSE PHASES — secuencia de la corrida
+# ---------------------------------------------------------------------------
+executes_steps:
+  - identify         # Fase 0 — Descubrimiento feature: inventario de stories + código compartido
+  - reconstruct_feature   # Fase 1+2 — Reverse de FT-XX/definition.md (+ decisions.md si aplica)
+  - reconstruct_stories   # Fase 3 — Sub-pipeline reverse-story por cada HU descubierta
+  - bump_parent      # Fase 4 — Bump product/plan.md
+  - report_aggregate # Fase 5 — Reporte agregado: confidence + gaps por story + sync-back sugerido
+
+phase_detail:
+  identify:
+    sources:
+      - "docs/works/features/{FT-XX}/user-stories/*"  # stories ya existentes
+      - src_code_shared                                 # código compartido de la feature
+      - common_tests                                    # tests transversales
+      - git_log_feature_folder                         # historia del folder de la feature
+    produces_in_memory:
+      - story_list              # HU-YY descubiertas (existentes o inferidas del código)
+      - feature_capabilities    # capacidades agregadas de stories
+      - cross_story_adrs        # ADRs locales de la feature
+
+  reconstruct_feature:
+    consumes: [identify]
+    skill: /fremi-reverse-feature
+    produces:
+      - "FT-XX/definition.md"   # v1.0.0 snapshot
+      - "FT-XX/decisions.md"    # condicional — living con ADRs descubiertos
+    applies_rules: [R26, R27, R30]
+    gaps_checked:
+      - initiative_link         # init-XXX — preguntar al usuario
+      - success_metrics         # métricas de la feature vs negocio
+      - sync_back_to_product    # capacidades transversales que pertenecen a product/definition.md
+
+  reconstruct_stories:
+    consumes: [identify, reconstruct_feature]
+    sub_pipeline: /fremi-pipeline-reverse-story
+    mode: sequential            # una story a la vez (no paralelo — single-writer)
+    applies_to: each story in story_list
+    options_forwarded: [--mode, --stealth, --from-git-history]
+    skip_condition: "--skip-stories flag was passed"
+    filter_condition: "--only-stories HU-01,HU-02 restricts which stories are processed"
+
+  bump_parent:
+    rule: R17
+    bump_targets:
+      - "product/plan.md"       # MINOR bump — feature registrada (si existe product layer)
+    bump_condition: "feature not already listed in product/plan.md"
+
+  report_aggregate:
+    rule: R28
+    required_output:
+      - feature_reconstructed
+      - stories_reconstructed_list   # con confidence individual por story
+      - adrs_discovered_global       # cantidad + scope (feature o producto)
+      - gaps_aggregate               # agregado de gaps por story + gaps de feature
+      - sync_back_suggested          # si aplica — proponer reverse-product o actualizar product/*
+      - confidence_global            # promedio ponderado feature + stories
+
+# ---------------------------------------------------------------------------
+# PREFLIGHT — verificación antes de la fase 0
+# ---------------------------------------------------------------------------
+preflight:
+  - id: verify_preconditions
+    order: -1
+    purpose: >
+      Verificar las precondiciones duras de R25 + R24 antes de tocar
+      cualquier archivo. Si falla → abortar con mensaje claro.
+    aborts_pipeline_on_failure: true
+
+  - id: identify_feature_scope
+    order: -2
+    purpose: >
+      Resolver `{FEATURE_ID}` → path del folder de feature, y verificar que
+      existe al menos una story identificable (folder bajo `user-stories/` o
+      código de feature reconocible) cuando `--skip-stories = false`.
+
+# ---------------------------------------------------------------------------
+# EXECUTION — modo de corrida
+# ---------------------------------------------------------------------------
+execution:
+  default_mode: interactive
+  mode_options: [auto, interactive]
+
+  auto:
+    description: >
+      Cada fase corre sin pausar. Pausa sólo ante stop events reales.
+      Las stories se procesan secuencialmente sin checkpoint entre ellas.
+    phase_pauses: false
+
+  interactive:
+    description: >
+      El pipeline pausa ENTRE la fase de feature y cada story. Al terminar
+      `reconstruct_feature` muestra el definition.md generado y pregunta si
+      continuar con las stories. Luego pausa entre stories (si son varias).
+      Recomendado cuando la feature tiene muchas stories o gaps de negocio.
+    phase_pauses: true
+    checkpoint_between_phases: true
+    checkpoint_between_stories: true
+
+  hard_rule: >
+    Las stories se procesan de forma SECUENCIAL (un writer a la vez).
+    No correr sub-pipelines de story en paralelo — riesgo de conflictos
+    en bump de padres compartidos.
+
+# ---------------------------------------------------------------------------
+# HARD PRECONDITIONS — abortan el pipeline si fallan
+# ---------------------------------------------------------------------------
+hard_preconditions:
+  - id: framework_installed
+    rule: R24
+    check: >
+      `.claude/skills/fremi-reverse-feature` es symlink válido Y `CLAUDE.md`
+      referencia `~/.fremi/framework/rules/workflow.md`.
+    abort_message: >
+      Corré el CLI `fremi install` antes de invocar el pipeline.
+
+  - id: methodology_present
+    check: >
+      `~/.fremi/framework/settings/methodology.core.yaml` +
+      `~/.fremi/framework/settings/config.reverse.core.yaml` existen y parsean.
+
+  - id: work_in_production
+    rule: R25
+    check: >
+      El código de la feature está mergeado a main o en branch de release
+      confirmado — no experimental en curso.
+    abort_message: >
+      Reverse-engineering es para trabajo pre-existente (Regla 25).
+      Este código aún está en curso — usar el flow forward.
+
+  - id: feature_folder_exists
+    check: >
+      Existe el folder `docs/works/features/{FT-XX}_<slug>/` (aunque
+      `definition.md` esté vacío/faltante) O existe código identificable de
+      la feature en `src/`.
+    abort_message: >
+      No se puede identificar el folder de la feature. Indicar `{FEATURE_ID}`
+      exacto (ej: `FT-05`).
+
+  - id: stories_identifiable
+    check: >
+      Cuando `--skip-stories = false` (default): al menos 1 carpeta de story
+      existe bajo `user-stories/` o es inferible del código de la feature.
+    abort_message: >
+      No se encontraron stories identificables. Usar `--skip-stories` para
+      reconstruir sólo la feature, o indicar el código fuente de las stories.
+
+  - id: reverse_config_active
+    check: "config.reverse.core.yaml → active: true"
+
+# ---------------------------------------------------------------------------
+# STOP EVENTS — condiciones que pausan el pipeline (NO abortan)
+# ---------------------------------------------------------------------------
+stop_events:
+  - id: feature_vs_product_scope
+    triggers_during: [reconstruct_feature]
+    rule: R12
+    behavior: >
+      Al inferir el `FT-XX/definition.md` aparecen capacidades transversales
+      que pertenecen a `product/definition.md`. Pausar y sugerir sync-back —
+      proponer correr `/fremi-pipeline-reverse-product` primero si la capa
+      producto tampoco existe.
+
+  - id: story_grouping_ambiguous
+    triggers_during: [identify]
+    behavior: >
+      El código muestra 2 funcionalidades que podrían ser 1 o 2 stories.
+      Pausar y preguntar al usuario cómo agruparlas antes de continuar
+      con la reconstrucción de stories.
+
+  - id: initiative_not_clear
+    triggers_during: [reconstruct_feature]
+    rule: R27
+    behavior: >
+      La feature debería vincular a una iniciativa (`init-XXX`) pero no
+      existe la capa producto o no hay iniciativa identificable. Preguntar
+      al usuario o dejar sin vincular con warning explícito.
+
+  - id: story_code_conflict
+    triggers_during: [reconstruct_stories]
+    behavior: >
+      Dos stories descubiertas comparten código de forma incompatible
+      (imports mutuos, same handler). Pausar y clarificar el reparto antes
+      de procesar ambas.
+
+  - id: gap_non_inferrable_feature
+    triggers_during: [reconstruct_feature]
+    rule: R27
+    behavior: >
+      Gaps de la capa feature no-inferibles: iniciativa vinculada,
+      métricas de éxito de negocio, glosario de términos del dominio.
+      Preguntar o marcar TBD.
+
+  - id: low_confidence_aggregate
+    triggers_after: [reconstruct_stories]
+    behavior: >
+      El confidence agregado de feature + stories cae bajo el umbral
+      configurado. Notificar al usuario antes de cerrar linaje — los docs
+      quedan marcados `needs_review: true`.
+
+  - id: reverse_ratio_exceeded
+    triggers_after: [report_aggregate]
+    rule: R32
+    behavior: >
+      El ratio reverse/forward del proyecto superó el umbral configurado.
+      Notificar (no bloquear).
+
+  - id: stealth_without_adr
+    triggers_before: [reconstruct_feature]
+    rule: R26
+    behavior: >
+      Se pasó `--stealth` sin ADR de justificación. Mostrar advertencia y
+      confirmar decisión explícita del usuario antes de continuar.
+
+anti_patterns:
+  - "Correr stories en paralelo — serializar siempre para evitar conflictos de bump"
+  - "Inventar iniciativa o métricas de éxito de la feature"
+  - "Ignorar ADRs locales que podrían promoverse a producto (sync-back hacia arriba)"
+  - "Agrupar en una sola story código que pertenece a 2 stories distintas"
+  - "Marcar confidence: 1.0 en docs reverse-engineered"
+
+# ---------------------------------------------------------------------------
+# RULES ACTIVE — reglas del framework aplicables durante la ejecución
+# ---------------------------------------------------------------------------
+rules_active:
+  - id: R25
+    reason: "Precondición dura: trabajo mergeado/en producción."
+  - id: R26
+    reason: "Default transparent — cada doc lleva frontmatter reverse_engineered:*."
+  - id: R27
+    reason: "Gaps no-inferibles → preguntar al usuario, nunca inventar."
+  - id: R28
+    reason: "Reverse no reemplaza revisión humana — reportar áreas a revisar."
+  - id: R30
+    reason: "Regla 17 aplica retroactivamente: timestamps inferidos de git history."
+  - id: R31
+    reason: "Si el código sigue en curso → abortar."
+  - id: R32
+    reason: "Reportar ratio reverse/forward al terminar."
+  - id: R17
+    reason: "Bumpear product/plan.md al registrar la feature."
+  - id: R12
+    reason: "Sync-back: contenido de feature que pertenece a producto → reportar y proponer sync."
+  - id: R3b
+    reason: "ADRs retroactivos por bifurcaciones técnicas descubiertas en la feature."
+
+# ---------------------------------------------------------------------------
+# FINAL REPORT — shape del reporte que la IA emite al terminar
+# ---------------------------------------------------------------------------
+final_report:
+  required_fields:
+    - feature_reconstructed:    "FT-XX_<slug> + path"
+    - stories_reconstructed:    "lista con HU-YY + confidence individual"
+    - adrs_discovered:          "cantidad + scope (feature o producto)"
+    - gaps_global:              "agregado de gaps por story + gaps de feature layer"
+    - sync_back_suggested:      "si aplica — qué llevar a product/definition.md o product/plan.md"
+    - confidence_global:        "promedio ponderado feature + stories (separados)"
+    - human_review_areas:       "prioridad alta (definition, ADRs) vs media (SC-XXX, RNFs)"
+    - parents_bumped:           "product/plan.md bumpeado si aplica"
+    - mode_used:                "transparent | stealth"
+    - next_actions:             "revisar iniciativa, métricas, sync-back sugerido, /fremi-sync-check"
+
+# ---------------------------------------------------------------------------
+# REFERENCES
+# ---------------------------------------------------------------------------
+references:
+  invocation:           ./PIPELINE.md
+  narrative:            ./flow.md
+  reverse_skill:        ~/.fremi/framework/reverse-engineering/reverse-feature/SKILL.md
+  sub_pipeline:         ~/.fremi/framework/pipelines/reverse-story/PIPELINE.md
+  reverse_flow:         ~/.fremi/framework/reverse-engineering/flow.md
+  reverse_config:       ~/.fremi/framework/settings/config.reverse.core.yaml
+  rules_reverse:        ~/.fremi/framework/reverse-engineering/rules/reverse.md
+  rules_index:          ~/.fremi/framework/rules/workflow.md
+  parent_pipeline:      ../reverse-product/PIPELINE.md

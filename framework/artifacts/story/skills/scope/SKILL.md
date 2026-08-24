@@ -1,9 +1,11 @@
 ---
 name: fremi-story-scope
-description: Puebla o actualiza el `{workflow.scope}` de una story — límites explícitos in-scope / out-of-scope + dependencias. Doc snapshot. Se invoca cuando la definition ya existe y hay que acotar la story antes de meterse en BDD. Sin scope explícito los escenarios BDD se expanden sin control (Regla 6.1).
+description: Puebla o actualiza el doc `scope` (`{workflow.scope}`) de una story — límites explícitos in-scope / out-of-scope + dependencias. Doc snapshot. Se invoca cuando la definition ya existe y hay que acotar la story antes de meterse en BDD. Sin scope explícito los escenarios BDD se expanden sin control (Regla 6.1).
 ---
 
-# /fremi-story-scope — Poblar FW-03 (límites de la story)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+# /fremi-story-scope — Poblar el doc `scope` (límites de la story)
 
 Puebla el `{workflow.scope}` con listas explícitas:
 - **In-scope** — qué SÍ entra.

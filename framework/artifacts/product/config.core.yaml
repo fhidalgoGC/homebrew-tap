@@ -1,203 +1,189 @@
 schema: framework-layer-core
-schema_version: 4
+schema_version: 5
 layer: product
-since: 2026-07-16
+since: 2026-08-10
+# v5 (2026-08-10): la SECUENCIA canónica se movió a workflow.yaml (fuente única).
+#                  Este archivo queda con SÓLO agent_matrix + parallelism topology.
 # v4 (2026-07-16): `agent` pasa a ser estructura con `options` + `default` + `reasoning`.
 # v3 (2026-07-16): agrega `agent` (main | subagent) + `agent_reason` por step.
 # v2 (2026-07-16): agrega `requires_complete` + `consumes` a step_matrix.
 
 # ===========================================================================
-# CONFIG.CORE — capa PRODUCTO
+# CONFIG.CORE — capa PRODUCT
 #
-# Fuente de verdad ESTRUCTURAL — el usuario NO edita.
-# - Toggle on/off → settings/config.core.yaml → parallelism.enabled.
-# - Config operativa → ~/.fremi/framework/artifacts/product/config.user.yaml.
+# Fuente de verdad ESTRUCTURAL — el usuario NO edita este archivo.
+# Sólo el mantenedor del framework lo cambia cuando la topología de
+# ejecución muta (agent options nuevos, paralelismo diferente, etc.).
+#
+# Este archivo NO contiene la SECUENCIA del workflow — eso vive en
+# workflow.yaml. Acá sólo:
+#   - agent_matrix: qué agentes pueden ejecutar cada step (options + default + reasoning)
+#   - single_writer: qué steps son single-writer
+#   - internal_items: paralelismo INTRA-step (items del mismo tipo generados en paralelo)
+#   - cross_instance: paralelismo INTER-product (N/A — product es SINGLETON)
+#
+# - Toggle on/off del paralelismo → `~/.fremi/framework/settings/config.core.yaml → parallelism.enabled`.
+# - Elección concreta de agent por step → `config.user.yaml → step_agents`.
+# - Steps enumerados acá deben existir en `workflow.yaml` con el mismo `id`.
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# STEP MATRIX — para cada step:
-#   - requires_complete: DAG.
-#   - consumes: insumos que lee.
-#   - can_run_with: concurrentes.
-#   - agent.options / agent.default / agent.reasoning:
-#       Tipos ESTRUCTURALMENTE viables + recomendación del framework.
-#       El user elige en config.user.yaml → step_agents.
-#       Tipos: main | subagent | agent (ver header de story/config.core.yaml).
+# AGENT MATRIX — para cada step del workflow, qué tipos de agente son
+# ESTRUCTURALMENTE viables.
+#
+# Tipos:
+#   - main     → el agente principal (thread del usuario). Necesario ante
+#                decisiones de negocio, bifurcaciones Regla 3b, escritura
+#                sobre docs living single-writer, o co-creación con el usuario.
+#   - subagent → subagente aislado spawneado vía Task tool (context propio,
+#                retorna al main). Ideal para trabajo auto-contenido:
+#                research, generación determinista, ejecución mecánica.
+#   - agent    → agente ESPECIALIZADO (subagent_type específico como Explore,
+#                Plan, sdd-apply, o un agent-type custom del proyecto). Se
+#                diferencia de `subagent` en que tiene system prompt de
+#                dominio + tools acotados.
+#
+# Sólo los tipos listados en `options` son elegibles. El usuario elige uno en
+# `config.user.yaml → step_agents`; si no lo elige, se usa `default`.
+# Elegir un tipo que NO está en `options` es error de configuración.
+#
+# `single_writer: true` → la ESCRITURA sobre el doc producido se serializa
+# aunque el step corra con subagentes.
+#
+# Regla dura: subagentes y agentes NUNCA interactúan con el usuario. Si
+# `execution_mode: interactive`, el main pausa al retornar el subagente/agente
+# para que el usuario valide antes de continuar.
 # ---------------------------------------------------------------------------
-step_matrix:
+agent_matrix:
+
   iniciativas:
-    skill: /fremi-product-iniciativas
-    requires_complete: []
-    consumes:
-      - "descripción libre del producto (input inicial del usuario)"
-    can_run_with: []
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Co-creación de hipótesis de negocio con el usuario. Las iniciativas
-          SAFe reflejan la estrategia — deciden qué se construye y por qué.
-          No delegable — el user tiene contexto que la IA no puede inferir.
-    reason: >
-      Raíz del discovery. Sin dependencia previa — sólo necesita la
-      descripción inicial del producto.
+    options: [main]
+    default: main
+    reasoning:
+      main: >
+        Co-creación de hipótesis de negocio con el usuario. Las iniciativas
+        reflejan la estrategia — deciden qué se construye y por qué.
+        No delegable — el usuario tiene contexto que la IA no puede inferir.
 
   ideas:
-    skill: /fremi-product-ideas
-    requires_complete: [iniciativas]
-    consumes:
-      - "product/iniciativas.md — init-XXX Aceptadas para brainstorm de enfoques"
-    can_run_with: []
-    agent:
-      options: [main, subagent, agent]
-      default: subagent
-      reasoning:
-        subagent: >
-          Brainstorm mecánico de enfoques por cada iniciativa. Sin decidir
-          nada — sólo abre opciones. Subagentes en paralelo (uno por
-          iniciativa).
-        main: >
-          Si el usuario quiere hacer el brainstorm en su thread principal
-          para reaccionar a cada idea.
-        agent: >
-          Si hay un agente especializado en ideation / discovery.
-    reason: >
-      Sin iniciativas declaradas no hay contra qué proponer ideas.
-      Regla 4 — discovery encadena secuencialmente.
+    options: [main, subagent, agent]
+    default: subagent
+    reasoning:
+      subagent: >
+        Brainstorm mecánico de enfoques por cada iniciativa. Sin decidir
+        nada — sólo abre opciones. Subagentes en paralelo (uno por
+        iniciativa) son idóneos para este paso divergente.
+      main: >
+        Si el usuario quiere hacer el brainstorm en su thread principal
+        para reaccionar a cada idea sobre la marcha.
+      agent: >
+        Si hay un agente especializado en ideation / discovery con
+        system prompt de dominio configurado.
 
   planteamiento:
-    skill: /fremi-product-planteamiento
-    requires_complete: [ideas]
-    consumes:
-      - "product/ideas.md — enfoques a evaluar y elegir approach"
-      - "product/iniciativas.md — para conectar approach con hipótesis"
-    can_run_with: [/fremi-product-adr]
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Elección del approach entre múltiples opciones — decisión de
-          negocio + potencial Regla 3b. El usuario decide entre caminos
-          viables.
-    reason: >
-      El planteamiento elige el approach entre las ideas. Bifurcaciones en
-      approach → ADR concurrente.
+    options: [main]
+    default: main
+    reasoning:
+      main: >
+        Elección del approach entre múltiples opciones — decisión de
+        negocio + potencial Regla 3b. El usuario decide entre caminos
+        viables. Un subagente aislado no puede resolver esas pausas.
 
   definition:
-    skill: /fremi-product-definition
-    requires_complete: [planteamiento]
-    consumes:
-      - "product/planteamiento.md — approach elegido y framing del problema"
-      - "product/iniciativas.md — capacidades que respaldan cada in-scope"
-    can_run_with: [/fremi-product-adr]
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Formalización del producto: in-scope, capacidades, usuarios,
-          criterios de éxito medibles. Cascadea a TODAS las features —
-          calidad de cada decisión pesa. Main obligatorio.
-    reason: >
-      Regla 4 — no se puede formalizar sin discovery cerrado.
+    options: [main]
+    default: main
+    reasoning:
+      main: >
+        Formalización del producto: in-scope, capacidades, usuarios,
+        criterios de éxito medibles. Cascadea a TODAS las features —
+        calidad de cada decisión pesa. Regla 3b puede dispararse.
+        Main obligatorio.
 
   strategies:
-    skill: /fremi-product-strategies
-    requires_complete: [definition]
-    consumes:
-      - "product/definition.md — capacidades in-scope + NFRs para comparar"
-    can_run_with: [/fremi-product-adr]
-    agent:
-      options: [main, subagent, agent]
-      default: main
-      reasoning:
-        main: >
-          Comparación de 2-3 estrategias técnicas + ELECCIÓN — Regla 3b
-          típica. La elección del stack cascadea a todo el proyecto.
-        subagent: >
-          Análisis inicial de CADA estrategia (pros/contras aislados) puede
-          hacerse en subagentes en paralelo. La ELECCIÓN final la hace el
-          main con el usuario — nunca delegar la decisión.
-        agent: >
-          Si hay agente especializado en arquitectura / stack analysis.
-    reason: >
-      Sin definition no hay contra qué comparar.
+    options: [main, subagent, agent]
+    default: main
+    reasoning:
+      main: >
+        Comparación de estrategias técnicas + ELECCIÓN — Regla 3b
+        típica. La elección del stack cascadea a todo el proyecto.
+        Main para poder pausar ante la bifurcación.
+      subagent: >
+        Análisis inicial de CADA estrategia (pros/contras aislados) puede
+        hacerse en subagentes en paralelo. La ELECCIÓN final la hace el
+        main con el usuario — nunca delegar la decisión.
+      agent: >
+        Si hay agente especializado en arquitectura / stack analysis con
+        tools acotados.
 
   decisions:
-    skill: /fremi-product-adr
-    requires_complete: []
-    consumes:
-      - "contexto de la decisión (variable — puede venir de cualquier fase)"
-    can_run_with: []
+    options: [main]
+    default: main
     single_writer: true
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          ADRs nacen de bifurcaciones Regla 3b — el usuario elige. La
-          numeración ADR-XXX global es single-writer.
-    reason: >
-      ADRs son TRANSVERSALES — pueden aparecer en cualquier momento.
+    reasoning:
+      main: >
+        Los ADRs nacen de bifurcaciones Regla 3b — el usuario elige.
+        La numeración de ADRs es global al proyecto y exige single-writer
+        para evitar colisiones. No delegable.
 
   plan:
-    skill: /fremi-product-plan
-    requires_complete: [definition, strategies]
-    consumes:
-      - "product/definition.md — capacidades in-scope para descomponer en features"
-      - "product/strategies.md — estrategia elegida para priorizar features"
-    can_run_with: []
-    agent:
-      options: [main]
-      default: main
-      reasoning:
-        main: >
-          Roadmap — priorización es decisión de negocio con el usuario.
-          Además living doc single-writer (Regla 17 bumps).
-    reason: >
-      Requiere definition (qué producto) + strategies (con qué stack).
+    options: [main]
+    default: main
+    single_writer: true
+    reasoning:
+      main: >
+        Roadmap — priorización es decisión de negocio con el usuario.
+        Doc living single-writer (Regla 17 bumps) y fuente que habilita
+        la capa feature. No delegable.
 
 # ---------------------------------------------------------------------------
-# INTERNAL ITEMS
+# INTERNAL ITEMS — paralelismo INTRA-step.
+#
+# Dentro de un step que produce N items del mismo tipo, ¿pueden generarse
+# en paralelo por subagentes? El agent-type usado internamente hereda del
+# step (o del override en config.user.yaml → step_agents).
+#
+# Steps ausentes acá → items secuenciales (default).
 # ---------------------------------------------------------------------------
 internal_items:
+
   iniciativas:
-    unit: init-XXX
+    unit: initiative            # formato configurable en methodology.core.yaml → identifiers.initiative
     allow_parallel: true
     max_concurrent: 5
     merge_strategy: append-numbered
     reason: >
-      Cada iniciativa SAFe es una hipótesis de negocio independiente.
+      Cada iniciativa es una hipótesis de negocio independiente. Un
+      subagente puede redactar múltiples iniciativas en paralelo si el
+      usuario provee suficiente contexto inicial.
     merge_hazards:
       - "Iniciativas con overlap semántico → consolidar en una sola pasada."
 
   ideas:
-    unit: idea (bloque por iniciativa)
+    unit: idea-block-per-initiative
     allow_parallel: true
     max_concurrent: 5
     merge_strategy: group-by-initiative
     reason: >
       El brainstorm de enfoques por iniciativa es independiente entre
-      iniciativas.
+      iniciativas. Cada subagente trabaja sobre una iniciativa distinta.
 
   strategies:
-    unit: strategy (2-3 opciones técnicas)
+    unit: strategy-option
     allow_parallel: true
     max_concurrent: 3
     merge_strategy: append-with-comparison
     reason: >
       Cada estrategia técnica es una opción independiente con pros/contras.
+      La redacción del análisis puede paralelizarse; la elección no.
     merge_hazards:
-      - "La ELECCIÓN entre estrategias es Regla 3b — no paralelizable, siempre pausa."
+      - "La ELECCIÓN entre estrategias es Regla 3b — no paralelizable, siempre pausa al usuario."
 
   decisions:
-    unit: ADR-XXX
+    unit: adr                   # formato configurable en methodology.core.yaml → identifiers.adr
     allow_parallel: false
     reason: >
-      ADRs se crean uno por uno cuando aparece la bifurcación (Regla 3b).
-      Numeración global exige serialize.
+      Los ADRs se crean uno por uno cuando aparece la bifurcación (Regla 3b).
+      La numeración global exige serialize para evitar colisiones.
 
   plan:
     unit: feature-entry
@@ -206,7 +192,7 @@ internal_items:
     merge_strategy: append-ordered-by-priority
     reason: >
       Cada entry del roadmap (una feature) es una unidad independiente.
-      Priorización (orden) es el paso serial al final.
+      Priorización (orden final) es el paso serial al final.
 
 # ---------------------------------------------------------------------------
 # CROSS INSTANCE — producto es SINGLETON.
@@ -216,3 +202,18 @@ cross_instance:
   reason: >
     Producto es SINGLETON por proyecto — no hay múltiples productos.
     No aplica cross-instance parallelism.
+
+# ---------------------------------------------------------------------------
+# Referencias cruzadas
+#
+# `config.user.yaml` es user-editable: runtime lee del PROYECTO
+# (`.fremi/settings/<capa>/config.user.yaml`). Si no existe, fallback al
+# TEMPLATE del framework. Los demás archivos viven SÓLO en el framework.
+# ---------------------------------------------------------------------------
+references:
+  workflow: ~/.fremi/framework/artifacts/product/workflow.yaml
+  user_choices:
+    runtime: .fremi/settings/product/config.user.yaml               # PROYECTO (preferido en runtime)
+    framework_template: ~/.fremi/framework/artifacts/product/config.user.yaml  # FALLBACK / template inicial
+  applied_rules: ~/.fremi/framework/artifacts/product/rules/applies.yaml
+  master_config: ~/.fremi/framework/settings/config.core.yaml

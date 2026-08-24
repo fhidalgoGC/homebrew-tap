@@ -23,7 +23,7 @@
 
 | Lo que tenés | Va a |
 |---|---|
-| "Antes de X, debe existir Y" — una regla obligatoria | `rules/workflow.md` (sumar como Regla N) |
+| "Antes de X, debe existir Y" — una regla obligatoria | archivo temático en `rules/` (`hierarchy.md`, `bug-fix-and-refactor.md`, `sync-back.md`, etc.) y sumar al índice en `rules/workflow.md`. Ver `rules/README.md` para elegir dónde. |
 | "El usuario escribe `/foo` y la IA hace ..." | `skills/foo/SKILL.md` |
 | "Cuando el usuario manda un mensaje, automáticamente ..." | `hooks/<nombre>.sh` |
 | "El prefijo de features debería ser X y formato ..." | `settings/methodology.core.yaml` |

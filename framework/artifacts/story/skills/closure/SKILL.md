@@ -1,9 +1,11 @@
 ---
 name: fremi-story-closure
-description: Completa/firma el `{workflow.closure}` de una story — matriz de trazabilidad CA→SC→SDD→Design→test→código + DoD + sign-off. Doc snapshot. Precondiciones: {workflow.checkwork} al 100% + `/fremi-story-verify` con verdict PASS o PASS WITH WARNINGS. Bumpea versión de la feature padre (Regla 17). DIFERENTE de `/fremi-story-closure-check` (que audita antes de firmar).
+description: Completa/firma el doc `closure` (`{workflow.closure}`) de una story — matriz de trazabilidad criterio→escenario→sdd→design→test→código + DoD + sign-off. Doc snapshot. Precondiciones: {workflow.checkwork} al 100% + `/fremi-story-verify` con verdict PASS o PASS WITH WARNINGS. Bumpea versión de la feature padre (Regla 17). DIFERENTE de `/fremi-story-closure-check` (que audita antes de firmar).
 ---
 
-# /fremi-story-closure — Completar y firmar FW-10 (cierre de la story)
+> **Nota sobre identificadores:** los prefijos concretos (feature, story, workflow doc, criterios de aceptación, escenarios, test cases) salen de `~/.fremi/framework/settings/methodology.core.yaml`. Este archivo usa step IDs semánticos. Ver `.claude/rules/no-hardcoded-identifiers.md`.
+
+# /fremi-story-closure — Completar y firmar el doc `closure` (cierre de la story)
 
 Completa el `{workflow.closure}` con la matriz de trazabilidad final, checklist DoD marcado, evidencia (PR/commits), y sign-off con fecha. Este skill **firma el cierre**; `/fremi-story-closure-check` **audita antes de firmar**.
 
@@ -39,7 +41,7 @@ Flujo típico: `/fremi-story-verify` PASS → `/fremi-story-closure-check` repor
 ### Paso 1 — Validar precondiciones DURAS
 1. `{workflow.checkwork}` % progreso = 100 (verificar en frontmatter o cuerpo).
 2. Última entrada en `## Última corrida de verify` del checkwork = **PASS** o **PASS WITH WARNINGS** (aceptadas).
-3. Sin bugs abiertos en `HU-XX/bugs/` (o transferidos a follow-up).
+3. Sin bugs abiertos en la carpeta `bugs/` de la story (o transferidos a follow-up).
 4. Si algo falla → abortar y reportar qué falta.
 
 ### Paso 2 — Cargar template
@@ -47,11 +49,11 @@ Flujo típico: `/fremi-story-verify` PASS → `/fremi-story-closure-check` repor
 
 ### Paso 3 — Rellenar la matriz de trazabilidad
 
-Para cada CA-XXX del `{workflow.definition}`:
-1. Buscar el SC-XXX (BDD) que lo cubre.
-2. Buscar la cláusula SDD que aterriza el contrato.
-3. Buscar la sección de Design (FW-06) que la implementa.
-4. Buscar el TC-XXX del TDD que la verifica.
+Para cada criterio de aceptación del doc `definition` (`{workflow.definition}`):
+1. Buscar el escenario BDD (doc `bdd`) que lo cubre.
+2. Buscar la cláusula SDD (doc `sdd`) que aterriza el contrato.
+3. Buscar la sección del doc `design` que la implementa.
+4. Buscar el test case del doc `tdd` que la verifica.
 5. Buscar el archivo de implementación (grep en codebase).
 6. Marcar estado ✅ / 🟡 / ⬜.
 
@@ -72,10 +74,10 @@ Si algún casilla queda vacía → **abortar el closure** y reportar como gap (l
 Consultar `config.yaml → parent_bump_triggers.story_closes`:
 
 1. Analizar qué agregó/modificó esta story vs. la feature padre:
-   - Requirements nuevos → **MINOR** de `FT-XX/spec.md` (living, cuando exista).
-   - Requirements modificados → **MAJOR** de `FT-XX/spec.md`.
-   - ADRs nuevos → **MINOR** de `FT-XX/decisions.md`.
-   - Sólo aclaró supuestos → **PATCH** de `FT-XX/definition.md`.
+   - Requirements nuevos → **MINOR** del doc `spec` de la feature (living, cuando exista).
+   - Requirements modificados → **MAJOR** del doc `spec` de la feature.
+   - ADRs nuevos → **MINOR** del doc `decisions` de la feature.
+   - Sólo aclaró supuestos → **PATCH** del doc `definition` de la feature.
 
 2. Bumpear la(s) versión(es) del padre:
    - Leer frontmatter del(los) archivo(s) del padre.
@@ -92,7 +94,7 @@ Consultar `config.yaml → parent_bump_triggers.story_closes`:
 - Marcar estado del closure como CERRADO.
 - Guardar.
 - Reportar al usuario:
-  - CA-XXX cubiertos (X/N).
+  - Criterios de aceptación cubiertos (X/N).
   - Versión final del padre después del bump.
   - Sugerir siguiente: archivar la story o arrancar la siguiente (`/fremi-story`).
 
