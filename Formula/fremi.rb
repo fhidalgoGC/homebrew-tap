@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.19"
+  version "0.4.20"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.19/fremi-darwin-arm64"
-      sha256 "c624c1e9768214bf3a987bdae70b925c4ab43e4194e6fa75eb5ed3646c3db22e"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-darwin-arm64"
+      sha256 "cff8b111d1b82df8b554b6285b7c53b0f1d18293d54b3e53599af57c9cc1f4c9"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.19/fremi-darwin-x64"
-      sha256 "3792f543ed40abc6180e5e37a578d3dcd7350bd82d3dddddbbc3e8ecb631dd0d"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-darwin-x64"
+      sha256 "23be07f3be268b5d6ced4ac29e06e9b871aa806cad203b7f35bf6c1c7dc52ab7"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.19/fremi-linux-arm64"
-      sha256 "4d3847db7d79e31165f9ef322db1fb798d509cac7f295e5f77036c7e529360df"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-linux-arm64"
+      sha256 "a0f8ba92724a1155d88a7fc3034371c18b0673eb046f3ac66680b96c05afbb32"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.19/fremi-linux-x64"
-      sha256 "d00d91f67582c59c6935b4fb482121276a9eaf845666c49a25f80fd3d1a2b95b"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-linux-x64"
+      sha256 "db12c6d8ad600ff0c46d23c72433dc8b2c4bfc8131313995fcb4b4050415740c"
     end
   end
 
@@ -37,20 +37,22 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      What's new in v0.4.19 — a project carries its own fremi:
+      What's new in v0.4.20 — upgrading cleans up after old versions:
 
-        `fremi install` now writes .claude/skills/, .claude/rules/ and the
-        framework's hooks into the PROJECT, next to CLAUDE.md and .fremi/.
-        The skills used to live in the user-level plugin, so every project on
-        the machine saw them whether or not it had installed fremi.
+        Before the plugin layout, fremi symlinked every skill into
+        ~/.claude/skills/ and every rule into ~/.claude/rules/. That code is
+        long gone, so nothing removed them either — the links just rode along
+        through every upgrade, mostly dangling.
 
-        Staying user-level: the MCP server (it answers about fremi itself,
-        not about a project) and the SessionStart bootstrap hook (it must run
-        where fremi is NOT installed, to say so).
+        `fremi agent install` and `fremi agent uninstall` now sweep them. Only
+        symlinks named fremi-* or pointing inside a framework/ tree are
+        touched; your own skills and rules stay put.
 
-        Fixed: `fremi verify` hung forever when stdin was a pipe nobody
-        closed — it is the SessionStart hook, so it was surviving on Claude
-        Code's 5s kill.
+      v0.4.19 — a project carries its own fremi:
+
+        `fremi install` writes .claude/skills/, .claude/rules/ and the
+        framework's hooks into the PROJECT. Staying user-level: the MCP
+        server and the SessionStart bootstrap hook.
 
       Upgrading from an older version:
 
