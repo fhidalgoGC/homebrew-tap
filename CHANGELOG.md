@@ -4,6 +4,21 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
+## [0.4.20] — 2026-08-24
+
+### Fixed
+- **Barrido del residuo que dejaban las versiones viejas.** Antes del layout
+  de plugin, `fremi install` symlinkeaba TODOS los skills en
+  `~/.claude/skills/` y las rules cross-domain en `~/.claude/rules/`. Como el
+  código que los creaba ya no existe, tampoco existía el que los borraba: un
+  upgrade se los llevaba puestos en silencio. En una máquina real quedaron 52
+  symlinks del 6 de agosto, 36 de ellos ROTOS, apuntando a un checkout de
+  desarrollo. Ahora `fremi agent install` (como migración) y
+  `fremi agent uninstall` los barren.
+- El barrido es deliberadamente conservador: sólo borra symlinks cuyo nombre
+  sea `fremi-*` o cuyo target caiga dentro de un árbol `framework/`. Un skill
+  o una rule propios del usuario no se tocan, estén rotos o no.
+
 ## [0.4.19] — 2026-08-24
 
 Un proyecto ahora carga su propio fremi: skills, rules y hooks viven en el

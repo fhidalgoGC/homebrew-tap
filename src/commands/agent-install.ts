@@ -3,9 +3,10 @@ import { ensureFrameworkContent } from "../core/ensure-framework";
 import { gatherInstallAnswers, validateAgentsAreSupported } from "../prompts/install";
 import { installClaudePlugin } from "../agents/claude/plugin-install";
 import { writeUserMarker, readUserMarker } from "../core/user-marker";
+import { sweepLegacyUserAssets } from "../core/sweep-legacy-user-assets";
 import type { InstallFlags } from "./install";
 
-const FREMI_VERSION = "0.4.19";
+const FREMI_VERSION = "0.4.20";
 
 // `fremi agent install` - materialises fremi as a plugin at USER level for
 // every selected agent. For Claude Code that means writing to
@@ -29,6 +30,23 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
   console.log(`    home:      ${home}`);
   console.log(`    framework: ${frameworkContent}`);
   console.log("");
+
+  // Migration: older versions symlinked every skill and rule into the home
+  // directory. Nothing creates those anymore, so clear them before writing
+  // the plugin — otherwise the old copies keep shadowing the per-project ones.
+  const legacy = sweepLegacyUserAssets(home);
+  if (legacy.skillsRemoved.length > 0 || legacy.rulesRemoved.length > 0) {
+    console.log("==> Cleaned up assets left by an older fremi");
+    if (legacy.skillsRemoved.length > 0) {
+      console.log(`    ~/.claude/skills: ${legacy.skillsRemoved.length} stale symlink(s) removed`);
+    }
+    if (legacy.rulesRemoved.length > 0) {
+      console.log(`    ~/.claude/rules:  ${legacy.rulesRemoved.length} stale symlink(s) removed`);
+    }
+    console.log("    (skills and rules install per-project since v0.4.19)");
+    console.log("");
+  }
+  for (const e of legacy.errors) console.log(`    ! ${e}`);
 
   for (const agent of answers.agents) {
     if (agent !== "claude") continue;

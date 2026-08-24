@@ -1,6 +1,7 @@
 import { uninstallClaudePlugin } from "../agents/claude/plugin-uninstall";
 import { removeUserMarker, readUserMarker, writeUserMarker } from "../core/user-marker";
 import { gatherAgentUninstallAnswers, type AgentUninstallFlags } from "../prompts/agent-uninstall";
+import { sweepLegacyUserAssets } from "../core/sweep-legacy-user-assets";
 
 /**
  * `fremi agent uninstall` — interactive removal of user-level plugin
@@ -25,6 +26,18 @@ export async function runAgentUninstall(flags: AgentUninstallFlags = {}): Promis
   console.log(`==> User-level plugin uninstall for agent(s): ${answers.agents.join(", ")}`);
   console.log(`    home: ${home}`);
   console.log("");
+
+  // Also clear what pre-plugin versions left in the home directory; a user
+  // uninstalling should not be told "removed entirely" while dozens of stale
+  // symlinks stay behind.
+  const legacy = sweepLegacyUserAssets(home);
+  if (legacy.skillsRemoved.length > 0 || legacy.rulesRemoved.length > 0) {
+    console.log(`==> Assets from an older fremi`);
+    console.log(`    ~/.claude/skills: ${legacy.skillsRemoved.length} stale symlink(s) removed`);
+    console.log(`    ~/.claude/rules:  ${legacy.rulesRemoved.length} stale symlink(s) removed`);
+    console.log("");
+  }
+  for (const e of legacy.errors) console.log(`    ! ${e}`);
 
   for (const agent of answers.agents) {
     if (agent === "claude") {
