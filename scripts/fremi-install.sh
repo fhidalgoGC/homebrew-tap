@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# Wrapper for `bun run fremi:install` — supports optional --init flag.
-# --init  → wipes ./sandbox before installing (fresh state).
-# Without → installs on top of whatever ./sandbox currently has (idempotent
-#          re-run showing which artifacts were "unchanged" vs "recreated").
+# Thin alias kept for muscle memory — the sandbox lifecycle lives in
+# scripts/sandbox.sh, which isolates HOME so testing never touches your
+# real ~/.claude.
+#
+#   --init  → wipe the sandbox first (fresh state)
+#
+# Prefer calling sandbox.sh directly:
+#   bun run sandbox:cycle     reset + install + tree + uninstall + verify
 
 set -e
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ " $* " == *" --init "* ]]; then
-  echo "==> --init detected: wiping ./sandbox before install"
-  rm -rf sandbox
+  bash "$HERE/sandbox.sh" reset
 fi
-
-mkdir -p sandbox
-exec bun run src/index.ts install ./sandbox
+exec bash "$HERE/sandbox.sh" install

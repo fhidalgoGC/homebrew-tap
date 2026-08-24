@@ -17,7 +17,7 @@
 import { runVersion } from "./commands/version";
 import { runInstall } from "./commands/install";
 import type { InstallFlags } from "./commands/install";
-import { runUninstall } from "./commands/uninstall";
+import { runUninstall, type UninstallFlags } from "./commands/uninstall";
 import { runUpdate } from "./commands/update";
 import { runVerify } from "./commands/verify";
 import { runAgentInstall } from "./commands/agent-install";
@@ -45,9 +45,11 @@ async function main(): Promise<void> {
       break;
     }
 
-    case "uninstall":
-      await runUninstall(rest[0]);
+    case "uninstall": {
+      const { path, flags } = parseUninstallArgs(rest);
+      await runUninstall(path, flags);
       break;
+    }
 
     case "update":
       await runUpdate();
@@ -132,6 +134,45 @@ function parseInstallArgs(args: string[]): { path?: string; flags: InstallFlags 
   return { path, flags };
 }
 
+/**
+ * Args for `fremi uninstall`: an optional path plus the flags that widen the
+ * blast radius. Kept separate from parseInstallArgs because --purge and
+ * --with-user only make sense here.
+ */
+function parseUninstallArgs(args: string[]): { path?: string; flags: UninstallFlags } {
+  const flags: UninstallFlags = {};
+  let path: string | undefined;
+
+  for (const arg of args) {
+    if (!arg) continue;
+    if (arg === "--purge") {
+      flags.purge = true;
+      continue;
+    }
+    if (arg === "--with-user" || arg === "--all") {
+      flags.withUser = true;
+      continue;
+    }
+    if (arg === "--non-interactive" || arg === "-y" || arg === "--yes") {
+      flags.nonInteractive = true;
+      continue;
+    }
+    if (arg.startsWith("--agent=")) {
+      flags.agent = arg.slice("--agent=".length);
+      continue;
+    }
+    if (!arg.startsWith("-") && !path) {
+      path = arg;
+      continue;
+    }
+  }
+
+  // --all implies -y: it is meant for scripted teardown.
+  if (flags.withUser && flags.nonInteractive === undefined) flags.nonInteractive = true;
+
+  return { path, flags };
+}
+
 function printHelp(): void {
   console.log(`
 fremi — Product Discovery + SDD + BDD + TDD framework CLI
@@ -157,7 +198,11 @@ Commands:
 
   uninstall [path]       Remove project-level artifacts (CLAUDE.md block,
                          .fremi/settings/config.user.yaml). Preserves
-                         docs/works/ and other .fremi/settings/ files.
+                         docs/works/ and your other .fremi/settings/ files.
+    --purge              Also remove the rest of .fremi/ (settings, catalog).
+    --with-user, --all   Also run the user-level uninstall, so nothing fremi
+                         remains for any project. Implies -y.
+                         docs/works/ is never removed, with or without flags.
 
   update                 Pull the latest framework content from GitHub.
   verify                 Health check (silent when everything is OK).
@@ -169,6 +214,7 @@ Examples:
   fremi install                                → project-level (auto-agent-install if needed)
   fremi install ~/code/my-project --agent claude -y
   fremi uninstall                              → project-level cleanup
+  fremi uninstall ./sandbox --purge --all       → leave zero trace (both levels)
   fremi agent uninstall                        → full user-level cleanup
   fremi update
 `);

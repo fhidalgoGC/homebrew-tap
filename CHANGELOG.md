@@ -4,6 +4,46 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
+## [0.4.18] — 2026-08-24
+
+`fremi uninstall` puede no dejar rastro, y el sandbox pasa a probar de verdad
+el ciclo completo en un entorno aislado.
+
+### Added
+- `fremi uninstall --purge` — borra todo `.fremi/` (settings + catalog), no
+  sólo el `config.user.yaml`. Antes el install creaba 12 archivos y el
+  uninstall borraba 1, así que quedaban 11 huérfanos que el summary no
+  nombraba.
+- `fremi uninstall --with-user` (alias `--all`) — encadena la limpieza de
+  nivel usuario (skills, hooks.json, registry, marketplace, mcp, marker), así
+  que un solo comando deja el sistema sin fremi para NINGÚN proyecto. Implica
+  `-y`.
+- `bun run sandbox:verify` — assert de residuo cero en los dos niveles; sale
+  con código 1 si queda algo. Probado en positivo y en negativo, así que
+  `sandbox:cycle` es un gate real de pass/fail.
+- `bun run sandbox:cycle:fast` — el mismo ciclo desde TypeScript
+  (`FREMI_RUNNER=source`), sin compilar.
+- `docs/ARCHITECTURE.md`: sección de sandbox + secciones de skills/hooks
+  reescritas (describían `install-skills.ts` e `install-hooks.ts`, borrados en
+  v0.4.17, y llamaban "Future (v0.2+)" al header `# Tipo:` que ya está
+  implementado).
+
+### Changed
+- **El sandbox ahora aísla `HOME`**: `sandbox/.home/` recibe el plugin, los
+  skills y el MCP, y `sandbox/project/` es el proyecto. Antes los scripts
+  corrían con el HOME real, así que cada prueba reescribía el `~/.claude` del
+  desarrollador — y el `uninstall` del sandbox no podía verificar el nivel
+  usuario porque no era suyo.
+- `sandbox:uninstall` corre `fremi uninstall --purge --all`: los dos niveles,
+  vía el CLI real. Ninguna acción del sandbox falsea el resultado con
+  `rm -rf`; lo único deliberadamente distinto es `FREMI_HOME`, que apunta al
+  repo para que se prueben los cambios locales del framework.
+- El summary de `fremi uninstall` ahora lista archivo por archivo lo que dejó
+  en `.fremi/` y sugiere `--purge`. Antes decía "Preserved: .fremi/settings/"
+  y se leía como "no quedó nada".
+- `docs/works/` sigue intocable con o sin flags — es el trabajo real del
+  usuario, no andamiaje del framework.
+
 ## [0.4.17] — 2026-08-24
 
 Los hooks del framework vuelven a estar vivos: el instalador los descubre y los

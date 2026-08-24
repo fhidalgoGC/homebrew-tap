@@ -66,15 +66,28 @@ framework/
 
 ## Skill discovery
 
-`install-skills.ts` walks `framework/skills/`, `framework/reverse-engineering/`, and `framework/installs/` looking for `SKILL.md` files. It parses the `name:` frontmatter field and creates a symlink at `.claude/skills/<name>` → `<skill_dir>`.
+`agents/claude/plugin-install.ts` walks `framework/artifacts/`, `framework/skills/` and `framework/reverse-engineering/` looking for `SKILL.md` files (descending into nested `skills/` dirs). It parses the `name:` frontmatter field and symlinks `<pluginRoot>/skills/<name>` → `<skill_dir>`.
 
 Skills must have `name: fremi-<...>` per Regla 21. Skills without the prefix are skipped with an error.
 
+Since v0.3.0 skills live at USER level inside the Claude Code plugin, not as per-project `.claude/skills/` symlinks. The old project-level `install-skills.ts` was removed in v0.4.17.
+
 ## Hook registration
 
-`install-hooks.ts` reads all `*.sh` under `framework/hooks/` and adds them to `.claude/settings.json` under `hooks.PostToolUse[]` with a generic `Edit|Write` matcher. Existing entries are preserved (matched by absolute path).
+`core/discover-hooks.ts` walks the whole framework tree for `hooks/` dirs — `framework/hooks/` (cross-domain) plus the per-domain ones under `artifacts/<layer>/`, `pipelines/<p>/` and `reverse-engineering/<skill>/`. Each hook declares its own wiring in its header comment:
 
-**Future** (v0.2+): each hook will declare its own event and matcher in its header comment (e.g. `# Event: PostToolUse`, `# Matcher: docs/works/**/*.md`) and `install-hooks.ts` will honor them.
+```bash
+# Tipo: PostToolUse                                    → the event
+# Matcher (sugerido): { "tool_name": "Edit|Write", ... } → the matcher
+```
+
+`plugin-install.ts` groups them by event + matcher and writes `<pluginRoot>/hooks/hooks.json`, together with the SessionStart bootstrap entry (`fremi verify`). Consequences:
+
+- Adding a hook anywhere in the framework needs no CLI change — drop the `.sh` in a `hooks/` dir with a `# Tipo:` header and re-run `fremi agent install`.
+- Files prefixed with `_` are skipped: they are `source`-only bash libraries (`_methodology.sh`), not hooks.
+- A hook with no valid `# Tipo:` header, or without the executable bit, is reported as skipped instead of failing at runtime.
+
+Measured cost of the resulting wiring lives in `framework/hooks/README.md`.
 
 ## CLAUDE.md integration
 
@@ -84,9 +97,27 @@ Content outside the markers is preserved — users can safely edit their `CLAUDE
 
 ## Multi-platform strategy
 
-- **Build**: Bun `--compile` produces native binaries for macOS (arm64/x64), Linux (x64/arm64), Windows (x64).
-- **Distribute**: GitHub Actions workflow (`.github/workflows/release.yml`) builds all 5 on every tag push and uploads to GitHub Releases.
-- **Install**: `install.sh` (curl) for macOS/Linux, `install.ps1` (iwr) for Windows. Both detect platform+arch and pull the correct binary.
+- **Build**: Bun `--compile` produces native binaries for macOS (arm64/x64), Linux (x64/arm64), Windows (x64) — `scripts/build-all.sh`.
+- **Distribute**: release is **manual** today (`.github/workflows/release.yml` is disabled). `scripts/release.sh publish` builds all 5 and runs `gh release create v$(cat VERSION)`. Then `Formula/fremi.rb` gets the new version, 4 urls and 4 sha256 (`scripts/release.sh sha256`).
+- **Version bump in lockstep**: `VERSION`, `package.json`, `src/commands/version.ts` (`EMBEDDED_VERSION`) and `src/commands/agent-install.ts` (`FREMI_VERSION`). The last one names the plugin's install dir, so missing it installs under a stale version path.
+- **Default branch is `develop`**, and both the Homebrew formula and the framework clone (`ensure-framework.ts`) read from it. There is no `main`-based release step.
+- **Install**: `brew install fhidalgoGC/tap/fremi`, or `install.sh` (curl) / `install.ps1` (iwr), which detect platform+arch.
+
+## Testing: the sandbox
+
+`scripts/sandbox.sh` simulates installing into ANOTHER project, fully isolated:
+
+```
+sandbox/
+├── .home/      ← fake $HOME: plugin, skills, hooks.json, mcp, marker
+└── project/    ← the "other project": CLAUDE.md, .fremi/, docs/works/
+```
+
+The fake `$HOME` matters because fremi installs at two levels; without it, every test run would rewrite the developer's real `~/.claude`. Actions: `reset`, `install`, `uninstall`, `tree`, `verify`, `cycle`, `setting`. `verify` asserts zero residue at both levels and exits non-zero otherwise, so `cycle` is a real pass/fail gate.
+
+Every action drives the same CLI a user would run — nothing is faked with `rm -rf`. The one deliberate difference: `FREMI_HOME` points at the repo, so the sandbox exercises the LOCAL `framework/` content instead of the published clone. The clone path is covered by installing via brew.
+
+`FREMI_RUNNER=source` runs from TypeScript for fast iteration; the default compiles the darwin-arm64 binary first for user fidelity.
 
 ## Roadmap
 
