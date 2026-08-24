@@ -125,18 +125,30 @@ async function resolveProjectCwd(): Promise<string> {
 function readStdinWithTimeout(timeoutMs: number): Promise<string> {
   return new Promise((resolve) => {
     let buf = "";
-    const timer = setTimeout(() => resolve(buf), timeoutMs);
+    let settled = false;
+
+    // Resolving alone is not enough: an attached stdin listener keeps the
+    // event loop alive, so on timeout the process would print its output and
+    // then hang forever whenever stdin is a pipe nobody ever closes. Detach
+    // and pause so the process can exit.
+    const done = (value: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      process.stdin.removeAllListeners("data");
+      process.stdin.removeAllListeners("end");
+      process.stdin.removeAllListeners("error");
+      process.stdin.pause();
+      process.stdin.unref?.();
+      resolve(value);
+    };
+
+    const timer = setTimeout(() => done(buf), timeoutMs);
     process.stdin.setEncoding("utf8");
     process.stdin.on("data", (chunk) => {
       buf += chunk;
     });
-    process.stdin.on("end", () => {
-      clearTimeout(timer);
-      resolve(buf);
-    });
-    process.stdin.on("error", () => {
-      clearTimeout(timer);
-      resolve(buf);
-    });
+    process.stdin.on("end", () => done(buf));
+    process.stdin.on("error", () => done(buf));
   });
 }

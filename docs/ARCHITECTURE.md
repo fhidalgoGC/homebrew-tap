@@ -105,19 +105,41 @@ Content outside the markers is preserved — users can safely edit their `CLAUDE
 
 ## Testing: the sandbox
 
-`scripts/sandbox.sh` simulates installing into ANOTHER project, fully isolated:
+`scripts/sandbox.sh` runs the CLI against a throwaway environment whose folders
+mirror the two install levels one-to-one:
 
 ```
 sandbox/
-├── .home/      ← fake $HOME: plugin, skills, hooks.json, mcp, marker
-└── project/    ← the "other project": CLAUDE.md, .fremi/, docs/works/
+├── agent/     ← fake $HOME.   `fremi agent install` writes here   (real: ~/.claude)
+├── project/   ← fake project. `fremi install` writes here         (real: your repo)
+└── fremi/     ← throwaway framework clone, used by `update` only
 ```
 
-The fake `$HOME` matters because fremi installs at two levels; without it, every test run would rewrite the developer's real `~/.claude`. Actions: `reset`, `install`, `uninstall`, `tree`, `verify`, `cycle`, `setting`. `verify` asserts zero residue at both levels and exits non-zero otherwise, so `cycle` is a real pass/fail gate.
+**Every `bun run` script in this repo lands in the sandbox.** There is no
+`bun run` path to your real `~/.claude` or `~/.fremi`; installing for real means
+calling the `fremi` binary directly. `fremi_run()` enforces this by setting
+`HOME=sandbox/agent` and running from `sandbox/project`, so even cwd-sensitive
+commands (`verify`, `mcp`) answer about the sandbox project.
 
-Every action drives the same CLI a user would run — nothing is faked with `rm -rf`. The one deliberate difference: `FREMI_HOME` points at the repo, so the sandbox exercises the LOCAL `framework/` content instead of the published clone. The clone path is covered by installing via brew.
+Actions come in two families. **CLI mirrors** — `agent-install`,
+`agent-uninstall`, `install`, `uninstall`, `update`, `verify`, `version`,
+`setting`, `mcp`, `help`, plus `run <args>` for anything without a mirror of its
+own. **Lifecycle** — `reset`, `tree`, `clean`, `cycle`. `clean` asserts zero
+residue at both levels and exits non-zero otherwise, so `cycle`
+(reset → install → tree → uninstall → clean) is a real pass/fail gate.
 
-The sandbox runs from TypeScript source by default — it exists for fast command testing, so no compile step stands between an edit and a run. `FREMI_RUNNER=binary` (or `bun run sandbox:cycle:binary`) compiles the darwin-arm64 binary first for user fidelity; use it before a release.
+Every action drives the same CLI a user would run — nothing is faked with
+`rm -rf`. The one deliberate difference: `FREMI_HOME` points at the repo, so the
+sandbox exercises the LOCAL `framework/` content instead of the published clone.
+The clone path is covered by installing via brew. `update` is the exception:
+`fremi update` is a `git pull` inside `FREMI_HOME`, and pulling this repo
+mid-work would rewrite the tree you are editing — so that action alone points
+`FREMI_HOME` at `sandbox/fremi`.
+
+The sandbox runs from TypeScript source by default — it exists for fast command
+testing, so no compile step stands between an edit and a run.
+`FREMI_RUNNER=binary` (or `bun run sandbox:cycle:binary`) compiles the
+darwin-arm64 binary first for user fidelity; use it before a release.
 
 ## Roadmap
 

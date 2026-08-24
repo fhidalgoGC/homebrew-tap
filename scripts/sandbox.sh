@@ -1,30 +1,51 @@
 #!/usr/bin/env bash
-# Sandbox lifecycle — simulates installing fremi in ANOTHER project, fully
-# isolated from your real environment.
+# Sandbox — every fremi command, run against a throwaway environment.
 #
 #   sandbox/
-#   ├── .home/      ← fake $HOME: Claude plugin, skills, hooks.json, mcp, marker
-#   └── project/    ← the "other project": CLAUDE.md, .fremi/, docs/works/
+#   ├── agent/     ← fake $HOME. What `fremi agent install` writes: plugin,
+#   │                skills, hooks.json, mcp, marker.   Real life: ~/.claude
+#   └── project/   ← fake project. What `fremi install` writes: CLAUDE.md,
+#                    .fremi/, docs/works/.              Real life: your repo
 #
-# Why the fake HOME: fremi installs at TWO levels. Without isolation, testing
-# here would rewrite your real ~/.claude (skills + hooks for every project you
-# open). With it, `sandbox uninstall` can prove it left zero trace — which is
-# the whole point of the sandbox.
+# Two commands, two levels, two folders — the folder names mirror the CLI:
 #
-# Every action drives the REAL CLI, same code path as `fremi install` in your
-# own project. Nothing here fakes the result with rm -rf.
+#   fremi agent install   →  sandbox/agent/.claude/
+#   fremi install         →  sandbox/project/
 #
-# FREMI_HOME points at this repo, so the sandbox exercises your LOCAL framework
-# content (edit a rule, re-install, see it) instead of the published clone.
+# EVERY `bun run` script in this repo lands in here. Nothing you launch with
+# `bun run` can touch your real ~/.claude or ~/.fremi. To install for real,
+# call the `fremi` binary directly in your terminal — that is the only way.
 #
-# Usage:  bash scripts/sandbox.sh <action>
-#   reset      → wipe and recreate sandbox/{.home,project}
-#   install    → install both levels into the sandbox
-#   uninstall  → uninstall both levels (--purge --all), leaving zero trace
-#   tree       → show what exists at each level
-#   verify     → assert the sandbox is clean (exit 1 if anything remains)
-#   cycle      → reset + install + tree + uninstall + verify
-#   setting    → open the settings TUI against the sandbox project
+# Every action drives the REAL CLI, same code path a user gets. Nothing here
+# fakes a result with rm -rf. The one deliberate difference: FREMI_HOME points
+# at this repo, so the sandbox exercises your LOCAL framework/ content (edit a
+# rule, re-install, see it) instead of the published clone.
+#
+# `update` is the single exception: `fremi update` is `git pull` inside
+# FREMI_HOME, and pulling THIS repo mid-work would rewrite the tree you are
+# editing. So that action alone points FREMI_HOME at sandbox/fremi, a throwaway
+# clone of the published framework — which is also the honest way to test it.
+#
+# Usage:  bash scripts/sandbox.sh <action> [args...]
+#
+#   CLI mirrors — one per fremi command, extra args pass straight through:
+#     agent-install     → fremi agent install        (writes to sandbox/agent)
+#     agent-uninstall   → fremi agent uninstall
+#     install           → fremi install              (writes to sandbox/project)
+#     uninstall         → fremi uninstall --purge --all
+#     update            → fremi update   (see FREMI_HOME note below)
+#     verify            → fremi verify
+#     version           → fremi version
+#     setting           → fremi setting              (TUI on the sandbox project)
+#     mcp               → fremi mcp                  (stdio server; ctrl-c to stop)
+#     help              → fremi help
+#     run <args...>     → any fremi command, incl. ones not listed above
+#
+#   Sandbox lifecycle:
+#     reset      → wipe and recreate sandbox/{agent,project}
+#     tree       → show what exists at each level
+#     clean      → assert zero residue at both levels (exit 1 if anything remains)
+#     cycle      → reset + install + tree + uninstall + clean
 #
 # Env:
 #   FREMI_RUNNER=source   → run from TS source (default; fast iteration)
@@ -33,70 +54,141 @@
 
 set -e
 
-ACTION="${1:?Usage: sandbox.sh <reset|install|uninstall|tree|verify|cycle|setting>}"
+ACTION="${1:?Usage: sandbox.sh <action>   (see the header for the full list)}"
+shift || true
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SANDBOX="$REPO/sandbox"
-FAKE_HOME="$SANDBOX/.home"
-PROJECT="$SANDBOX/project"
+AGENT="$SANDBOX/agent"      # fake $HOME  → the `fremi agent install` level
+PROJECT="$SANDBOX/project"  # fake repo   → the `fremi install` level
+FREMI_CLONE="$SANDBOX/fremi" # throwaway framework clone, used by `update` only
 RUNNER="${FREMI_RUNNER:-source}"
 
-# Run the CLI with the sandbox environment applied.
+# Run the CLI with the sandbox environment applied:
+#   HOME  → keeps the agent level inside sandbox/agent, not your ~/.claude
+#   cwd   → sandbox/project, so cwd-sensitive commands (`verify`, `mcp`)
+#           answer about the sandbox project instead of this repo
+#   paths → absolute, so the cd cannot affect what gets run
 fremi_run() {
+  local fremi_home="${FREMI_HOME_OVERRIDE:-$REPO}"
   if [[ "$RUNNER" == "source" ]]; then
-    HOME="$FAKE_HOME" FREMI_HOME="$REPO" bun run "$REPO/src/index.ts" "$@"
+    (cd "$PROJECT" && HOME="$AGENT" FREMI_HOME="$fremi_home" bun run "$REPO/src/index.ts" "$@")
   else
-    HOME="$FAKE_HOME" FREMI_HOME="$REPO" "$REPO/bin/fremi-darwin-arm64" "$@"
+    (cd "$PROJECT" && HOME="$AGENT" FREMI_HOME="$fremi_home" "$REPO/bin/fremi-darwin-arm64" "$@")
   fi
 }
 
-ensure_dirs() { mkdir -p "$FAKE_HOME" "$PROJECT"; }
+ensure_dirs() { mkdir -p "$AGENT" "$PROJECT"; }
 
 ensure_binary() {
   [[ "$RUNNER" == "source" ]] && return 0
   bash "$REPO/scripts/build.sh" darwin-arm64
 }
 
+banner() {
+  echo "==> runner: $RUNNER   framework: $REPO/framework   HOME: sandbox/agent"
+  echo ""
+}
+
+self() { bash "$REPO/scripts/sandbox.sh" "$@"; }
+
 case "$ACTION" in
+  # ---------- CLI mirrors ----------
+
+  agent-install)
+    ensure_dirs; ensure_binary; banner
+    fremi_run agent install --agent claude -y --with-mcp "$@"
+    ;;
+
+  agent-uninstall)
+    ensure_dirs; ensure_binary
+    fremi_run agent uninstall --agent claude -y "$@"
+    ;;
+
+  install)
+    ensure_dirs; ensure_binary; banner
+    # `fremi install` chains the agent level itself when the marker is absent,
+    # so this single action exercises both levels — exactly like a real user.
+    fremi_run install "$PROJECT" --agent claude -y --with-mcp "$@"
+    ;;
+
+  uninstall)
+    ensure_dirs; ensure_binary
+    # --purge  → the whole .fremi/ tree, not just the master switch
+    # --all    → chain the user-level uninstall (skills, hooks, mcp, marketplace)
+    fremi_run uninstall "$PROJECT" --purge --all "$@"
+    ;;
+
+  update)
+    ensure_dirs; ensure_binary
+    # NEVER against $REPO: `fremi update` git-pulls FREMI_HOME.
+    if [[ ! -f "$FREMI_CLONE/VERSION" ]]; then
+      echo "==> first run: cloning the published framework into sandbox/fremi"
+      rm -rf "$FREMI_CLONE"
+      FREMI_HOME_OVERRIDE="$FREMI_CLONE" fremi_run install "$PROJECT" --agent claude -y >/dev/null
+      echo ""
+    fi
+    FREMI_HOME_OVERRIDE="$FREMI_CLONE" fremi_run update "$@"
+    ;;
+
+  verify)
+    ensure_dirs; ensure_binary
+    fremi_run verify "$@"
+    ;;
+
+  version)
+    ensure_dirs; ensure_binary
+    fremi_run version "$@"
+    ;;
+
+  setting|settings)
+    ensure_dirs; ensure_binary
+    fremi_run setting "$PROJECT" "$@"
+    ;;
+
+  mcp)
+    ensure_dirs; ensure_binary
+    fremi_run mcp "$@"
+    ;;
+
+  help)
+    ensure_binary
+    fremi_run help "$@"
+    ;;
+
+  run)
+    # Generic passthrough, so a command with no mirror of its own (or one
+    # added later) still cannot escape the sandbox.
+    ensure_dirs; ensure_binary
+    fremi_run "$@"
+    ;;
+
+  # ---------- sandbox lifecycle ----------
+
   reset)
     rm -rf "$SANDBOX"
     ensure_dirs
     echo "Fresh sandbox:"
-    echo "  fake HOME: sandbox/.home"
-    echo "  project:   sandbox/project"
+    echo "  agent   (fake HOME): sandbox/agent"
+    echo "  project:             sandbox/project"
     echo "Run \`bun run sandbox:install\` to install fremi there."
     ;;
 
-  install)
-    ensure_dirs
-    ensure_binary
-    echo "==> runner: $RUNNER   framework: $REPO/framework   HOME: sandbox/.home"
-    echo ""
-    fremi_run install "$PROJECT" --agent claude -y --with-mcp
-    ;;
-
-  uninstall)
-    ensure_binary
-    # --purge  → the whole .fremi/ tree, not just the master switch
-    # --all    → chain the user-level uninstall (skills, hooks, mcp, marketplace)
-    fremi_run uninstall "$PROJECT" --purge --all
-    ;;
-
   tree)
-    echo "########## PROJECT LEVEL (sandbox/project) ##########"
+    echo "########## PROJECT LEVEL (sandbox/project) — \`fremi install\` ##########"
     if [[ -d "$PROJECT" ]]; then
       (cd "$PROJECT" && find . -not -path "*/.git/*" | sort | sed 's|^\./||;s|^|  |' | grep -v '^  $')
     else
       echo "  (does not exist)"
     fi
     echo ""
-    echo "########## USER LEVEL (sandbox/.home) ##########"
-    if [[ -d "$FAKE_HOME/.claude" ]]; then
-      (cd "$FAKE_HOME" && find .claude -maxdepth 5 \
+    echo "########## AGENT LEVEL (sandbox/agent) — \`fremi agent install\` ##########"
+    if [[ -d "$AGENT/.claude" ]]; then
+      (cd "$AGENT" && find .claude -maxdepth 5 \
         -not -path "*/marketplaces/fremi/*" -not -path "*/skills/*" | sort | sed 's|^|  |')
-      local_skills="$FAKE_HOME/.claude/plugins/cache/fremi/fremi"
-      if [[ -d "$local_skills" ]]; then
-        for v in "$local_skills"/*; do
+      skills_root="$AGENT/.claude/plugins/cache/fremi/fremi"
+      if [[ -d "$skills_root" ]]; then
+        for v in "$skills_root"/*; do
           [[ -d "$v/skills" ]] && echo "  → $(basename "$v")/skills/: $(ls "$v/skills" | wc -l | tr -d ' ') symlinks into the framework"
         done
       fi
@@ -105,7 +197,7 @@ case "$ACTION" in
     fi
     ;;
 
-  verify)
+  clean)
     fail=0
     check_absent() {
       if [[ -e "$1" ]]; then echo "  ✗ LEFTOVER: ${1#$SANDBOX/}"; fail=1; else echo "  ✓ gone: ${1#$SANDBOX/}"; fi
@@ -128,13 +220,13 @@ case "$ACTION" in
     check_absent "$PROJECT/.fremi"
     check_present "$PROJECT/docs/works"     # user content: must survive
 
-    echo "=== user level ==="
-    check_absent "$FAKE_HOME/.claude/plugins/cache/fremi"
-    check_absent "$FAKE_HOME/.claude/plugins/marketplaces/fremi"
-    check_absent "$FAKE_HOME/.claude/.fremi-installed"
-    check_absent "$FAKE_HOME/.claude/mcp/fremi.json"
-    check_json_clean "$FAKE_HOME/.claude/plugins/installed_plugins.json"
-    check_json_clean "$FAKE_HOME/.claude/settings.json"
+    echo "=== agent level ==="
+    check_absent "$AGENT/.claude/plugins/cache/fremi"
+    check_absent "$AGENT/.claude/plugins/marketplaces/fremi"
+    check_absent "$AGENT/.claude/.fremi-installed"
+    check_absent "$AGENT/.claude/mcp/fremi.json"
+    check_json_clean "$AGENT/.claude/plugins/installed_plugins.json"
+    check_json_clean "$AGENT/.claude/settings.json"
 
     echo ""
     if [[ $fail -eq 0 ]]; then
@@ -146,25 +238,20 @@ case "$ACTION" in
     ;;
 
   cycle)
-    bash "$REPO/scripts/sandbox.sh" reset
-    echo ""
-    bash "$REPO/scripts/sandbox.sh" install
-    echo ""
-    bash "$REPO/scripts/sandbox.sh" tree
-    echo ""
-    bash "$REPO/scripts/sandbox.sh" uninstall
-    echo ""
-    bash "$REPO/scripts/sandbox.sh" verify
-    ;;
-
-  setting)
-    ensure_dirs
-    fremi_run setting "$PROJECT"
+    self reset;     echo ""
+    self install;   echo ""
+    self tree;      echo ""
+    self uninstall; echo ""
+    self clean
     ;;
 
   *)
     echo "Unknown action: $ACTION"
-    echo "Usage: sandbox.sh <reset|install|uninstall|tree|verify|cycle|setting>"
+    echo ""
+    echo "CLI mirrors:  agent-install agent-uninstall install uninstall"
+    echo "              update verify version setting mcp help"
+    echo "Passthrough:  run <any fremi args>"
+    echo "Lifecycle:    reset tree clean cycle"
     exit 1
     ;;
 esac

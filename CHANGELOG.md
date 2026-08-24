@@ -4,6 +4,44 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
+## [Unreleased]
+
+### Added
+- Una acción de sandbox por CADA comando del CLI: `sandbox:agent:install`,
+  `sandbox:agent:uninstall`, `sandbox:install`, `sandbox:uninstall`,
+  `sandbox:update`, `sandbox:verify`, `sandbox:version`, `sandbox:setting`,
+  `sandbox:mcp`, `sandbox:help`, más `run <args>` (y `bun run dev`) como
+  passthrough para cualquier comando que se agregue después.
+
+### Changed
+- **Las carpetas del sandbox ahora espejan los dos comandos**: `sandbox/agent/`
+  (lo que escribe `fremi agent install`, antes el oculto `.home/`) y
+  `sandbox/project/` (lo que escribe `fremi install`). El nombre `.home` no
+  decía a qué comando correspondía y se prestaba a leer `.claude` como algo
+  del proyecto.
+- **Todo `bun run` es sandbox.** Se eliminó la familia `fremi:*` de
+  package.json junto con `scripts/fremi-run.sh` y `scripts/fremi-install.sh`:
+  `fremi:agent:install`, `fremi:agent:uninstall` y `fremi:update` corrían el
+  CLI SIN aislar `HOME`, o sea que instalaban de verdad en el `~/.claude` del
+  desarrollador con un nombre que parecía de prueba. `bun run dev` tenía el
+  mismo agujero. Para instalar en serio, el binario `fremi` y nada más.
+- El sandbox corre el CLI parado en `sandbox/project`, así los comandos que
+  dependen del cwd (`verify`, `mcp`) responden sobre el proyecto del sandbox y
+  no sobre este repo.
+- `sandbox:update` usa su propio `FREMI_HOME` (`sandbox/fremi`, un clone
+  descartable). `fremi update` es un `git pull` adentro de `FREMI_HOME`, y con
+  el default del sandbox eso era un pull sobre ESTE repo, en medio del trabajo.
+- El assert de residuo cero pasó de `sandbox:verify` a `sandbox:clean`, para
+  que `sandbox:verify` signifique lo mismo que `fremi verify` como todos los
+  demás mirrors.
+
+### Fixed
+- `fremi verify` colgaba para siempre cuando stdin era un pipe que nadie
+  cerraba. `readStdinWithTimeout` resolvía su promesa a los 500 ms pero dejaba
+  los listeners de stdin puestos, y eso mantiene vivo el event loop. Como
+  `fremi verify` ES el hook de `SessionStart`, sobrevivía sólo gracias al
+  timeout de 5s de Claude Code. Ahora desengancha y pausa stdin al terminar.
+
 ## [0.4.18] — 2026-08-24
 
 `fremi uninstall` puede no dejar rastro, y el sandbox pasa a probar de verdad
