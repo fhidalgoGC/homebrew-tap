@@ -117,7 +117,7 @@ The fake `$HOME` matters because fremi installs at two levels; without it, every
 
 Every action drives the same CLI a user would run — nothing is faked with `rm -rf`. The one deliberate difference: `FREMI_HOME` points at the repo, so the sandbox exercises the LOCAL `framework/` content instead of the published clone. The clone path is covered by installing via brew.
 
-`FREMI_RUNNER=source` runs from TypeScript for fast iteration; the default compiles the darwin-arm64 binary first for user fidelity.
+The sandbox runs from TypeScript source by default — it exists for fast command testing, so no compile step stands between an edit and a run. `FREMI_RUNNER=binary` (or `bun run sandbox:cycle:binary`) compiles the darwin-arm64 binary first for user fidelity; use it before a release.
 
 ## Roadmap
 

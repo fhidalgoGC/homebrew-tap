@@ -21,12 +21,23 @@ el ciclo completo en un entorno aislado.
 - `bun run sandbox:verify` — assert de residuo cero en los dos niveles; sale
   con código 1 si queda algo. Probado en positivo y en negativo, así que
   `sandbox:cycle` es un gate real de pass/fail.
-- `bun run sandbox:cycle:fast` — el mismo ciclo desde TypeScript
-  (`FREMI_RUNNER=source`), sin compilar.
+- El sandbox corre desde TypeScript por default (es para probar comandos
+  rápido). `bun run sandbox:cycle:binary` (`FREMI_RUNNER=binary`) compila
+  el binario primero, para fidelidad de usuario antes de un release.
 - `docs/ARCHITECTURE.md`: sección de sandbox + secciones de skills/hooks
   reescritas (describían `install-skills.ts` e `install-hooks.ts`, borrados en
   v0.4.17, y llamaban "Future (v0.2+)" al header `# Tipo:` que ya está
   implementado).
+
+### Fixed
+- El MCP se registraba apuntando a `which fremi` — o sea al binario de brew —
+  aunque el install lo estuviera corriendo otro binario. Un dev build, o el
+  sandbox, escribían en `~/.claude/mcp/fremi.json` una ruta ajena a lo que se
+  estaba probando. Ahora se registra lo que REALMENTE está corriendo: el
+  binario compilado, o `bun <repo>/src/index.ts` cuando se corre desde
+  fuente. Si el binario vive detrás de un symlink estable en PATH que apunta
+  a una ruta version-pinned (brew: `bin/fremi` → `Cellar/fremi/X.Y.Z/bin/fremi`)
+  se prefiere el symlink, así la entrada sobrevive a `brew upgrade`.
 
 ### Changed
 - **El sandbox ahora aísla `HOME`**: `sandbox/.home/` recibe el plugin, los

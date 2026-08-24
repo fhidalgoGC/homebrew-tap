@@ -27,8 +27,9 @@
 #   setting    → open the settings TUI against the sandbox project
 #
 # Env:
-#   FREMI_RUNNER=source   → run from TS source (fast iteration)
-#   FREMI_RUNNER=binary   → compile darwin-arm64 first (default; user fidelity)
+#   FREMI_RUNNER=source   → run from TS source (default; fast iteration)
+#   FREMI_RUNNER=binary   → compile darwin-arm64 first (user fidelity;
+#                           use before a release)
 
 set -e
 
@@ -38,7 +39,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SANDBOX="$REPO/sandbox"
 FAKE_HOME="$SANDBOX/.home"
 PROJECT="$SANDBOX/project"
-RUNNER="${FREMI_RUNNER:-binary}"
+RUNNER="${FREMI_RUNNER:-source}"
 
 # Run the CLI with the sandbox environment applied.
 fremi_run() {

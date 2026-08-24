@@ -1,10 +1,11 @@
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, basename } from "node:path";
 import {
   existsSync,
   mkdirSync,
   readFileSync,
   writeFileSync,
   unlinkSync,
+  realpathSync,
 } from "node:fs";
 import { execSync } from "node:child_process";
 
@@ -47,11 +48,10 @@ export function registerFremiMcp(homePath: string, pluginRoot: string): McpRegis
   };
 
   try {
-    // 1. Resolve absolute path to `fremi` binary. `which fremi` gives us
-    //    a stable path Claude Code can exec (~/.claude/mcp/*.json entries
-    //    prefer absolute paths).
-    const binaryPath = resolveBinaryPath();
-    report.binaryPath = binaryPath;
+    // 1. Resolve how to invoke fremi. Absolute paths only: ~/.claude/mcp/*.json
+    //    entries are exec'd directly, so they must not depend on PATH.
+    const invocation = resolveMcpInvocation();
+    report.binaryPath = [invocation.command, ...invocation.args].join(" ");
 
     // 2. Write ~/.claude/mcp/fremi.json - the Engram-style loose config.
     const mcpJsonPath = resolve(homePath, ".claude", "mcp", `${MCP_NAME}.json`);
@@ -59,7 +59,7 @@ export function registerFremiMcp(homePath: string, pluginRoot: string): McpRegis
     mkdirSync(dirname(mcpJsonPath), { recursive: true });
     writeFileSync(
       mcpJsonPath,
-      JSON.stringify({ command: binaryPath, args: MCP_ARGS }, null, 2) + "\n",
+      JSON.stringify({ command: invocation.command, args: invocation.args }, null, 2) + "\n",
     );
     report.fremiJsonWritten = true;
 
@@ -70,7 +70,7 @@ export function registerFremiMcp(homePath: string, pluginRoot: string): McpRegis
     // 4. Update the plugin's own .mcp.json so the plugin declares the
     //    MCP server it ships with (Claude Code merges this with the
     //    loose config in step 2).
-    updatePluginMcpJson(pluginRoot, binaryPath);
+    updatePluginMcpJson(pluginRoot);
     report.pluginMcpJsonUpdated = true;
   } catch (err) {
     report.errors.push((err as Error).message);
@@ -122,18 +122,62 @@ export function unregisterFremiMcp(homePath: string): {
   return result;
 }
 
-function resolveBinaryPath(): string {
-  // Prefer the currently running binary path so `fremi` invoked via
-  // brew, curl, or a dev build resolves to itself. `process.execPath`
-  // is bun-the-runtime when running from source; `which fremi` is more
-  // reliable for the compiled binary.
-  try {
-    const out = execSync("which fremi", { encoding: "utf8" }).trim();
-    if (out) return out;
-  } catch {
-    // fall through
+interface McpInvocation {
+  command: string;
+  args: string[];
+}
+
+function resolveMcpInvocation(): McpInvocation {
+  // Register whatever is ACTUALLY running, so a brew install, a curl
+  // install, a local dev build and a from-source run each point at
+  // themselves instead of at whatever `which fremi` happens to find.
+  const running = process.execPath;
+
+  // 1. Compiled binary (brew / curl / `scripts/build.sh`): for a Bun
+  //    single-file executable process.execPath IS that binary.
+  if (running && basename(running).startsWith(MCP_NAME)) {
+    // A package manager may expose a stable symlink on PATH that points at a
+    // version-pinned real path (brew: bin/fremi -> Cellar/fremi/X.Y.Z/bin/fremi,
+    // and execPath resolves symlinks). Prefer the symlink when it designates
+    // this same binary, so the entry survives `brew upgrade`.
+    const onPath = whichFremi();
+    if (onPath && realPath(onPath) === realPath(running)) {
+      return { command: onPath, args: [...MCP_ARGS] };
+    }
+    return { command: running, args: [...MCP_ARGS] };
   }
-  return "fremi";
+
+  // 2. Running from TypeScript source (`bun run src/index.ts`, i.e. the
+  //    sandbox's fast path): execPath is bun-the-runtime, so pair it with
+  //    the entry script. Without this the MCP would silently point at an
+  //    unrelated installed binary rather than the code being edited.
+  const entry = process.argv[1];
+  if (running && entry && entry.endsWith(".ts")) {
+    return { command: running, args: [entry, ...MCP_ARGS] };
+  }
+
+  // 3. Last resort: an installation somewhere on PATH.
+  const onPath = whichFremi();
+  if (onPath) return { command: onPath, args: [...MCP_ARGS] };
+
+  return { command: MCP_NAME, args: [...MCP_ARGS] };
+}
+
+function whichFremi(): string | null {
+  try {
+    const out = execSync(`which ${MCP_NAME}`, { encoding: "utf8" }).trim();
+    return out || null;
+  } catch {
+    return null;
+  }
+}
+
+function realPath(path: string): string {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
 }
 
 function mergePermissions(homePath: string): number {
@@ -165,7 +209,7 @@ function mergePermissions(homePath: string): number {
   return added;
 }
 
-function updatePluginMcpJson(pluginRoot: string, _absoluteBinaryPath: string): void {
+function updatePluginMcpJson(pluginRoot: string): void {
   const path = resolve(pluginRoot, ".mcp.json");
   // Plugin-embedded .mcp.json matches Engram's pattern: the command is
   // the bare binary name, resolved via PATH at runtime. Keeps the plugin

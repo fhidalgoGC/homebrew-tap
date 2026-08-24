@@ -41,7 +41,7 @@
     "sandbox:tree": "bash scripts/sandbox.sh tree",
     "sandbox:verify": "bash scripts/sandbox.sh verify",
     "sandbox:cycle": "bash scripts/sandbox.sh cycle",
-    "sandbox:cycle:fast": "FREMI_RUNNER=source bash scripts/sandbox.sh cycle",
+    "sandbox:cycle:binary": "FREMI_RUNNER=binary bash scripts/sandbox.sh cycle",
     "release:publish": "bash scripts/release.sh publish",
     "release:sha256": "bash scripts/release.sh sha256"
   },
