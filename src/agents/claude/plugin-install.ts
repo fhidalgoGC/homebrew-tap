@@ -12,13 +12,14 @@ import {
 } from "node:fs";
 import { installFremiMarketplace, type MarketplaceInstallReport } from "./marketplace";
 import { registerFremiMcp, type McpRegisterReport } from "./mcp-register";
+import { discoverFrameworkHooks, toHooksConfig } from "../../core/discover-hooks";
 
 // Materialises fremi as a native Claude Code plugin (same layout Engram
 // uses). Everything lands under:
 //   ~/.claude/plugins/cache/fremi/fremi/<version>/
 //     .claude-plugin/plugin.json
 //     .mcp.json                       (empty for now)
-//     hooks/hooks.json                (SessionStart -> `fremi verify`)
+//     hooks/hooks.json                (bootstrap + every framework hook)
 //     skills/fremi-*/SKILL.md         (symlinks into ~/.fremi/framework)
 // Then we register the plugin in ~/.claude/plugins/installed_plugins.json
 // and enable it via ~/.claude/settings.json.enabledPlugins.
@@ -31,6 +32,8 @@ export interface PluginInstallReport {
   skillsSkipped: number;
   skillsRecreated: number;
   hooksJsonWritten: boolean;
+  frameworkHooksRegistered: number;
+  frameworkHooksSkipped: string[];
   mcpJsonWritten: boolean;
   pluginJsonWritten: boolean;
   registeredInRegistry: boolean;
@@ -52,6 +55,8 @@ export async function installClaudePlugin(
     skillsSkipped: 0,
     skillsRecreated: 0,
     hooksJsonWritten: false,
+    frameworkHooksRegistered: 0,
+    frameworkHooksSkipped: [],
     mcpJsonWritten: false,
     pluginJsonWritten: false,
     registeredInRegistry: false,
@@ -85,8 +90,10 @@ export async function installClaudePlugin(
   writeMcpJson(pluginRoot);
   report.mcpJsonWritten = true;
 
-  writeHooksJson(pluginRoot);
+  const hooksReport = writeHooksJson(pluginRoot, frameworkContent);
   report.hooksJsonWritten = true;
+  report.frameworkHooksRegistered = hooksReport.registered;
+  report.frameworkHooksSkipped = hooksReport.skipped;
 
   const skillsReport = symlinkSkillsIntoPlugin(pluginRoot, frameworkContent);
   report.skillsInstalled = skillsReport.installed;
@@ -142,27 +149,48 @@ function writeMcpJson(pluginRoot: string): void {
   writeFileSync(path, JSON.stringify({ mcpServers: {} }, null, 2) + "\n");
 }
 
-function writeHooksJson(pluginRoot: string): void {
+/**
+ * Writes the plugin's hooks/hooks.json.
+ *
+ * Two layers land in the same file:
+ *   1. The bootstrap hook — SessionStart calls `fremi verify` to inject
+ *      project status into the session.
+ *   2. Every framework hook discovered across the tree (framework/hooks/ plus
+ *      the per-domain hooks/ dirs under artifacts/, pipelines/ and
+ *      reverse-engineering/). Each hook declares its own event and matcher in
+ *      its header, so no event mapping is hardcoded here.
+ *
+ * Commands are absolute paths into ~/.fremi/framework — resolved at install
+ * time, refreshed by `fremi update` + reinstall.
+ */
+function writeHooksJson(
+  pluginRoot: string,
+  frameworkContent: string,
+): { registered: number; skipped: string[] } {
   const path = join(pluginRoot, "hooks", "hooks.json");
   mkdirSync(dirname(path), { recursive: true });
-  const content = {
-    description: "fremi bootstrap - SessionStart calls `fremi verify` to inject project status.",
-    hooks: {
-      SessionStart: [
-        {
-          matcher: "startup|clear",
-          hooks: [
-            {
-              type: "command",
-              command: "fremi verify",
-              timeout: 5,
-            },
-          ],
-        },
-      ],
+
+  const discovered = discoverFrameworkHooks(frameworkContent);
+  const hooks: Record<string, unknown> = toHooksConfig(discovered.hooks, { timeout: 10 });
+
+  // Bootstrap SessionStart entry goes first so it runs before anything else.
+  const sessionStart = (hooks.SessionStart ?? []) as Array<Record<string, unknown>>;
+  hooks.SessionStart = [
+    {
+      matcher: "startup|clear",
+      hooks: [{ type: "command", command: "fremi verify", timeout: 5 }],
     },
+    ...sessionStart,
+  ];
+
+  const content = {
+    description:
+      "fremi hooks - SessionStart bootstrap (`fremi verify`) plus every framework hook, wired to the event each hook declares in its header.",
+    hooks,
   };
   writeFileSync(path, JSON.stringify(content, null, 2) + "\n");
+
+  return { registered: discovered.hooks.length, skipped: discovered.skipped };
 }
 
 function symlinkSkillsIntoPlugin(

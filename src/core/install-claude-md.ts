@@ -11,8 +11,10 @@ const CLAUDE_MD_HEADER = `# Project — powered by fremi-framework
 Este proyecto usa **fremi-framework** para su flujo Product Discovery + SDD + BDD + TDD.
 
 **Reglas duras del framework** (obligatorias antes de cualquier acción no trivial):
-- \`.claude/rules/workflow.md\` — Reglas 1-24 (flow forward).
-- \`.claude/rules/reverse.md\` — Reglas 25-32 (reverse-engineering).
+- \`~/.fremi/framework/rules/workflow.md\` — **empezar acá**. Índice global: jerarquía de capas, nomenclatura, principio rector, y qué regla vive dónde.
+- \`~/.fremi/framework/rules/\` — reglas cross-domain (\`hierarchy.md\`, \`sync-back.md\`, \`versioning.md\`, \`framework-mechanics.md\`).
+- \`~/.fremi/framework/artifacts/<capa>/rules/\` — reglas de dominio (story, product, feature, enabler, extra). El \`applies.yaml\` de cada capa declara qué reglas cargar por step: cargá sólo las del dominio en uso, no todas.
+- \`~/.fremi/framework/reverse-engineering/rules/reverse.md\` — reverse-engineering (alinear código pre-existente).
 
 **Skills invocables**: prefijo \`/fremi-*\`. Ver \`.claude/skills/\`.
 

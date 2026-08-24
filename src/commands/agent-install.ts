@@ -5,7 +5,7 @@ import { installClaudePlugin } from "../agents/claude/plugin-install";
 import { writeUserMarker, readUserMarker } from "../core/user-marker";
 import type { InstallFlags } from "./install";
 
-const FREMI_VERSION = "0.4.16";
+const FREMI_VERSION = "0.4.17";
 
 // `fremi agent install` - materialises fremi as a plugin at USER level for
 // every selected agent. For Claude Code that means writing to
@@ -40,7 +40,10 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
     console.log(`    skills:       ${report.skillsInstalled} installed, ${report.skillsSkipped} unchanged, ${report.skillsRecreated} recreated`);
     console.log(`    plugin.json:  ${report.pluginJsonWritten ? "written" : "skipped"}`);
     console.log(`    .mcp.json:    ${report.mcpJsonWritten ? "written" : "skipped"}`);
-    console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written (SessionStart -> fremi verify)" : "skipped"}`);
+    console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written" : "skipped"} (bootstrap + ${report.frameworkHooksRegistered} framework hooks)`);
+    if (report.frameworkHooksSkipped.length > 0) {
+      console.log(`                  no event declared (not wired): ${report.frameworkHooksSkipped.join(", ")}`);
+    }
     console.log(`    registry:     ${report.registeredInRegistry ? "added to installed_plugins.json" : "unchanged"}`);
     console.log(`    settings:     ${report.enabledInSettings ? "enabledPlugins updated" : "unchanged"}`);
     const mkt = report.marketplace;
