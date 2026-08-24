@@ -4,6 +4,14 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
+## [Unreleased]
+
+### Fixed
+- `fremi agent install` borra las versiones anteriores del plugin. La ruta de
+  instalación lleva la versión adentro (`…/fremi/fremi/<version>/`), así que
+  cada upgrade dejaba el árbol viejo al lado del nuevo — una copia por release,
+  acumulándose para siempre.
+
 ## [0.4.20] — 2026-08-24
 
 ### Fixed

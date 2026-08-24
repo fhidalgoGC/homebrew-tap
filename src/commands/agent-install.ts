@@ -58,6 +58,9 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
     console.log(`    plugin.json:  ${report.pluginJsonWritten ? "written" : "skipped"}`);
     console.log(`    .mcp.json:    ${report.mcpJsonWritten ? "written" : "skipped"}`);
     console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written" : "skipped"} (SessionStart bootstrap)`);
+    if (report.prunedVersions.length > 0) {
+      console.log(`    old versions: pruned ${report.prunedVersions.join(", ")}`);
+    }
     console.log(`    registry:     ${report.registeredInRegistry ? "added to installed_plugins.json" : "unchanged"}`);
     console.log(`    settings:     ${report.enabledInSettings ? "enabledPlugins updated" : "unchanged"}`);
     const mkt = report.marketplace;

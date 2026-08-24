@@ -9,6 +9,7 @@ import {
   readlinkSync,
   symlinkSync,
   unlinkSync,
+  rmSync,
 } from "node:fs";
 import { installFremiMarketplace, type MarketplaceInstallReport } from "./marketplace";
 import { registerFremiMcp, type McpRegisterReport } from "./mcp-register";
@@ -35,6 +36,7 @@ export interface PluginInstallReport {
   pluginJsonWritten: boolean;
   registeredInRegistry: boolean;
   enabledInSettings: boolean;
+  prunedVersions: string[];
   marketplace: MarketplaceInstallReport;
   mcp: McpRegisterReport;
   errors: string[];
@@ -53,6 +55,7 @@ export async function installClaudePlugin(
     pluginJsonWritten: false,
     registeredInRegistry: false,
     enabledInSettings: false,
+    prunedVersions: [],
     marketplace: {
       marketplaceDir: "",
       cloned: false,
@@ -71,6 +74,8 @@ export async function installClaudePlugin(
     },
     errors: [],
   };
+
+  report.prunedVersions = prunePluginVersions(homePath, version);
 
   const pluginRoot = getPluginRoot(homePath, version);
   report.pluginRoot = pluginRoot;
@@ -107,6 +112,28 @@ export async function installClaudePlugin(
   }
 
   return report;
+}
+
+/**
+ * Removes plugin directories from previous versions. The install path is
+ * versioned (…/fremi/fremi/<version>/), so without this every upgrade leaves
+ * the old tree behind and the cache grows one copy per release.
+ */
+function prunePluginVersions(homePath: string, keepVersion: string): string[] {
+  const base = resolve(homePath, ".claude", "plugins", "cache", PLUGIN_NAME, PLUGIN_NAME);
+  if (!existsSync(base)) return [];
+
+  const pruned: string[] = [];
+  for (const entry of readdirSync(base, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === keepVersion) continue;
+    try {
+      rmSync(join(base, entry.name), { recursive: true, force: true });
+      pruned.push(entry.name);
+    } catch {
+      // Leave it rather than fail the install over a stale directory.
+    }
+  }
+  return pruned;
 }
 
 function getPluginRoot(homePath: string, version: string): string {
