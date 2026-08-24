@@ -2,6 +2,8 @@ import { resolve } from "node:path";
 import { existsSync, statSync } from "node:fs";
 import { uninstallClaudeMd } from "../core/uninstall-claude-md";
 import { uninstallFremiConfig } from "../core/uninstall-fremi-config";
+import { uninstallProjectClaude } from "../core/uninstall-project-claude";
+import { getFrameworkContentRoot } from "../core/paths";
 import { runAgentUninstall } from "./agent-uninstall";
 
 export interface UninstallFlags {
@@ -51,12 +53,16 @@ export async function runUninstall(
   const report = {
     claudeMd: await uninstallClaudeMd(targetPath),
     fremiConfig: await uninstallFremiConfig(targetPath, { purge: flags.purge }),
+    claude: uninstallProjectClaude(targetPath, getFrameworkContentRoot()),
   };
 
   console.log("==> Uninstall summary:");
   console.log(`    CLAUDE.md:    ${report.claudeMd.action}`);
   console.log(`    .fremi/:      ${report.fremiConfig.action}`);
-  for (const e of [...report.claudeMd.errors, ...report.fremiConfig.errors]) {
+  console.log(`    .claude/skills/: ${report.claude.skillsRemoved} removed${report.claude.skillsKept > 0 ? `, ${report.claude.skillsKept} kept (not fremi's)` : ""}`);
+  console.log(`    .claude/rules/:  ${report.claude.rulesRemoved} removed${report.claude.rulesKept > 0 ? `, ${report.claude.rulesKept} kept (not fremi's)` : ""}`);
+  console.log(`    .claude/settings.json: ${report.claude.hooksRemoved} framework hooks removed`);
+  for (const e of [...report.claudeMd.errors, ...report.fremiConfig.errors, ...report.claude.errors]) {
     console.log(`    error:        ${e}`);
   }
   console.log("");

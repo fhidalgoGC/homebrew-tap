@@ -37,13 +37,9 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
     });
     console.log(`==> Claude Code plugin`);
     console.log(`    plugin root:  ${report.pluginRoot}`);
-    console.log(`    skills:       ${report.skillsInstalled} installed, ${report.skillsSkipped} unchanged, ${report.skillsRecreated} recreated`);
     console.log(`    plugin.json:  ${report.pluginJsonWritten ? "written" : "skipped"}`);
     console.log(`    .mcp.json:    ${report.mcpJsonWritten ? "written" : "skipped"}`);
-    console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written" : "skipped"} (bootstrap + ${report.frameworkHooksRegistered} framework hooks)`);
-    if (report.frameworkHooksSkipped.length > 0) {
-      console.log(`                  no event declared (not wired): ${report.frameworkHooksSkipped.join(", ")}`);
-    }
+    console.log(`    hooks.json:   ${report.hooksJsonWritten ? "written" : "skipped"} (SessionStart bootstrap)`);
     console.log(`    registry:     ${report.registeredInRegistry ? "added to installed_plugins.json" : "unchanged"}`);
     console.log(`    settings:     ${report.enabledInSettings ? "enabledPlugins updated" : "unchanged"}`);
     const mkt = report.marketplace;
@@ -77,6 +73,7 @@ export async function runAgentInstall(flags: InstallFlags = {}): Promise<void> {
   console.log("✓ fremi installed as user-level plugin.");
   console.log("");
   console.log("Restart Claude Code (or open a new session) to load the plugin.");
+  console.log("Skills, rules and framework hooks install per-project — run `fremi install` there.");
 }
 
 function dedupe<T>(arr: T[]): T[] {

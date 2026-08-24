@@ -9,6 +9,7 @@ import { initFremiConfig } from "../core/init-config";
 import { readUserMarker } from "../core/user-marker";
 import { runAgentInstall } from "./agent-install";
 import { fetchAgentCatalogs } from "../core/fetch-catalog";
+import { installProjectClaude } from "../core/install-project-claude";
 
 export interface InstallFlags {
   agent?: string;             // comma-separated list of agents, e.g. "claude,cursor"
@@ -65,9 +66,10 @@ export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Pr
   console.log(`    framework: ${frameworkContent}`);
   console.log("");
 
-  // 4. Project-level artifacts ONLY. Skills / rules / hooks live at user
-  //    level (installed via `fremi agent install`). Everything below is
-  //    idempotent — safe to re-run.
+  // 4. Project-level artifacts. Skills and rules land in .claude/ here, so
+  //    the project is self-contained; only the MCP and the bootstrap hook
+  //    stay user-level (`fremi agent install`).
+  //    Everything below is idempotent — safe to re-run.
   const report = {
     claudeMd: await installClaudeMd(targetPath, frameworkContent),
     userSettings: await installUserSettings(targetPath, frameworkContent),
@@ -77,6 +79,7 @@ export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Pr
     // in the YAML anymore, so this step is what makes the models editor
     // work on a fresh install.
     catalogs: await fetchAgentCatalogs(targetPath),
+    claude: await installProjectClaude(targetPath, frameworkContent),
   };
 
   // 5. Report
@@ -85,6 +88,13 @@ export async function runInstall(rawPath?: string, flags: InstallFlags = {}): Pr
   console.log(`    Settings:     ${report.userSettings.copied} copied, ${report.userSettings.skipped} kept (already customized)`);
   console.log(`    docs/works/:  ${report.docsWorks.action}`);
   console.log(`    .fremi/:      ${report.config.action}`);
+  console.log(`    .claude/skills/: ${report.claude.skillsInstalled} installed, ${report.claude.skillsSkipped} unchanged, ${report.claude.skillsRecreated} recreated`);
+  console.log(`    .claude/rules/:  ${report.claude.rulesInstalled} installed, ${report.claude.rulesSkipped} unchanged, ${report.claude.rulesRecreated} recreated`);
+  console.log(`    .claude/settings.json: ${report.claude.hooksRegistered} framework hooks wired`);
+  if (report.claude.hooksSkipped.length > 0) {
+    console.log(`      no event declared (not wired): ${report.claude.hooksSkipped.join(", ")}`);
+  }
+  for (const e of report.claude.errors) console.log(`      ! ${e}`);
   for (const c of report.catalogs) {
     const summary =
       c.status === "fetched"

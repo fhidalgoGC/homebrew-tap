@@ -6,6 +6,25 @@
 
 ## [Unreleased]
 
+### Changed
+- **Un proyecto ahora es autocontenido.** `fremi install` escribe
+  `.claude/skills/` (un symlink por skill), `.claude/rules/` y los hooks del
+  framework dentro de `.claude/settings.json` del proyecto. Antes los 50
+  skills vivían en el plugin de nivel usuario, así que aparecían en TODOS los
+  proyectos de la máquina hubieran instalado fremi o no.
+- En el nivel usuario quedan sólo dos cosas: el **MCP** (`~/.claude/mcp/fremi.json`),
+  que responde sobre fremi mismo — versión, estado — y no sobre un proyecto en
+  particular; y el **hook bootstrap de SessionStart** (`fremi verify`), que
+  justamente tiene que correr en proyectos que NO instalaron fremi para
+  avisar que está inactivo. El plugin, el marketplace y el registro siguen
+  donde estaban.
+- Los hooks del framework se registran en UN solo lugar (el proyecto). Antes
+  estaban en el `hooks.json` del plugin; dejarlos en los dos niveles los
+  dispararía dos veces por evento.
+- `fremi uninstall` limpia lo nuevo: saca los symlinks que apuntan al
+  framework y las entradas de hook que son suyas, y respeta los skills, rules
+  y hooks que el proyecto haya agregado a mano.
+
 ### Added
 - Una acción de sandbox por CADA comando del CLI: `sandbox:agent:install`,
   `sandbox:agent:uninstall`, `sandbox:install`, `sandbox:uninstall`,

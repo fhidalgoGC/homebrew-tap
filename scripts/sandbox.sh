@@ -177,7 +177,13 @@ case "$ACTION" in
   tree)
     echo "########## PROJECT LEVEL (sandbox/project) — \`fremi install\` ##########"
     if [[ -d "$PROJECT" ]]; then
-      (cd "$PROJECT" && find . -not -path "*/.git/*" | sort | sed 's|^\./||;s|^|  |' | grep -v '^  $')
+      (cd "$PROJECT" && find . -not -path "*/.git/*" -not -path "./.claude/skills/*" \
+        -not -path "./.claude/rules/*" | sort | sed 's|^\./||;s|^|  |' | grep -v '^  $')
+      for d in skills rules; do
+        if [[ -d "$PROJECT/.claude/$d" ]]; then
+          echo "  → .claude/$d/: $(ls "$PROJECT/.claude/$d" | wc -l | tr -d ' ') symlinks into the framework"
+        fi
+      done
     else
       echo "  (does not exist)"
     fi
@@ -186,12 +192,6 @@ case "$ACTION" in
     if [[ -d "$AGENT/.claude" ]]; then
       (cd "$AGENT" && find .claude -maxdepth 5 \
         -not -path "*/marketplaces/fremi/*" -not -path "*/skills/*" | sort | sed 's|^|  |')
-      skills_root="$AGENT/.claude/plugins/cache/fremi/fremi"
-      if [[ -d "$skills_root" ]]; then
-        for v in "$skills_root"/*; do
-          [[ -d "$v/skills" ]] && echo "  → $(basename "$v")/skills/: $(ls "$v/skills" | wc -l | tr -d ' ') symlinks into the framework"
-        done
-      fi
     else
       echo "  (nothing installed)"
     fi
@@ -218,6 +218,9 @@ case "$ACTION" in
     echo "=== project level ==="
     check_absent "$PROJECT/CLAUDE.md"
     check_absent "$PROJECT/.fremi"
+    check_absent "$PROJECT/.claude/skills"
+    check_absent "$PROJECT/.claude/rules"
+    check_json_clean "$PROJECT/.claude/settings.json"
     check_present "$PROJECT/docs/works"     # user content: must survive
 
     echo "=== agent level ==="

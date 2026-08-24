@@ -15,9 +15,9 @@ import { execSync } from "node:child_process";
 // permissions.allow, and updates the plugin's .mcp.json so Claude Code
 // wires the server on plugin load.
 
-const MCP_NAME = "fremi";
-const MCP_ARGS = ["mcp"];
-const FREMI_TOOLS = [
+export const MCP_NAME = "fremi";
+export const MCP_ARGS = ["mcp"];
+export const FREMI_TOOLS = [
   "mcp__fremi__project_status",
   "mcp__fremi__list_features",
   "mcp__fremi__list_stories",
@@ -122,12 +122,12 @@ export function unregisterFremiMcp(homePath: string): {
   return result;
 }
 
-interface McpInvocation {
+export interface McpInvocation {
   command: string;
   args: string[];
 }
 
-function resolveMcpInvocation(): McpInvocation {
+export function resolveMcpInvocation(): McpInvocation {
   // Register whatever is ACTUALLY running, so a brew install, a curl
   // install, a local dev build and a from-source run each point at
   // themselves instead of at whatever `which fremi` happens to find.

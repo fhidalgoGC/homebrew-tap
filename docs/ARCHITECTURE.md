@@ -115,6 +115,14 @@ sandbox/
 └── fremi/     ← throwaway framework clone, used by `update` only
 ```
 
+What lands where, since v0.4.19: a project is self-contained. `fremi install`
+writes `.claude/skills/` (one symlink per skill), `.claude/rules/` and the
+framework's hooks into `.claude/settings.json`, next to `CLAUDE.md`, `.fremi/`
+and `docs/works/`. Only two things stay user-level: the MCP server, which
+answers about fremi itself rather than about any one project, and the
+SessionStart bootstrap hook, which has to run in projects that never installed
+fremi in order to report that it is inactive there.
+
 **Every `bun run` script in this repo lands in the sandbox.** There is no
 `bun run` path to your real `~/.claude` or `~/.fremi`; installing for real means
 calling the `fremi` binary directly. `fremi_run()` enforces this by setting

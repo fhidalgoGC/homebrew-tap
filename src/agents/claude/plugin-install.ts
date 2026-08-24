@@ -12,28 +12,25 @@ import {
 } from "node:fs";
 import { installFremiMarketplace, type MarketplaceInstallReport } from "./marketplace";
 import { registerFremiMcp, type McpRegisterReport } from "./mcp-register";
-import { discoverFrameworkHooks, toHooksConfig } from "../../core/discover-hooks";
 
 // Materialises fremi as a native Claude Code plugin (same layout Engram
 // uses). Everything lands under:
 //   ~/.claude/plugins/cache/fremi/fremi/<version>/
 //     .claude-plugin/plugin.json
 //     .mcp.json                       (empty for now)
-//     hooks/hooks.json                (bootstrap + every framework hook)
-//     skills/fremi-*/SKILL.md         (symlinks into ~/.fremi/framework)
+//     hooks/hooks.json                (the SessionStart bootstrap only)
 // Then we register the plugin in ~/.claude/plugins/installed_plugins.json
 // and enable it via ~/.claude/settings.json.enabledPlugins.
+//
+// Skills, rules and the framework's hooks are NOT here: they install
+// per-project so a project carries its own fremi. What stays user-level is
+// the MCP server and the bootstrap hook. See core/install-project-claude.ts.
 
 const PLUGIN_NAME = "fremi";
 
 export interface PluginInstallReport {
   pluginRoot: string;
-  skillsInstalled: number;
-  skillsSkipped: number;
-  skillsRecreated: number;
   hooksJsonWritten: boolean;
-  frameworkHooksRegistered: number;
-  frameworkHooksSkipped: string[];
   mcpJsonWritten: boolean;
   pluginJsonWritten: boolean;
   registeredInRegistry: boolean;
@@ -51,12 +48,7 @@ export async function installClaudePlugin(
 ): Promise<PluginInstallReport> {
   const report: PluginInstallReport = {
     pluginRoot: "",
-    skillsInstalled: 0,
-    skillsSkipped: 0,
-    skillsRecreated: 0,
     hooksJsonWritten: false,
-    frameworkHooksRegistered: 0,
-    frameworkHooksSkipped: [],
     mcpJsonWritten: false,
     pluginJsonWritten: false,
     registeredInRegistry: false,
@@ -90,16 +82,8 @@ export async function installClaudePlugin(
   writeMcpJson(pluginRoot);
   report.mcpJsonWritten = true;
 
-  const hooksReport = writeHooksJson(pluginRoot, frameworkContent);
+  writeHooksJson(pluginRoot);
   report.hooksJsonWritten = true;
-  report.frameworkHooksRegistered = hooksReport.registered;
-  report.frameworkHooksSkipped = hooksReport.skipped;
-
-  const skillsReport = symlinkSkillsIntoPlugin(pluginRoot, frameworkContent);
-  report.skillsInstalled = skillsReport.installed;
-  report.skillsSkipped = skillsReport.skipped;
-  report.skillsRecreated = skillsReport.recreated;
-  report.errors.push(...skillsReport.errors);
 
   registerInInstalledPlugins(homePath, pluginRoot, version);
   report.registeredInRegistry = true;
@@ -163,124 +147,33 @@ function writeMcpJson(pluginRoot: string): void {
  * Commands are absolute paths into ~/.fremi/framework — resolved at install
  * time, refreshed by `fremi update` + reinstall.
  */
-function writeHooksJson(
-  pluginRoot: string,
-  frameworkContent: string,
-): { registered: number; skipped: string[] } {
+function writeHooksJson(pluginRoot: string): void {
   const path = join(pluginRoot, "hooks", "hooks.json");
   mkdirSync(dirname(path), { recursive: true });
 
-  const discovered = discoverFrameworkHooks(frameworkContent);
-  const hooks: Record<string, unknown> = toHooksConfig(discovered.hooks, { timeout: 10 });
-
-  // Bootstrap SessionStart entry goes first so it runs before anything else.
-  const sessionStart = (hooks.SessionStart ?? []) as Array<Record<string, unknown>>;
-  hooks.SessionStart = [
-    {
-      matcher: "startup|clear",
-      hooks: [{ type: "command", command: "fremi verify", timeout: 5 }],
-    },
-    ...sessionStart,
-  ];
-
+  // ONLY the bootstrap. It has to be user-level because its whole job is to
+  // run in projects that never installed fremi and report that fremi is
+  // inactive there. The framework's own hooks install per-project into
+  // .claude/settings.json — see core/install-project-claude.ts. Registering
+  // them here too would fire every hook twice.
   const content = {
     description:
-      "fremi hooks - SessionStart bootstrap (`fremi verify`) plus every framework hook, wired to the event each hook declares in its header.",
-    hooks,
+      "fremi bootstrap hook. Framework hooks live per-project in .claude/settings.json.",
+    hooks: {
+      SessionStart: [
+        {
+          matcher: "startup|clear",
+          hooks: [{ type: "command", command: "fremi verify", timeout: 5 }],
+        },
+      ],
+    },
   };
   writeFileSync(path, JSON.stringify(content, null, 2) + "\n");
-
-  return { registered: discovered.hooks.length, skipped: discovered.skipped };
 }
 
-function symlinkSkillsIntoPlugin(
-  pluginRoot: string,
-  frameworkContent: string,
-): { installed: number; skipped: number; recreated: number; errors: string[] } {
-  const result = { installed: 0, skipped: 0, recreated: 0, errors: [] as string[] };
-  const skillsDst = join(pluginRoot, "skills");
-  mkdirSync(skillsDst, { recursive: true });
 
-  // Discovery roots:
-  //   artifacts/          SAFe-style artifact layers (product, feature,
-  //                       story, enabler, extra) — the bulk of the skills.
-  //   skills/             Utility skills (tools/, sync-check/).
-  //   reverse-engineering/  Reverse-* skills for aligning pre-existing code.
-  //
-  // The old `installs/` root was removed in v0.4.15 along with the
-  // `/fremi-install-framework` slash-command.
-  const skillRoots = [
-    resolve(frameworkContent, "artifacts"),
-    resolve(frameworkContent, "skills"),
-    resolve(frameworkContent, "reverse-engineering"),
-  ];
 
-  const discovered: Array<{ name: string; skillDir: string }> = [];
-  for (const root of skillRoots) {
-    if (!existsSync(root)) continue;
-    walkForSkills(root, discovered);
-  }
 
-  for (const { name, skillDir } of discovered) {
-    if (!name.startsWith("fremi-")) {
-      result.errors.push(`Skipped ${skillDir}: skill name "${name}" doesn't start with 'fremi-'`);
-      continue;
-    }
-    const linkPath = join(skillsDst, name);
-    const action = ensureSymlink(linkPath, skillDir);
-    result[action]++;
-  }
-
-  return result;
-}
-
-function walkForSkills(root: string, out: Array<{ name: string; skillDir: string }>): void {
-  const entries = readdirSync(root, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const dir = join(root, entry.name);
-    const skillMd = join(dir, "SKILL.md");
-    if (existsSync(skillMd)) {
-      const name = extractSkillName(skillMd);
-      if (name) out.push({ name, skillDir: dir });
-    }
-    const nested = join(dir, "skills");
-    if (existsSync(nested) && lstatSync(nested).isDirectory()) {
-      walkForSkills(nested, out);
-    }
-  }
-}
-
-function extractSkillName(skillMd: string): string | null {
-  try {
-    const content = readFileSync(skillMd, "utf8");
-    const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
-    if (!match) return null;
-    const frontmatter = match[1] ?? "";
-    const nameMatch = frontmatter.match(/^name:\s*(.+?)\s*$/m);
-    return nameMatch?.[1]?.trim() ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function ensureSymlink(linkPath: string, target: string): "installed" | "skipped" | "recreated" {
-  if (existsSync(linkPath)) {
-    const stat = lstatSync(linkPath);
-    if (stat.isSymbolicLink()) {
-      const current = readlinkSync(linkPath);
-      const currentAbs = resolve(dirname(linkPath), current);
-      if (currentAbs === resolve(target)) return "skipped";
-      unlinkSync(linkPath);
-      symlinkSync(target, linkPath);
-      return "recreated";
-    }
-    return "skipped";
-  }
-  mkdirSync(dirname(linkPath), { recursive: true });
-  symlinkSync(target, linkPath);
-  return "installed";
-}
 
 function registerInInstalledPlugins(homePath: string, pluginRoot: string, version: string): void {
   const path = resolve(homePath, ".claude", "plugins", "installed_plugins.json");
