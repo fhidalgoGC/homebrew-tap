@@ -10,7 +10,12 @@ const FRAMEWORK_REPO = "https://github.com/fhidalgoGC/homebrew-tap.git";
  * (skills, rules, hooks, flows, etc.), plus a couple of loose metadata
  * files. `src/`, `Formula/`, Dockerfiles etc. are excluded.
  */
-const SPARSE_PATHS = ["framework", "VERSION", "LICENSE", "README.md"];
+// Leading slashes are load-bearing. In --no-cone mode a bare `README.md`
+// matches at ANY depth, so it dragged in plugin/README.md,
+// plugin/claude-code/README.md and friends — creating a plugin/ tree in
+// ~/.fremi that holds nothing but stray READMEs (and a git warning per
+// pattern telling us exactly this).
+const SPARSE_PATHS = ["/framework", "/VERSION", "/LICENSE", "/README.md"];
 
 /**
  * Ensures the framework content is present at `frameworkRoot`. Since v0.2.x

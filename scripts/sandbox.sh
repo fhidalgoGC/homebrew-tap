@@ -2,10 +2,11 @@
 # Sandbox — every fremi command, run against a throwaway environment.
 #
 #   sandbox/
-#   ├── agent/     ← fake $HOME. What `fremi agent install` writes: plugin,
-#   │                skills, hooks.json, mcp, marker.   Real life: ~/.claude
+#   ├── agent/     ← fake $HOME, so it holds what a home holds:
+#   │   ├── .claude/   plugin, hooks.json, mcp, marker   Real life: ~/.claude
+#   │   └── .fremi/    the framework content             Real life: ~/.fremi
 #   └── project/   ← fake project. What `fremi install` writes: CLAUDE.md,
-#                    .fremi/, docs/works/.              Real life: your repo
+#                    .fremi/, .claude/, docs/works/.     Real life: your repo
 #
 # Two commands, two levels, two folders — the folder names mirror the CLI:
 #
@@ -17,14 +18,16 @@
 # call the `fremi` binary directly in your terminal — that is the only way.
 #
 # Every action drives the REAL CLI, same code path a user gets. Nothing here
-# fakes a result with rm -rf. The one deliberate difference: FREMI_HOME points
-# at this repo, so the sandbox exercises your LOCAL framework/ content (edit a
-# rule, re-install, see it) instead of the published clone.
+# fakes a result with rm -rf. The one deliberate difference is what lives in
+# sandbox/agent/.fremi: its `framework/` and `VERSION` are SYMLINKS to this
+# repo, so the layout matches a real home while the content you exercise is
+# the one you are editing — change a rule, reinstall, see it.
 #
-# `update` is the single exception: `fremi update` is `git pull` inside
-# FREMI_HOME, and pulling THIS repo mid-work would rewrite the tree you are
-# editing. So that action alone points FREMI_HOME at sandbox/fremi, a throwaway
-# clone of the published framework — which is also the honest way to test it.
+# `update` is the exception. `fremi update` is `git pull` inside FREMI_HOME,
+# and pulling through those symlinks would rewrite the repo you are working
+# in. So that action replaces sandbox/agent/.fremi with a REAL sparse clone of
+# the published framework, which is also the honest way to test it. The next
+# `install` puts the symlink layout back, and says so.
 #
 # Usage:  bash scripts/sandbox.sh <action> [args...]
 #
@@ -61,7 +64,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SANDBOX="$REPO/sandbox"
 AGENT="$SANDBOX/agent"      # fake $HOME  → the `fremi agent install` level
 PROJECT="$SANDBOX/project"  # fake repo   → the `fremi install` level
-FREMI_CLONE="$SANDBOX/fremi" # throwaway framework clone, used by `update` only
+FREMI_HOME_DIR="$AGENT/.fremi"  # the framework content, where a home keeps it
 RUNNER="${FREMI_RUNNER:-source}"
 
 # Run the CLI with the sandbox environment applied:
@@ -70,7 +73,7 @@ RUNNER="${FREMI_RUNNER:-source}"
 #           answer about the sandbox project instead of this repo
 #   paths → absolute, so the cd cannot affect what gets run
 fremi_run() {
-  local fremi_home="${FREMI_HOME_OVERRIDE:-$REPO}"
+  local fremi_home="${FREMI_HOME_OVERRIDE:-$FREMI_HOME_DIR}"
   if [[ "$RUNNER" == "source" ]]; then
     (cd "$PROJECT" && HOME="$AGENT" FREMI_HOME="$fremi_home" bun run "$REPO/src/index.ts" "$@")
   else
@@ -80,13 +83,28 @@ fremi_run() {
 
 ensure_dirs() { mkdir -p "$AGENT" "$PROJECT"; }
 
+# sandbox/agent/.fremi mirrors ~/.fremi, but framework/ and VERSION are
+# symlinks into this repo — same layout, local content. If `update` left a
+# real clone behind, say so and restore the symlinks, so an install is never
+# silently testing published content instead of yours.
+ensure_fremi_home() {
+  if [[ -d "$FREMI_HOME_DIR/.git" ]]; then
+    echo "==> sandbox/agent/.fremi is a real clone (left by \`update\`)"
+    echo "    restoring the symlink to your local framework/"
+    rm -rf "$FREMI_HOME_DIR"
+  fi
+  mkdir -p "$FREMI_HOME_DIR"
+  [[ -e "$FREMI_HOME_DIR/framework" ]] || ln -s "$REPO/framework" "$FREMI_HOME_DIR/framework"
+  [[ -e "$FREMI_HOME_DIR/VERSION" ]]   || ln -s "$REPO/VERSION"   "$FREMI_HOME_DIR/VERSION"
+}
+
 ensure_binary() {
   [[ "$RUNNER" == "source" ]] && return 0
   bash "$REPO/scripts/build.sh" darwin-arm64
 }
 
 banner() {
-  echo "==> runner: $RUNNER   framework: $REPO/framework   HOME: sandbox/agent"
+  echo "==> runner: $RUNNER   HOME: sandbox/agent   FREMI_HOME: sandbox/agent/.fremi → $REPO/framework"
   echo ""
 }
 
@@ -96,24 +114,24 @@ case "$ACTION" in
   # ---------- CLI mirrors ----------
 
   agent-install)
-    ensure_dirs; ensure_binary; banner
+    ensure_dirs; ensure_fremi_home; ensure_binary; banner
     fremi_run agent install --agent claude -y --with-mcp "$@"
     ;;
 
   agent-uninstall)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     fremi_run agent uninstall --agent claude -y "$@"
     ;;
 
   install)
-    ensure_dirs; ensure_binary; banner
+    ensure_dirs; ensure_fremi_home; ensure_binary; banner
     # `fremi install` chains the agent level itself when the marker is absent,
     # so this single action exercises both levels — exactly like a real user.
     fremi_run install "$PROJECT" --agent claude -y --with-mcp "$@"
     ;;
 
   uninstall)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     # --purge  → the whole .fremi/ tree, not just the master switch
     # --all    → chain the user-level uninstall (skills, hooks, mcp, marketplace)
     fremi_run uninstall "$PROJECT" --purge --all "$@"
@@ -121,33 +139,35 @@ case "$ACTION" in
 
   update)
     ensure_dirs; ensure_binary
-    # NEVER against $REPO: `fremi update` git-pulls FREMI_HOME.
-    if [[ ! -f "$FREMI_CLONE/VERSION" ]]; then
-      echo "==> first run: cloning the published framework into sandbox/fremi"
-      rm -rf "$FREMI_CLONE"
-      FREMI_HOME_OVERRIDE="$FREMI_CLONE" fremi_run install "$PROJECT" --agent claude -y >/dev/null
+    # A real clone, never the symlinks: `fremi update` git-pulls FREMI_HOME,
+    # and pulling through them would touch the repo you are editing.
+    if [[ ! -d "$FREMI_HOME_DIR/.git" ]]; then
+      echo "==> replacing sandbox/agent/.fremi with a real clone of the published framework"
+      echo "    (the next \`install\` restores the symlink to your local framework/)"
+      rm -rf "$FREMI_HOME_DIR"
+      fremi_run install "$PROJECT" --agent claude -y >/dev/null
       echo ""
     fi
-    FREMI_HOME_OVERRIDE="$FREMI_CLONE" fremi_run update "$@"
+    fremi_run update "$@"
     ;;
 
   verify)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     fremi_run verify "$@"
     ;;
 
   version)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     fremi_run version "$@"
     ;;
 
   setting|settings)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     fremi_run setting "$PROJECT" "$@"
     ;;
 
   mcp)
-    ensure_dirs; ensure_binary
+    ensure_dirs; ensure_fremi_home; ensure_binary
     fremi_run mcp "$@"
     ;;
 
@@ -168,8 +188,9 @@ case "$ACTION" in
   reset)
     rm -rf "$SANDBOX"
     ensure_dirs
+    ensure_fremi_home
     echo "Fresh sandbox:"
-    echo "  agent   (fake HOME): sandbox/agent"
+    echo "  agent   (fake HOME): sandbox/agent   (.claude/ + .fremi/)"
     echo "  project:             sandbox/project"
     echo "Run \`bun run sandbox:install\` to install fremi there."
     ;;

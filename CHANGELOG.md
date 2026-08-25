@@ -7,10 +7,25 @@
 ## [Unreleased]
 
 ### Fixed
+- **Los patterns de sparse-checkout no llevaban barra inicial.** En modo
+  `--no-cone`, `README.md` matchea a CUALQUIER profundidad, así que el clone
+  de `~/.fremi` se traía `plugin/README.md`, `plugin/claude-code/README.md` y
+  compañía — creando un `plugin/` que no contiene más que READMEs sueltos.
+  git lo venía avisando con un warning por pattern. Ahora son `/framework`,
+  `/VERSION`, `/LICENSE`, `/README.md`.
 - `fremi agent install` borra las versiones anteriores del plugin. La ruta de
   instalación lleva la versión adentro (`…/fremi/fremi/<version>/`), así que
   cada upgrade dejaba el árbol viejo al lado del nuevo — una copia por release,
   acumulándose para siempre.
+
+### Changed
+- **El sandbox simula el home completo.** `sandbox/agent/` ahora tiene
+  `.claude/` Y `.fremi/`, como cualquier home. `framework/` y `VERSION` de ese
+  `.fremi` son symlinks a este repo: el layout es el real, el contenido es el
+  que estás editando. `sandbox:update` lo reemplaza por un clone de verdad
+  (es lo que ejercita `git pull`), y el siguiente `install` restaura los
+  symlinks avisando, para que nunca estés probando contenido publicado
+  creyendo que probás el tuyo.
 
 ## [0.4.20] — 2026-08-24
 
