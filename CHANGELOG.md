@@ -4,7 +4,9 @@
 > dejó de actualizar después de la 0.1.0). A partir de 0.4.17 se retoma, orden
 > newest-first.
 
-## [Unreleased]
+## [0.4.21] — 2026-08-24
+
+Limpieza de lo que las versiones viejas dejaban en el home.
 
 ### Fixed
 - **Los patterns de sparse-checkout no llevaban barra inicial.** En modo
@@ -12,7 +14,10 @@
   de `~/.fremi` se traía `plugin/README.md`, `plugin/claude-code/README.md` y
   compañía — creando un `plugin/` que no contiene más que READMEs sueltos.
   git lo venía avisando con un warning por pattern. Ahora son `/framework`,
-  `/VERSION`, `/LICENSE`, `/README.md`.
+  `/VERSION`, `/LICENSE`, `/README.md`. `fremi update` además REAPLICA los
+  patterns antes del pull: viven adentro del clone, así que sin eso un clone
+  hecho por una versión vieja se quedaba con los suyos para siempre y el fix
+  no llegaba a nadie que ya tuviera fremi instalado.
 - `fremi agent install` borra las versiones anteriores del plugin. La ruta de
   instalación lleva la versión adentro (`…/fremi/fremi/<version>/`), así que
   cada upgrade dejaba el árbol viejo al lado del nuevo — una copia por release,

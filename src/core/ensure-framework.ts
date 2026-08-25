@@ -15,7 +15,7 @@ const FRAMEWORK_REPO = "https://github.com/fhidalgoGC/homebrew-tap.git";
 // plugin/claude-code/README.md and friends — creating a plugin/ tree in
 // ~/.fremi that holds nothing but stray READMEs (and a git warning per
 // pattern telling us exactly this).
-const SPARSE_PATHS = ["/framework", "/VERSION", "/LICENSE", "/README.md"];
+export const SPARSE_PATHS = ["/framework", "/VERSION", "/LICENSE", "/README.md"];
 
 /**
  * Ensures the framework content is present at `frameworkRoot`. Since v0.2.x

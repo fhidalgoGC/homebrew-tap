@@ -6,7 +6,7 @@ import { writeUserMarker, readUserMarker } from "../core/user-marker";
 import { sweepLegacyUserAssets } from "../core/sweep-legacy-user-assets";
 import type { InstallFlags } from "./install";
 
-const FREMI_VERSION = "0.4.20";
+const FREMI_VERSION = "0.4.21";
 
 // `fremi agent install` - materialises fremi as a plugin at USER level for
 // every selected agent. For Claude Code that means writing to
