@@ -1,30 +1,30 @@
 class Fremi < Formula
   desc "Product Discovery + SDD + BDD + TDD framework CLI for AI coding agents"
   homepage "https://github.com/fhidalgoGC/homebrew-tap"
-  version "0.4.20"
+  version "0.4.21"
   license "MIT"
 
   depends_on "git"
 
   on_macos do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-darwin-arm64"
-      sha256 "cff8b111d1b82df8b554b6285b7c53b0f1d18293d54b3e53599af57c9cc1f4c9"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.21/fremi-darwin-arm64"
+      sha256 "8bac2922386f215f6d20b4dc27491d33763dd557355e0aba58884ca5ab35105f"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-darwin-x64"
-      sha256 "23be07f3be268b5d6ced4ac29e06e9b871aa806cad203b7f35bf6c1c7dc52ab7"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.21/fremi-darwin-x64"
+      sha256 "d8308257c82744f1d3e31f00ae82f6138f23c23111649c66e05029a95849e815"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-linux-arm64"
-      sha256 "a0f8ba92724a1155d88a7fc3034371c18b0673eb046f3ac66680b96c05afbb32"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.21/fremi-linux-arm64"
+      sha256 "58715238f37b23c39b2aacef9e849ee4225588ede486e800c906a7d08841fc46"
     end
     on_intel do
-      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.20/fremi-linux-x64"
-      sha256 "db12c6d8ad600ff0c46d23c72433dc8b2c4bfc8131313995fcb4b4050415740c"
+      url "https://github.com/fhidalgoGC/homebrew-tap/releases/download/v0.4.21/fremi-linux-x64"
+      sha256 "fa7698f2ddb3c3e03efe6c3a1d269ab68c7ee4f7ceaa6917d9a05d8ec2e8a74a"
     end
   end
 
@@ -37,16 +37,24 @@ class Fremi < Formula
     <<~EOS
       fremi installed.
 
-      What's new in v0.4.20 — upgrading cleans up after old versions:
+      What's new in v0.4.21 — the home directory gets cleaned up:
 
-        Before the plugin layout, fremi symlinked every skill into
-        ~/.claude/skills/ and every rule into ~/.claude/rules/. That code is
-        long gone, so nothing removed them either — the links just rode along
-        through every upgrade, mostly dangling.
+        `fremi update` now re-applies the sparse-checkout patterns before
+        pulling. They were missing a leading slash, which in --no-cone mode
+        matches at any depth, so ~/.fremi grew a plugin/ tree holding nothing
+        but stray READMEs. The patterns live inside the clone, so this is
+        what makes the fix reach installs that already exist.
 
-        `fremi agent install` and `fremi agent uninstall` now sweep them. Only
-        symlinks named fremi-* or pointing inside a framework/ tree are
-        touched; your own skills and rules stay put.
+        `fremi agent install` prunes previous plugin versions — the install
+        path carries the version, so every upgrade used to leave the old tree
+        behind.
+
+      v0.4.20 — upgrading cleans up after old versions:
+
+        Skills and rules that pre-plugin releases symlinked into
+        ~/.claude/skills and ~/.claude/rules are swept by `fremi agent
+        install` and `fremi agent uninstall`. Only symlinks named fremi-* or
+        pointing inside a framework/ tree are touched.
 
       v0.4.19 — a project carries its own fremi:
 
